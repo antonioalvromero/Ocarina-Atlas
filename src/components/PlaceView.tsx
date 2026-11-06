@@ -220,7 +220,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
     if (unhid) setInList(hiddenCategoriesSlot, item.cat, false)
     if (previousAge) write(ageFilterSlot, 'both')
     setDraft(null)
-    setSelection({ kind: 'item', id: item.id })
+    setSelection(null)
   }
 
   function createPin(type: string, name = pinTypeLabel(type)) {

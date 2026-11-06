@@ -1,0 +1,97 @@
+import { Link } from '@tanstack/react-router'
+import { Check } from 'lucide-react'
+import { useMemo } from 'react'
+import { pinPosition } from '../lib/coords'
+import { dataset } from '../lib/data'
+import { officialDoneSlot, useStored } from '../lib/storage'
+import type { Place } from '../lib/types'
+import { MapViewport } from './MapViewport'
+
+const totals = new Map<string, number>()
+for (const item of dataset.items) totals.set(item.place, (totals.get(item.place) ?? 0) + 1)
+
+function PlaceLink({ place, done }: { place: Place; done: number }) {
+  const total = totals.get(place.id) ?? 0
+  const complete = total > 0 && done === total
+  const dungeon = place.kind === 'dungeon'
+  const progress = total > 0 ? `${done} of ${total} items completed` : 'no tracked items'
+
+  return (
+    <div data-pin className="absolute size-0 hover:z-10 focus-within:z-10" style={pinPosition(place.pin)}>
+      <Link
+        to="/$zone"
+        params={{ zone: place.slug }}
+        draggable={false}
+        aria-label={`${place.name}, ${dungeon ? 'dungeon' : 'zone'}, ${progress}`}
+        className="group absolute -top-6 left-0 flex w-max -translate-x-1/2 cursor-pointer flex-col items-center rounded-lg"
+      >
+        <span className="grid size-12 place-items-center">
+          <span
+            className={`grid place-items-center border-2 shadow-md shadow-black/60 transition-transform group-hover:scale-125 group-focus-visible:scale-125 ${
+              dungeon
+                ? 'size-4 rotate-45 border-ink-950 bg-ember'
+                : 'size-4.5 rounded-full border-ink-950 bg-parchment-200'
+            } ${complete ? 'bg-moss!' : ''}`}
+          >
+            {complete && <Check size={10} strokeWidth={4} className={`text-ink-950 ${dungeon ? '-rotate-45' : ''}`} />}
+          </span>
+        </span>
+        <span
+          className={`-mt-2.5 flex items-center gap-1 rounded border bg-ink-950/85 px-1.5 py-0.5 text-[11px] leading-tight font-medium text-parchment-50 transition-colors group-hover:bg-parchment-200 group-hover:text-ink-950 group-focus-visible:bg-parchment-200 group-focus-visible:text-ink-950 ${
+            dungeon ? 'border-ember/70' : 'border-parchment-600/50'
+          }`}
+        >
+          {place.name}
+          {total > 0 && done > 0 && <span className="tabular-nums opacity-70">{done}/{total}</span>}
+        </span>
+      </Link>
+    </div>
+  )
+}
+
+export function WorldMap() {
+  const doneIds = useStored(officialDoneSlot)
+  const donePerPlace = useMemo(() => {
+    const done = new Set(doneIds)
+    const counts = new Map<string, number>()
+    for (const item of dataset.items) {
+      if (done.has(item.id)) counts.set(item.place, (counts.get(item.place) ?? 0) + 1)
+    }
+    return counts
+  }, [doneIds])
+  const doneTotal = [...donePerPlace.values()].reduce((sum, n) => sum + n, 0)
+
+  return (
+    <main className="relative h-dvh overflow-clip bg-ink-950">
+      <img
+        src="/content/maps/hyrule.webp"
+        alt=""
+        aria-hidden
+        className="absolute inset-0 size-full scale-110 object-cover opacity-35 blur-2xl"
+      />
+      <MapViewport
+        image={dataset.map.image}
+        alt="Map of Hyrule"
+        aspect={dataset.map.width / dataset.map.height}
+      >
+        {dataset.places.map((place) => (
+          <PlaceLink key={place.id} place={place} done={donePerPlace.get(place.id) ?? 0} />
+        ))}
+      </MapViewport>
+      <header className="pointer-events-none absolute top-3 left-3 rounded-lg border border-ink-600 bg-ink-900/90 px-4 py-3 shadow-lg">
+        <h1 className="font-serif text-xl text-parchment-50">Field Atlas</h1>
+        <p className="mt-0.5 text-xs text-parchment-400 tabular-nums">
+          {doneTotal} of {dataset.items.length} items completed
+        </p>
+        <ul className="mt-2 flex gap-4 text-xs text-parchment-200">
+          <li className="flex items-center gap-1.5">
+            <span className="size-2.5 rounded-full bg-parchment-200" /> Zone
+          </li>
+          <li className="flex items-center gap-1.5">
+            <span className="size-2.5 rotate-45 bg-ember" /> Dungeon
+          </li>
+        </ul>
+      </header>
+    </main>
+  )
+}

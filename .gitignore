@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.tanstack/
+.DS_Store
+
+# Extracted site content: used with permission for personal use only
+public/content/
+src/data/oot.json

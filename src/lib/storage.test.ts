@@ -1,0 +1,97 @@
+import { createElement } from 'react'
+import { renderToString } from 'react-dom/server'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  addPin,
+  officialDoneSlot,
+  officialVisibleSlot,
+  pinsSlot,
+  read,
+  removePin,
+  toggleInList,
+  updatePin,
+  useStored,
+  write,
+} from './storage'
+
+function fakeWindow() {
+  const entries = new Map<string, string>()
+  return {
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    localStorage: {
+      getItem: (key: string) => entries.get(key) ?? null,
+      setItem: (key: string, value: string) => void entries.set(key, value),
+    },
+  }
+}
+
+afterEach(() => vi.unstubAllGlobals())
+
+describe('without a window', () => {
+  it('reads empty values and ignores writes', () => {
+    expect(read(officialVisibleSlot)).toBe(false)
+    expect(() => write(officialVisibleSlot, true)).not.toThrow()
+    expect(read(pinsSlot('a', 'b'))).toEqual([])
+  })
+})
+
+describe('with localStorage', () => {
+  let win: ReturnType<typeof fakeWindow>
+
+  beforeEach(() => {
+    win = fakeWindow()
+    vi.stubGlobal('window', win)
+  })
+
+  it('keeps pins separate per place and per map', () => {
+    addPin('kokiri', 'principal', 'Chest', { x: 0.1, y: 0.2 })
+    addPin('kokiri', 'other', 'Door', { x: 0.3, y: 0.4 })
+    addPin('deku', 'principal', 'Web', { x: 0.5, y: 0.6 })
+    expect(read(pinsSlot('kokiri', 'principal')).map((p) => p.name)).toEqual(['Chest'])
+    expect(read(pinsSlot('kokiri', 'other')).map((p) => p.name)).toEqual(['Door'])
+    expect(read(pinsSlot('deku', 'principal')).map((p) => p.name)).toEqual(['Web'])
+  })
+
+  it('stores fractional coordinates and supports rename, complete, delete', () => {
+    const pin = addPin('kokiri', 'principal', 'Chest', { x: 0.1, y: 0.2 })
+    expect(pin).toMatchObject({ x: 0.1, y: 0.2, done: false })
+    updatePin('kokiri', 'principal', pin.id, { name: 'Big chest', done: true })
+    expect(read(pinsSlot('kokiri', 'principal'))[0]).toMatchObject({ name: 'Big chest', done: true })
+    removePin('kokiri', 'principal', pin.id)
+    expect(read(pinsSlot('kokiri', 'principal'))).toEqual([])
+  })
+
+  it('returns a stable snapshot until the value changes', () => {
+    write(officialDoneSlot, ['a'])
+    const first = read(officialDoneSlot)
+    expect(read(officialDoneSlot)).toBe(first)
+    toggleInList(officialDoneSlot, 'b')
+    expect(read(officialDoneSlot)).toEqual(['a', 'b'])
+    toggleInList(officialDoneSlot, 'a')
+    expect(read(officialDoneSlot)).toEqual(['b'])
+  })
+
+  it('treats corrupt or invalid entries as empty', () => {
+    win.localStorage.setItem('oot-map:v1:official-done', '{nope')
+    expect(read(officialDoneSlot)).toEqual([])
+    win.localStorage.setItem(
+      'oot-map:v1:pins:p:m',
+      JSON.stringify([{ id: 'a', name: 'ok', x: 0.5, y: 0.5, done: false }, { id: 'b', x: 7 }]),
+    )
+    expect(read(pinsSlot('p', 'm')).map((p) => p.id)).toEqual(['a'])
+  })
+
+  it('renders the empty value during server rendering, whatever is stored', () => {
+    write(officialVisibleSlot, true)
+    const Probe = () => createElement('i', null, String(useStored(officialVisibleSlot)))
+    expect(renderToString(createElement(Probe))).toContain('false')
+  })
+
+  it('survives a storage that refuses writes', () => {
+    win.localStorage.setItem = () => {
+      throw new Error('quota')
+    }
+    expect(() => write(officialVisibleSlot, true)).not.toThrow()
+  })
+})

@@ -49,6 +49,8 @@ type Props = {
   ref?: Ref<MapViewportHandle>
   /** A click on the image that was neither a drag nor on a `data-pin` element. */
   onMapClick?: (fraction: Fraction) => void
+  /** Set while a popover is open: the next click off a pin closes it and does nothing else. */
+  onDismiss?: () => void
   /** Pins, laid out in the stage: 0-100% of the image. */
   children?: ReactNode
   /** UI over the map that must not move or zoom with it. */
@@ -59,7 +61,7 @@ function distance(a: Point, b: Point) {
   return Math.hypot(a.x - b.x, a.y - b.y)
 }
 
-export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, children, overlay }: Props) {
+export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDismiss, children, overlay }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState<Size | null>(null)
@@ -169,10 +171,15 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, child
   }
 
   function onClickCapture(event: MouseEvent) {
-    if (!dragged.current) return
-    dragged.current = false
-    event.preventDefault()
+    if (dragged.current) {
+      dragged.current = false
+      event.preventDefault()
+      event.stopPropagation()
+      return
+    }
+    if (!onDismiss || (event.target as Element).closest('[data-pin]')) return
     event.stopPropagation()
+    onDismiss()
   }
 
   function onClick(event: MouseEvent) {

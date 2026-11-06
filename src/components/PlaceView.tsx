@@ -292,6 +292,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
               setDraft({ mapId: map.id, at })
               setSelection(null)
             }}
+            onDismiss={draft ? () => setDraft(null) : undefined}
             overlay={(projection) =>
               draft && (
                 <NewPinPopover

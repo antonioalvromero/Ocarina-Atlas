@@ -111,6 +111,7 @@ export function FloorGrid({
       viewId={`${place.id}:all-floors`}
       alt={`All floors of ${place.name}`}
       aspect={grid.aspect}
+      onDismiss={draft ? () => onDraft(null) : undefined}
       overlay={(projection) =>
         draft &&
         draftCell && (

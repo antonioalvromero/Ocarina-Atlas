@@ -28,6 +28,15 @@ function PinGlyph({ type }: { type: string }) {
   )
 }
 
+/** The small tick on the corner of a completed marker, which keeps its icon. */
+function DoneBadge() {
+  return (
+    <span className="pointer-events-none absolute -top-1 -right-1 grid size-3.5 place-items-center rounded-full border border-ink-950 bg-moss text-ink-950" aria-hidden>
+      <Check size={9} strokeWidth={4} />
+    </span>
+  )
+}
+
 export function CustomMarker({
   pin,
   selected,
@@ -48,13 +57,10 @@ export function CustomMarker({
         onClick={onSelect}
         className="group absolute bottom-0 left-0 flex w-max -translate-x-3.5 translate-y-0.5 cursor-pointer items-end gap-0.5 rounded"
       >
-        {pin.done ? (
-          <span className="mb-0.5 grid size-7 place-items-center rounded-full border-2 border-ink-950 bg-moss text-ink-950 shadow-md shadow-black/50">
-            <Check size={15} strokeWidth={3.5} />
-          </span>
-        ) : (
+        <span className="relative block shrink-0">
           <PinGlyph type={pin.type} />
-        )}
+          {pin.done && <DoneBadge />}
+        </span>
         <span
           className={`mb-1 max-w-40 truncate rounded px-1.5 py-0.5 text-[11px] font-medium ${
             selected ? 'bg-parchment-50 text-ink-950' : pin.done ? 'bg-ink-950/85 text-parchment-400' : 'bg-ink-950/85 text-parchment-50'
@@ -123,12 +129,13 @@ export function OfficialMarker({
         aria-label={`${item.name}, ${categoryName(item.cat)}${done ? ', completed' : ''}`}
         aria-pressed={selected}
         onClick={onSelect}
-        style={{ borderColor: done ? undefined : color, color: done ? undefined : color }}
-        className={`absolute -top-3.5 -left-3.5 grid size-7 cursor-pointer place-items-center rounded-full border-2 shadow-md shadow-black/50 transition-transform hover:scale-115 ${
-          done ? 'border-moss bg-ink-800/80 text-moss opacity-70' : 'bg-ink-950'
-        } ${selected ? 'scale-125 opacity-100 ring-2 ring-parchment-50' : ''} ${target?.appeared ? 'merge-pop' : ''}`}
+        style={{ borderColor: color, color }}
+        className={`absolute -top-3.5 -left-3.5 grid size-7 cursor-pointer place-items-center rounded-full border-2 bg-ink-950 shadow-md shadow-black/50 transition-transform hover:scale-115 ${
+          selected ? 'scale-125 ring-2 ring-parchment-50' : ''
+        } ${target?.appeared ? 'merge-pop' : ''}`}
       >
-        {done ? <Check size={14} strokeWidth={3.5} /> : <Icon size={15} strokeWidth={2.25} />}
+        <Icon size={15} strokeWidth={2.25} />
+        {done && <DoneBadge />}
       </button>
     </div>
   )

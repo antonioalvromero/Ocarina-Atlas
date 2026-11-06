@@ -3,22 +3,28 @@ import { ArrowLeft } from 'lucide-react'
 import { useMemo, useRef, useState, type ReactNode } from 'react'
 import { isUnplaced, itemsOfPlace, matchesAge, startMapOf } from '../lib/data'
 import { gridPoint, layoutFloors } from '../lib/floorGrid'
+import { findMerge, type Merge } from '../lib/merge'
+import { OTHER_PIN, pinTypeLabel } from '../lib/pinTypes'
 import {
   addPin,
   ageFilterSlot,
   hiddenCategoriesSlot,
   officialDoneSlot,
+  officialRevealedSlot,
   officialVisibleSlot,
   pinsSlot,
+  setInList,
   useStored,
+  write,
   type CustomPin,
 } from '../lib/storage'
 import type { Fraction, Item, Place, PlaceMap } from '../lib/types'
 import { FloorGrid, type FloorDraft } from './FloorGrid'
 import { MapViewport, type MapViewportHandle } from './MapViewport'
+import { MergeNotice } from './MergeNotice'
 import { NewPinPopover } from './NewPinPopover'
-import { CustomPinList, OfficialList, OfficialToggle, Section } from './Panels'
-import { CustomMarker, DraftMarker, OfficialMarker } from './Pins'
+import { CustomPinList, OfficialList, OfficialToggle, RevealedList, Section } from './Panels'
+import { CustomMarker, DraftMarker, MergeTrail, OfficialMarker } from './Pins'
 
 type Selection = { kind: 'custom' | 'item'; id: string } | null
 
@@ -127,21 +133,28 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
   const [selection, setSelection] = useState<Selection>(null)
   const [draft, setDraft] = useState<FloorDraft | null>(null)
   const [showAllFloors, setShowAllFloors] = useState(false)
+  const [merge, setMerge] = useState<Merge | null>(null)
   const viewport = useRef<MapViewportHandle>(null)
 
   const pins = useStored(pinsSlot(place.id, map.id))
   const showOfficial = useStored(officialVisibleSlot)
   const hidden = useStored(hiddenCategoriesSlot)
   const age = useStored(ageFilterSlot)
+  const revealedIds = useStored(officialRevealedSlot)
+  const revealed = useMemo(() => new Set(revealedIds), [revealedIds])
 
   const items = useMemo(() => itemsOfPlace(place.id), [place.id])
   const { done, count } = useOfficialProgress(items)
   const hasFloorGrid = place.kind === 'dungeon' && place.maps.length > 1
   const grid = useMemo(() => layoutFloors(place.maps), [place.maps])
   const allFloors = hasFloorGrid && showAllFloors
-  const forAge = items.filter((item) => matchesAge(item, age))
-  const onMap = forAge.filter((item) => (allFloors ? item.at : item.at?.map === map.id))
-  const unplaced = forAge.filter((item) => isUnplaced(item, place))
+  const inView = items.filter((item) => (allFloors ? item.at : item.at?.map === map.id))
+  const onMap = inView.filter((item) => matchesAge(item, age))
+  const unplaced = items.filter((item) => matchesAge(item, age) && isUnplaced(item, place))
+  // With official pins off, only reveals count, and no filter can hide those.
+  const isShown = (item: Item) =>
+    showOfficial ? matchesAge(item, age) && !hidden.includes(item.cat) : revealed.has(item.id)
+  const shownOnMap = inView.filter(isShown)
 
   const selectedCustom = selection?.kind === 'custom' ? selection.id : null
   const selectedItem = selection?.kind === 'item' ? selection.id : null
@@ -160,24 +173,72 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
     setShowAllFloors(false)
     setSelection(null)
     setDraft(null)
+    setMerge(null)
   }
 
   function showGrid() {
     setShowAllFloors(true)
     setSelection(null)
     setDraft(null)
+    setMerge(null)
   }
 
-  function createPin(name: string) {
-    if (!draft) return
-    const pin = addPin(place.id, draft.mapId, name, draft.at)
+  function mergeInto(item: Item, to: Fraction, type: string, name: string, from: FloorDraft) {
+    const unhid = showOfficial && hidden.includes(item.cat)
+    const previousAge = showOfficial && !matchesAge(item, age) ? age : null
+    setMerge({
+      id: Date.now(),
+      item,
+      mapId: from.mapId,
+      type,
+      name,
+      from: from.at,
+      to,
+      appeared: !isShown(item),
+      revealed: !revealed.has(item.id),
+      unhid,
+      previousAge,
+    })
+    setInList(officialRevealedSlot, item.id, true)
+    if (unhid) setInList(hiddenCategoriesSlot, item.cat, false)
+    if (previousAge) write(ageFilterSlot, 'both')
     setDraft(null)
+    setSelection({ kind: 'item', id: item.id })
+  }
+
+  function createPin(type: string, name = pinTypeLabel(type)) {
+    if (!draft) return
+    const floor = place.maps.find((candidate) => candidate.id === draft.mapId)
+    const match =
+      floor && type !== OTHER_PIN
+        ? findMerge(items, { type, mapId: floor.id, at: draft.at, aspect: floor.aspect }, revealed)
+        : null
+    if (match?.at) {
+      mergeInto(match, match.at, type, name, draft)
+      return
+    }
+    const pin = addPin(place.id, draft.mapId, name, draft.at, type)
+    setDraft(null)
+    setSelection({ kind: 'custom', id: pin.id })
+  }
+
+  function undoMerge() {
+    if (!merge) return
+    if (merge.revealed) setInList(officialRevealedSlot, merge.item.id, false)
+    if (merge.unhid) setInList(hiddenCategoriesSlot, merge.item.cat, true)
+    if (merge.previousAge) write(ageFilterSlot, merge.previousAge)
+    const pin = addPin(place.id, merge.mapId, merge.name, merge.from, merge.type)
+    setMerge(null)
     setSelection({ kind: 'custom', id: pin.id })
   }
 
   /** Where to centre for a point on a floor, in the view on screen. */
   function focusPoint(mapId: string, at: Fraction): Fraction | null {
     return allFloors ? gridPoint(grid, mapId, at) : at
+  }
+
+  function selectOfficial(item: Item) {
+    toggleSelection({ kind: 'item', id: item.id }, item.at && focusPoint(item.at.map, item.at))
   }
 
   return (
@@ -194,10 +255,11 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
               if (next) setSelection(null)
             }}
             onCreate={createPin}
-            officialItems={showOfficial ? onMap.filter((item) => !hidden.includes(item.cat)) : []}
+            officialItems={shownOnMap}
             done={done}
             selectedCustom={selectedCustom}
             selectedItem={selectedItem}
+            merge={merge}
             onSelectCustom={(id) => toggleSelection({ kind: 'custom', id })}
             onSelectItem={(id) => toggleSelection({ kind: 'item', id })}
           />
@@ -224,22 +286,20 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
               )
             }
           >
-            {showOfficial &&
-              onMap
-                .filter((item) => !hidden.includes(item.cat))
-                .map(
-                  (item) =>
-                    item.at && (
-                      <OfficialMarker
-                        key={item.id}
-                        item={item}
-                        at={item.at}
-                        done={done.has(item.id)}
-                        selected={item.id === selectedItem}
-                        onSelect={() => toggleSelection({ kind: 'item', id: item.id })}
-                      />
-                    ),
-                )}
+            {shownOnMap.map(
+              (item) =>
+                item.at && (
+                  <OfficialMarker
+                    key={item.id}
+                    item={item}
+                    at={item.at}
+                    done={done.has(item.id)}
+                    selected={item.id === selectedItem}
+                    merge={merge}
+                    onSelect={() => toggleSelection({ kind: 'item', id: item.id })}
+                  />
+                ),
+            )}
             {pins.map((pin) => (
               <CustomMarker
                 key={pin.id}
@@ -249,6 +309,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
               />
             ))}
             {draft && <DraftMarker at={draft.at} />}
+            {merge && <MergeTrail key={merge.id} merge={merge} />}
           </MapViewport>
         )}
         {place.maps.length > 1 && (
@@ -257,6 +318,16 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
             current={allFloors ? null : map.id}
             onChange={changeMap}
             allFloors={hasFloorGrid ? { active: allFloors, onShow: showGrid } : undefined}
+          />
+        )}
+        {merge && (
+          <MergeNotice
+            key={merge.id}
+            merge={merge}
+            done={done.has(merge.item.id)}
+            onComplete={() => setInList(officialDoneSlot, merge.item.id, true)}
+            onUndo={undoMerge}
+            onDismiss={() => setMerge(null)}
           />
         )}
       </div>
@@ -287,7 +358,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
           />
         )}
         <Section title="Official pins" aside={<OfficialToggle on={showOfficial} />}>
-          {showOfficial && (
+          {showOfficial ? (
             <OfficialList
               onMap={onMap}
               unplaced={unplaced}
@@ -295,10 +366,10 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
               hidden={hidden}
               done={done}
               selectedId={selectedItem}
-              onSelect={(item) =>
-                toggleSelection({ kind: 'item', id: item.id }, item.at && focusPoint(item.at.map, item.at))
-              }
+              onSelect={selectOfficial}
             />
+          ) : (
+            <RevealedList items={shownOnMap} done={done} selectedId={selectedItem} onSelect={selectOfficial} />
           )}
         </Section>
       </Sidebar>

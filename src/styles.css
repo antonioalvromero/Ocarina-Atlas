@@ -32,3 +32,70 @@ body {
   outline: 2px solid var(--color-parchment-50);
   outline-offset: 2px;
 }
+
+/* A pin merging into an official one: slide, then the official pin answers. */
+@keyframes merge-slide {
+  from {
+    left: var(--from-x);
+    top: var(--from-y);
+  }
+  to {
+    left: var(--to-x);
+    top: var(--to-y);
+  }
+}
+
+@keyframes merge-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes merge-pop {
+  from {
+    scale: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes merge-ring {
+  from {
+    scale: 1;
+    opacity: 0.9;
+  }
+  to {
+    scale: 2.6;
+    opacity: 0;
+  }
+}
+
+.merge-ghost {
+  animation:
+    merge-slide 500ms ease-in-out both,
+    merge-fade 200ms ease-out 500ms both;
+}
+
+.merge-trail {
+  animation: merge-fade 500ms ease-out 1200ms both;
+}
+
+.merge-pop {
+  animation: merge-pop 350ms cubic-bezier(0.34, 1.56, 0.64, 1) 450ms backwards;
+}
+
+.merge-ring {
+  opacity: 0;
+  animation: merge-ring 900ms ease-out 500ms 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .merge-ghost,
+  .merge-trail,
+  .merge-ring {
+    display: none;
+  }
+
+  .merge-pop {
+    animation: none;
+  }
+}

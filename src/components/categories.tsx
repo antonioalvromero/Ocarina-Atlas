@@ -1,4 +1,4 @@
-import { Bean, CircleHelp, Heart, HeartPlus, KeyRound, Lightbulb, Milk, Skull, Sparkles, type LucideIcon } from 'lucide-react'
+import { Bean, CircleHelp, Heart, HeartPlus, KeyRound, Lightbulb, MapPin, Milk, Skull, Sparkles, type LucideIcon } from 'lucide-react'
 
 type Style = { icon: LucideIcon; color: string }
 
@@ -11,6 +11,7 @@ const styles: Record<string, Style> = {
   bottle: { icon: Milk, color: '#7fd0e6' },
   key: { icon: KeyRound, color: '#f0a14a' },
   thought: { icon: Lightbulb, color: '#a9a4f5' },
+  other: { icon: MapPin, color: '#e6d8b8' },
 }
 
 const fallback: Style = { icon: CircleHelp, color: '#c4ad7f' }

@@ -1,11 +1,12 @@
 import { type MouseEvent, type Ref } from 'react'
 import { boxToFraction, isInsideImage, pinPosition } from '../lib/coords'
 import { floorToGrid, type FloorCell, type FloorGrid as Grid } from '../lib/floorGrid'
+import type { Merge } from '../lib/merge'
 import { pinsSlot, useStored } from '../lib/storage'
 import type { Fraction, Item, Place } from '../lib/types'
 import { MapViewport, type MapViewportHandle } from './MapViewport'
 import { NewPinPopover } from './NewPinPopover'
-import { CustomMarker, DraftMarker, OfficialMarker } from './Pins'
+import { CustomMarker, DraftMarker, MergeTrail, OfficialMarker } from './Pins'
 
 export type FloorDraft = { mapId: string; at: Fraction }
 
@@ -15,6 +16,7 @@ type Shared = {
   done: Set<string>
   selectedCustom: string | null
   selectedItem: string | null
+  merge: Merge | null
   onSelectCustom: (id: string) => void
   onSelectItem: (id: string) => void
 }
@@ -28,6 +30,7 @@ function Floor({
   done,
   selectedCustom,
   selectedItem,
+  merge,
   onSelectCustom,
   onSelectItem,
 }: Shared & { cell: FloorCell; draft: Fraction | null; onDraft: (at: Fraction) => void }) {
@@ -65,6 +68,7 @@ function Floor({
               at={item.at}
               done={done.has(item.id)}
               selected={item.id === selectedItem}
+              merge={merge}
               onSelect={() => onSelectItem(item.id)}
             />
           ),
@@ -78,6 +82,7 @@ function Floor({
         />
       ))}
       {draft && <DraftMarker at={draft} />}
+      {merge?.mapId === cell.map.id && <MergeTrail key={merge.id} merge={merge} />}
     </div>
   )
 }
@@ -97,7 +102,7 @@ export function FloorGrid({
   viewport: Ref<MapViewportHandle>
   draft: FloorDraft | null
   onDraft: (draft: FloorDraft | null) => void
-  onCreate: (name: string) => void
+  onCreate: (type: string, name?: string) => void
 }) {
   const draftCell = draft && grid.cells.find((cell) => cell.map.id === draft.mapId)
   return (

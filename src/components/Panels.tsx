@@ -1,17 +1,21 @@
-import { Check, ChevronDown, Trash2 } from 'lucide-react'
+import { Check, ChevronDown, EyeOff, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import {
   ageFilterSlot,
   hiddenCategoriesSlot,
   officialDoneSlot,
+  officialRevealedSlot,
   officialVisibleSlot,
   removePin,
+  setInList,
   toggleInList,
   updatePin,
+  useStored,
   write,
   type CustomPin,
 } from '../lib/storage'
 import { dataset } from '../lib/data'
+import { PIN_TYPES, pinTypeLabel } from '../lib/pinTypes'
 import type { AgeFilter, Item } from '../lib/types'
 import { categoryStyle } from './categories'
 import { ItemDetail } from './ItemDetail'
@@ -69,6 +73,14 @@ function CustomPinRow({
 }) {
   const ref = useRevealWhen(selected)
   const [name, setName] = useState(pin.name)
+  const { icon: Icon, color } = categoryStyle(pin.type)
+
+  function changeType(type: string) {
+    // A default name follows the type. One you wrote stays.
+    const next = pin.name === pinTypeLabel(pin.type) ? pinTypeLabel(type) : pin.name
+    updatePin(placeId, mapId, pin.id, { type, name: next })
+    setName(next)
+  }
 
   function rename(event: FormEvent) {
     event.preventDefault()
@@ -85,6 +97,7 @@ function CustomPinRow({
           label={`Mark ${pin.name} completed`}
           onToggle={() => updatePin(placeId, mapId, pin.id, { done: !pin.done })}
         />
+        <Icon size={14} style={{ color }} className="shrink-0" aria-hidden />
         <button
           type="button"
           aria-expanded={selected}
@@ -96,6 +109,22 @@ function CustomPinRow({
           {pin.name}
         </button>
       </div>
+      {selected && (
+        <label className="flex items-center gap-2 px-2 pb-1.5 text-xs text-parchment-400">
+          Type
+          <select
+            value={pin.type}
+            onChange={(event) => changeType(event.target.value)}
+            className="min-w-0 flex-1 rounded border border-ink-600 bg-ink-950 px-1.5 py-1 text-sm text-parchment-50 outline-none focus:border-parchment-400"
+          >
+            {PIN_TYPES.map(({ key, label }) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {selected && (
         <form onSubmit={rename} className="flex gap-1.5 px-2 pb-2">
           <input
@@ -183,6 +212,7 @@ function ItemRow({
 }) {
   const ref = useRevealWhen(selected)
   const { icon: Icon, color } = categoryStyle(item.cat)
+  const revealed = useStored(officialRevealedSlot).includes(item.id)
   return (
     <li ref={ref} className={`rounded-md ${selected ? 'bg-ink-900 ring-1 ring-ink-600' : ''}`}>
       <div className="flex items-center gap-2 px-2 py-1.5">
@@ -201,6 +231,17 @@ function ItemRow({
         </button>
       </div>
       {selected && <ItemDetail item={item} />}
+      {selected && revealed && (
+        <div className="flex justify-end px-2 pb-2">
+          <button
+            type="button"
+            onClick={() => setInList(officialRevealedSlot, item.id, false)}
+            className="flex cursor-pointer items-center gap-1 rounded border border-ink-600 px-2 py-1 text-xs text-parchment-200 hover:border-parchment-400"
+          >
+            <EyeOff size={13} /> Hide again
+          </button>
+        </div>
+      )}
     </li>
   )
 }
@@ -301,6 +342,22 @@ export function OfficialToggle({ on }: { on: boolean }) {
       </span>
     </button>
   )
+}
+
+/** What the official section lists while the rest stay hidden. */
+export function RevealedList({
+  items,
+  done,
+  selectedId,
+  onSelect,
+}: {
+  items: Item[]
+  done: Set<string>
+  selectedId: string | null
+  onSelect: (item: Item) => void
+}) {
+  if (items.length === 0) return null
+  return <ItemList items={items} done={done} selectedId={selectedId} onSelect={onSelect} />
 }
 
 export function OfficialList({

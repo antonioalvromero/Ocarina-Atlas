@@ -5,10 +5,12 @@ import {
   addPin,
   ageFilterSlot,
   officialDoneSlot,
+  officialRevealedSlot,
   officialVisibleSlot,
   pinsSlot,
   read,
   removePin,
+  setInList,
   toggleInList,
   updatePin,
   useStored,
@@ -102,5 +104,33 @@ describe('with localStorage', () => {
       throw new Error('quota')
     }
     expect(() => write(officialVisibleSlot, true)).not.toThrow()
+  })
+})
+
+describe('pin types and reveals', () => {
+  beforeEach(() => vi.stubGlobal('window', fakeWindow()))
+
+  it('reads pins saved before types existed as Other', () => {
+    const slot = pinsSlot('p', 'm')
+    window.localStorage.setItem(
+      `oot-map:v1:${slot.key}`,
+      JSON.stringify([{ id: 'a', name: 'Old', x: 0.1, y: 0.2, done: false }]),
+    )
+    expect(read(slot)[0]?.type).toBe('other')
+  })
+
+  it('keeps and updates a pin type', () => {
+    const pin = addPin('p2', 'm', 'Gold Skulltula', { x: 0.1, y: 0.2 }, 'gs')
+    expect(read(pinsSlot('p2', 'm'))[0]?.type).toBe('gs')
+    updatePin('p2', 'm', pin.id, { type: 'bean' })
+    expect(read(pinsSlot('p2', 'm'))[0]?.type).toBe('bean')
+  })
+
+  it('sets list membership without duplicates', () => {
+    setInList(officialRevealedSlot, 'a', true)
+    setInList(officialRevealedSlot, 'a', true)
+    expect(read(officialRevealedSlot)).toEqual(['a'])
+    setInList(officialRevealedSlot, 'a', false)
+    expect(read(officialRevealedSlot)).toEqual([])
   })
 })

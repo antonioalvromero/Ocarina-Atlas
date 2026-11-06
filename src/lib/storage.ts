@@ -1,9 +1,10 @@
 import { useSyncExternalStore } from 'react'
+import { OTHER_PIN } from './pinTypes'
 import type { AgeFilter, Fraction } from './types'
 
 const PREFIX = 'oot-map:v1:'
 
-export type CustomPin = Fraction & { id: string; name: string; done: boolean }
+export type CustomPin = Fraction & { id: string; name: string; done: boolean; type: string }
 
 export type Slot<T> = {
   key: string
@@ -23,7 +24,7 @@ function isCoordinate(value: unknown): value is number {
   return typeof value === 'number' && value >= 0 && value <= 1
 }
 
-function isPin(raw: unknown): raw is CustomPin {
+function isPin(raw: unknown): raw is Omit<CustomPin, 'type'> & { type?: unknown } {
   if (typeof raw !== 'object' || raw === null) return false
   const pin = raw as Partial<CustomPin>
   return (
@@ -36,7 +37,9 @@ function isPin(raw: unknown): raw is CustomPin {
 }
 
 function parsePins(raw: unknown): CustomPin[] {
-  return Array.isArray(raw) ? raw.filter(isPin) : NO_PINS
+  if (!Array.isArray(raw)) return NO_PINS
+  // Pins saved before types existed have none.
+  return raw.filter(isPin).map((pin) => ({ ...pin, type: typeof pin.type === 'string' ? pin.type : OTHER_PIN }))
 }
 
 export const officialVisibleSlot: Slot<boolean> = {
@@ -47,6 +50,13 @@ export const officialVisibleSlot: Slot<boolean> = {
 
 export const officialDoneSlot: Slot<string[]> = {
   key: 'official-done',
+  empty: NO_STRINGS,
+  parse: parseStrings,
+}
+
+/** Official items shown one by one, because a pin merged into them. */
+export const officialRevealedSlot: Slot<string[]> = {
+  key: 'official-revealed',
   empty: NO_STRINGS,
   parse: parseStrings,
 }
@@ -126,10 +136,16 @@ export function useStored<T>(slot: Slot<T>): T {
   )
 }
 
-export function addPin(placeId: string, mapId: string, name: string, at: Fraction): CustomPin {
+export function addPin(
+  placeId: string,
+  mapId: string,
+  name: string,
+  at: Fraction,
+  type: string = OTHER_PIN,
+): CustomPin {
   const slot = pinsSlot(placeId, mapId)
   const id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
-  const pin: CustomPin = { id, name, x: at.x, y: at.y, done: false }
+  const pin: CustomPin = { id, name, type, x: at.x, y: at.y, done: false }
   write(slot, [...read(slot), pin])
   return pin
 }
@@ -138,7 +154,7 @@ export function updatePin(
   placeId: string,
   mapId: string,
   id: string,
-  patch: Partial<Pick<CustomPin, 'name' | 'done'>>,
+  patch: Partial<Pick<CustomPin, 'name' | 'done' | 'type'>>,
 ): void {
   const slot = pinsSlot(placeId, mapId)
   write(
@@ -155,7 +171,11 @@ export function removePin(placeId: string, mapId: string, id: string): void {
   )
 }
 
+export function setInList(slot: Slot<string[]>, value: string, present: boolean): void {
+  const others = read(slot).filter((v) => v !== value)
+  write(slot, present ? [...others, value] : others)
+}
+
 export function toggleInList(slot: Slot<string[]>, value: string): void {
-  const list = read(slot)
-  write(slot, list.includes(value) ? list.filter((v) => v !== value) : [...list, value])
+  setInList(slot, value, !read(slot).includes(value))
 }

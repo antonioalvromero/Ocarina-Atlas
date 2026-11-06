@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import type { Fraction } from './types'
+import type { AgeFilter, Fraction } from './types'
 
 const PREFIX = 'oot-map:v1:'
 
@@ -55,6 +55,12 @@ export const hiddenCategoriesSlot: Slot<string[]> = {
   key: 'hidden-categories',
   empty: NO_STRINGS,
   parse: parseStrings,
+}
+
+export const ageFilterSlot: Slot<AgeFilter> = {
+  key: 'age-filter',
+  empty: 'both',
+  parse: (raw) => (raw === 'child' || raw === 'adult' ? raw : 'both'),
 }
 
 export function pinsSlot(placeId: string, mapId: string): Slot<CustomPin[]> {

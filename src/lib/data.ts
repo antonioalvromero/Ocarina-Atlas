@@ -1,5 +1,5 @@
 import raw from '../data/oot.json'
-import type { Dataset, Item, ItemRequirement, Place, PlaceMap } from './types'
+import type { AgeFilter, Dataset, Item, ItemRequirement, Place, PlaceMap } from './types'
 
 export const dataset = raw as unknown as Dataset
 
@@ -22,6 +22,11 @@ export function startMapOf(place: Place): PlaceMap | undefined {
 export function isUnplaced(item: Item, place: Place): boolean {
   const at = item.at
   return at === null || !place.maps.some((map) => map.id === at.map)
+}
+
+/** Items with no recorded age stay visible, since they may be reachable at either age. */
+export function matchesAge(item: Item, filter: AgeFilter): boolean {
+  return filter === 'both' || item.age === null || item.age === 'both' || item.age === filter
 }
 
 export function categoryName(key: string): string {

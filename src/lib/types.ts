@@ -41,6 +41,9 @@ export type Item = {
   images: string[]
 }
 
+/** Which of Link's ages the official pins are shown for. */
+export type AgeFilter = 'child' | 'adult' | 'both'
+
 export type Dataset = {
   map: { image: string; width: number; height: number }
   categories: Category[]

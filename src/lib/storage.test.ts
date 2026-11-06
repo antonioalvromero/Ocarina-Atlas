@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   addPin,
+  ageFilterSlot,
   officialDoneSlot,
   officialVisibleSlot,
   pinsSlot,
@@ -80,6 +81,14 @@ describe('with localStorage', () => {
       JSON.stringify([{ id: 'a', name: 'ok', x: 0.5, y: 0.5, done: false }, { id: 'b', x: 7 }]),
     )
     expect(read(pinsSlot('p', 'm')).map((p) => p.id)).toEqual(['a'])
+  })
+
+  it('stores the age filter and falls back to both', () => {
+    expect(read(ageFilterSlot)).toBe('both')
+    write(ageFilterSlot, 'adult')
+    expect(read(ageFilterSlot)).toBe('adult')
+    win.localStorage.setItem('oot-map:v1:age-filter', '"elderly"')
+    expect(read(ageFilterSlot)).toBe('both')
   })
 
   it('renders the empty value during server rendering, whatever is stored', () => {

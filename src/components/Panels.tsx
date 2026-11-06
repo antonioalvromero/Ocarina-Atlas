@@ -1,6 +1,7 @@
 import { Check, ChevronDown, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import {
+  ageFilterSlot,
   hiddenCategoriesSlot,
   officialDoneSlot,
   officialVisibleSlot,
@@ -11,7 +12,7 @@ import {
   type CustomPin,
 } from '../lib/storage'
 import { dataset } from '../lib/data'
-import type { Item } from '../lib/types'
+import type { AgeFilter, Item } from '../lib/types'
 import { categoryStyle } from './categories'
 import { ItemDetail } from './ItemDetail'
 
@@ -230,6 +231,32 @@ function ItemList({
   )
 }
 
+const ageOptions: { value: AgeFilter; label: string }[] = [
+  { value: 'child', label: 'Child' },
+  { value: 'adult', label: 'Adult' },
+  { value: 'both', label: 'Both' },
+]
+
+function AgeSelector({ age }: { age: AgeFilter }) {
+  return (
+    <div role="group" aria-label="Filter by age" className="mb-2 flex overflow-hidden rounded border border-ink-600">
+      {ageOptions.map(({ value, label }) => (
+        <button
+          key={value}
+          type="button"
+          aria-pressed={value === age}
+          onClick={() => write(ageFilterSlot, value)}
+          className={`flex-1 cursor-pointer px-2 py-1 text-xs ${
+            value === age ? 'bg-parchment-200 font-medium text-ink-950' : 'text-parchment-200 hover:bg-ink-700'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function CategoryFilter({ items, hidden }: { items: Item[]; hidden: string[] }) {
   return (
     <div role="group" aria-label="Filter by category" className="mb-2 flex flex-wrap gap-1">
@@ -279,6 +306,7 @@ export function OfficialToggle({ on }: { on: boolean }) {
 export function OfficialList({
   onMap,
   unplaced,
+  age,
   hidden,
   done,
   selectedId,
@@ -286,6 +314,7 @@ export function OfficialList({
 }: {
   onMap: Item[]
   unplaced: Item[]
+  age: AgeFilter
   hidden: string[]
   done: Set<string>
   selectedId: string | null
@@ -296,6 +325,7 @@ export function OfficialList({
   const listed = shown(unplaced)
   return (
     <>
+      <AgeSelector age={age} />
       <CategoryFilter items={[...onMap, ...unplaced]} hidden={hidden} />
       {mapped.length > 0 && (
         <ItemList items={mapped} done={done} selectedId={selectedId} onSelect={onSelect} />

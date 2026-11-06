@@ -1,10 +1,11 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { useMemo, useRef, useState, type ReactNode } from 'react'
-import { isUnplaced, itemsOfPlace, startMapOf } from '../lib/data'
+import { isUnplaced, itemsOfPlace, matchesAge, startMapOf } from '../lib/data'
 import { gridPoint, layoutFloors } from '../lib/floorGrid'
 import {
   addPin,
+  ageFilterSlot,
   hiddenCategoriesSlot,
   officialDoneSlot,
   officialVisibleSlot,
@@ -131,14 +132,16 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
   const pins = useStored(pinsSlot(place.id, map.id))
   const showOfficial = useStored(officialVisibleSlot)
   const hidden = useStored(hiddenCategoriesSlot)
+  const age = useStored(ageFilterSlot)
 
   const items = useMemo(() => itemsOfPlace(place.id), [place.id])
   const { done, count } = useOfficialProgress(items)
   const hasFloorGrid = place.kind === 'dungeon' && place.maps.length > 1
   const grid = useMemo(() => layoutFloors(place.maps), [place.maps])
   const allFloors = hasFloorGrid && showAllFloors
-  const onMap = items.filter((item) => (allFloors ? item.at : item.at?.map === map.id))
-  const unplaced = items.filter((item) => isUnplaced(item, place))
+  const forAge = items.filter((item) => matchesAge(item, age))
+  const onMap = forAge.filter((item) => (allFloors ? item.at : item.at?.map === map.id))
+  const unplaced = forAge.filter((item) => isUnplaced(item, place))
 
   const selectedCustom = selection?.kind === 'custom' ? selection.id : null
   const selectedItem = selection?.kind === 'item' ? selection.id : null
@@ -288,6 +291,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
             <OfficialList
               onMap={onMap}
               unplaced={unplaced}
+              age={age}
               hidden={hidden}
               done={done}
               selectedId={selectedItem}
@@ -305,6 +309,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
 function MaplessPlace({ place }: { place: Place }) {
   const [selected, setSelected] = useState<string | null>(null)
   const hidden = useStored(hiddenCategoriesSlot)
+  const age = useStored(ageFilterSlot)
   const showOfficial = useStored(officialVisibleSlot)
   const items = useMemo(() => itemsOfPlace(place.id), [place.id])
   const { done, count } = useOfficialProgress(items)
@@ -327,7 +332,8 @@ function MaplessPlace({ place }: { place: Place }) {
             {showOfficial && (
               <OfficialList
                 onMap={[]}
-                unplaced={items}
+                unplaced={items.filter((item) => matchesAge(item, age))}
+                age={age}
                 hidden={hidden}
                 done={done}
                 selectedId={selected}

@@ -3,6 +3,6 @@ dist/
 .tanstack/
 .DS_Store
 
-# Extracted site content: used with permission for personal use only
-public/content/
-src/data/oot.json
+# Downloaded variants the app does not use
+public/content/media/*.avif
+public/content/maps/hyrule-720.webp

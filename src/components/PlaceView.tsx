@@ -284,6 +284,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
           <MapViewport
             key={map.id}
             ref={viewport}
+            viewId={`${place.id}:${map.id}`}
             image={map.image}
             alt={`Map of ${place.name}, ${map.label}`}
             aspect={map.aspect}

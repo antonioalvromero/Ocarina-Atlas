@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { INITIAL_VIEW, MAX_ZOOM, MIN_ZOOM, type View } from './coords'
 import { OTHER_PIN } from './pinTypes'
 import type { AgeFilter, Fraction } from './types'
 
@@ -22,6 +23,13 @@ function parseStrings(raw: unknown): string[] {
 
 function isCoordinate(value: unknown): value is number {
   return typeof value === 'number' && value >= 0 && value <= 1
+}
+
+function parseView(raw: unknown): View {
+  if (typeof raw !== 'object' || raw === null) return INITIAL_VIEW
+  const { cx, cy, zoom } = raw as Partial<View>
+  const validZoom = typeof zoom === 'number' && zoom >= MIN_ZOOM && zoom <= MAX_ZOOM
+  return isCoordinate(cx) && isCoordinate(cy) && validZoom ? { cx, cy, zoom } : INITIAL_VIEW
 }
 
 function isPin(raw: unknown): raw is Omit<CustomPin, 'type'> & { type?: unknown } {
@@ -82,6 +90,11 @@ export const ageFilterSlot: Slot<AgeFilter> = {
 
 export function pinsSlot(placeId: string, mapId: string): Slot<CustomPin[]> {
   return { key: `pins:${placeId}:${mapId}`, empty: NO_PINS, parse: parsePins }
+}
+
+/** Zoom and position of one map, so each map reopens where it was left. */
+export function viewSlot(viewId: string): Slot<View> {
+  return { key: `view:${viewId}`, empty: INITIAL_VIEW, parse: parseView }
 }
 
 function backend(): Storage | null {

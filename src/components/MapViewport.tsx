@@ -26,17 +26,22 @@ import {
   type Point,
   type Size,
 } from '../lib/coords'
+import { read, viewSlot, write } from '../lib/storage'
 import type { Fraction } from '../lib/types'
 
 const DRAG_THRESHOLD = 4
 const KEY_PAN = 80
 const BUTTON_ZOOM = 1.5
+/** Wheel and drag change the view on every event, so saving waits for a pause. */
+const SAVE_DELAY = 200
 
 export type MapViewportHandle = { centerOn: (fraction: Fraction) => void }
 
 export type Projection = { size: Size; project: (fraction: Fraction) => Point }
 
 type Props = {
+  /** Identifies this map's saved zoom and position. */
+  viewId: string
   /** Omit when the children draw the whole stage. */
   image?: string
   alt: string
@@ -54,7 +59,7 @@ function distance(a: Point, b: Point) {
   return Math.hypot(a.x - b.x, a.y - b.y)
 }
 
-export function MapViewport({ image, alt, aspect, ref, onMapClick, children, overlay }: Props) {
+export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, children, overlay }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState<Size | null>(null)
@@ -74,6 +79,14 @@ export function MapViewport({ image, alt, aspect, ref, onMapClick, children, ove
     observer.observe(container)
     return () => observer.disconnect()
   }, [])
+
+  // After mount, so hydration matches the server, which has no saved view.
+  useLayoutEffect(() => setView(read(viewSlot(viewId))), [viewId])
+
+  useEffect(() => {
+    const timer = setTimeout(() => write(viewSlot(viewId), view), SAVE_DELAY)
+    return () => clearTimeout(timer)
+  }, [viewId, view])
 
   const shown = size ? clampView(view, size, aspect) : view
   const box = size ? stageBox(shown, size, aspect) : null

@@ -1,6 +1,7 @@
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { INITIAL_VIEW } from './coords'
 import {
   addPin,
   ageFilterSlot,
@@ -15,6 +16,7 @@ import {
   toggleInList,
   updatePin,
   useStored,
+  viewSlot,
   write,
 } from './storage'
 
@@ -141,5 +143,29 @@ describe('pin types and reveals', () => {
     expect(read(officialRevealedSlot)).toEqual(['a'])
     setInList(officialRevealedSlot, 'a', false)
     expect(read(officialRevealedSlot)).toEqual([])
+  })
+})
+
+describe('saved views', () => {
+  beforeEach(() => vi.stubGlobal('window', fakeWindow()))
+
+  it('starts from the initial view', () => {
+    expect(read(viewSlot('world'))).toEqual(INITIAL_VIEW)
+  })
+
+  it('keeps one view per map', () => {
+    write(viewSlot('world'), { cx: 0.2, cy: 0.7, zoom: 3 })
+    expect(read(viewSlot('world'))).toEqual({ cx: 0.2, cy: 0.7, zoom: 3 })
+    expect(read(viewSlot('forest:f1'))).toEqual(INITIAL_VIEW)
+  })
+
+  it.each([
+    ['a zoom out of range', { cx: 0.5, cy: 0.5, zoom: 99 }],
+    ['a centre off the map', { cx: 2, cy: 0.5, zoom: 2 }],
+    ['missing fields', { zoom: 2 }],
+    ['the wrong type', 'zoomed'],
+  ])('falls back to the initial view on %s', (_, stored) => {
+    write(viewSlot('bad') as never, stored as never)
+    expect(read(viewSlot('bad'))).toEqual(INITIAL_VIEW)
   })
 })

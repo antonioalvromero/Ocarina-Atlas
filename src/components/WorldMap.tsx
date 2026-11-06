@@ -71,6 +71,7 @@ export function WorldMap() {
         className="absolute inset-0 size-full scale-110 object-cover opacity-35 blur-2xl"
       />
       <MapViewport
+        viewId="world"
         image={dataset.map.image}
         alt="Map of Hyrule"
         aspect={dataset.map.width / dataset.map.height}

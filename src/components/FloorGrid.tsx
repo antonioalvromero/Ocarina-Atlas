@@ -108,6 +108,7 @@ export function FloorGrid({
   return (
     <MapViewport
       ref={viewport}
+      viewId={`${place.id}:all-floors`}
       alt={`All floors of ${place.name}`}
       aspect={grid.aspect}
       overlay={(projection) =>

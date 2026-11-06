@@ -13,5 +13,5 @@
     "noEmit": true,
     "paths": { "~/*": ["./src/*"] }
   },
-  "include": ["src", "vite.config.ts", "vitest.config.ts"]
+  "include": ["src", "pwa/plugin.ts", "vite.config.ts", "vitest.config.ts"]
 }

@@ -67,6 +67,13 @@ export const hiddenCategoriesSlot: Slot<string[]> = {
   parse: parseStrings,
 }
 
+/** Places whose item count the user chose to see. Hidden everywhere else. */
+export const itemCountVisibleSlot: Slot<string[]> = {
+  key: 'item-count-visible',
+  empty: NO_STRINGS,
+  parse: parseStrings,
+}
+
 export const ageFilterSlot: Slot<AgeFilter> = {
   key: 'age-filter',
   empty: 'both',

@@ -3,18 +3,18 @@ import { Check } from 'lucide-react'
 import { useMemo } from 'react'
 import { pinPosition } from '../lib/coords'
 import { dataset } from '../lib/data'
-import { officialDoneSlot, useStored } from '../lib/storage'
+import { itemCountVisibleSlot, officialDoneSlot, useStored } from '../lib/storage'
 import type { Place } from '../lib/types'
 import { MapViewport } from './MapViewport'
 
 const totals = new Map<string, number>()
 for (const item of dataset.items) totals.set(item.place, (totals.get(item.place) ?? 0) + 1)
 
-function PlaceLink({ place, done }: { place: Place; done: number }) {
+function PlaceLink({ place, done, showCount }: { place: Place; done: number; showCount: boolean }) {
   const total = totals.get(place.id) ?? 0
   const complete = total > 0 && done === total
   const dungeon = place.kind === 'dungeon'
-  const progress = total > 0 ? `${done} of ${total} items completed` : 'no tracked items'
+  const progress = total === 0 ? 'no tracked items' : showCount ? `${done} of ${total} items completed` : null
 
   return (
     <div data-pin className="absolute size-0 hover:z-10 focus-within:z-10" style={pinPosition(place.pin)}>
@@ -22,7 +22,7 @@ function PlaceLink({ place, done }: { place: Place; done: number }) {
         to="/$zone"
         params={{ zone: place.slug }}
         draggable={false}
-        aria-label={`${place.name}, ${dungeon ? 'dungeon' : 'zone'}, ${progress}`}
+        aria-label={[place.name, dungeon ? 'dungeon' : 'zone', progress].filter(Boolean).join(', ')}
         className="group absolute -top-6 left-0 flex w-max -translate-x-1/2 cursor-pointer flex-col items-center rounded-lg"
       >
         <span className="grid size-12 place-items-center">
@@ -42,7 +42,7 @@ function PlaceLink({ place, done }: { place: Place; done: number }) {
           }`}
         >
           {place.name}
-          {total > 0 && done > 0 && <span className="tabular-nums opacity-70">{done}/{total}</span>}
+          {showCount && total > 0 && done > 0 && <span className="tabular-nums opacity-70">{done}/{total}</span>}
         </span>
       </Link>
     </div>
@@ -51,6 +51,7 @@ function PlaceLink({ place, done }: { place: Place; done: number }) {
 
 export function WorldMap() {
   const doneIds = useStored(officialDoneSlot)
+  const countsShown = useStored(itemCountVisibleSlot)
   const donePerPlace = useMemo(() => {
     const done = new Set(doneIds)
     const counts = new Map<string, number>()
@@ -75,7 +76,12 @@ export function WorldMap() {
         aspect={dataset.map.width / dataset.map.height}
       >
         {dataset.places.map((place) => (
-          <PlaceLink key={place.id} place={place} done={donePerPlace.get(place.id) ?? 0} />
+          <PlaceLink
+            key={place.id}
+            place={place}
+            done={donePerPlace.get(place.id) ?? 0}
+            showCount={countsShown.includes(place.id)}
+          />
         ))}
       </MapViewport>
       <header className="pointer-events-none absolute top-3 left-3 rounded-lg border border-ink-600 bg-ink-900/90 px-4 py-3 shadow-lg">

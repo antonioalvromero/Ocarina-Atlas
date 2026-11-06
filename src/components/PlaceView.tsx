@@ -9,11 +9,13 @@ import {
   addPin,
   ageFilterSlot,
   hiddenCategoriesSlot,
+  itemCountVisibleSlot,
   officialDoneSlot,
   officialRevealedSlot,
   officialVisibleSlot,
   pinsSlot,
   setInList,
+  toggleInList,
   useStored,
   write,
   type CustomPin,
@@ -34,6 +36,23 @@ function useOfficialProgress(items: Item[]) {
   return { done, count: items.filter((item) => done.has(item.id)).length }
 }
 
+function ItemCount({ placeId, progress, total }: { placeId: string; progress: number; total: number }) {
+  const shown = useStored(itemCountVisibleSlot).includes(placeId)
+  return (
+    <>
+      {' · '}
+      {shown && <span className="tabular-nums">{progress}/{total} items · </span>}
+      <button
+        type="button"
+        onClick={() => toggleInList(itemCountVisibleSlot, placeId)}
+        className="cursor-pointer underline hover:text-parchment-50"
+      >
+        {shown ? 'Hide' : 'Show item count'}
+      </button>
+    </>
+  )
+}
+
 function Sidebar({ place, progress, total, children }: { place: Place; progress: number; total: number; children: ReactNode }) {
   return (
     <aside className="flex min-h-0 flex-1 flex-col overflow-y-auto border-ink-700 bg-ink-900 max-lg:border-t lg:w-96 lg:flex-none lg:border-l">
@@ -47,9 +66,7 @@ function Sidebar({ place, progress, total, children }: { place: Place; progress:
             {place.kind === 'dungeon' ? 'Dungeon' : 'Zone'}
           </span>{' '}
           in {place.region}
-          {total > 0 && (
-            <span className="tabular-nums"> · {progress}/{total} items</span>
-          )}
+          {total > 0 && <ItemCount placeId={place.id} progress={progress} total={total} />}
         </p>
         <details className="mt-2 text-sm leading-relaxed text-parchment-200">
           <summary className="cursor-pointer text-xs text-parchment-400 hover:text-parchment-50">About this place</summary>

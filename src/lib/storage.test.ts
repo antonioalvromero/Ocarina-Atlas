@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   addPin,
   ageFilterSlot,
+  itemCountVisibleSlot,
   officialDoneSlot,
   officialRevealedSlot,
   officialVisibleSlot,
@@ -97,6 +98,14 @@ describe('with localStorage', () => {
     write(officialVisibleSlot, true)
     const Probe = () => createElement('i', null, String(useStored(officialVisibleSlot)))
     expect(renderToString(createElement(Probe))).toContain('false')
+  })
+
+  it('hides item counts by default and shows them per place', () => {
+    expect(read(itemCountVisibleSlot)).toEqual([])
+    toggleInList(itemCountVisibleSlot, 'p1')
+    expect(read(itemCountVisibleSlot)).toEqual(['p1'])
+    toggleInList(itemCountVisibleSlot, 'p1')
+    expect(read(itemCountVisibleSlot)).toEqual([])
   })
 
   it('survives a storage that refuses writes', () => {

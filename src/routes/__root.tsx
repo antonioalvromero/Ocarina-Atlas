@@ -1,6 +1,7 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import appCss from '../styles.css?url'
+import { analyticsScripts } from '../lib/analytics'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -16,6 +17,7 @@ export const Route = createRootRoute({
       { rel: 'apple-touch-icon', href: '/icons/apple-touch-icon.png' },
       { rel: 'manifest', href: '/manifest.webmanifest' },
     ],
+    scripts: analyticsScripts,
   }),
   component: RootDocument,
 })

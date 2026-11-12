@@ -117,6 +117,13 @@ function main() {
   fs.cpSync(distClient, path.join(appDistDir, 'client'), { recursive: true })
   fs.cpSync(distServer, path.join(appDistDir, 'server'), { recursive: true })
 
+  for (const docName of ['LICENSE', 'README.md']) {
+    const srcDoc = path.join(ROOT_DIR, docName)
+    if (fs.existsSync(srcDoc)) {
+      fs.copyFileSync(srcDoc, path.join(BUNDLE_DIR, docName))
+    }
+  }
+
   // 4. Copy current Node.js executable as portable runtime/node.exe
   assertExists(process.execPath, 'Node.js runtime binary')
   const bundledNodePath = path.join(runtimeDir, 'node.exe')

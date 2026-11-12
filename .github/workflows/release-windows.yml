@@ -21,11 +21,48 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
           node-version: "24"
+
+      - name: Detect release refs and configured AI summary provider
+        id: release-meta
+        shell: pwsh
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          $headRef = if ($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME } else { "HEAD" }
+          $prevTag = git describe --tags --abbrev=0 --match "v*" "$headRef^" 2>$null
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($prevTag)) {
+            $prevTag = ""
+          } else {
+            $prevTag = $prevTag.Trim()
+          }
+
+          $copilotBase = $prevTag
+          if ([string]::IsNullOrWhiteSpace($copilotBase)) {
+            $copilotBase = (git rev-list --max-parents=0 HEAD | Select-Object -First 1).Trim()
+          }
+
+          $provider = "none"
+          if (-not [string]::IsNullOrWhiteSpace($env:COPILOT_GITHUB_TOKEN)) {
+            $provider = "copilot"
+          } elseif (-not [string]::IsNullOrWhiteSpace($env:GEMINI_API_KEY)) {
+            $provider = "gemini"
+          } elseif (-not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)) {
+            $provider = "openai"
+          }
+
+          "head_ref=$headRef" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "prev_tag=$prevTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "copilot_base_ref=$copilotBase" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "provider=$provider" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       - name: Install dependencies
         shell: pwsh
@@ -52,6 +89,48 @@ jobs:
         shell: pwsh
         run: ./scripts/smoke-test-win.ps1 -Port 34568
 
+      - name: Generate AI release notes with GitHub Copilot (optional)
+        id: copilot-notes
+        if: steps.release-meta.outputs.provider == 'copilot' && steps.release-meta.outputs.copilot_base_ref != '' && steps.release-meta.outputs.copilot_base_ref != steps.release-meta.outputs.head_ref
+        continue-on-error: true
+        uses: github/copilot-release-notes@main
+        with:
+          base-ref: ${{ steps.release-meta.outputs.copilot_base_ref }}
+          head-ref: ${{ steps.release-meta.outputs.head_ref }}
+          instructions: .github/release-notes-instructions.md
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Save Copilot output for release body composer
+        if: steps.copilot-notes.outcome == 'success'
+        shell: pwsh
+        env:
+          COPILOT_OUTPUT: ${{ steps.copilot-notes.outputs.release-notes }}
+        run: |
+          $copilotPath = Join-Path $env:RUNNER_TEMP "copilot-notes.md"
+          if (-not [string]::IsNullOrWhiteSpace($env:COPILOT_OUTPUT)) {
+            $env:COPILOT_OUTPUT | Out-File -FilePath $copilotPath -Encoding utf8
+          }
+
+      - name: Compose release notes & checksum
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          HEAD_REF: ${{ steps.release-meta.outputs.head_ref }}
+          PREVIOUS_TAG: ${{ steps.release-meta.outputs.prev_tag }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          COPILOT_NOTES_FILE: ${{ runner.temp }}/copilot-notes.md
+          ZIP_PATH: release/OcarinaMaps-Lichii-Windows-x64.zip
+          OUT_PATH: release/RELEASE_NOTES.md
+        run: |
+          node scripts/generate-release-notes.mjs
+          if (Test-Path release/RELEASE_NOTES.md) {
+            Get-Content release/RELEASE_NOTES.md | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+
       - name: Upload Windows build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -64,4 +143,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release/OcarinaMaps-Lichii-Windows-x64.zip
-          generate_release_notes: true
+          body_path: release/RELEASE_NOTES.md
+          generate_release_notes: false

@@ -7,6 +7,7 @@ using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -49,6 +50,8 @@ namespace OcarinaMapsLauncher
         public int Port = 3000;
         public string LichiiHost = "127.0.0.1";
         public int LichiiPort = 6545;
+        public bool AllowLan = true;
+        public string BindHost = null;
         public bool AutoOpenBrowser = true;
         public bool StartMinimized = false;
         public bool AutoStart = false;
@@ -96,6 +99,27 @@ namespace OcarinaMapsLauncher
                         opts.LichiiPort = parsed;
                     }
                 }
+                else if (string.Equals(key, "--lan", StringComparison.OrdinalIgnoreCase))
+                {
+                    opts.AllowLan = true;
+                    opts.BindHost = null;
+                }
+                else if (string.Equals(key, "--local-only", StringComparison.OrdinalIgnoreCase) ||
+                         string.Equals(key, "--localhost", StringComparison.OrdinalIgnoreCase))
+                {
+                    opts.AllowLan = false;
+                    opts.BindHost = "127.0.0.1";
+                }
+                else if (string.Equals(key, "--host", StringComparison.OrdinalIgnoreCase))
+                {
+                    string raw = value ?? (i + 1 < args.Length ? args[++i] : null);
+                    string sanitized = LanNetworkHelper.SanitizeHost(raw, null);
+                    if (!string.IsNullOrEmpty(sanitized))
+                    {
+                        opts.BindHost = sanitized;
+                        opts.AllowLan = !LanNetworkHelper.IsLoopbackHost(sanitized);
+                    }
+                }
                 else if (string.Equals(key, "--no-browser", StringComparison.OrdinalIgnoreCase))
                 {
                     opts.AutoOpenBrowser = false;
@@ -111,6 +135,285 @@ namespace OcarinaMapsLauncher
             }
 
             return opts;
+        }
+    }
+
+    internal static class LanNetworkHelper
+    {
+        private static readonly string[] VirtualKeywords = new string[]
+        {
+            "vethernet", "hyper-v", "wsl", "virtualbox", "vbox",
+            "vmware", "docker", "veth", "utun", "loopback", "isatap", "teredo"
+        };
+
+        private sealed class ScoredIp
+        {
+            public string Address;
+            public int Score;
+        }
+
+        public static string SanitizeHost(string rawHost, string fallback)
+        {
+            if (string.IsNullOrEmpty(rawHost)) return fallback;
+            string trimmed = rawHost.Trim();
+            if (trimmed.Length == 0 || trimmed.Length > 253) return fallback;
+            for (int i = 0; i < trimmed.Length; i++)
+            {
+                char c = trimmed[i];
+                bool valid = (c >= 'a' && c <= 'z') ||
+                             (c >= 'A' && c <= 'Z') ||
+                             (c >= '0' && c <= '9') ||
+                             c == '.' || c == '-' || c == '_' || c == ':' || c == '[' || c == ']';
+                if (!valid) return fallback;
+            }
+            return trimmed;
+        }
+
+        public static bool IsWildcardHost(string host)
+        {
+            if (string.IsNullOrEmpty(host)) return false;
+            string normalized = host.Trim();
+            return string.Equals(normalized, "0.0.0.0", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(normalized, "::", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(normalized, "0:0:0:0:0:0:0:0", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsLoopbackHost(string host)
+        {
+            if (string.IsNullOrEmpty(host)) return false;
+            string normalized = host.Trim();
+            return string.Equals(normalized, "127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(normalized, "localhost", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(normalized, "::1", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static string FormatHttpUrl(string host, int port)
+        {
+            string cleanHost = string.IsNullOrEmpty(host) ? "127.0.0.1" : host;
+            if (cleanHost.IndexOf(':') >= 0 && !cleanHost.StartsWith("[", StringComparison.Ordinal))
+            {
+                cleanHost = "[" + cleanHost + "]";
+            }
+            return string.Format(CultureInfo.InvariantCulture, "http://{0}:{1}", cleanHost, port);
+        }
+
+        public static List<string> GetLanIpv4Addresses()
+        {
+            Dictionary<string, int> byIp = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
+                for (int i = 0; i < nics.Length; i++)
+                {
+                    NetworkInterface nic = nics[i];
+                    if (nic == null || nic.OperationalStatus != OperationalStatus.Up) continue;
+                    if (nic.NetworkInterfaceType == NetworkInterfaceType.Loopback ||
+                        nic.NetworkInterfaceType == NetworkInterfaceType.Tunnel)
+                    {
+                        continue;
+                    }
+
+                    IPInterfaceProperties props;
+                    try
+                    {
+                        props = nic.GetIPProperties();
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    if (props == null || props.UnicastAddresses == null) continue;
+
+                    bool hasIpv4Gateway = false;
+                    if (props.GatewayAddresses != null)
+                    {
+                        for (int g = 0; g < props.GatewayAddresses.Count; g++)
+                        {
+                            GatewayIPAddressInformation gw = props.GatewayAddresses[g];
+                            if (gw != null && gw.Address != null &&
+                                gw.Address.AddressFamily == AddressFamily.InterNetwork &&
+                                !IPAddress.Any.Equals(gw.Address))
+                            {
+                                hasIpv4Gateway = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    string adapterLabel = ((nic.Name ?? string.Empty) + " " + (nic.Description ?? string.Empty)).ToLowerInvariant();
+                    bool isVirtual = false;
+                    for (int k = 0; k < VirtualKeywords.Length; k++)
+                    {
+                        if (adapterLabel.IndexOf(VirtualKeywords[k], StringComparison.Ordinal) >= 0)
+                        {
+                            isVirtual = true;
+                            break;
+                        }
+                    }
+
+                    for (int u = 0; u < props.UnicastAddresses.Count; u++)
+                    {
+                        UnicastIPAddressInformation ua = props.UnicastAddresses[u];
+                        if (ua == null || ua.Address == null) continue;
+                        if (ua.Address.AddressFamily != AddressFamily.InterNetwork) continue;
+
+                        byte[] bytes = ua.Address.GetAddressBytes();
+                        if (bytes.Length != 4) continue;
+                        if (bytes[0] == 127) continue;
+                        if (bytes[0] == 169 && bytes[1] == 254) continue;
+
+                        string ip = ua.Address.ToString();
+                        int score = 0;
+                        if (hasIpv4Gateway) score += 100;
+                        if (!isVirtual) score += 50;
+                        if (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 ||
+                            nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                        {
+                            score += 30;
+                        }
+                        if (bytes[0] == 192 && bytes[1] == 168) score += 40;
+                        else if (bytes[0] == 10) score += 30;
+                        else if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) score += 20;
+                        else if (bytes[0] == 100 && bytes[1] >= 64 && bytes[1] <= 127) score += 10;
+
+                        int existingScore;
+                        if (!byIp.TryGetValue(ip, out existingScore) || score > existingScore)
+                        {
+                            byIp[ip] = score;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Best-effort network enumeration only.
+            }
+
+            List<ScoredIp> scored = new List<ScoredIp>();
+            foreach (KeyValuePair<string, int> kv in byIp)
+            {
+                ScoredIp item = new ScoredIp();
+                item.Address = kv.Key;
+                item.Score = kv.Value;
+                scored.Add(item);
+            }
+
+            scored.Sort(delegate(ScoredIp a, ScoredIp b)
+            {
+                int cmp = b.Score.CompareTo(a.Score);
+                if (cmp != 0) return cmp;
+                return string.CompareOrdinal(a.Address, b.Address);
+            });
+
+            List<string> result = new List<string>(scored.Count);
+            for (int i = 0; i < scored.Count; i++)
+            {
+                result.Add(scored[i].Address);
+            }
+            return result;
+        }
+
+        public static string GetFirewallRuleName(int port)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "Hyrule Atlas (TCP {0})", port);
+        }
+
+        public static bool IsFirewallRulePresent(int port)
+        {
+            if (port < 1 || port > 65535) return false;
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = "netsh.exe";
+                psi.Arguments = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "advfirewall firewall show rule name=\"{0}\"",
+                    GetFirewallRuleName(port));
+                psi.CreateNoWindow = true;
+                psi.UseShellExecute = false;
+                psi.RedirectStandardOutput = true;
+                psi.RedirectStandardError = true;
+
+                using (Process proc = Process.Start(psi))
+                {
+                    if (proc == null) return false;
+                    proc.OutputDataReceived += delegate { };
+                    proc.ErrorDataReceived += delegate { };
+                    proc.BeginOutputReadLine();
+                    proc.BeginErrorReadLine();
+                    if (!proc.WaitForExit(2500))
+                    {
+                        try { proc.Kill(); } catch { }
+                        return false;
+                    }
+                    return proc.ExitCode == 0;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool AddPrivateLanFirewallRule(int port, out bool canceledByUser, out string errorMessage)
+        {
+            canceledByUser = false;
+            errorMessage = null;
+            if (port < 1 || port > 65535)
+            {
+                errorMessage = "Invalid TCP port.";
+                return false;
+            }
+
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = "netsh.exe";
+                psi.Arguments = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "advfirewall firewall add rule name=\"{0}\" dir=in action=allow protocol=TCP localport={1} profile=private",
+                    GetFirewallRuleName(port),
+                    port);
+                psi.Verb = "runas";
+                psi.UseShellExecute = true;
+                psi.WindowStyle = ProcessWindowStyle.Hidden;
+
+                using (Process proc = Process.Start(psi))
+                {
+                    if (proc == null)
+                    {
+                        errorMessage = "Could not start netsh.exe.";
+                        return false;
+                    }
+                    if (!proc.WaitForExit(15000))
+                    {
+                        errorMessage = "Timed out waiting for Windows Firewall configuration.";
+                        return false;
+                    }
+                    if (proc.ExitCode != 0)
+                    {
+                        errorMessage = string.Format(CultureInfo.InvariantCulture, "netsh.exe exited with code {0}.", proc.ExitCode);
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            catch (Win32Exception ex)
+            {
+                if (ex.NativeErrorCode == 1223)
+                {
+                    canceledByUser = true;
+                    errorMessage = "Administrator permission prompt was canceled.";
+                    return false;
+                }
+                errorMessage = ex.Message;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
         }
     }
 
@@ -277,8 +580,9 @@ namespace OcarinaMapsLauncher
 
     internal static class RuntimeResolver
     {
-        public static RuntimeResolution Resolve(int port)
+        public static RuntimeResolution Resolve(int port, string bindHost)
         {
+            string safeBindHost = LanNetworkHelper.SanitizeHost(bindHost, "0.0.0.0");
             string exeDir = (AppDomain.CurrentDomain.BaseDirectory ?? Environment.CurrentDirectory)
                 .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
@@ -324,7 +628,7 @@ namespace OcarinaMapsLauncher
                     res.Mode = RuntimeMode.RepoDev;
                     res.ExecutablePath = "cmd.exe";
                     res.ArgumentsTemplate = "/d /s /c \"\"" + npmCmd + "\" run dev -- --port " +
-                        port.ToString(CultureInfo.InvariantCulture) + " --host 127.0.0.1\"";
+                        port.ToString(CultureInfo.InvariantCulture) + " --host " + safeBindHost + "\"";
                     res.WorkingDirectory = repoRoot;
                     res.Summary = "Dev Repo";
                     return res;
@@ -877,10 +1181,19 @@ namespace OcarinaMapsLauncher
         private Process _serverProcess;
         private ServerLifecycle _lifecycle = ServerLifecycle.Stopped;
         private int _activePort = 3000;
+        private string _activeBindHost = "0.0.0.0";
+        private string _customBindHost;
         private string _activeLichiiHost = "127.0.0.1";
         private int _activeLichiiPort = 6545;
         private bool _browserOpenedForRun = false;
         private int _pollInFlight = 0;
+        private int _firewallCheckInFlight = 0;
+        private int _firewallCheckedPort = -1;
+        private bool _firewallAllowed = false;
+        private int _copyFeedbackTicks = 0;
+        private string _primaryLanUrl = string.Empty;
+        private List<string> _lanUrls = new List<string>();
+        private ToolTip _toolTip;
 
         // Layout containers
         private BorderedPanel _controlsCard;
@@ -898,12 +1211,17 @@ namespace OcarinaMapsLauncher
         private Button _advancedToggleButton;
         private CheckBox _autoOpenCheckBox;
         private CheckBox _trayMinimizeCheckBox;
+        private CheckBox _allowLanCheckBox;
+        private Button _firewallButton;
         private TextBox _lichiiHostInput;
         private NumericUpDown _lichiiPortInput;
 
         private StatusDot _serverDot;
         private Label _serverStatusLabel;
         private LinkLabel _serverUrlLink;
+        private LinkLabel _lanUrlLink;
+        private Label _lanStatusLabel;
+        private Button _copyLanUrlButton;
         private StatusDot _lichiiDot;
         private Label _lichiiLabelTitle;
         private Label _lichiiStatusLabel;
@@ -928,6 +1246,10 @@ namespace OcarinaMapsLauncher
         {
             _options = options ?? new LaunchOptions();
             _activePort = _options.Port;
+            _customBindHost = _options.BindHost;
+            _activeBindHost = _options.AllowLan
+                ? (LanNetworkHelper.SanitizeHost(_options.BindHost, "0.0.0.0"))
+                : "127.0.0.1";
             _activeLichiiHost = _options.LichiiHost;
             _activeLichiiPort = _options.LichiiPort;
 
@@ -938,8 +1260,8 @@ namespace OcarinaMapsLauncher
             BackColor = Theme.Ink950;
             ForeColor = Theme.Parchment200;
             Font = new Font("Segoe UI", 9f, FontStyle.Regular);
-            ClientSize = new Size(600, 480);
-            MinimumSize = new Size(580, 440);
+            ClientSize = new Size(600, 540);
+            MinimumSize = new Size(590, 500);
             StartPosition = FormStartPosition.CenterScreen;
             AutoScaleMode = AutoScaleMode.Font;
 
@@ -947,6 +1269,7 @@ namespace OcarinaMapsLauncher
             BuildTrayIcon();
             ApplyInitialOptions();
             RefreshRuntimeBadge();
+            RefreshLanDisplays();
             RefreshLichiiConfigStatus();
             UpdateControlStates();
             ReflowLayout();
@@ -963,6 +1286,8 @@ namespace OcarinaMapsLauncher
 
         private void BuildLayout()
         {
+            _toolTip = new ToolTip();
+
             // Header
             Panel headerPanel = new Panel();
             headerPanel.Location = new Point(16, 12);
@@ -1002,7 +1327,7 @@ namespace OcarinaMapsLauncher
             // Card 1: Server Controls
             _controlsCard = new BorderedPanel();
             _controlsCard.Location = new Point(16, 68);
-            _controlsCard.Size = new Size(568, 92);
+            _controlsCard.Size = new Size(568, 116);
             _controlsCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             Controls.Add(_controlsCard);
 
@@ -1035,6 +1360,7 @@ namespace OcarinaMapsLauncher
             _portInput.BackColor = Theme.Ink800;
             _portInput.ForeColor = Theme.Parchment50;
             _portInput.BorderStyle = BorderStyle.FixedSingle;
+            _portInput.ValueChanged += OnPortInputChanged;
             _controlsCard.Controls.Add(_portInput);
 
             _advancedToggleButton = CreateButton("Lichii ▾", 468, 15, 86, 28, false);
@@ -1061,9 +1387,27 @@ namespace OcarinaMapsLauncher
             _trayMinimizeCheckBox.Location = new Point(316, 56);
             _controlsCard.Controls.Add(_trayMinimizeCheckBox);
 
+            _allowLanCheckBox = new CheckBox();
+            _allowLanCheckBox.Text = "Allow LAN access (iPad, tablet, other PCs)";
+            _allowLanCheckBox.AutoSize = true;
+            _allowLanCheckBox.Checked = true;
+            _allowLanCheckBox.ForeColor = Theme.Parchment200;
+            _allowLanCheckBox.BackColor = Theme.Ink900;
+            _allowLanCheckBox.Location = new Point(14, 82);
+            _allowLanCheckBox.CheckedChanged += OnAllowLanCheckedChanged;
+            _controlsCard.Controls.Add(_allowLanCheckBox);
+            _toolTip.SetToolTip(_allowLanCheckBox, "Bind 0.0.0.0 so any browser on your local Wi-Fi/LAN can open the map. Uncheck for localhost-only.");
+
+            _firewallButton = CreateButton("Allow LAN Firewall", 378, 79, 176, 25, false);
+            _firewallButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _firewallButton.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+            _firewallButton.Click += OnAllowFirewallClick;
+            _controlsCard.Controls.Add(_firewallButton);
+            _toolTip.SetToolTip(_firewallButton, "Adds an inbound Windows Firewall rule for this port on Private networks so tablets/iPads can connect.");
+
             // Collapsible Lichii host/port panel inside controls card
             _advancedPanel = new Panel();
-            _advancedPanel.Location = new Point(12, 86);
+            _advancedPanel.Location = new Point(12, 112);
             _advancedPanel.Size = new Size(544, 34);
             _advancedPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _advancedPanel.BackColor = Theme.Ink900;
@@ -1112,8 +1456,8 @@ namespace OcarinaMapsLauncher
 
             // Card 2: Live Status
             _statusCard = new BorderedPanel();
-            _statusCard.Location = new Point(16, 168);
-            _statusCard.Size = new Size(568, 92);
+            _statusCard.Location = new Point(16, 192);
+            _statusCard.Size = new Size(568, 118);
             _statusCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             Controls.Add(_statusCard);
 
@@ -1148,8 +1492,41 @@ namespace OcarinaMapsLauncher
             _serverUrlLink.LinkClicked += OnServerUrlLinkClicked;
             _statusCard.Controls.Add(_serverUrlLink);
 
+            Label lanTitleLabel = new Label();
+            lanTitleLabel.Text = "LAN / Tablet URL:";
+            lanTitleLabel.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
+            lanTitleLabel.ForeColor = Theme.Parchment50;
+            lanTitleLabel.AutoSize = true;
+            lanTitleLabel.Location = new Point(32, 38);
+            _statusCard.Controls.Add(lanTitleLabel);
+
+            _lanStatusLabel = new Label();
+            _lanStatusLabel.Text = "Checking LAN IP...";
+            _lanStatusLabel.ForeColor = Theme.Parchment400;
+            _lanStatusLabel.AutoSize = true;
+            _lanStatusLabel.Location = new Point(148, 38);
+            _statusCard.Controls.Add(_lanStatusLabel);
+
+            _lanUrlLink = new LinkLabel();
+            _lanUrlLink.Text = string.Empty;
+            _lanUrlLink.LinkColor = Theme.Moss;
+            _lanUrlLink.ActiveLinkColor = Theme.Parchment50;
+            _lanUrlLink.VisitedLinkColor = Theme.Moss;
+            _lanUrlLink.AutoSize = true;
+            _lanUrlLink.Visible = false;
+            _lanUrlLink.Location = new Point(148, 38);
+            _lanUrlLink.LinkClicked += OnLanUrlLinkClicked;
+            _statusCard.Controls.Add(_lanUrlLink);
+
+            _copyLanUrlButton = CreateButton("Copy URL", 478, 35, 76, 22, false);
+            _copyLanUrlButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _copyLanUrlButton.Font = new Font("Segoe UI", 7.75f, FontStyle.Regular);
+            _copyLanUrlButton.Click += OnCopyLanUrlClick;
+            _statusCard.Controls.Add(_copyLanUrlButton);
+            _toolTip.SetToolTip(_copyLanUrlButton, "Copy the LAN URL so you can open it on your iPad, tablet, or phone.");
+
             _lichiiDot = new StatusDot();
-            _lichiiDot.Location = new Point(14, 42);
+            _lichiiDot.Location = new Point(14, 68);
             _lichiiDot.DotColor = Theme.Parchment600;
             _statusCard.Controls.Add(_lichiiDot);
 
@@ -1158,14 +1535,14 @@ namespace OcarinaMapsLauncher
             _lichiiLabelTitle.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
             _lichiiLabelTitle.ForeColor = Theme.Parchment50;
             _lichiiLabelTitle.AutoSize = true;
-            _lichiiLabelTitle.Location = new Point(32, 40);
+            _lichiiLabelTitle.Location = new Point(32, 66);
             _statusCard.Controls.Add(_lichiiLabelTitle);
 
             _lichiiStatusLabel = new Label();
             _lichiiStatusLabel.Text = "Checking port 6545...";
             _lichiiStatusLabel.ForeColor = Theme.Parchment200;
             _lichiiStatusLabel.AutoSize = true;
-            _lichiiStatusLabel.Location = new Point(156, 40);
+            _lichiiStatusLabel.Location = new Point(156, 66);
             _statusCard.Controls.Add(_lichiiStatusLabel);
 
             _lichiiDetailLabel = new Label();
@@ -1173,7 +1550,7 @@ namespace OcarinaMapsLauncher
             _lichiiDetailLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
             _lichiiDetailLabel.ForeColor = Theme.Parchment400;
             _lichiiDetailLabel.AutoSize = false;
-            _lichiiDetailLabel.Location = new Point(32, 64);
+            _lichiiDetailLabel.Location = new Point(32, 90);
             _lichiiDetailLabel.Size = new Size(522, 20);
             _lichiiDetailLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _statusCard.Controls.Add(_lichiiDetailLabel);
@@ -1312,6 +1689,8 @@ namespace OcarinaMapsLauncher
         private void ApplyInitialOptions()
         {
             _portInput.Value = Math.Max(1, Math.Min(65535, _options.Port));
+            _allowLanCheckBox.Checked = _options.AllowLan;
+            _customBindHost = _options.BindHost;
             _lichiiHostInput.Text = _options.LichiiHost;
             _lichiiPortInput.Value = Math.Max(1, Math.Min(65535, _options.LichiiPort));
             _autoOpenCheckBox.Checked = _options.AutoOpenBrowser;
@@ -1327,7 +1706,7 @@ namespace OcarinaMapsLauncher
 
         private void ReflowLayout()
         {
-            _controlsCard.Height = _advancedExpanded ? 126 : 92;
+            _controlsCard.Height = _advancedExpanded ? 154 : 116;
             _advancedPanel.Visible = _advancedExpanded;
             _advancedToggleButton.Text = _advancedExpanded ? "Lichii ▴" : "Lichii ▾";
 
@@ -1353,6 +1732,8 @@ namespace OcarinaMapsLauncher
         private void OnFormLoad(object sender, EventArgs e)
         {
             AppendLog("Launcher ready. Checking runtime and Lichii status...");
+            RefreshLanDisplays();
+            TriggerFirewallStatusCheck();
             TriggerPollNow();
 
             if (_options.AutoStart)
@@ -1398,7 +1779,7 @@ namespace OcarinaMapsLauncher
 
         private void RefreshRuntimeBadge()
         {
-            RuntimeResolution res = RuntimeResolver.Resolve((int)_portInput.Value);
+            RuntimeResolution res = RuntimeResolver.Resolve((int)_portInput.Value, GetSelectedBindHost());
             _modeBadgeLabel.Text = res.Summary;
             if (res.Mode == RuntimeMode.Missing)
             {
@@ -1553,9 +1934,287 @@ namespace OcarinaMapsLauncher
             OpenMapInBrowser();
         }
 
+        private string GetSelectedBindHost()
+        {
+            if (!_allowLanCheckBox.Checked) return "127.0.0.1";
+            if (!string.IsNullOrEmpty(_customBindHost) && !LanNetworkHelper.IsLoopbackHost(_customBindHost))
+            {
+                return LanNetworkHelper.SanitizeHost(_customBindHost, "0.0.0.0");
+            }
+            return "0.0.0.0";
+        }
+
+        private string GetEffectiveBindHost()
+        {
+            return _lifecycle == ServerLifecycle.Stopped ? GetSelectedBindHost() : _activeBindHost;
+        }
+
+        private int GetEffectivePort()
+        {
+            return _lifecycle == ServerLifecycle.Stopped ? (int)_portInput.Value : _activePort;
+        }
+
+        private void OnPortInputChanged(object sender, EventArgs e)
+        {
+            RefreshLanDisplays();
+            RefreshRuntimeBadge();
+            TriggerFirewallStatusCheck();
+        }
+
+        private void OnAllowLanCheckedChanged(object sender, EventArgs e)
+        {
+            if (!_allowLanCheckBox.Checked)
+            {
+                _customBindHost = null;
+            }
+            RefreshLanDisplays();
+            RefreshRuntimeBadge();
+            UpdateControlStates();
+            TriggerFirewallStatusCheck();
+        }
+
+        private void RefreshLanDisplays()
+        {
+            string bindHost = GetEffectiveBindHost();
+            int port = GetEffectivePort();
+            _lanUrls.Clear();
+
+            if (LanNetworkHelper.IsLoopbackHost(bindHost))
+            {
+                _primaryLanUrl = string.Empty;
+            }
+            else if (!LanNetworkHelper.IsWildcardHost(bindHost))
+            {
+                _primaryLanUrl = LanNetworkHelper.FormatHttpUrl(bindHost, port);
+                _lanUrls.Add(_primaryLanUrl);
+            }
+            else
+            {
+                List<string> ips = LanNetworkHelper.GetLanIpv4Addresses();
+                for (int i = 0; i < ips.Count; i++)
+                {
+                    _lanUrls.Add(LanNetworkHelper.FormatHttpUrl(ips[i], port));
+                }
+                _primaryLanUrl = _lanUrls.Count > 0 ? _lanUrls[0] : string.Empty;
+            }
+
+            UpdateLanRowUi();
+        }
+
+        private void UpdateLanRowUi()
+        {
+            if (_lanStatusLabel == null || _lanUrlLink == null || _copyLanUrlButton == null) return;
+
+            bool isRunning = _lifecycle == ServerLifecycle.Running;
+            string bindHost = GetEffectiveBindHost();
+
+            if (LanNetworkHelper.IsLoopbackHost(bindHost))
+            {
+                _lanUrlLink.Visible = false;
+                _lanStatusLabel.Text = "Disabled (localhost only — 127.0.0.1)";
+                _lanStatusLabel.ForeColor = Theme.Parchment600;
+                _lanStatusLabel.Visible = true;
+                _copyLanUrlButton.Enabled = false;
+                _toolTip.SetToolTip(_lanUrlLink, string.Empty);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_primaryLanUrl))
+            {
+                _lanUrlLink.Visible = false;
+                _lanStatusLabel.Text = "No active Wi-Fi/Ethernet LAN IPv4 detected";
+                _lanStatusLabel.ForeColor = Theme.Ember;
+                _lanStatusLabel.Visible = true;
+                _copyLanUrlButton.Enabled = false;
+                _toolTip.SetToolTip(_lanUrlLink, string.Empty);
+                return;
+            }
+
+            _copyLanUrlButton.Enabled = true;
+
+            if (isRunning)
+            {
+                _lanStatusLabel.Visible = false;
+                _lanUrlLink.Text = _primaryLanUrl;
+                _lanUrlLink.Visible = true;
+            }
+            else
+            {
+                _lanUrlLink.Visible = false;
+                _lanStatusLabel.Text = _primaryLanUrl + "  (ready when started)";
+                _lanStatusLabel.ForeColor = Theme.Parchment200;
+                _lanStatusLabel.Visible = true;
+            }
+
+            if (_lanUrls.Count > 1)
+            {
+                _toolTip.SetToolTip(
+                    _lanUrlLink,
+                    "All detected LAN URLs:\n" + string.Join("\n", _lanUrls.ToArray()));
+            }
+            else
+            {
+                _toolTip.SetToolTip(_lanUrlLink, "Open this URL on your iPad, tablet, or another PC on the same network.");
+            }
+        }
+
+        private void OnLanUrlLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_primaryLanUrl)) return;
+            OpenUrlInBrowser(_primaryLanUrl);
+        }
+
+        private void OnCopyLanUrlClick(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(_primaryLanUrl)) return;
+            try
+            {
+                Clipboard.SetText(_primaryLanUrl);
+                _copyLanUrlButton.Text = "Copied!";
+                _copyFeedbackTicks = 2;
+                AppendLog("Copied LAN URL to clipboard: " + _primaryLanUrl);
+            }
+            catch (Exception ex)
+            {
+                AppendLog("Could not copy LAN URL to clipboard: " + ex.Message);
+            }
+        }
+
+        private void TriggerFirewallStatusCheck()
+        {
+            if (IsDisposed || !IsHandleCreated) return;
+            if (LanNetworkHelper.IsLoopbackHost(GetEffectiveBindHost()))
+            {
+                UpdateFirewallButtonState();
+                return;
+            }
+            if (Interlocked.CompareExchange(ref _firewallCheckInFlight, 1, 0) != 0) return;
+
+            int port = GetEffectivePort();
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                bool allowed = false;
+                try
+                {
+                    allowed = LanNetworkHelper.IsFirewallRulePresent(port);
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref _firewallCheckInFlight, 0);
+                }
+
+                BeginInvokeSafe(delegate
+                {
+                    _firewallCheckedPort = port;
+                    _firewallAllowed = allowed;
+                    UpdateFirewallButtonState();
+                });
+            });
+        }
+
+        private void UpdateFirewallButtonState()
+        {
+            if (_firewallButton == null) return;
+            int port = GetEffectivePort();
+            bool lanEnabled = !LanNetworkHelper.IsLoopbackHost(GetEffectiveBindHost());
+
+            if (!lanEnabled)
+            {
+                _firewallButton.Enabled = false;
+                _firewallButton.Text = "Firewall: Local Only";
+                _firewallButton.ForeColor = Theme.Parchment600;
+                _firewallButton.FlatAppearance.BorderColor = Theme.Ink600;
+                return;
+            }
+
+            _firewallButton.Enabled = true;
+            if (_firewallCheckedPort == port && _firewallAllowed)
+            {
+                _firewallButton.Text = string.Format(CultureInfo.InvariantCulture, "Firewall OK (:{0})", port);
+                _firewallButton.ForeColor = Theme.Moss;
+                _firewallButton.FlatAppearance.BorderColor = Theme.Moss;
+            }
+            else
+            {
+                _firewallButton.Text = string.Format(CultureInfo.InvariantCulture, "Allow Firewall (:{0})", port);
+                _firewallButton.ForeColor = Theme.Parchment200;
+                _firewallButton.FlatAppearance.BorderColor = Theme.Ink600;
+            }
+        }
+
+        private void OnAllowFirewallClick(object sender, EventArgs e)
+        {
+            int port = GetEffectivePort();
+            if (_firewallCheckedPort == port && _firewallAllowed)
+            {
+                MessageBox.Show(
+                    this,
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Windows Defender Firewall rule \"{0}\" is already present for Private networks.",
+                        LanNetworkHelper.GetFirewallRuleName(port)),
+                    "LAN Firewall Ready",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            _firewallButton.Enabled = false;
+            _firewallButton.Text = "Configuring...";
+
+            bool canceled;
+            string error;
+            bool ok = LanNetworkHelper.AddPrivateLanFirewallRule(port, out canceled, out error);
+            if (ok)
+            {
+                _firewallCheckedPort = port;
+                _firewallAllowed = true;
+                UpdateFirewallButtonState();
+                AppendLog(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Added Windows Firewall Private LAN rule \"{0}\" for TCP port {1}.",
+                    LanNetworkHelper.GetFirewallRuleName(port),
+                    port));
+                MessageBox.Show(
+                    this,
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Windows Firewall now allows incoming LAN connections on TCP port {0} (Private networks).\n\nTip: If an iPad/tablet still cannot connect, verify your Windows Wi-Fi/Ethernet network profile is set to Private in Windows Settings.",
+                        port),
+                    "LAN Firewall Configured",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            else if (canceled)
+            {
+                UpdateFirewallButtonState();
+                AppendLog("Firewall configuration prompt canceled.");
+            }
+            else
+            {
+                UpdateFirewallButtonState();
+                AppendLog("Failed to add Windows Firewall rule: " + (error ?? "Unknown error"));
+                MessageBox.Show(
+                    this,
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Could not automatically configure Windows Firewall:\n{0}\n\nYou can run this in an Administrator Command Prompt:\nnetsh advfirewall firewall add rule name=\"{1}\" dir=in action=allow protocol=TCP localport={2} profile=private",
+                        error ?? "Unknown error",
+                        LanNetworkHelper.GetFirewallRuleName(port),
+                        port),
+                    "Firewall Configuration Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+        }
+
         private void OpenMapInBrowser()
         {
-            string url = GetServerUrl();
+            OpenUrlInBrowser(GetServerUrl());
+        }
+
+        private void OpenUrlInBrowser(string url)
+        {
             try
             {
                 ProcessStartInfo psi = new ProcessStartInfo(url);
@@ -1578,6 +2237,7 @@ namespace OcarinaMapsLauncher
             if (_lifecycle != ServerLifecycle.Stopped) return;
 
             int port = (int)_portInput.Value;
+            string bindHost = GetSelectedBindHost();
             string lichiiHost = (_lichiiHostInput.Text ?? string.Empty).Trim();
             if (string.IsNullOrEmpty(lichiiHost)) lichiiHost = "127.0.0.1";
             int lichiiPort = (int)_lichiiPortInput.Value;
@@ -1597,7 +2257,7 @@ namespace OcarinaMapsLauncher
                 return;
             }
 
-            RuntimeResolution target = RuntimeResolver.Resolve(port);
+            RuntimeResolution target = RuntimeResolver.Resolve(port, bindHost);
             if (target.Mode == RuntimeMode.Missing)
             {
                 AppendLog("ERROR: " + target.ErrorMessage);
@@ -1606,17 +2266,24 @@ namespace OcarinaMapsLauncher
             }
 
             _activePort = port;
+            _activeBindHost = bindHost;
             _activeLichiiHost = lichiiHost;
             _activeLichiiPort = lichiiPort;
             _browserOpenedForRun = false;
             _lifecycle = ServerLifecycle.Starting;
+            RefreshLanDisplays();
             UpdateControlStates();
+
+            string lanNote = string.IsNullOrEmpty(_primaryLanUrl)
+                ? (LanNetworkHelper.IsLoopbackHost(bindHost) ? "localhost only" : "LAN enabled")
+                : "LAN " + _primaryLanUrl;
 
             AppendLog(string.Format(
                 CultureInfo.InvariantCulture,
-                "Starting {0} server on http://127.0.0.1:{1} (Lichii {2}:{3})...",
+                "Starting {0} server on http://127.0.0.1:{1} ({2}, Lichii {3}:{4})...",
                 target.Summary,
                 port,
+                lanNote,
                 lichiiHost,
                 lichiiPort));
 
@@ -1639,7 +2306,7 @@ namespace OcarinaMapsLauncher
                 psi.StandardOutputEncoding = Encoding.UTF8;
                 psi.StandardErrorEncoding = Encoding.UTF8;
 
-                psi.EnvironmentVariables["HOST"] = "127.0.0.1";
+                psi.EnvironmentVariables["HOST"] = bindHost;
                 psi.EnvironmentVariables["PORT"] = port.ToString(CultureInfo.InvariantCulture);
                 psi.EnvironmentVariables["LICHII_HOST"] = lichiiHost;
                 psi.EnvironmentVariables["LICHII_PORT"] = lichiiPort.ToString(CultureInfo.InvariantCulture);
@@ -1885,6 +2552,12 @@ namespace OcarinaMapsLauncher
             {
                 _appIcon.Dispose();
             }
+
+            if (_toolTip != null)
+            {
+                _toolTip.Dispose();
+                _toolTip = null;
+            }
         }
 
         private void UpdateControlStates()
@@ -1894,6 +2567,7 @@ namespace OcarinaMapsLauncher
             bool isStopping = _lifecycle == ServerLifecycle.Stopping;
 
             _portInput.Enabled = isStopped;
+            _allowLanCheckBox.Enabled = isStopped;
             _lichiiHostInput.Enabled = isStopped;
             _lichiiPortInput.Enabled = isStopped;
 
@@ -1953,6 +2627,8 @@ namespace OcarinaMapsLauncher
             }
 
             _openBrowserButton.Enabled = isRunning;
+            UpdateLanRowUi();
+            UpdateFirewallButtonState();
             if (_trayOpenBrowserItem != null) _trayOpenBrowserItem.Enabled = isRunning;
             if (_trayToggleServerItem != null)
             {
@@ -1969,6 +2645,15 @@ namespace OcarinaMapsLauncher
 
         private void OnPollTimerTick(object sender, EventArgs e)
         {
+            if (_copyFeedbackTicks > 0)
+            {
+                _copyFeedbackTicks--;
+                if (_copyFeedbackTicks == 0 && _copyLanUrlButton != null)
+                {
+                    _copyLanUrlButton.Text = "Copy URL";
+                }
+            }
+            RefreshLanDisplays();
             TriggerPollNow();
         }
 

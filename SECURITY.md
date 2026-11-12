@@ -13,7 +13,9 @@ Live emulator telemetry and the standalone Windows launcher are currently suppor
 
 This project is designed to operate locally on the user's machine:
 
-- **Loopback-only binding by default**: The local server binds to `127.0.0.1` (`HOST` environment variable) and queries Lichii's JSON-RPC debug endpoint on `127.0.0.1:6545` (`LICHII_HOST` / `LICHII_PORT`) by default.
+- **LAN second-screen access with opt-out localhost mode**: To support opening the map from an iPad, tablet, or second PC on your home Wi-Fi/LAN out of the box, the map HTTP server binds `0.0.0.0` (`HOST` environment variable / `--lan`) while Lichii's JSON-RPC connection remains strictly local on `127.0.0.1:6545` (`LICHII_HOST` / `LICHII_PORT`) by default. You can restrict the web UI to `127.0.0.1` at any time by unchecking **Allow LAN access** in `OcarinaMaps.exe`, passing `--local-only`, or setting `HOST=127.0.0.1`.
+- **Scoped Windows Firewall helper (explicit user action only)**: Clicking **Allow Firewall** in `OcarinaMaps.exe` runs `netsh advfirewall firewall add rule` via UAC elevation only on explicit click, scoped strictly to `profile=private` networks (`Hyrule Atlas (TCP <port>)`), never `public` or `any`.
+- **Host header & dev server host validation**: Standalone requests validate incoming `Host` headers via `sanitizeHostHeader()` before URL construction, and Vite dev/preview servers restrict hostnames via `resolveAllowedDevHosts()`.
 - **Read-only emulator & save inspection**: Live tracking reads game memory via Lichii's debug RPC (`status`, `read_memory`, `search_memory`) and reads local `caption.sav` / `progress.sav` files in read-only mode. It never writes to game memory or save files.
 - **Browser-local persistence**: Map pins, revealed/completed markers, viewport state, and tracker toggles are stored in browser `localStorage` (`oot-map:v1:*`).
 - **Safe static file serving**: Static asset routes enforce path-containment checks to prevent directory traversal outside the built `dist/client` directory.

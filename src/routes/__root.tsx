@@ -8,6 +8,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { name: 'apple-mobile-web-app-title', content: 'Hyrule Atlas' },
       { name: 'theme-color', content: '#13100c' },
       { title: 'Field Atlas' },
     ],
@@ -24,7 +25,9 @@ export const Route = createRootRoute({
 
 function RootDocument() {
   useEffect(() => {
-    if (import.meta.env.PROD && 'serviceWorker' in navigator) void navigator.serviceWorker.register('/sw.js')
+    if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+      void navigator.serviceWorker.register('/sw.js').catch(() => {})
+    }
   }, [])
 
   return (

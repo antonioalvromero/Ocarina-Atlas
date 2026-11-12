@@ -201,9 +201,10 @@ The repository retains the upstream [`Dockerfile`](Dockerfile) using Bun (`oven/
 | `public/` | Static map SVGs/WebPs (`content/maps/`), item screenshots (`content/media/`), PWA icons, and `manifest.webmanifest`. |
 | `pwa/` | Build-time service worker generator (`plugin.ts`) and offline cache template (`sw.js`). |
 | `launcher/` | Native C# WinForms Windows launcher source (`OcarinaMaps.cs`). |
-| `scripts/` | Standalone production Node HTTP server (`server-entry.ts`), Windows portable packager (`build-win.mjs`), and Windows smoke test (`smoke-test-win.ps1`). |
-| `.github/` | Issue templates, PR template, CI workflow (`ci.yml`), and Windows release workflow (`release-windows.yml`). |
+| `scripts/` | Standalone production Node HTTP server (`server-entry.ts`), Windows portable packager (`build-win.mjs`), smoke test (`smoke-test-win.ps1`), and AI release notes composer (`generate-release-notes.mjs`). |
+| `.github/` | Issue templates, PR template, release category/AI guidelines (`release.yml`, `release-notes-instructions.md`), CI workflow (`ci.yml`), and Windows release workflow (`release-windows.yml`). |
 | `AGENTS.md` | Architecture notes, engineering invariants, and verification commands for AI coding agents. |
+| `LICENSE` | MIT License covering newly authored **Hyrule Atlas** components and documentation. |
 
 ---
 
@@ -211,6 +212,7 @@ The repository retains the upstream [`Dockerfile`](Dockerfile) using Bun (`oven/
 
 - **Original Map Tracker:** Built upon [`lucasriondel/oot-remake-map`](https://github.com/lucasriondel/oot-remake-map) (Field Atlas).
 - **Emulator Integration:** Designed for [`zortos293/Lichii`](https://github.com/zortos293/Lichii).
+- **Documentation Co-Author:** This `README.md` and repository documentation were co-authored with **Antigravity AI** (Google DeepMind).
 - **Map Assets & Item Data:** Map images and location data come from [Nintendúo](https://nintenduo.com/juegos/the-legend-of-zelda-ocarina-of-time/mapa/en/). The content belongs to its owner and is used without their permission.
 - **Disclaimer:** Non-commercial fan project, not affiliated with Nintendo.
 
@@ -218,6 +220,6 @@ The repository retains the upstream [`Dockerfile`](Dockerfile) using Bun (`oven/
 
 ## License
 
-The upstream repository ([`lucasriondel/oot-remake-map`](https://github.com/lucasriondel/oot-remake-map)) does **not** include a `LICENSE` file in its root directory. Accordingly, upstream map data, media assets, and base application code remain governed by the upstream repository (`lucasriondel/oot-remake-map`), and no third-party license file has been added or asserted here.
+Newly authored **Hyrule Atlas** components — including the live Lichii telemetry bridge (`src/lib/lichii-*`, `src/lib/useLichiiTracker.ts`, `src/components/LichiiStatusPanel.tsx`, `src/components/PlayerPin.tsx`), Windows launcher (`launcher/`), build and release automation scripts (`scripts/`, `.github/`), and documentation — are licensed under the **[MIT License](LICENSE)** (permissive free use, modification, and distribution).
 
-Maintainers who fork or publish distributions of this project should confirm upstream permissions and add an explicit `LICENSE` file for newly authored integration components if desired.
+The upstream repository ([`lucasriondel/oot-remake-map`](https://github.com/lucasriondel/oot-remake-map)) does **not** include a `LICENSE` file in its root directory; upstream base code remains subject to its upstream terms, and map assets/game IP remain the property of their respective owners as noted in **Credits & Attribution**.

@@ -42,6 +42,7 @@ Notes for Windows shells:
 - `launcher/OcarinaMaps.cs` — Native C# WinForms launcher (`OcarinaMaps.exe`) compiled by `%WINDIR%\Microsoft.NET\Framework64\v4*\csc.exe` (`/target:winexe /platform:x64 /warn:4 /warnaserror`), managing the server child process with a Windows Job Object (`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`) and 1-click `%APPDATA%\lichii\nx2_switches.txt` configuration.
 - `scripts/build-win.mjs` — Cross-platform Node script orchestrating `vite build`, `rolldown`, copying `node.exe`, compiling `launcher/OcarinaMaps.cs`, and producing `release/OcarinaMaps-Lichii-Windows-x64.zip`.
 - `scripts/smoke-test-win.ps1` — PowerShell verification script asserting Windows release artifacts, launching `OcarinaMaps.exe` outside the repo, validating HTTP `200` on `/` and `/api/lichii/state`, and confirming Job Object port cleanup.
+- `src/lib/release-notes.ts` & `scripts/generate-release-notes.mjs` — Pure prompt/summary helpers and CI release-body composer supporting `COPILOT_GITHUB_TOKEN`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, SHA-256 digests, and `CHANGELOG.md` fallback.
 - `.github/workflows/` — CI (`ci.yml`) and Windows release packager (`release-windows.yml`).
 
 ## Critical Engineering Invariants

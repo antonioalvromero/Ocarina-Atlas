@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1] - 2026-11-11
+
+### Added
+- **MIT License (`LICENSE`):** Added an explicit permissive MIT License covering newly authored **Hyrule Atlas** telemetry, Windows launcher, automation scripts, and documentation, alongside co-author credit for Antigravity AI in `README.md`.
+- **AI-Assisted Release Notes Automation (`.github/workflows/release-windows.yml`, `scripts/generate-release-notes.mjs`, `src/lib/release-notes.ts`, `.github/release.yml`, `.github/release-notes-instructions.md`):**
+  - Supports automated AI release summaries via GitHub Copilot (`COPILOT_GITHUB_TOKEN` with `github/copilot-release-notes`), Google Gemini (`GEMINI_API_KEY`), or OpenAI (`OPENAI_API_KEY`), falling back cleanly to `CHANGELOG.md` + grouped commit notes and GitHub auto-generated PR notes.
+  - Embeds the portable `OcarinaMaps-Lichii-Windows-x64.zip` SHA-256 verification digest in every release body.
+
 ## [1.0.0] - 2026-11-11
 
 ### Added

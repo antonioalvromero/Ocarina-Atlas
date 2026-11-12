@@ -1,0 +1,34 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+      - duplicate
+      - invalid
+    authors:
+      - dependabot
+      - dependabot[bot]
+  categories:
+    - title: "✨ New Features"
+      labels:
+        - feature
+        - enhancement
+    - title: "🔌 Telemetry & Map Tracking"
+      labels:
+        - telemetry
+        - reverse-engineering
+    - title: "🪟 Windows Launcher & Packaging"
+      labels:
+        - windows
+        - launcher
+    - title: "🐛 Bug Fixes"
+      labels:
+        - bug
+        - fix
+    - title: "📚 Documentation & CI/CD"
+      labels:
+        - documentation
+        - docs
+        - ci
+    - title: "🔧 Other Changes"
+      labels:
+        - "*"

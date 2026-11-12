@@ -15,7 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace OcarinaMapsLauncher
+namespace HyruleAtlasLauncher
 {
     internal static class Program
     {
@@ -667,7 +667,7 @@ namespace OcarinaMapsLauncher
             string exeDir = (AppDomain.CurrentDomain.BaseDirectory ?? Environment.CurrentDirectory)
                 .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-            // 1. Standalone Release layout beside OcarinaMaps.exe:
+            // 1. Standalone Release layout beside HyruleAtlas.exe:
             //    runtime\node.exe + app\standalone-server.mjs + app\dist\
             string bundledNode = Path.Combine(exeDir, "runtime", "node.exe");
             string bundledEntry = Path.Combine(exeDir, "app", "standalone-server.mjs");
@@ -898,7 +898,7 @@ namespace OcarinaMapsLauncher
             }
             else
             {
-                outLines.Add("# Lichii NX2 switches (configured by OcarinaMaps Launcher)");
+                outLines.Add("# Lichii NX2 switches (configured by Hyrule Atlas)");
                 outLines.Add("# Restart Lichii after editing.");
                 outLines.Add(newLine);
             }
@@ -1923,7 +1923,7 @@ namespace OcarinaMapsLauncher
                 _trayHintShown = true;
                 _trayIcon.ShowBalloonTip(
                     2500,
-                    "OcarinaMaps Launcher",
+                    "Hyrule Atlas",
                     "Still running in the system tray. Double-click the icon to reopen.",
                     ToolTipIcon.Info);
             }

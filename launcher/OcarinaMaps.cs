@@ -138,18 +138,61 @@ namespace OcarinaMapsLauncher
         }
     }
 
+    internal sealed class LanEndpoint
+    {
+        public string IpAddress = string.Empty;
+        public string Url = string.Empty;
+        public string AdapterLabel = string.Empty;
+        public bool IsPreferred = false;
+
+        public override string ToString()
+        {
+            if (string.IsNullOrEmpty(AdapterLabel))
+            {
+                return Url;
+            }
+            return string.Format(CultureInfo.InvariantCulture, "{0} ({1})", Url, AdapterLabel);
+        }
+    }
+
     internal static class LanNetworkHelper
     {
         private static readonly string[] VirtualKeywords = new string[]
         {
             "vethernet", "hyper-v", "wsl", "virtualbox", "vbox",
-            "vmware", "docker", "veth", "utun", "loopback", "isatap", "teredo"
+            "vmware", "docker", "veth", "utun", "loopback", "isatap", "teredo",
+            "tailscale", "zerotier", "wireguard", "nordlynx", "radmin",
+            "hamachi", "openvpn", "wintun", "tap-", "npcap", "bridge"
         };
 
-        private sealed class ScoredIp
+        private sealed class ScoredEndpoint
         {
-            public string Address;
+            public string IpAddress;
+            public string AdapterLabel;
+            public int Ipv4Index;
             public int Score;
+        }
+
+        [DllImport("iphlpapi.dll", SetLastError = true)]
+        private static extern int GetBestInterface(uint destAddr, out uint bestIfIndex);
+
+        private static int GetPreferredInterfaceIndex()
+        {
+            try
+            {
+                uint bestIndex;
+                // 0x01010101 = 1.1.1.1 in network byte order
+                int rc = GetBestInterface(0x01010101u, out bestIndex);
+                if (rc == 0)
+                {
+                    return (int)bestIndex;
+                }
+            }
+            catch
+            {
+                // Ignore on environments where iphlpapi.dll call is unavailable.
+            }
+            return -1;
         }
 
         public static string SanitizeHost(string rawHost, string fallback)
@@ -199,7 +242,20 @@ namespace OcarinaMapsLauncher
 
         public static List<string> GetLanIpv4Addresses()
         {
-            Dictionary<string, int> byIp = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            List<LanEndpoint> endpoints = GetLanEndpoints(3000);
+            List<string> result = new List<string>(endpoints.Count);
+            for (int i = 0; i < endpoints.Count; i++)
+            {
+                result.Add(endpoints[i].IpAddress);
+            }
+            return result;
+        }
+
+        public static List<LanEndpoint> GetLanEndpoints(int port)
+        {
+            Dictionary<string, ScoredEndpoint> byIp = new Dictionary<string, ScoredEndpoint>(StringComparer.OrdinalIgnoreCase);
+            int bestIfIndex = GetPreferredInterfaceIndex();
+
             try
             {
                 NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
@@ -212,6 +268,18 @@ namespace OcarinaMapsLauncher
                     {
                         continue;
                     }
+
+                    string adapterSearch = ((nic.Name ?? string.Empty) + " " + (nic.Description ?? string.Empty)).ToLowerInvariant();
+                    bool isVirtual = false;
+                    for (int k = 0; k < VirtualKeywords.Length; k++)
+                    {
+                        if (adapterSearch.IndexOf(VirtualKeywords[k], StringComparison.Ordinal) >= 0)
+                        {
+                            isVirtual = true;
+                            break;
+                        }
+                    }
+                    if (isVirtual) continue;
 
                     IPInterfaceProperties props;
                     try
@@ -240,16 +308,24 @@ namespace OcarinaMapsLauncher
                         }
                     }
 
-                    string adapterLabel = ((nic.Name ?? string.Empty) + " " + (nic.Description ?? string.Empty)).ToLowerInvariant();
-                    bool isVirtual = false;
-                    for (int k = 0; k < VirtualKeywords.Length; k++)
+                    int ipv4Index = -1;
+                    try
                     {
-                        if (adapterLabel.IndexOf(VirtualKeywords[k], StringComparison.Ordinal) >= 0)
+                        IPv4InterfaceProperties ipv4Props = props.GetIPv4Properties();
+                        if (ipv4Props != null)
                         {
-                            isVirtual = true;
-                            break;
+                            ipv4Index = ipv4Props.Index;
                         }
                     }
+                    catch
+                    {
+                        ipv4Index = -1;
+                    }
+
+                    bool isBestInterface = bestIfIndex >= 0 && ipv4Index == bestIfIndex;
+                    string adapterLabel = !string.IsNullOrEmpty(nic.Name)
+                        ? nic.Name.Trim()
+                        : (!string.IsNullOrEmpty(nic.Description) ? nic.Description.Trim() : "LAN");
 
                     for (int u = 0; u < props.UnicastAddresses.Count; u++)
                     {
@@ -261,25 +337,31 @@ namespace OcarinaMapsLauncher
                         if (bytes.Length != 4) continue;
                         if (bytes[0] == 127) continue;
                         if (bytes[0] == 169 && bytes[1] == 254) continue;
+                        if (bytes[0] == 100 && bytes[1] >= 64 && bytes[1] <= 127) continue;
 
                         string ip = ua.Address.ToString();
                         int score = 0;
-                        if (hasIpv4Gateway) score += 100;
-                        if (!isVirtual) score += 50;
+                        if (isBestInterface) score += 1000;
+                        if (hasIpv4Gateway) score += 200;
                         if (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 ||
                             nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
                         {
-                            score += 30;
+                            score += 50;
                         }
                         if (bytes[0] == 192 && bytes[1] == 168) score += 40;
                         else if (bytes[0] == 10) score += 30;
                         else if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) score += 20;
-                        else if (bytes[0] == 100 && bytes[1] >= 64 && bytes[1] <= 127) score += 10;
+                        if (ipv4Index >= 0) score += Math.Max(0, 20 - Math.Min(20, ipv4Index));
 
-                        int existingScore;
-                        if (!byIp.TryGetValue(ip, out existingScore) || score > existingScore)
+                        ScoredEndpoint existing;
+                        if (!byIp.TryGetValue(ip, out existing) || score > existing.Score)
                         {
-                            byIp[ip] = score;
+                            ScoredEndpoint item = new ScoredEndpoint();
+                            item.IpAddress = ip;
+                            item.AdapterLabel = adapterLabel;
+                            item.Ipv4Index = ipv4Index >= 0 ? ipv4Index : int.MaxValue;
+                            item.Score = score;
+                            byIp[ip] = item;
                         }
                     }
                 }
@@ -289,26 +371,25 @@ namespace OcarinaMapsLauncher
                 // Best-effort network enumeration only.
             }
 
-            List<ScoredIp> scored = new List<ScoredIp>();
-            foreach (KeyValuePair<string, int> kv in byIp)
-            {
-                ScoredIp item = new ScoredIp();
-                item.Address = kv.Key;
-                item.Score = kv.Value;
-                scored.Add(item);
-            }
-
-            scored.Sort(delegate(ScoredIp a, ScoredIp b)
+            List<ScoredEndpoint> scored = new List<ScoredEndpoint>(byIp.Values);
+            scored.Sort(delegate(ScoredEndpoint a, ScoredEndpoint b)
             {
                 int cmp = b.Score.CompareTo(a.Score);
                 if (cmp != 0) return cmp;
-                return string.CompareOrdinal(a.Address, b.Address);
+                cmp = a.Ipv4Index.CompareTo(b.Ipv4Index);
+                if (cmp != 0) return cmp;
+                return string.CompareOrdinal(a.IpAddress, b.IpAddress);
             });
 
-            List<string> result = new List<string>(scored.Count);
+            List<LanEndpoint> result = new List<LanEndpoint>(scored.Count);
             for (int i = 0; i < scored.Count; i++)
             {
-                result.Add(scored[i].Address);
+                LanEndpoint ep = new LanEndpoint();
+                ep.IpAddress = scored[i].IpAddress;
+                ep.Url = FormatHttpUrl(scored[i].IpAddress, port);
+                ep.AdapterLabel = scored[i].AdapterLabel;
+                ep.IsPreferred = (i == 0);
+                result.Add(ep);
             }
             return result;
         }
@@ -1113,19 +1194,56 @@ namespace OcarinaMapsLauncher
     internal sealed class BorderedPanel : Panel
     {
         public Color BorderColor = Theme.Ink600;
+        public Color FillColor = Theme.Ink900;
+        public int CornerRadius = 8;
 
         public BorderedPanel()
         {
-            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
             BackColor = Theme.Ink900;
+        }
+
+        private static GraphicsPath CreateRoundedRectPath(Rectangle bounds, int radius)
+        {
+            GraphicsPath path = new GraphicsPath();
+            int diameter = radius * 2;
+            if (diameter <= 0 || diameter > bounds.Width || diameter > bounds.Height)
+            {
+                path.AddRectangle(bounds);
+                return path;
+            }
+
+            Rectangle arc = new Rectangle(bounds.Location, new Size(diameter, diameter));
+            path.AddArc(arc, 180, 90);
+            arc.X = bounds.Right - diameter;
+            path.AddArc(arc, 270, 90);
+            arc.Y = bounds.Bottom - diameter;
+            path.AddArc(arc, 0, 90);
+            arc.X = bounds.Left;
+            path.AddArc(arc, 90, 90);
+            path.CloseFigure();
+            return path;
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            Color parentBack = Parent != null ? Parent.BackColor : Theme.Ink950;
+            using (SolidBrush outerBrush = new SolidBrush(parentBack))
+            {
+                e.Graphics.FillRectangle(outerBrush, ClientRectangle);
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            base.OnPaint(e);
-            using (Pen pen = new Pen(BorderColor, 1f))
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            Rectangle rect = new Rectangle(0, 0, Math.Max(1, Width - 1), Math.Max(1, Height - 1));
+            using (GraphicsPath path = CreateRoundedRectPath(rect, CornerRadius))
+            using (SolidBrush fillBrush = new SolidBrush(FillColor))
+            using (Pen borderPen = new Pen(BorderColor, 1f))
             {
-                e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
+                e.Graphics.FillPath(fillBrush, path);
+                e.Graphics.DrawPath(borderPen, path);
             }
         }
     }
@@ -1172,6 +1290,9 @@ namespace OcarinaMapsLauncher
 
     internal sealed class MainForm : Form
     {
+        private const int CollapsedClientHeight = 434;
+        private const int ExpandedClientHeight = 664;
+
         private readonly LaunchOptions _options;
         private readonly object _procLock = new object();
         private readonly System.Windows.Forms.Timer _pollTimer;
@@ -1180,6 +1301,7 @@ namespace OcarinaMapsLauncher
         private JobObject _jobObject;
         private Process _serverProcess;
         private ServerLifecycle _lifecycle = ServerLifecycle.Stopped;
+        private bool _hasStartupError = false;
         private int _activePort = 3000;
         private string _activeBindHost = "0.0.0.0";
         private string _customBindHost;
@@ -1191,46 +1313,51 @@ namespace OcarinaMapsLauncher
         private int _firewallCheckedPort = -1;
         private bool _firewallAllowed = false;
         private int _copyFeedbackTicks = 0;
-        private string _primaryLanUrl = string.Empty;
-        private List<string> _lanUrls = new List<string>();
+        private string _selectedLanUrl = string.Empty;
+        private List<LanEndpoint> _lanEndpoints = new List<LanEndpoint>();
         private ToolTip _toolTip;
 
         // Layout containers
-        private BorderedPanel _controlsCard;
-        private BorderedPanel _statusCard;
-        private BorderedPanel _configCard;
-        private Panel _advancedPanel;
+        private BorderedPanel _heroCard;
+        private BorderedPanel _heroStatusPill;
+        private BorderedPanel _step1Card;
+        private BorderedPanel _configuredPill;
+        private BorderedPanel _step2Card;
+        private BorderedPanel _advancedDrawerPanel;
         private Panel _logContainer;
-        private Panel _logHeaderPanel;
 
-        // Controls
-        private Label _modeBadgeLabel;
-        private Button _startStopButton;
-        private Button _openBrowserButton;
-        private NumericUpDown _portInput;
-        private Button _advancedToggleButton;
-        private CheckBox _autoOpenCheckBox;
-        private CheckBox _trayMinimizeCheckBox;
-        private CheckBox _allowLanCheckBox;
-        private Button _firewallButton;
-        private TextBox _lichiiHostInput;
-        private NumericUpDown _lichiiPortInput;
-
+        // Hero controls
         private StatusDot _serverDot;
         private Label _serverStatusLabel;
+        private Label _heroSummaryLabel;
         private LinkLabel _serverUrlLink;
-        private LinkLabel _lanUrlLink;
-        private Label _lanStatusLabel;
-        private Button _copyLanUrlButton;
-        private StatusDot _lichiiDot;
-        private Label _lichiiLabelTitle;
-        private Label _lichiiStatusLabel;
-        private Label _lichiiDetailLabel;
+        private Button _startStopButton;
+        private Button _openBrowserButton;
+        private StatusDot _heroLichiiDot;
+        private Label _heroLichiiLabel;
 
-        private Label _configStatusLabel;
+        // Step 1 controls (Lichii Live Sync)
+        private Label _lichiiStepDetailLabel;
         private Button _enableRpcButton;
 
-        private Button _logToggleButton;
+        // Step 2 controls (LAN / Second Screen)
+        private Button _firewallButton;
+        private ComboBox _lanComboBox;
+        private LinkLabel _lanUrlLink;
+        private Label _lanStatusLabel;
+        private Button _refreshLanButton;
+        private Button _copyLanUrlButton;
+        private Label _lanHintLabel;
+
+        // Advanced drawer controls
+        private Button _advancedToggleButton;
+        private Label _modeBadgeLabel;
+        private NumericUpDown _portInput;
+        private TextBox _lichiiHostInput;
+        private NumericUpDown _lichiiPortInput;
+        private CheckBox _allowLanCheckBox;
+        private CheckBox _autoOpenCheckBox;
+        private CheckBox _trayMinimizeCheckBox;
         private Button _clearLogButton;
         private TextBox _logTextBox;
 
@@ -1239,7 +1366,6 @@ namespace OcarinaMapsLauncher
         private ToolStripMenuItem _trayOpenBrowserItem;
 
         private bool _advancedExpanded = false;
-        private bool _logExpanded = true;
         private bool _trayHintShown = false;
 
         public MainForm(LaunchOptions options)
@@ -1248,7 +1374,7 @@ namespace OcarinaMapsLauncher
             _activePort = _options.Port;
             _customBindHost = _options.BindHost;
             _activeBindHost = _options.AllowLan
-                ? (LanNetworkHelper.SanitizeHost(_options.BindHost, "0.0.0.0"))
+                ? LanNetworkHelper.SanitizeHost(_options.BindHost, "0.0.0.0")
                 : "127.0.0.1";
             _activeLichiiHost = _options.LichiiHost;
             _activeLichiiPort = _options.LichiiPort;
@@ -1256,12 +1382,12 @@ namespace OcarinaMapsLauncher
             _appIcon = CreateTriforceIcon();
             Icon = _appIcon;
 
-            Text = "Ocarina of Time Map Tracker — Lichii Bridge";
+            Text = "Hyrule Atlas — Ocarina of Time Map Tracker";
             BackColor = Theme.Ink950;
             ForeColor = Theme.Parchment200;
             Font = new Font("Segoe UI", 9f, FontStyle.Regular);
-            ClientSize = new Size(600, 540);
-            MinimumSize = new Size(590, 500);
+            ClientSize = new Size(560, CollapsedClientHeight);
+            MinimumSize = new Size(550, 450);
             StartPosition = FormStartPosition.CenterScreen;
             AutoScaleMode = AutoScaleMode.Font;
 
@@ -1288,338 +1414,370 @@ namespace OcarinaMapsLauncher
         {
             _toolTip = new ToolTip();
 
-            // Header
-            Panel headerPanel = new Panel();
-            headerPanel.Location = new Point(16, 12);
-            headerPanel.Size = new Size(568, 50);
-            headerPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            headerPanel.BackColor = Theme.Ink950;
-            Controls.Add(headerPanel);
+            // 1. Hero Card
+            _heroCard = new BorderedPanel();
+            _heroCard.Location = new Point(16, 14);
+            _heroCard.Size = new Size(528, 148);
+            _heroCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            Controls.Add(_heroCard);
 
             Label titleLabel = new Label();
-            titleLabel.Text = "Ocarina of Time Map Tracker — Lichii Bridge";
-            titleLabel.Font = new Font("Georgia", 12.5f, FontStyle.Bold);
+            titleLabel.Text = "Hyrule Atlas";
+            titleLabel.Font = new Font("Georgia", 15f, FontStyle.Bold);
             titleLabel.ForeColor = Theme.Parchment50;
             titleLabel.AutoSize = true;
-            titleLabel.Location = new Point(0, 0);
-            headerPanel.Controls.Add(titleLabel);
+            titleLabel.Location = new Point(16, 12);
+            _heroCard.Controls.Add(titleLabel);
 
-            Label subtitleLabel = new Label();
-            subtitleLabel.Text = "Launch the interactive Hyrule map and connect live Lichii emulator tracking.";
-            subtitleLabel.Font = new Font("Segoe UI", 8.75f, FontStyle.Regular);
-            subtitleLabel.ForeColor = Theme.Parchment400;
-            subtitleLabel.AutoSize = true;
-            subtitleLabel.Location = new Point(1, 27);
-            headerPanel.Controls.Add(subtitleLabel);
-
-            _modeBadgeLabel = new Label();
-            _modeBadgeLabel.AutoSize = false;
-            _modeBadgeLabel.Size = new Size(92, 22);
-            _modeBadgeLabel.Location = new Point(476, 3);
-            _modeBadgeLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _modeBadgeLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _modeBadgeLabel.Font = new Font("Segoe UI", 7.75f, FontStyle.Bold);
-            _modeBadgeLabel.BackColor = Theme.Ink800;
-            _modeBadgeLabel.ForeColor = Theme.Parchment400;
-            _modeBadgeLabel.BorderStyle = BorderStyle.FixedSingle;
-            headerPanel.Controls.Add(_modeBadgeLabel);
-
-            // Card 1: Server Controls
-            _controlsCard = new BorderedPanel();
-            _controlsCard.Location = new Point(16, 68);
-            _controlsCard.Size = new Size(568, 116);
-            _controlsCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            Controls.Add(_controlsCard);
-
-            _startStopButton = CreateButton("Start Server", 12, 12, 148, 34, true);
-            _startStopButton.BackColor = Theme.Moss;
-            _startStopButton.ForeColor = Theme.Ink950;
-            _startStopButton.FlatAppearance.BorderColor = Theme.Moss;
-            _startStopButton.Click += OnStartStopClick;
-            _controlsCard.Controls.Add(_startStopButton);
-
-            _openBrowserButton = CreateButton("Open Map in Browser", 168, 12, 168, 34, false);
-            _openBrowserButton.Click += OnOpenBrowserClick;
-            _controlsCard.Controls.Add(_openBrowserButton);
-
-            Label portLabel = new Label();
-            portLabel.Text = "Port:";
-            portLabel.ForeColor = Theme.Parchment400;
-            portLabel.AutoSize = true;
-            portLabel.Location = new Point(352, 21);
-            portLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _controlsCard.Controls.Add(portLabel);
-
-            _portInput = new NumericUpDown();
-            _portInput.Minimum = 1;
-            _portInput.Maximum = 65535;
-            _portInput.Value = 3000;
-            _portInput.Location = new Point(388, 18);
-            _portInput.Size = new Size(68, 24);
-            _portInput.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _portInput.BackColor = Theme.Ink800;
-            _portInput.ForeColor = Theme.Parchment50;
-            _portInput.BorderStyle = BorderStyle.FixedSingle;
-            _portInput.ValueChanged += OnPortInputChanged;
-            _controlsCard.Controls.Add(_portInput);
-
-            _advancedToggleButton = CreateButton("Lichii ▾", 468, 15, 86, 28, false);
-            _advancedToggleButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _advancedToggleButton.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
-            _advancedToggleButton.Click += OnAdvancedToggleClick;
-            _controlsCard.Controls.Add(_advancedToggleButton);
-
-            _autoOpenCheckBox = new CheckBox();
-            _autoOpenCheckBox.Text = "Auto-open browser when server starts";
-            _autoOpenCheckBox.AutoSize = true;
-            _autoOpenCheckBox.Checked = true;
-            _autoOpenCheckBox.ForeColor = Theme.Parchment200;
-            _autoOpenCheckBox.BackColor = Theme.Ink900;
-            _autoOpenCheckBox.Location = new Point(14, 56);
-            _controlsCard.Controls.Add(_autoOpenCheckBox);
-
-            _trayMinimizeCheckBox = new CheckBox();
-            _trayMinimizeCheckBox.Text = "Hide to tray on minimize";
-            _trayMinimizeCheckBox.AutoSize = true;
-            _trayMinimizeCheckBox.Checked = false;
-            _trayMinimizeCheckBox.ForeColor = Theme.Parchment200;
-            _trayMinimizeCheckBox.BackColor = Theme.Ink900;
-            _trayMinimizeCheckBox.Location = new Point(316, 56);
-            _controlsCard.Controls.Add(_trayMinimizeCheckBox);
-
-            _allowLanCheckBox = new CheckBox();
-            _allowLanCheckBox.Text = "Allow LAN access (iPad, tablet, other PCs)";
-            _allowLanCheckBox.AutoSize = true;
-            _allowLanCheckBox.Checked = true;
-            _allowLanCheckBox.ForeColor = Theme.Parchment200;
-            _allowLanCheckBox.BackColor = Theme.Ink900;
-            _allowLanCheckBox.Location = new Point(14, 82);
-            _allowLanCheckBox.CheckedChanged += OnAllowLanCheckedChanged;
-            _controlsCard.Controls.Add(_allowLanCheckBox);
-            _toolTip.SetToolTip(_allowLanCheckBox, "Bind 0.0.0.0 so any browser on your local Wi-Fi/LAN can open the map. Uncheck for localhost-only.");
-
-            _firewallButton = CreateButton("Allow LAN Firewall", 378, 79, 176, 25, false);
-            _firewallButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _firewallButton.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
-            _firewallButton.Click += OnAllowFirewallClick;
-            _controlsCard.Controls.Add(_firewallButton);
-            _toolTip.SetToolTip(_firewallButton, "Adds an inbound Windows Firewall rule for this port on Private networks so tablets/iPads can connect.");
-
-            // Collapsible Lichii host/port panel inside controls card
-            _advancedPanel = new Panel();
-            _advancedPanel.Location = new Point(12, 112);
-            _advancedPanel.Size = new Size(544, 34);
-            _advancedPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            _advancedPanel.BackColor = Theme.Ink900;
-            _advancedPanel.Visible = false;
-            _controlsCard.Controls.Add(_advancedPanel);
-
-            Label lHostLabel = new Label();
-            lHostLabel.Text = "Lichii Host:";
-            lHostLabel.ForeColor = Theme.Parchment400;
-            lHostLabel.AutoSize = true;
-            lHostLabel.Location = new Point(2, 8);
-            _advancedPanel.Controls.Add(lHostLabel);
-
-            _lichiiHostInput = new TextBox();
-            _lichiiHostInput.Text = "127.0.0.1";
-            _lichiiHostInput.Location = new Point(74, 5);
-            _lichiiHostInput.Size = new Size(140, 23);
-            _lichiiHostInput.BackColor = Theme.Ink800;
-            _lichiiHostInput.ForeColor = Theme.Parchment50;
-            _lichiiHostInput.BorderStyle = BorderStyle.FixedSingle;
-            _advancedPanel.Controls.Add(_lichiiHostInput);
-
-            Label lPortLabel = new Label();
-            lPortLabel.Text = "Lichii RPC Port:";
-            lPortLabel.ForeColor = Theme.Parchment400;
-            lPortLabel.AutoSize = true;
-            lPortLabel.Location = new Point(232, 8);
-            _advancedPanel.Controls.Add(lPortLabel);
-
-            _lichiiPortInput = new NumericUpDown();
-            _lichiiPortInput.Minimum = 1;
-            _lichiiPortInput.Maximum = 65535;
-            _lichiiPortInput.Value = 6545;
-            _lichiiPortInput.Location = new Point(328, 5);
-            _lichiiPortInput.Size = new Size(72, 23);
-            _lichiiPortInput.BackColor = Theme.Ink800;
-            _lichiiPortInput.ForeColor = Theme.Parchment50;
-            _lichiiPortInput.BorderStyle = BorderStyle.FixedSingle;
-            _lichiiPortInput.ValueChanged += OnLichiiPortChanged;
-            _advancedPanel.Controls.Add(_lichiiPortInput);
-
-            Button resetLichiiBtn = CreateButton("Reset Defaults", 418, 4, 122, 25, false);
-            resetLichiiBtn.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
-            resetLichiiBtn.Click += OnResetLichiiDefaultsClick;
-            _advancedPanel.Controls.Add(resetLichiiBtn);
-
-            // Card 2: Live Status
-            _statusCard = new BorderedPanel();
-            _statusCard.Location = new Point(16, 192);
-            _statusCard.Size = new Size(568, 118);
-            _statusCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            Controls.Add(_statusCard);
+            _heroStatusPill = new BorderedPanel();
+            _heroStatusPill.Location = new Point(406, 14);
+            _heroStatusPill.Size = new Size(106, 24);
+            _heroStatusPill.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _heroStatusPill.FillColor = Theme.Ink800;
+            _heroStatusPill.BorderColor = Theme.Ink600;
+            _heroStatusPill.CornerRadius = 11;
+            _heroCard.Controls.Add(_heroStatusPill);
 
             _serverDot = new StatusDot();
-            _serverDot.Location = new Point(14, 15);
+            _serverDot.Location = new Point(10, 6);
+            _serverDot.BackColor = Theme.Ink800;
             _serverDot.DotColor = Theme.Parchment600;
-            _statusCard.Controls.Add(_serverDot);
-
-            Label serverTitleLabel = new Label();
-            serverTitleLabel.Text = "Map Server:";
-            serverTitleLabel.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
-            serverTitleLabel.ForeColor = Theme.Parchment50;
-            serverTitleLabel.AutoSize = true;
-            serverTitleLabel.Location = new Point(32, 13);
-            _statusCard.Controls.Add(serverTitleLabel);
+            _heroStatusPill.Controls.Add(_serverDot);
 
             _serverStatusLabel = new Label();
             _serverStatusLabel.Text = "Stopped";
-            _serverStatusLabel.ForeColor = Theme.Parchment200;
-            _serverStatusLabel.AutoSize = true;
-            _serverStatusLabel.Location = new Point(116, 13);
-            _statusCard.Controls.Add(_serverStatusLabel);
+            _serverStatusLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _serverStatusLabel.ForeColor = Theme.Parchment400;
+            _serverStatusLabel.BackColor = Theme.Ink800;
+            _serverStatusLabel.AutoSize = false;
+            _serverStatusLabel.TextAlign = ContentAlignment.MiddleLeft;
+            _serverStatusLabel.Location = new Point(26, 2);
+            _serverStatusLabel.Size = new Size(74, 20);
+            _heroStatusPill.Controls.Add(_serverStatusLabel);
+
+            _heroSummaryLabel = new Label();
+            _heroSummaryLabel.Text = "Click Start Map to open the interactive Hyrule map in your browser.";
+            _heroSummaryLabel.Font = new Font("Segoe UI", 9f, FontStyle.Regular);
+            _heroSummaryLabel.ForeColor = Theme.Parchment200;
+            _heroSummaryLabel.AutoSize = false;
+            _heroSummaryLabel.Location = new Point(16, 46);
+            _heroSummaryLabel.Size = new Size(496, 22);
+            _heroSummaryLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _heroCard.Controls.Add(_heroSummaryLabel);
 
             _serverUrlLink = new LinkLabel();
             _serverUrlLink.Text = string.Empty;
             _serverUrlLink.LinkColor = Theme.Moss;
             _serverUrlLink.ActiveLinkColor = Theme.Parchment50;
             _serverUrlLink.VisitedLinkColor = Theme.Moss;
+            _serverUrlLink.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
             _serverUrlLink.AutoSize = true;
             _serverUrlLink.Visible = false;
-            _serverUrlLink.Location = new Point(182, 13);
+            _serverUrlLink.Location = new Point(16, 70);
             _serverUrlLink.LinkClicked += OnServerUrlLinkClicked;
-            _statusCard.Controls.Add(_serverUrlLink);
+            _heroCard.Controls.Add(_serverUrlLink);
 
-            Label lanTitleLabel = new Label();
-            lanTitleLabel.Text = "LAN / Tablet URL:";
-            lanTitleLabel.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
-            lanTitleLabel.ForeColor = Theme.Parchment50;
-            lanTitleLabel.AutoSize = true;
-            lanTitleLabel.Location = new Point(32, 38);
-            _statusCard.Controls.Add(lanTitleLabel);
+            _startStopButton = CreateButton("Start Map", 16, 98, 152, 36, true);
+            _startStopButton.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            _startStopButton.BackColor = Theme.Moss;
+            _startStopButton.ForeColor = Theme.Ink950;
+            _startStopButton.FlatAppearance.BorderColor = Theme.Moss;
+            _startStopButton.Click += OnStartStopClick;
+            _heroCard.Controls.Add(_startStopButton);
 
-            _lanStatusLabel = new Label();
-            _lanStatusLabel.Text = "Checking LAN IP...";
-            _lanStatusLabel.ForeColor = Theme.Parchment400;
-            _lanStatusLabel.AutoSize = true;
-            _lanStatusLabel.Location = new Point(148, 38);
-            _statusCard.Controls.Add(_lanStatusLabel);
+            _openBrowserButton = CreateButton("Open in Browser", 178, 98, 150, 36, false);
+            _openBrowserButton.Click += OnOpenBrowserClick;
+            _heroCard.Controls.Add(_openBrowserButton);
+
+            _heroLichiiDot = new StatusDot();
+            _heroLichiiDot.Location = new Point(348, 110);
+            _heroLichiiDot.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _heroLichiiDot.BackColor = Theme.Ink900;
+            _heroLichiiDot.DotColor = Theme.Parchment600;
+            _heroCard.Controls.Add(_heroLichiiDot);
+
+            _heroLichiiLabel = new Label();
+            _heroLichiiLabel.Text = "Lichii: Not detected";
+            _heroLichiiLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
+            _heroLichiiLabel.ForeColor = Theme.Parchment400;
+            _heroLichiiLabel.AutoSize = false;
+            _heroLichiiLabel.TextAlign = ContentAlignment.MiddleLeft;
+            _heroLichiiLabel.Location = new Point(365, 106);
+            _heroLichiiLabel.Size = new Size(148, 20);
+            _heroLichiiLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _heroCard.Controls.Add(_heroLichiiLabel);
+
+            // 2. Step 1 Card: Lichii Live Sync
+            _step1Card = new BorderedPanel();
+            _step1Card.Location = new Point(16, 172);
+            _step1Card.Size = new Size(528, 86);
+            _step1Card.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            Controls.Add(_step1Card);
+
+            Label step1Title = new Label();
+            step1Title.Text = "Step 1 \u00B7 Lichii Live Sync";
+            step1Title.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            step1Title.ForeColor = Theme.Parchment50;
+            step1Title.AutoSize = true;
+            step1Title.Location = new Point(16, 12);
+            _step1Card.Controls.Add(step1Title);
+
+            _configuredPill = new BorderedPanel();
+            _configuredPill.Location = new Point(414, 14);
+            _configuredPill.Size = new Size(98, 24);
+            _configuredPill.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _configuredPill.FillColor = Theme.Ink800;
+            _configuredPill.BorderColor = Theme.Moss;
+            _configuredPill.CornerRadius = 11;
+            _configuredPill.Visible = false;
+            _step1Card.Controls.Add(_configuredPill);
+
+            Label configuredLabel = new Label();
+            configuredLabel.Text = "Configured";
+            configuredLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            configuredLabel.ForeColor = Theme.Moss;
+            configuredLabel.BackColor = Theme.Ink800;
+            configuredLabel.Dock = DockStyle.Fill;
+            configuredLabel.TextAlign = ContentAlignment.MiddleCenter;
+            _configuredPill.Controls.Add(configuredLabel);
+
+            _enableRpcButton = CreateButton("1-Click Setup Lichii", 360, 12, 152, 30, true);
+            _enableRpcButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _enableRpcButton.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+            _enableRpcButton.ForeColor = Theme.Parchment50;
+            _enableRpcButton.FlatAppearance.BorderColor = Theme.Parchment400;
+            _enableRpcButton.Click += OnEnableRpcClick;
+            _step1Card.Controls.Add(_enableRpcButton);
+
+            _lichiiStepDetailLabel = new Label();
+            _lichiiStepDetailLabel.Text = "Allows Hyrule Atlas to follow Link and mark Gold Skulltulas automatically.";
+            _lichiiStepDetailLabel.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
+            _lichiiStepDetailLabel.AutoSize = false;
+            _lichiiStepDetailLabel.Location = new Point(16, 38);
+            _lichiiStepDetailLabel.Size = new Size(336, 36);
+            _lichiiStepDetailLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _step1Card.Controls.Add(_lichiiStepDetailLabel);
+
+            // 3. Step 2 Card: Play on Another Device (LAN)
+            _step2Card = new BorderedPanel();
+            _step2Card.Location = new Point(16, 268);
+            _step2Card.Size = new Size(528, 112);
+            _step2Card.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            Controls.Add(_step2Card);
+
+            Label step2Title = new Label();
+            step2Title.Text = "Step 2 \u00B7 Play on Another Device (Optional)";
+            step2Title.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            step2Title.ForeColor = Theme.Parchment50;
+            step2Title.AutoSize = true;
+            step2Title.Location = new Point(16, 12);
+            _step2Card.Controls.Add(step2Title);
+
+            _firewallButton = CreateButton("Allow LAN Access", 372, 10, 140, 26, false);
+            _firewallButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _firewallButton.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
+            _firewallButton.Click += OnAllowFirewallClick;
+            _step2Card.Controls.Add(_firewallButton);
+            _toolTip.SetToolTip(_firewallButton, "Adds a Windows Firewall rule on Private networks so your tablet or phone can connect.");
+
+            _lanComboBox = new ComboBox();
+            _lanComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            _lanComboBox.FlatStyle = FlatStyle.Flat;
+            _lanComboBox.BackColor = Theme.Ink800;
+            _lanComboBox.ForeColor = Theme.Parchment50;
+            _lanComboBox.Font = new Font("Segoe UI", 8.75f, FontStyle.Regular);
+            _lanComboBox.Location = new Point(16, 44);
+            _lanComboBox.Size = new Size(322, 24);
+            _lanComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _lanComboBox.Visible = false;
+            _lanComboBox.SelectedIndexChanged += OnLanComboSelectedIndexChanged;
+            _step2Card.Controls.Add(_lanComboBox);
 
             _lanUrlLink = new LinkLabel();
             _lanUrlLink.Text = string.Empty;
             _lanUrlLink.LinkColor = Theme.Moss;
             _lanUrlLink.ActiveLinkColor = Theme.Parchment50;
             _lanUrlLink.VisitedLinkColor = Theme.Moss;
+            _lanUrlLink.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
             _lanUrlLink.AutoSize = true;
+            _lanUrlLink.Location = new Point(16, 47);
             _lanUrlLink.Visible = false;
-            _lanUrlLink.Location = new Point(148, 38);
             _lanUrlLink.LinkClicked += OnLanUrlLinkClicked;
-            _statusCard.Controls.Add(_lanUrlLink);
+            _step2Card.Controls.Add(_lanUrlLink);
 
-            _copyLanUrlButton = CreateButton("Copy URL", 478, 35, 76, 22, false);
+            _lanStatusLabel = new Label();
+            _lanStatusLabel.Text = "Checking network adapters...";
+            _lanStatusLabel.Font = new Font("Segoe UI", 8.75f, FontStyle.Regular);
+            _lanStatusLabel.ForeColor = Theme.Parchment200;
+            _lanStatusLabel.AutoSize = false;
+            _lanStatusLabel.Location = new Point(16, 47);
+            _lanStatusLabel.Size = new Size(322, 22);
+            _lanStatusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _step2Card.Controls.Add(_lanStatusLabel);
+
+            _refreshLanButton = CreateButton("Refresh", 346, 43, 72, 26, false);
+            _refreshLanButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _refreshLanButton.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+            _refreshLanButton.Click += OnRefreshLanClick;
+            _step2Card.Controls.Add(_refreshLanButton);
+            _toolTip.SetToolTip(_refreshLanButton, "Re-scan active Wi-Fi and Ethernet network adapters.");
+
+            _copyLanUrlButton = CreateButton("Copy URL", 424, 43, 88, 26, false);
             _copyLanUrlButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _copyLanUrlButton.Font = new Font("Segoe UI", 7.75f, FontStyle.Regular);
+            _copyLanUrlButton.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
             _copyLanUrlButton.Click += OnCopyLanUrlClick;
-            _statusCard.Controls.Add(_copyLanUrlButton);
-            _toolTip.SetToolTip(_copyLanUrlButton, "Copy the LAN URL so you can open it on your iPad, tablet, or phone.");
+            _step2Card.Controls.Add(_copyLanUrlButton);
+            _toolTip.SetToolTip(_copyLanUrlButton, "Copy the selected LAN address to open on your tablet, iPad, or phone.");
 
-            _lichiiDot = new StatusDot();
-            _lichiiDot.Location = new Point(14, 68);
-            _lichiiDot.DotColor = Theme.Parchment600;
-            _statusCard.Controls.Add(_lichiiDot);
+            _lanHintLabel = new Label();
+            _lanHintLabel.Text = "Open this address on your tablet, iPad, or phone on the same Wi-Fi network.";
+            _lanHintLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
+            _lanHintLabel.ForeColor = Theme.Parchment400;
+            _lanHintLabel.AutoSize = false;
+            _lanHintLabel.Location = new Point(16, 78);
+            _lanHintLabel.Size = new Size(496, 22);
+            _lanHintLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _step2Card.Controls.Add(_lanHintLabel);
 
-            _lichiiLabelTitle = new Label();
-            _lichiiLabelTitle.Text = "Lichii RPC (:6545):";
-            _lichiiLabelTitle.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
-            _lichiiLabelTitle.ForeColor = Theme.Parchment50;
-            _lichiiLabelTitle.AutoSize = true;
-            _lichiiLabelTitle.Location = new Point(32, 66);
-            _statusCard.Controls.Add(_lichiiLabelTitle);
+            // 4. Collapsible Advanced Settings & Logs Drawer
+            _advancedToggleButton = CreateButton("\u25B8 Advanced Settings & Logs", 16, 390, 528, 30, false);
+            _advancedToggleButton.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _advancedToggleButton.TextAlign = ContentAlignment.MiddleLeft;
+            _advancedToggleButton.Padding = new Padding(8, 0, 0, 0);
+            _advancedToggleButton.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
+            _advancedToggleButton.ForeColor = Theme.Parchment400;
+            _advancedToggleButton.Click += OnAdvancedToggleClick;
+            Controls.Add(_advancedToggleButton);
 
-            _lichiiStatusLabel = new Label();
-            _lichiiStatusLabel.Text = "Checking port 6545...";
-            _lichiiStatusLabel.ForeColor = Theme.Parchment200;
-            _lichiiStatusLabel.AutoSize = true;
-            _lichiiStatusLabel.Location = new Point(156, 66);
-            _statusCard.Controls.Add(_lichiiStatusLabel);
+            _advancedDrawerPanel = new BorderedPanel();
+            _advancedDrawerPanel.Location = new Point(16, 426);
+            _advancedDrawerPanel.Size = new Size(528, 224);
+            _advancedDrawerPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            _advancedDrawerPanel.Visible = false;
+            Controls.Add(_advancedDrawerPanel);
 
-            _lichiiDetailLabel = new Label();
-            _lichiiDetailLabel.Text = "Start Ocarina of Time in Lichii for live location and Gold Skulltula sync.";
-            _lichiiDetailLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
-            _lichiiDetailLabel.ForeColor = Theme.Parchment400;
-            _lichiiDetailLabel.AutoSize = false;
-            _lichiiDetailLabel.Location = new Point(32, 90);
-            _lichiiDetailLabel.Size = new Size(522, 20);
-            _lichiiDetailLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            _statusCard.Controls.Add(_lichiiDetailLabel);
+            Label portLabel = new Label();
+            portLabel.Text = "Map Port:";
+            portLabel.ForeColor = Theme.Parchment400;
+            portLabel.AutoSize = true;
+            portLabel.Location = new Point(14, 15);
+            _advancedDrawerPanel.Controls.Add(portLabel);
 
-            // Card 3: 1-Click Lichii RPC Config
-            _configCard = new BorderedPanel();
-            _configCard.Location = new Point(16, 268);
-            _configCard.Size = new Size(568, 62);
-            _configCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            Controls.Add(_configCard);
+            _portInput = new NumericUpDown();
+            _portInput.Minimum = 1;
+            _portInput.Maximum = 65535;
+            _portInput.Value = 3000;
+            _portInput.Location = new Point(76, 12);
+            _portInput.Size = new Size(64, 23);
+            _portInput.BackColor = Theme.Ink800;
+            _portInput.ForeColor = Theme.Parchment50;
+            _portInput.BorderStyle = BorderStyle.FixedSingle;
+            _portInput.ValueChanged += OnPortInputChanged;
+            _advancedDrawerPanel.Controls.Add(_portInput);
 
-            Label configTitleLabel = new Label();
-            configTitleLabel.Text = "Lichii Auto-Setup (%APPDATA%\\lichii\\nx2_switches.txt)";
-            configTitleLabel.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
-            configTitleLabel.ForeColor = Theme.Parchment50;
-            configTitleLabel.AutoSize = true;
-            configTitleLabel.Location = new Point(14, 10);
-            _configCard.Controls.Add(configTitleLabel);
+            Label lHostLabel = new Label();
+            lHostLabel.Text = "Lichii Host:";
+            lHostLabel.ForeColor = Theme.Parchment400;
+            lHostLabel.AutoSize = true;
+            lHostLabel.Location = new Point(152, 15);
+            _advancedDrawerPanel.Controls.Add(lHostLabel);
 
-            _configStatusLabel = new Label();
-            _configStatusLabel.Text = "Checking Lichii configuration...";
-            _configStatusLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
-            _configStatusLabel.ForeColor = Theme.Parchment400;
-            _configStatusLabel.AutoSize = false;
-            _configStatusLabel.Location = new Point(14, 33);
-            _configStatusLabel.Size = new Size(346, 20);
-            _configStatusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            _configCard.Controls.Add(_configStatusLabel);
+            _lichiiHostInput = new TextBox();
+            _lichiiHostInput.Text = "127.0.0.1";
+            _lichiiHostInput.Location = new Point(220, 12);
+            _lichiiHostInput.Size = new Size(104, 23);
+            _lichiiHostInput.BackColor = Theme.Ink800;
+            _lichiiHostInput.ForeColor = Theme.Parchment50;
+            _lichiiHostInput.BorderStyle = BorderStyle.FixedSingle;
+            _advancedDrawerPanel.Controls.Add(_lichiiHostInput);
 
-            _enableRpcButton = CreateButton("Enable Lichii RPC (6545)", 372, 13, 182, 34, false);
-            _enableRpcButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _enableRpcButton.Click += OnEnableRpcClick;
-            _configCard.Controls.Add(_enableRpcButton);
+            Label lPortLabel = new Label();
+            lPortLabel.Text = "RPC Port:";
+            lPortLabel.ForeColor = Theme.Parchment400;
+            lPortLabel.AutoSize = true;
+            lPortLabel.Location = new Point(334, 15);
+            _advancedDrawerPanel.Controls.Add(lPortLabel);
 
-            // Activity Log Header + Box
-            _logHeaderPanel = new Panel();
-            _logHeaderPanel.Location = new Point(16, 338);
-            _logHeaderPanel.Size = new Size(568, 24);
-            _logHeaderPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            _logHeaderPanel.BackColor = Theme.Ink950;
-            Controls.Add(_logHeaderPanel);
+            _lichiiPortInput = new NumericUpDown();
+            _lichiiPortInput.Minimum = 1;
+            _lichiiPortInput.Maximum = 65535;
+            _lichiiPortInput.Value = 6545;
+            _lichiiPortInput.Location = new Point(394, 12);
+            _lichiiPortInput.Size = new Size(64, 23);
+            _lichiiPortInput.BackColor = Theme.Ink800;
+            _lichiiPortInput.ForeColor = Theme.Parchment50;
+            _lichiiPortInput.BorderStyle = BorderStyle.FixedSingle;
+            _lichiiPortInput.ValueChanged += OnLichiiPortChanged;
+            _advancedDrawerPanel.Controls.Add(_lichiiPortInput);
+
+            Button resetLichiiBtn = CreateButton("Reset", 464, 11, 50, 25, false);
+            resetLichiiBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            resetLichiiBtn.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+            resetLichiiBtn.Click += OnResetLichiiDefaultsClick;
+            _advancedDrawerPanel.Controls.Add(resetLichiiBtn);
+
+            _allowLanCheckBox = new CheckBox();
+            _allowLanCheckBox.Text = "Allow LAN access";
+            _allowLanCheckBox.AutoSize = true;
+            _allowLanCheckBox.Checked = true;
+            _allowLanCheckBox.ForeColor = Theme.Parchment200;
+            _allowLanCheckBox.BackColor = Theme.Ink900;
+            _allowLanCheckBox.Location = new Point(14, 44);
+            _allowLanCheckBox.CheckedChanged += OnAllowLanCheckedChanged;
+            _advancedDrawerPanel.Controls.Add(_allowLanCheckBox);
+
+            _autoOpenCheckBox = new CheckBox();
+            _autoOpenCheckBox.Text = "Auto-open browser";
+            _autoOpenCheckBox.AutoSize = true;
+            _autoOpenCheckBox.Checked = true;
+            _autoOpenCheckBox.ForeColor = Theme.Parchment200;
+            _autoOpenCheckBox.BackColor = Theme.Ink900;
+            _autoOpenCheckBox.Location = new Point(164, 44);
+            _advancedDrawerPanel.Controls.Add(_autoOpenCheckBox);
+
+            _trayMinimizeCheckBox = new CheckBox();
+            _trayMinimizeCheckBox.Text = "Minimize to tray";
+            _trayMinimizeCheckBox.AutoSize = true;
+            _trayMinimizeCheckBox.Checked = false;
+            _trayMinimizeCheckBox.ForeColor = Theme.Parchment200;
+            _trayMinimizeCheckBox.BackColor = Theme.Ink900;
+            _trayMinimizeCheckBox.Location = new Point(322, 44);
+            _advancedDrawerPanel.Controls.Add(_trayMinimizeCheckBox);
 
             Label logTitle = new Label();
             logTitle.Text = "Activity Log";
             logTitle.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
             logTitle.ForeColor = Theme.Parchment400;
             logTitle.AutoSize = true;
-            logTitle.Location = new Point(0, 4);
-            _logHeaderPanel.Controls.Add(logTitle);
+            logTitle.Location = new Point(14, 75);
+            _advancedDrawerPanel.Controls.Add(logTitle);
 
-            _clearLogButton = CreateButton("Clear", 424, 0, 62, 22, false);
+            _modeBadgeLabel = new Label();
+            _modeBadgeLabel.AutoSize = false;
+            _modeBadgeLabel.Size = new Size(92, 20);
+            _modeBadgeLabel.Location = new Point(352, 72);
+            _modeBadgeLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _modeBadgeLabel.TextAlign = ContentAlignment.MiddleCenter;
+            _modeBadgeLabel.Font = new Font("Segoe UI", 7.5f, FontStyle.Bold);
+            _modeBadgeLabel.BackColor = Theme.Ink800;
+            _modeBadgeLabel.ForeColor = Theme.Parchment400;
+            _modeBadgeLabel.BorderStyle = BorderStyle.FixedSingle;
+            _advancedDrawerPanel.Controls.Add(_modeBadgeLabel);
+
+            _clearLogButton = CreateButton("Clear", 452, 71, 62, 22, false);
             _clearLogButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _clearLogButton.Font = new Font("Segoe UI", 7.75f, FontStyle.Regular);
             _clearLogButton.Click += OnClearLogClick;
-            _logHeaderPanel.Controls.Add(_clearLogButton);
-
-            _logToggleButton = CreateButton("Hide Log", 492, 0, 76, 22, false);
-            _logToggleButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _logToggleButton.Font = new Font("Segoe UI", 7.75f, FontStyle.Regular);
-            _logToggleButton.Click += OnToggleLogClick;
-            _logHeaderPanel.Controls.Add(_logToggleButton);
+            _advancedDrawerPanel.Controls.Add(_clearLogButton);
 
             _logContainer = new Panel();
-            _logContainer.Location = new Point(16, 366);
-            _logContainer.Size = new Size(568, 100);
+            _logContainer.Location = new Point(14, 98);
+            _logContainer.Size = new Size(500, 112);
             _logContainer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             _logContainer.BackColor = Theme.Ink600;
             _logContainer.Padding = new Padding(1);
-            Controls.Add(_logContainer);
+            _advancedDrawerPanel.Controls.Add(_logContainer);
 
             _logTextBox = new TextBox();
             _logTextBox.Multiline = true;
@@ -1627,7 +1785,7 @@ namespace OcarinaMapsLauncher
             _logTextBox.ScrollBars = ScrollBars.Vertical;
             _logTextBox.BorderStyle = BorderStyle.None;
             _logTextBox.Dock = DockStyle.Fill;
-            _logTextBox.BackColor = Theme.Ink900;
+            _logTextBox.BackColor = Theme.Ink950;
             _logTextBox.ForeColor = Theme.Parchment200;
             _logTextBox.Font = new Font("Consolas", 8.25f, FontStyle.Regular);
             _logContainer.Controls.Add(_logTextBox);
@@ -1654,7 +1812,7 @@ namespace OcarinaMapsLauncher
         private void BuildTrayIcon()
         {
             ContextMenuStrip menu = new ContextMenuStrip();
-            ToolStripMenuItem showItem = new ToolStripMenuItem("Show OcarinaMaps Launcher");
+            ToolStripMenuItem showItem = new ToolStripMenuItem("Show Hyrule Atlas");
             showItem.Font = new Font(showItem.Font, FontStyle.Bold);
             showItem.Click += delegate { RestoreFromTray(); };
 
@@ -1662,7 +1820,7 @@ namespace OcarinaMapsLauncher
             _trayOpenBrowserItem.Enabled = false;
             _trayOpenBrowserItem.Click += delegate { OpenMapInBrowser(); };
 
-            _trayToggleServerItem = new ToolStripMenuItem("Start Server");
+            _trayToggleServerItem = new ToolStripMenuItem("Start Map");
             _trayToggleServerItem.Click += delegate { OnStartStopClick(this, EventArgs.Empty); };
 
             ToolStripMenuItem exitItem = new ToolStripMenuItem("Exit");
@@ -1680,7 +1838,7 @@ namespace OcarinaMapsLauncher
 
             _trayIcon = new NotifyIcon();
             _trayIcon.Icon = _appIcon;
-            _trayIcon.Text = "OcarinaMaps — Lichii Bridge";
+            _trayIcon.Text = "Hyrule Atlas";
             _trayIcon.ContextMenuStrip = menu;
             _trayIcon.Visible = true;
             _trayIcon.DoubleClick += delegate { RestoreFromTray(); };
@@ -1694,7 +1852,6 @@ namespace OcarinaMapsLauncher
             _lichiiHostInput.Text = _options.LichiiHost;
             _lichiiPortInput.Value = Math.Max(1, Math.Min(65535, _options.LichiiPort));
             _autoOpenCheckBox.Checked = _options.AutoOpenBrowser;
-            UpdateLichiiPortLabels();
 
             if (_options.StartMinimized)
             {
@@ -1706,26 +1863,29 @@ namespace OcarinaMapsLauncher
 
         private void ReflowLayout()
         {
-            _controlsCard.Height = _advancedExpanded ? 154 : 116;
-            _advancedPanel.Visible = _advancedExpanded;
-            _advancedToggleButton.Text = _advancedExpanded ? "Lichii ▴" : "Lichii ▾";
+            _advancedToggleButton.Text = _advancedExpanded
+                ? "\u25BE Advanced Settings & Logs"
+                : "\u25B8 Advanced Settings & Logs";
 
-            int y = _controlsCard.Bottom + 8;
-            _statusCard.Top = y;
-            y = _statusCard.Bottom + 8;
-            _configCard.Top = y;
-            y = _configCard.Bottom + 8;
-            _logHeaderPanel.Top = y;
+            int nonClientW = Size.Width - ClientSize.Width;
+            int nonClientH = Size.Height - ClientSize.Height;
 
-            _logContainer.Visible = _logExpanded;
-            _clearLogButton.Visible = _logExpanded;
-            _logToggleButton.Text = _logExpanded ? "Hide Log" : "Show Log";
-
-            if (_logExpanded)
+            if (_advancedExpanded)
             {
-                _logContainer.Top = _logHeaderPanel.Bottom + 4;
-                int remaining = ClientSize.Height - _logContainer.Top - 14;
-                _logContainer.Height = Math.Max(48, remaining);
+                _advancedDrawerPanel.Visible = true;
+                MinimumSize = new Size(550 + nonClientW, 600 + nonClientH);
+                if (ClientSize.Height < ExpandedClientHeight)
+                {
+                    ClientSize = new Size(ClientSize.Width, ExpandedClientHeight);
+                }
+                int drawerHeight = Math.Max(160, ClientSize.Height - _advancedDrawerPanel.Top - 14);
+                _advancedDrawerPanel.Height = drawerHeight;
+            }
+            else
+            {
+                _advancedDrawerPanel.Visible = false;
+                MinimumSize = new Size(550 + nonClientW, CollapsedClientHeight + nonClientH);
+                ClientSize = new Size(ClientSize.Width, CollapsedClientHeight);
             }
         }
 
@@ -1800,34 +1960,36 @@ namespace OcarinaMapsLauncher
             LichiiConfigStatus status = LichiiConfigManager.Inspect();
             if (!string.IsNullOrEmpty(status.ErrorMessage))
             {
-                _configStatusLabel.Text = "Could not read config: " + status.ErrorMessage;
-                _configStatusLabel.ForeColor = Theme.Ember;
+                _configuredPill.Visible = false;
+                _enableRpcButton.Visible = true;
+                _lichiiStepDetailLabel.Text = "Could not read Lichii config: " + status.ErrorMessage;
+                _lichiiStepDetailLabel.ForeColor = Theme.Ember;
                 return;
             }
 
             if (status.IsEnabled)
             {
-                _configStatusLabel.Text = "Enabled: EDEN_NX2_DEBUG_SERVER=" + status.ConfiguredTarget;
-                _configStatusLabel.ForeColor = Theme.Moss;
-            }
-            else if (status.FileExists)
-            {
-                _configStatusLabel.Text = "Not enabled yet in nx2_switches.txt (click button to add).";
-                _configStatusLabel.ForeColor = Theme.Ember;
+                _configuredPill.Visible = true;
+                _enableRpcButton.Visible = false;
+                _lichiiStepDetailLabel.Text = "Allows Hyrule Atlas to follow Link and mark Gold Skulltulas automatically.";
+                _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
+                _toolTip.SetToolTip(_configuredPill, "Configured: EDEN_NX2_DEBUG_SERVER=" + status.ConfiguredTarget);
             }
             else
             {
-                _configStatusLabel.Text = "Config file not found yet (click button to create it).";
-                _configStatusLabel.ForeColor = Theme.Ember;
+                _configuredPill.Visible = false;
+                _enableRpcButton.Visible = true;
+                _lichiiStepDetailLabel.Text = "Click to enable live tracking in Lichii so the map follows Link automatically.";
+                _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
             }
         }
 
         private void UpdateLichiiPortLabels()
         {
             int lPort = (int)_lichiiPortInput.Value;
-            _lichiiLabelTitle.Text = string.Format(CultureInfo.InvariantCulture, "Lichii RPC (:{0}):", lPort);
-            _lichiiStatusLabel.Left = _lichiiLabelTitle.Right + 6;
-            _enableRpcButton.Text = string.Format(CultureInfo.InvariantCulture, "Enable Lichii RPC ({0})", lPort);
+            _enableRpcButton.Text = lPort == 6545
+                ? "1-Click Setup Lichii"
+                : string.Format(CultureInfo.InvariantCulture, "Setup Lichii (:{0})", lPort);
         }
 
         private void OnLichiiPortChanged(object sender, EventArgs e)
@@ -1847,12 +2009,6 @@ namespace OcarinaMapsLauncher
         private void OnAdvancedToggleClick(object sender, EventArgs e)
         {
             _advancedExpanded = !_advancedExpanded;
-            ReflowLayout();
-        }
-
-        private void OnToggleLogClick(object sender, EventArgs e)
-        {
-            _logExpanded = !_logExpanded;
             ReflowLayout();
         }
 
@@ -1882,21 +2038,17 @@ namespace OcarinaMapsLauncher
                 string message = running
                     ? string.Format(
                         CultureInfo.InvariantCulture,
-                        "Enabled EDEN_NX2_DEBUG_SERVER={0}:{1} in:\n{2}\n\nLichii appears to be running right now. Please restart Lichii for port {1} to take effect.",
-                        host,
-                        port,
+                        "Lichii live sync is now configured in:\n{0}\n\nLichii appears to be running right now. Please restart Lichii for live sync to take effect.",
                         updated.FilePath)
                     : string.Format(
                         CultureInfo.InvariantCulture,
-                        "Enabled EDEN_NX2_DEBUG_SERVER={0}:{1} in:\n{2}\n\nStart (or restart) Lichii to activate live tracking.",
-                        host,
-                        port,
+                        "Lichii live sync is now configured in:\n{0}\n\nStart Lichii and load Ocarina of Time to activate live tracking.",
                         updated.FilePath);
 
                 MessageBox.Show(
                     this,
                     message,
-                    "Lichii RPC Enabled",
+                    "Lichii Live Sync Configured",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
@@ -1973,29 +2125,95 @@ namespace OcarinaMapsLauncher
             TriggerFirewallStatusCheck();
         }
 
+        private void OnRefreshLanClick(object sender, EventArgs e)
+        {
+            RefreshLanDisplays();
+            TriggerFirewallStatusCheck();
+            AppendLog("Refreshed active LAN network adapters.");
+        }
+
+        private void OnLanComboSelectedIndexChanged(object sender, EventArgs e)
+        {
+            LanEndpoint selected = _lanComboBox.SelectedItem as LanEndpoint;
+            if (selected != null)
+            {
+                _selectedLanUrl = selected.Url;
+            }
+        }
+
         private void RefreshLanDisplays()
         {
             string bindHost = GetEffectiveBindHost();
             int port = GetEffectivePort();
-            _lanUrls.Clear();
+            List<LanEndpoint> nextEndpoints = new List<LanEndpoint>();
 
             if (LanNetworkHelper.IsLoopbackHost(bindHost))
             {
-                _primaryLanUrl = string.Empty;
+                _selectedLanUrl = string.Empty;
             }
             else if (!LanNetworkHelper.IsWildcardHost(bindHost))
             {
-                _primaryLanUrl = LanNetworkHelper.FormatHttpUrl(bindHost, port);
-                _lanUrls.Add(_primaryLanUrl);
+                LanEndpoint ep = new LanEndpoint();
+                ep.IpAddress = bindHost;
+                ep.Url = LanNetworkHelper.FormatHttpUrl(bindHost, port);
+                ep.AdapterLabel = "Custom";
+                ep.IsPreferred = true;
+                nextEndpoints.Add(ep);
+                _selectedLanUrl = ep.Url;
             }
             else
             {
-                List<string> ips = LanNetworkHelper.GetLanIpv4Addresses();
-                for (int i = 0; i < ips.Count; i++)
+                nextEndpoints = LanNetworkHelper.GetLanEndpoints(port);
+            }
+
+            bool listChanged = nextEndpoints.Count != _lanEndpoints.Count;
+            if (!listChanged)
+            {
+                for (int i = 0; i < nextEndpoints.Count; i++)
                 {
-                    _lanUrls.Add(LanNetworkHelper.FormatHttpUrl(ips[i], port));
+                    if (!string.Equals(nextEndpoints[i].Url, _lanEndpoints[i].Url, StringComparison.Ordinal) ||
+                        !string.Equals(nextEndpoints[i].AdapterLabel, _lanEndpoints[i].AdapterLabel, StringComparison.Ordinal))
+                    {
+                        listChanged = true;
+                        break;
+                    }
                 }
-                _primaryLanUrl = _lanUrls.Count > 0 ? _lanUrls[0] : string.Empty;
+            }
+
+            _lanEndpoints = nextEndpoints;
+
+            if (_lanEndpoints.Count == 0)
+            {
+                _selectedLanUrl = string.Empty;
+            }
+            else if (_lanEndpoints.Count == 1)
+            {
+                _selectedLanUrl = _lanEndpoints[0].Url;
+            }
+            else if (listChanged)
+            {
+                string previousSelection = _selectedLanUrl;
+                int restoreIndex = 0;
+                _lanComboBox.BeginUpdate();
+                try
+                {
+                    _lanComboBox.Items.Clear();
+                    for (int i = 0; i < _lanEndpoints.Count; i++)
+                    {
+                        _lanComboBox.Items.Add(_lanEndpoints[i]);
+                        if (!string.IsNullOrEmpty(previousSelection) &&
+                            string.Equals(_lanEndpoints[i].Url, previousSelection, StringComparison.Ordinal))
+                        {
+                            restoreIndex = i;
+                        }
+                    }
+                    _lanComboBox.SelectedIndex = restoreIndex;
+                }
+                finally
+                {
+                    _lanComboBox.EndUpdate();
+                }
+                _selectedLanUrl = _lanEndpoints[restoreIndex].Url;
             }
 
             UpdateLanRowUi();
@@ -2003,76 +2221,87 @@ namespace OcarinaMapsLauncher
 
         private void UpdateLanRowUi()
         {
-            if (_lanStatusLabel == null || _lanUrlLink == null || _copyLanUrlButton == null) return;
+            if (_lanStatusLabel == null || _lanUrlLink == null || _copyLanUrlButton == null || _lanComboBox == null) return;
 
             bool isRunning = _lifecycle == ServerLifecycle.Running;
             string bindHost = GetEffectiveBindHost();
 
             if (LanNetworkHelper.IsLoopbackHost(bindHost))
             {
+                _lanComboBox.Visible = false;
                 _lanUrlLink.Visible = false;
-                _lanStatusLabel.Text = "Disabled (localhost only — 127.0.0.1)";
+                _lanStatusLabel.Text = "Disabled (localhost only \u2014 127.0.0.1)";
                 _lanStatusLabel.ForeColor = Theme.Parchment600;
                 _lanStatusLabel.Visible = true;
                 _copyLanUrlButton.Enabled = false;
-                _toolTip.SetToolTip(_lanUrlLink, string.Empty);
+                _lanHintLabel.Text = "Enable \"Allow LAN access\" in Advanced Settings to connect a tablet or phone.";
                 return;
             }
 
-            if (string.IsNullOrEmpty(_primaryLanUrl))
+            if (_lanEndpoints.Count == 0)
             {
+                _lanComboBox.Visible = false;
                 _lanUrlLink.Visible = false;
-                _lanStatusLabel.Text = "No active Wi-Fi/Ethernet LAN IPv4 detected";
+                _lanStatusLabel.Text = "No active Wi-Fi or Ethernet connection detected";
                 _lanStatusLabel.ForeColor = Theme.Ember;
                 _lanStatusLabel.Visible = true;
                 _copyLanUrlButton.Enabled = false;
-                _toolTip.SetToolTip(_lanUrlLink, string.Empty);
+                _lanHintLabel.Text = "Connect your PC to Wi-Fi or Ethernet, then click Refresh.";
                 return;
             }
 
             _copyLanUrlButton.Enabled = true;
 
-            if (isRunning)
-            {
-                _lanStatusLabel.Visible = false;
-                _lanUrlLink.Text = _primaryLanUrl;
-                _lanUrlLink.Visible = true;
-            }
-            else
+            if (_lanEndpoints.Count > 1)
             {
                 _lanUrlLink.Visible = false;
-                _lanStatusLabel.Text = _primaryLanUrl + "  (ready when started)";
-                _lanStatusLabel.ForeColor = Theme.Parchment200;
-                _lanStatusLabel.Visible = true;
-            }
-
-            if (_lanUrls.Count > 1)
-            {
-                _toolTip.SetToolTip(
-                    _lanUrlLink,
-                    "All detected LAN URLs:\n" + string.Join("\n", _lanUrls.ToArray()));
+                _lanStatusLabel.Visible = false;
+                _lanComboBox.Visible = true;
+                _lanHintLabel.Text = "Multiple network adapters found \u2014 pick the one your tablet or phone uses.";
             }
             else
             {
-                _toolTip.SetToolTip(_lanUrlLink, "Open this URL on your iPad, tablet, or another PC on the same network.");
+                _lanComboBox.Visible = false;
+                LanEndpoint primary = _lanEndpoints[0];
+                _selectedLanUrl = primary.Url;
+
+                if (isRunning)
+                {
+                    _lanStatusLabel.Visible = false;
+                    _lanUrlLink.Text = primary.Url;
+                    _lanUrlLink.Visible = true;
+                }
+                else
+                {
+                    _lanUrlLink.Visible = false;
+                    _lanStatusLabel.Text = string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0} ({1})",
+                        primary.Url,
+                        primary.AdapterLabel);
+                    _lanStatusLabel.ForeColor = Theme.Parchment200;
+                    _lanStatusLabel.Visible = true;
+                }
+
+                _lanHintLabel.Text = "Open this address on your tablet, iPad, or phone on the same Wi-Fi network.";
             }
         }
 
         private void OnLanUrlLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_primaryLanUrl)) return;
-            OpenUrlInBrowser(_primaryLanUrl);
+            if (string.IsNullOrEmpty(_selectedLanUrl)) return;
+            OpenUrlInBrowser(_selectedLanUrl);
         }
 
         private void OnCopyLanUrlClick(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(_primaryLanUrl)) return;
+            if (string.IsNullOrEmpty(_selectedLanUrl)) return;
             try
             {
-                Clipboard.SetText(_primaryLanUrl);
+                Clipboard.SetText(_selectedLanUrl);
                 _copyLanUrlButton.Text = "Copied!";
                 _copyFeedbackTicks = 2;
-                AppendLog("Copied LAN URL to clipboard: " + _primaryLanUrl);
+                AppendLog("Copied LAN URL to clipboard: " + _selectedLanUrl);
             }
             catch (Exception ex)
             {
@@ -2121,7 +2350,7 @@ namespace OcarinaMapsLauncher
             if (!lanEnabled)
             {
                 _firewallButton.Enabled = false;
-                _firewallButton.Text = "Firewall: Local Only";
+                _firewallButton.Text = "Localhost Only";
                 _firewallButton.ForeColor = Theme.Parchment600;
                 _firewallButton.FlatAppearance.BorderColor = Theme.Ink600;
                 return;
@@ -2130,13 +2359,13 @@ namespace OcarinaMapsLauncher
             _firewallButton.Enabled = true;
             if (_firewallCheckedPort == port && _firewallAllowed)
             {
-                _firewallButton.Text = string.Format(CultureInfo.InvariantCulture, "Firewall OK (:{0})", port);
+                _firewallButton.Text = "LAN Allowed";
                 _firewallButton.ForeColor = Theme.Moss;
                 _firewallButton.FlatAppearance.BorderColor = Theme.Moss;
             }
             else
             {
-                _firewallButton.Text = string.Format(CultureInfo.InvariantCulture, "Allow Firewall (:{0})", port);
+                _firewallButton.Text = "Allow LAN Access";
                 _firewallButton.ForeColor = Theme.Parchment200;
                 _firewallButton.FlatAppearance.BorderColor = Theme.Ink600;
             }
@@ -2270,13 +2499,14 @@ namespace OcarinaMapsLauncher
             _activeLichiiHost = lichiiHost;
             _activeLichiiPort = lichiiPort;
             _browserOpenedForRun = false;
+            _hasStartupError = false;
             _lifecycle = ServerLifecycle.Starting;
             RefreshLanDisplays();
             UpdateControlStates();
 
-            string lanNote = string.IsNullOrEmpty(_primaryLanUrl)
+            string lanNote = string.IsNullOrEmpty(_selectedLanUrl)
                 ? (LanNetworkHelper.IsLoopbackHost(bindHost) ? "localhost only" : "LAN enabled")
-                : "LAN " + _primaryLanUrl;
+                : "LAN " + _selectedLanUrl;
 
             AppendLog(string.Format(
                 CultureInfo.InvariantCulture,
@@ -2350,6 +2580,7 @@ namespace OcarinaMapsLauncher
             }
             catch (Exception ex)
             {
+                _hasStartupError = true;
                 _lifecycle = ServerLifecycle.Stopped;
                 UpdateControlStates();
                 AppendLog("Failed to start server: " + ex.Message);
@@ -2415,6 +2646,7 @@ namespace OcarinaMapsLauncher
                 }
 
                 bool wasStopping = _lifecycle == ServerLifecycle.Stopping;
+                _hasStartupError = !wasStopping && exitCode != 0;
                 _lifecycle = ServerLifecycle.Stopped;
                 UpdateControlStates();
                 AppendLog(wasStopping
@@ -2573,20 +2805,33 @@ namespace OcarinaMapsLauncher
 
             if (isStopped)
             {
-                _startStopButton.Text = "Start Server";
+                _startStopButton.Text = "Start Map";
                 _startStopButton.Enabled = true;
                 _startStopButton.BackColor = Theme.Moss;
                 _startStopButton.ForeColor = Theme.Ink950;
                 _startStopButton.FlatAppearance.BorderColor = Theme.Moss;
 
-                _serverDot.DotColor = Theme.Parchment600;
-                _serverStatusLabel.Text = "Stopped";
-                _serverStatusLabel.ForeColor = Theme.Parchment400;
+                if (_hasStartupError)
+                {
+                    _serverDot.DotColor = Theme.Ember;
+                    _serverStatusLabel.Text = "Error";
+                    _serverStatusLabel.ForeColor = Theme.Ember;
+                    _heroStatusPill.BorderColor = Theme.Ember;
+                    _heroSummaryLabel.Text = "Could not start the map server. Check Advanced Settings & Logs for details.";
+                }
+                else
+                {
+                    _serverDot.DotColor = Theme.Parchment600;
+                    _serverStatusLabel.Text = "Stopped";
+                    _serverStatusLabel.ForeColor = Theme.Parchment400;
+                    _heroStatusPill.BorderColor = Theme.Ink600;
+                    _heroSummaryLabel.Text = "Click Start Map to open the interactive Hyrule map in your browser.";
+                }
                 _serverUrlLink.Visible = false;
             }
             else if (_lifecycle == ServerLifecycle.Starting)
             {
-                _startStopButton.Text = "Stop Server";
+                _startStopButton.Text = "Stop Map";
                 _startStopButton.Enabled = true;
                 _startStopButton.BackColor = Theme.Ember;
                 _startStopButton.ForeColor = Theme.Ink950;
@@ -2595,21 +2840,24 @@ namespace OcarinaMapsLauncher
                 _serverDot.DotColor = Theme.Ember;
                 _serverStatusLabel.Text = "Starting...";
                 _serverStatusLabel.ForeColor = Theme.Ember;
+                _heroStatusPill.BorderColor = Theme.Ember;
+                _heroSummaryLabel.Text = "Starting the local map server...";
                 _serverUrlLink.Visible = false;
             }
             else if (isRunning)
             {
-                _startStopButton.Text = "Stop Server";
+                _startStopButton.Text = "Stop Map";
                 _startStopButton.Enabled = true;
                 _startStopButton.BackColor = Theme.Ember;
                 _startStopButton.ForeColor = Theme.Ink950;
                 _startStopButton.FlatAppearance.BorderColor = Theme.Ember;
 
                 _serverDot.DotColor = Theme.Moss;
-                _serverStatusLabel.Text = "Running at";
+                _serverStatusLabel.Text = "Running";
                 _serverStatusLabel.ForeColor = Theme.Moss;
+                _heroStatusPill.BorderColor = Theme.Moss;
+                _heroSummaryLabel.Text = "Map is live and ready in your browser.";
                 _serverUrlLink.Text = GetServerUrl();
-                _serverUrlLink.Left = _serverStatusLabel.Right + 4;
                 _serverUrlLink.Visible = true;
             }
             else if (isStopping)
@@ -2623,23 +2871,26 @@ namespace OcarinaMapsLauncher
                 _serverDot.DotColor = Theme.Ember;
                 _serverStatusLabel.Text = "Stopping...";
                 _serverStatusLabel.ForeColor = Theme.Ember;
+                _heroStatusPill.BorderColor = Theme.Ember;
+                _heroSummaryLabel.Text = "Shutting down the map server...";
                 _serverUrlLink.Visible = false;
             }
 
+            _heroStatusPill.Invalidate();
             _openBrowserButton.Enabled = isRunning;
             UpdateLanRowUi();
             UpdateFirewallButtonState();
             if (_trayOpenBrowserItem != null) _trayOpenBrowserItem.Enabled = isRunning;
             if (_trayToggleServerItem != null)
             {
-                _trayToggleServerItem.Text = isStopped ? "Start Server" : "Stop Server";
+                _trayToggleServerItem.Text = isStopped ? "Start Map" : "Stop Map";
                 _trayToggleServerItem.Enabled = !isStopping;
             }
             if (_trayIcon != null)
             {
                 _trayIcon.Text = isRunning
-                    ? "OcarinaMaps — Running (" + GetServerUrl() + ")"
-                    : "OcarinaMaps — " + _lifecycle.ToString();
+                    ? "Hyrule Atlas \u2014 Running (" + GetServerUrl() + ")"
+                    : "Hyrule Atlas \u2014 " + _lifecycle.ToString();
             }
         }
 
@@ -2677,7 +2928,7 @@ namespace OcarinaMapsLauncher
                 try
                 {
                     PollSnapshot snap = FetchStatusSnapshot(serverActive, serverPort, lichiiHost, lichiiPort);
-                    BeginInvokeSafe(delegate { ApplyPollSnapshot(snap, lichiiPort); });
+                    BeginInvokeSafe(delegate { ApplyPollSnapshot(snap); });
                 }
                 finally
                 {
@@ -2739,7 +2990,7 @@ namespace OcarinaMapsLauncher
             return snap;
         }
 
-        private void ApplyPollSnapshot(PollSnapshot snap, int lichiiPort)
+        private void ApplyPollSnapshot(PollSnapshot snap)
         {
             if (snap == null || IsDisposed) return;
 
@@ -2751,9 +3002,9 @@ namespace OcarinaMapsLauncher
             if (snap.ServerHttpOk && snap.Connected && snap.EmulatorRunning &&
                 string.Equals(snap.Source, "memory", StringComparison.OrdinalIgnoreCase))
             {
-                _lichiiDot.DotColor = Theme.Moss;
-                _lichiiStatusLabel.Text = "In-game live tracking";
-                _lichiiStatusLabel.ForeColor = Theme.Moss;
+                _heroLichiiDot.DotColor = Theme.Moss;
+                _heroLichiiLabel.Text = "Lichii: Live Sync";
+                _heroLichiiLabel.ForeColor = Theme.Moss;
 
                 List<string> parts = new List<string>();
                 string place = !string.IsNullOrEmpty(snap.PlaceName) ? snap.PlaceName : snap.Scene;
@@ -2775,48 +3026,54 @@ namespace OcarinaMapsLauncher
                     parts.Add(string.Format(CultureInfo.InvariantCulture, "{0}/100 Gold Skulltulas", snap.SkulltulaCount.Value));
                 }
 
-                _lichiiDetailLabel.Text = parts.Count > 0
-                    ? string.Join("  ·  ", parts.ToArray())
-                    : "Streaming live player coordinates from Lichii RAM.";
-                _lichiiDetailLabel.ForeColor = Theme.Parchment200;
+                _lichiiStepDetailLabel.Text = parts.Count > 0
+                    ? "Live: " + string.Join("  \u00B7  ", parts.ToArray())
+                    : "Streaming live player coordinates from Lichii.";
+                _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
             }
             else if ((snap.ServerHttpOk && snap.Connected) || snap.RpcPortOpen)
             {
-                _lichiiDot.DotColor = Theme.Ember;
-                _lichiiStatusLabel.Text = "Lichii RPC open (Waiting for game)";
-                _lichiiStatusLabel.ForeColor = Theme.Ember;
+                _heroLichiiDot.DotColor = Theme.Ember;
+                _heroLichiiLabel.Text = "Lichii: Waiting for game";
+                _heroLichiiLabel.ForeColor = Theme.Ember;
 
                 if (snap.ServerHttpOk && string.Equals(snap.Source, "save", StringComparison.OrdinalIgnoreCase) && snap.SkulltulaCount.HasValue)
                 {
-                    _lichiiDetailLabel.Text = string.Format(
+                    _lichiiStepDetailLabel.Text = string.Format(
                         CultureInfo.InvariantCulture,
-                        "Save fallback active ({0}/100 Gold Skulltulas) until Ocarina of Time loads in-game.",
+                        "Save loaded ({0}/100 Gold Skulltulas). Start Ocarina of Time in Lichii for live sync.",
                         snap.SkulltulaCount.Value);
                 }
                 else
                 {
-                    _lichiiDetailLabel.Text = "Lichii debug server is listening. Load your Ocarina of Time save to stream live movement.";
+                    _lichiiStepDetailLabel.Text = "Lichii is ready. Load your Ocarina of Time save to start live sync.";
                 }
-                _lichiiDetailLabel.ForeColor = Theme.Parchment400;
+                _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
             }
             else
             {
-                _lichiiDot.DotColor = Theme.Parchment600;
-                _lichiiStatusLabel.Text = string.Format(CultureInfo.InvariantCulture, "Port {0} closed (Not detected)", lichiiPort);
-                _lichiiStatusLabel.ForeColor = Theme.Parchment400;
+                _heroLichiiDot.DotColor = Theme.Parchment600;
+                _heroLichiiLabel.Text = "Lichii: Not detected";
+                _heroLichiiLabel.ForeColor = Theme.Parchment400;
 
                 if (snap.ServerHttpOk && string.Equals(snap.Source, "save", StringComparison.OrdinalIgnoreCase) && snap.SkulltulaCount.HasValue)
                 {
-                    _lichiiDetailLabel.Text = string.Format(
+                    _lichiiStepDetailLabel.Text = string.Format(
                         CultureInfo.InvariantCulture,
-                        "Save data found ({0}/100 Gold Skulltulas). Open Lichii and click Enable Lichii RPC below for live sync.",
+                        "Save data found ({0}/100 Gold Skulltulas). Open Lichii for live player tracking.",
                         snap.SkulltulaCount.Value);
+                    _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
+                }
+                else if (_configuredPill.Visible)
+                {
+                    _lichiiStepDetailLabel.Text = "Allows Hyrule Atlas to follow Link and mark Gold Skulltulas automatically.";
+                    _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
                 }
                 else
                 {
-                    _lichiiDetailLabel.Text = "Start Lichii, or click \"Enable Lichii RPC\" below if you haven't enabled it yet.";
+                    _lichiiStepDetailLabel.Text = "Click 1-Click Setup Lichii so the map can follow Link automatically.";
+                    _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
                 }
-                _lichiiDetailLabel.ForeColor = Theme.Parchment600;
             }
         }
 

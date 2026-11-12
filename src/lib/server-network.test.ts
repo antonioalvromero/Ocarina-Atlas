@@ -1,10 +1,14 @@
 import type { NetworkInterfaceInfo } from 'node:os'
 import { describe, expect, it } from 'vitest'
 import {
+  collectLanIpv4Endpoints,
   collectLanIpv4Urls,
   DEFAULT_SERVER_HOST,
   DEFAULT_SERVER_PORT,
+  isCgnatIpv4,
   isPrivateLanIpv4,
+  isRfc1918Ipv4,
+  isVirtualOrVpnAdapter,
   isWildcardBindHost,
   LOCALHOST_HOST,
   parseServerConfig,
@@ -94,7 +98,7 @@ describe('server-network helpers', () => {
     expect(sanitizeHostHeader(undefined, '127.0.0.1', 3000)).toBe('127.0.0.1:3000')
   })
 
-  it('identifies private LAN IPv4 ranges and prioritizes physical LAN adapters', () => {
+  it('identifies private LAN IPv4 ranges and filters virtual/VPN/CGNAT interfaces', () => {
     expect(isPrivateLanIpv4('192.168.1.42')).toBe(true)
     expect(isPrivateLanIpv4('10.0.0.15')).toBe(true)
     expect(isPrivateLanIpv4('172.16.0.5')).toBe(true)
@@ -102,11 +106,45 @@ describe('server-network helpers', () => {
     expect(isPrivateLanIpv4('100.64.1.2')).toBe(true)
     expect(isPrivateLanIpv4('127.0.0.1')).toBe(false)
 
+    expect(isRfc1918Ipv4('192.168.1.42')).toBe(true)
+    expect(isRfc1918Ipv4('100.64.1.2')).toBe(false)
+    expect(isCgnatIpv4('100.64.1.2')).toBe(true)
+    expect(isCgnatIpv4('100.127.255.254')).toBe(true)
+    expect(isCgnatIpv4('100.128.0.1')).toBe(false)
+
+    for (const adapter of [
+      'vEthernet (WSL)',
+      'Hyper-V Virtual Ethernet Adapter',
+      'DockerNAT',
+      'VMware Network Adapter VMnet8',
+      'VirtualBox Host-Only Network',
+      'Tailscale',
+      'ZeroTier One [abcd1234]',
+      'WireGuard Tunnel',
+      'NordLynx',
+      'Radmin VPN',
+      'Hamachi',
+      'OpenVPN Wintun',
+      'TAP-Windows Adapter V9',
+      'tun0',
+      'Bluetooth Network Connection',
+      'Loopback Pseudo-Interface 1',
+      'Npcap Loopback Adapter',
+    ]) {
+      expect(isVirtualOrVpnAdapter(adapter)).toBe(true)
+    }
+    expect(isVirtualOrVpnAdapter('Ethernet')).toBe(false)
+    expect(isVirtualOrVpnAdapter('Wi-Fi')).toBe(false)
+
     const urls = collectLanIpv4Urls(
       {
         'Loopback Pseudo-Interface': [makeIpv4Info('127.0.0.1', true)],
         'vEthernet (WSL)': [makeIpv4Info('172.24.16.1')],
+        Tailscale: [makeIpv4Info('100.90.12.34')],
+        ZeroTier: [makeIpv4Info('10.147.20.5')],
+        'WireGuard Tunnel': [makeIpv4Info('10.8.0.2')],
         'Ethernet Link-Local': [makeIpv4Info('169.254.10.2')],
+        'CGNAT Adapter': [makeIpv4Info('100.64.10.20')],
         'Wi-Fi': [
           makeIpv4Info('192.168.1.88'),
           makeIpv4Info('192.168.1.88'),
@@ -124,7 +162,41 @@ describe('server-network helpers', () => {
       3000,
     )
 
-    expect(urls).toEqual(['http://192.168.1.88:3000', 'http://172.24.16.1:3000'])
+    expect(urls).toEqual(['http://192.168.1.88:3000'])
+  })
+
+  it('ranks dual-NIC setups and RFC1918/physical adapters in collectLanIpv4Urls and collectLanIpv4Endpoints', () => {
+    const dualNic = collectLanIpv4Endpoints(
+      {
+        'Wi-Fi': [makeIpv4Info('192.168.68.103')],
+        Ethernet: [makeIpv4Info('192.168.1.4')],
+        Tailscale: [makeIpv4Info('100.100.100.100')],
+        'vEthernet (WSL)': [makeIpv4Info('172.28.112.1')],
+      },
+      3000,
+    )
+
+    expect(dualNic.map((item) => ({ url: item.url, interfaceName: item.interfaceName }))).toEqual([
+      { url: 'http://192.168.1.4:3000', interfaceName: 'Ethernet' },
+      { url: 'http://192.168.68.103:3000', interfaceName: 'Wi-Fi' },
+    ])
+
+    const ordered = collectLanIpv4Urls(
+      {
+        'Custom NIC': [makeIpv4Info('192.168.50.10')],
+        'Public NIC': [makeIpv4Info('203.0.113.5')],
+        'Wi-Fi': [makeIpv4Info('10.0.0.25')],
+        Ethernet: [makeIpv4Info('172.16.0.12')],
+      },
+      4000,
+    )
+
+    expect(ordered).toEqual([
+      'http://10.0.0.25:4000',
+      'http://172.16.0.12:4000',
+      'http://192.168.50.10:4000',
+      'http://203.0.113.5:4000',
+    ])
   })
 
   it('includes .local and case variants of the local hostname in allowedHosts', () => {

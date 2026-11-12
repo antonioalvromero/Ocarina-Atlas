@@ -6,6 +6,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "start": "vite preview",
+    "server:build": "vite build && node node_modules/rolldown/bin/cli.mjs scripts/server-entry.ts --platform node --format esm --minify -o dist/standalone-server.mjs",
+    "build:win": "node scripts/build-win.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

@@ -37,3 +37,27 @@ export function requirementLabel(requirement: ItemRequirement): string {
   const keys = typeof requirement === 'string' ? [requirement] : requirement
   return keys.map((key) => requirementNames.get(key) ?? key).join(' or ')
 }
+
+const FLOOR_DISPLAY_LABELS: Record<string, string> = {
+  '1F': '1F',
+  '2F': '2F',
+  '3F': '3F',
+  '4F': '4F',
+  '5F': '5F',
+  S1: 'B1',
+  B1: 'B1',
+  S2: 'B2',
+  B2: 'B2',
+  S3: 'B3',
+  B3: 'B3',
+  S4: 'B4',
+  B4: 'B4',
+  nino: 'Child',
+  adulto: 'Adult',
+  principal: 'Main',
+}
+
+/** Normalizes a floor label or internal map ID (`S1`-`S4`, `nino`, `adulto`, `principal`) to a standard English display label. */
+export function formatFloorLabel(labelOrId: string): string {
+  return FLOOR_DISPLAY_LABELS[labelOrId] ?? labelOrId
+}

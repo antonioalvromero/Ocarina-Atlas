@@ -6,3 +6,9 @@ dist/
 # Downloaded variants the app does not use
 public/content/media/*.avif
 public/content/maps/hyrule-720.webp
+
+# Windows build & release artifacts
+release/
+dist-win/
+*.exe
+*.zip

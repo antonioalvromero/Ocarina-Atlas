@@ -1,8 +1,8 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
-import { useMemo, useRef, useState, type ReactNode } from 'react'
-import { isUnplaced, itemsOfPlace, matchesAge, startMapOf } from '../lib/data'
-import { gridPoint, layoutFloors } from '../lib/floorGrid'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { dataset, formatFloorLabel, isUnplaced, itemsOfPlace, matchesAge, startMapOf } from '../lib/data'
+import { floorToGrid, gridPoint, layoutFloors } from '../lib/floorGrid'
 import { findMerge, type Merge } from '../lib/merge'
 import { OTHER_PIN, pinTypeLabel } from '../lib/pinTypes'
 import {
@@ -21,12 +21,15 @@ import {
   type CustomPin,
 } from '../lib/storage'
 import type { Fraction, Item, Place, PlaceMap } from '../lib/types'
+import { isLiveMemoryState, useLichiiTracker } from '../lib/useLichiiTracker'
 import { FloorGrid, type FloorDraft } from './FloorGrid'
+import { LichiiStatusPanel } from './LichiiStatusPanel'
 import { MapViewport, type MapViewportHandle } from './MapViewport'
 import { MergeNotice } from './MergeNotice'
 import { NewPinPopover } from './NewPinPopover'
 import { CustomPinList, OfficialList, OfficialToggle, RevealedList, Section } from './Panels'
 import { CustomMarker, DraftMarker, MergeTrail, OfficialMarker } from './Pins'
+import { PlayerPin } from './PlayerPin'
 
 type Selection = { kind: 'custom' | 'item'; id: string } | null
 
@@ -81,11 +84,15 @@ function Sidebar({ place, progress, total, children }: { place: Place; progress:
 function MapSwitcher({
   maps,
   current,
+  playerMapId,
+  playerLive = true,
   onChange,
   allFloors,
 }: {
   maps: PlaceMap[]
   current: string | null
+  playerMapId?: string | null
+  playerLive?: boolean
   onChange: (id: string) => void
   allFloors?: { active: boolean; onShow: () => void }
 }) {
@@ -103,19 +110,36 @@ function MapSwitcher({
           All floors
         </button>
       )}
-      {maps.map((map) => (
-        <button
-          key={map.id}
-          type="button"
-          aria-pressed={map.id === current}
-          onClick={() => onChange(map.id)}
-          className={`cursor-pointer px-3 py-1.5 text-sm ${
-            map.id === current ? 'bg-parchment-200 font-medium text-ink-950' : 'text-parchment-200 hover:bg-ink-700'
-          }`}
-        >
-          {map.label}
-        </button>
-      ))}
+      {maps.map((map) => {
+        const hasPlayer = playerMapId === map.id
+        return (
+          <button
+            key={map.id}
+            type="button"
+            aria-pressed={map.id === current}
+            onClick={() => onChange(map.id)}
+            className={` inline-flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm ${
+              map.id === current ? 'bg-parchment-200 font-medium text-ink-950' : 'text-parchment-200 hover:bg-ink-700'
+            }`}
+          >
+            {hasPlayer && (
+              <span
+                title={playerLive ? 'Link is on this floor' : 'Link is on this floor (Saved)'}
+                className={`size-2 rounded-full ${
+                  map.id === current
+                    ? playerLive
+                      ? 'bg-ink-950'
+                      : 'bg-ink-950/70'
+                    : playerLive
+                      ? 'bg-moss'
+                      : 'bg-ember/80'
+                }`}
+              />
+            )}
+            {formatFloorLabel(map.label)}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -139,14 +163,47 @@ function FloorPinList({
       mapId={map.id}
       selectedId={selectedId}
       onSelect={onSelect}
-      title={`Your pins · ${map.label}`}
+      title={`Your pins · ${formatFloorLabel(map.label)}`}
       hideWhenEmpty
     />
   )
 }
 
+function resolvePlayerMapId(place: Place, rawMapId: string | null, age: 'child' | 'adult' | null): string | null {
+  if (rawMapId && place.maps.some((m) => m.id === rawMapId)) {
+    return rawMapId
+  }
+  if (place.maps.length === 1) {
+    return place.maps[0]?.id ?? null
+  }
+  if (age === 'child' && place.maps.some((m) => m.id === 'nino')) {
+    return 'nino'
+  }
+  if (age === 'adult' && place.maps.some((m) => m.id === 'adulto')) {
+    return 'adulto'
+  }
+  return place.startMap ?? place.maps[0]?.id ?? null
+}
+
 function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) {
-  const [map, setMap] = useState(firstMap)
+  const navigate = useNavigate()
+  const tracker = useLichiiTracker()
+  const isLiveMemory = isLiveMemoryState(tracker.state)
+  const hasPlayerPin = isLiveMemory || tracker.state.source === 'save'
+  const isPlayerInPlace =
+    hasPlayerPin &&
+    (tracker.state.placeId === place.id || tracker.state.placeSlug === place.slug)
+  const playerMapId = isPlayerInPlace
+    ? resolvePlayerMapId(place, tracker.state.mapId, tracker.state.age)
+    : null
+
+  const [map, setMap] = useState<PlaceMap>(() => {
+    if (playerMapId) {
+      const matched = place.maps.find((candidate) => candidate.id === playerMapId)
+      if (matched) return matched
+    }
+    return firstMap
+  })
   const [selection, setSelection] = useState<Selection>(null)
   const [draft, setDraft] = useState<FloorDraft | null>(null)
   const [showAllFloors, setShowAllFloors] = useState(false)
@@ -175,6 +232,62 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
 
   const selectedCustom = selection?.kind === 'custom' ? selection.id : null
   const selectedItem = selection?.kind === 'item' ? selection.id : null
+
+  const targetPlace = useMemo(
+    () =>
+      dataset.places.find(
+        (p) => p.id === tracker.state.placeId || p.slug === tracker.state.placeSlug,
+      ) ?? null,
+    [tracker.state.placeId, tracker.state.placeSlug],
+  )
+  const prevTargetSlugRef = useRef<string | null>(targetPlace?.slug ?? null)
+  const prevPlayerMapIdRef = useRef<string | null>(playerMapId)
+  const prevFollowRef = useRef<boolean>(tracker.followPlayer)
+  const prevIsLiveMemoryRef = useRef<boolean>(isLiveMemory)
+
+  // Follow Link across places and floors when followPlayer is enabled and RAM is live
+  useEffect(() => {
+    const targetSlug = targetPlace?.slug ?? null
+    const slugChanged = targetSlug !== null && targetSlug !== prevTargetSlugRef.current
+    const floorChanged = playerMapId !== null && playerMapId !== prevPlayerMapIdRef.current
+    const followJustEnabled = tracker.followPlayer && !prevFollowRef.current
+    const justBecameLive = isLiveMemory && !prevIsLiveMemoryRef.current
+
+    prevTargetSlugRef.current = targetSlug
+    prevPlayerMapIdRef.current = playerMapId
+    prevFollowRef.current = tracker.followPlayer
+    prevIsLiveMemoryRef.current = isLiveMemory
+
+    if (!tracker.followPlayer || !isLiveMemory) return
+
+    if (targetSlug && targetSlug !== place.slug && (slugChanged || followJustEnabled || justBecameLive)) {
+      void navigate({ to: '/$zone', params: { zone: targetSlug } })
+      return
+    }
+    if (
+      isPlayerInPlace &&
+      playerMapId &&
+      playerMapId !== map.id &&
+      !showAllFloors &&
+      (floorChanged || followJustEnabled || justBecameLive)
+    ) {
+      const next = place.maps.find((candidate) => candidate.id === playerMapId)
+      if (next) {
+        setMap(next)
+      }
+    }
+  }, [
+    tracker.followPlayer,
+    isLiveMemory,
+    targetPlace,
+    isPlayerInPlace,
+    playerMapId,
+    place.slug,
+    place.maps,
+    map.id,
+    showAllFloors,
+    navigate,
+  ])
 
   function toggleSelection(next: NonNullable<Selection>, focus?: Fraction | null) {
     const closing = selection?.kind === next.kind && selection.id === next.id
@@ -255,7 +368,32 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
   }
 
   function selectOfficial(item: Item) {
+    if (item.at && !allFloors && item.at.map !== map.id) {
+      const targetFloor = place.maps.find((candidate) => candidate.id === item.at?.map)
+      if (targetFloor) setMap(targetFloor)
+    }
     toggleSelection({ kind: 'item', id: item.id }, item.at && focusPoint(item.at.map, item.at))
+  }
+
+  function jumpToPlayer() {
+    const targetPlace = dataset.places.find(
+      (p) => p.id === tracker.state.placeId || p.slug === tracker.state.placeSlug,
+    )
+    if (targetPlace && targetPlace.slug !== place.slug) {
+      void navigate({ to: '/$zone', params: { zone: targetPlace.slug } })
+      return
+    }
+    if (!isPlayerInPlace) return
+    if (playerMapId && (playerMapId !== map.id || allFloors)) {
+      const next = place.maps.find((candidate) => candidate.id === playerMapId)
+      if (next) setMap(next)
+      if (allFloors) setShowAllFloors(false)
+    }
+    const targetAt = tracker.state.mapFraction
+    if (targetAt) {
+      viewport.current?.centerOn(targetAt)
+      setTimeout(() => viewport.current?.centerOn(targetAt), 0)
+    }
   }
 
   return (
@@ -277,6 +415,23 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
             selectedCustom={selectedCustom}
             selectedItem={selectedItem}
             merge={merge}
+            player={
+              isPlayerInPlace && playerMapId && tracker.state.mapFraction
+                ? {
+                    mapId: playerMapId,
+                    at: tracker.state.mapFraction,
+                    yaw: tracker.state.position?.yaw,
+                    position3d: tracker.state.position,
+                    live: isLiveMemory,
+                    onClick: () => {
+                      const cell = grid.cells.find((c) => c.map.id === playerMapId)
+                      if (cell && tracker.state.mapFraction) {
+                        viewport.current?.centerOn(floorToGrid(cell, tracker.state.mapFraction))
+                      }
+                    },
+                  }
+                : null
+            }
             onSelectCustom={(id) => toggleSelection({ kind: 'custom', id })}
             onSelectItem={(id) => toggleSelection({ kind: 'item', id })}
           />
@@ -286,7 +441,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
             ref={viewport}
             viewId={`${place.id}:${map.id}`}
             image={map.image}
-            alt={`Map of ${place.name}, ${map.label}`}
+            alt={`Map of ${place.name}, ${formatFloorLabel(map.label)}`}
             aspect={map.aspect}
             onMapClick={(at) => {
               setDraft({ mapId: map.id, at })
@@ -327,6 +482,21 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
                 onSelect={() => toggleSelection({ kind: 'custom', id: pin.id })}
               />
             ))}
+            {isPlayerInPlace &&
+              playerMapId === map.id &&
+              tracker.state.mapFraction && (
+                <PlayerPin
+                  at={tracker.state.mapFraction}
+                  yaw={tracker.state.position?.yaw}
+                  live={isLiveMemory}
+                  label="Link"
+                  sublabel={formatFloorLabel(map.label)}
+                  position3d={tracker.state.position}
+                  onClick={() =>
+                    tracker.state.mapFraction && viewport.current?.centerOn(tracker.state.mapFraction)
+                  }
+                />
+              )}
             {draft && <DraftMarker at={draft.at} />}
             {merge && <MergeTrail key={merge.id} merge={merge} />}
           </MapViewport>
@@ -335,6 +505,8 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
           <MapSwitcher
             maps={place.maps}
             current={allFloors ? null : map.id}
+            playerMapId={playerMapId}
+            playerLive={isLiveMemory}
             onChange={changeMap}
             allFloors={hasFloorGrid ? { active: allFloors, onShow: showGrid } : undefined}
           />
@@ -349,6 +521,22 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
             onDismiss={() => setMerge(null)}
           />
         )}
+        <LichiiStatusPanel
+          state={tracker.state}
+          followPlayer={tracker.followPlayer}
+          onToggleFollow={tracker.toggleFollowPlayer}
+          autoMarkSkulltulas={tracker.autoMarkSkulltulas}
+          onToggleAutoMark={tracker.toggleAutoMarkSkulltulas}
+          toasts={tracker.toasts}
+          onDismissToast={tracker.dismissToast}
+          onJumpToPlayer={jumpToPlayer}
+          onSelectItem={(itemId) => {
+            const target = items.find((i) => i.id === itemId)
+            if (target) selectOfficial(target)
+          }}
+          error={tracker.error}
+          onRetry={tracker.refresh}
+        />
       </div>
 
       <Sidebar place={place} progress={count} total={items.length}>
@@ -397,6 +585,9 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
 }
 
 function MaplessPlace({ place }: { place: Place }) {
+  const navigate = useNavigate()
+  const tracker = useLichiiTracker()
+  const isLiveMemory = isLiveMemoryState(tracker.state)
   const [selected, setSelected] = useState<string | null>(null)
   const hidden = useStored(hiddenCategoriesSlot)
   const age = useStored(ageFilterSlot)
@@ -404,9 +595,36 @@ function MaplessPlace({ place }: { place: Place }) {
   const items = useMemo(() => itemsOfPlace(place.id), [place.id])
   const { done, count } = useOfficialProgress(items)
 
+  const targetPlace = useMemo(
+    () =>
+      dataset.places.find(
+        (p) => p.id === tracker.state.placeId || p.slug === tracker.state.placeSlug,
+      ) ?? null,
+    [tracker.state.placeId, tracker.state.placeSlug],
+  )
+  const prevTargetSlugRef = useRef<string | null>(targetPlace?.slug ?? null)
+  const prevFollowRef = useRef<boolean>(tracker.followPlayer)
+  const prevIsLiveMemoryRef = useRef<boolean>(isLiveMemory)
+
+  useEffect(() => {
+    const targetSlug = targetPlace?.slug ?? null
+    const slugChanged = targetSlug !== null && targetSlug !== prevTargetSlugRef.current
+    const followJustEnabled = tracker.followPlayer && !prevFollowRef.current
+    const justBecameLive = isLiveMemory && !prevIsLiveMemoryRef.current
+
+    prevTargetSlugRef.current = targetSlug
+    prevFollowRef.current = tracker.followPlayer
+    prevIsLiveMemoryRef.current = isLiveMemory
+
+    if (!tracker.followPlayer || !isLiveMemory) return
+    if (targetSlug && targetSlug !== place.slug && (slugChanged || followJustEnabled || justBecameLive)) {
+      void navigate({ to: '/$zone', params: { zone: targetSlug } })
+    }
+  }, [tracker.followPlayer, isLiveMemory, targetPlace, place.slug, navigate])
+
   return (
     <main className="flex h-dvh flex-col bg-ink-950 lg:flex-row">
-      <div className="grid flex-none place-items-center p-8 text-center lg:flex-1">
+      <div className="relative grid flex-none place-items-center p-8 text-center lg:flex-1">
         <div className="max-w-sm rounded-lg border border-parchment-600/50 bg-ink-900 px-6 py-5">
           <h2 className="font-serif text-lg text-parchment-50">No map for this place</h2>
           <p className="mt-1 text-sm text-parchment-400">
@@ -415,6 +633,23 @@ function MaplessPlace({ place }: { place: Place }) {
               : 'There are no tracked items here either. Custom pins need a map.'}
           </p>
         </div>
+        <LichiiStatusPanel
+          state={tracker.state}
+          followPlayer={tracker.followPlayer}
+          onToggleFollow={tracker.toggleFollowPlayer}
+          autoMarkSkulltulas={tracker.autoMarkSkulltulas}
+          onToggleAutoMark={tracker.toggleAutoMarkSkulltulas}
+          toasts={tracker.toasts}
+          onDismissToast={tracker.dismissToast}
+          onJumpToPlayer={() => {
+            if (targetPlace && targetPlace.slug !== place.slug) {
+              void navigate({ to: '/$zone', params: { zone: targetPlace.slug } })
+            }
+          }}
+          onSelectItem={(itemId) => setSelected(itemId)}
+          error={tracker.error}
+          onRetry={tracker.refresh}
+        />
       </div>
       <Sidebar place={place} progress={count} total={items.length}>
         {items.length > 0 && (

@@ -1,5 +1,6 @@
 import { type MouseEvent, type Ref } from 'react'
 import { boxToFraction, isInsideImage, pinPosition } from '../lib/coords'
+import { formatFloorLabel } from '../lib/data'
 import { floorToGrid, type FloorCell, type FloorGrid as Grid } from '../lib/floorGrid'
 import type { Merge } from '../lib/merge'
 import { pinsSlot, useStored } from '../lib/storage'
@@ -7,8 +8,18 @@ import type { Fraction, Item, Place } from '../lib/types'
 import { MapViewport, type MapViewportHandle } from './MapViewport'
 import { NewPinPopover } from './NewPinPopover'
 import { CustomMarker, DraftMarker, MergeTrail, OfficialMarker } from './Pins'
+import { PlayerPin } from './PlayerPin'
 
 export type FloorDraft = { mapId: string; at: Fraction }
+
+export type FloorPlayer = {
+  mapId: string
+  at: Fraction
+  yaw?: number | null
+  position3d?: { x: number; y: number; z: number } | null
+  live?: boolean
+  onClick?: () => void
+}
 
 type Shared = {
   placeId: string
@@ -17,6 +28,7 @@ type Shared = {
   selectedCustom: string | null
   selectedItem: string | null
   merge: Merge | null
+  player?: FloorPlayer | null
   onSelectCustom: (id: string) => void
   onSelectItem: (id: string) => void
 }
@@ -31,6 +43,7 @@ function Floor({
   selectedCustom,
   selectedItem,
   merge,
+  player,
   onSelectCustom,
   onSelectItem,
 }: Shared & { cell: FloorCell; draft: Fraction | null; onDraft: (at: Fraction) => void }) {
@@ -55,8 +68,8 @@ function Floor({
       }}
       onClick={onClick}
     >
-      <span className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 rounded bg-ink-900/90 px-2 py-0.5 text-xs font-medium text-parchment-200">
-        {cell.map.label}
+      <span className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-ink-900/90 px-2 py-0.5 text-xs font-medium text-parchment-200">
+        {formatFloorLabel(cell.map.label)}
       </span>
       <img src={cell.map.image} alt="" draggable={false} className="absolute inset-0 size-full max-w-none" />
       {officialItems.map(
@@ -83,6 +96,17 @@ function Floor({
       ))}
       {draft && <DraftMarker at={draft} />}
       {merge?.mapId === cell.map.id && <MergeTrail key={merge.id} merge={merge} />}
+      {player && player.mapId === cell.map.id && (
+        <PlayerPin
+          at={player.at}
+          yaw={player.yaw}
+          live={player.live}
+          label="Link"
+          sublabel={formatFloorLabel(cell.map.label)}
+          position3d={player.position3d}
+          onClick={player.onClick}
+        />
+      )}
     </div>
   )
 }

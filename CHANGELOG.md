@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - Updated standalone server startup output to print reachable `LAN http://<ip>:<port>` URLs prioritizing physical Wi-Fi/Ethernet adapters over virtual interfaces (`vEthernet`, `WSL`, VPN tunnels), and included the PC hostname alongside `.local` in Vite `allowedHosts`.
 
 ### Changed
+- **Compact Gold Skulltula Tracker Orb (`src/components/LichiiStatusPanel.tsx`, `src/components/LichiiStatusPanel.test.ts`):**
+  - Replaced the always-open bottom-left tracker bar with a `56px` circular Gold Skulltula medallion displaying live Skulltula count and a perimeter status indicator dot (`animate-ping` green pulse when live, amber for waiting/save, ember on error, muted when disconnected), keeping Gold Skulltula pickup toasts independent at top-right.
+  - Added smooth hover/focus expansion on desktop (with a continuous `pb-2` hover bridge, `180 ms` leave grace delay, keyboard `Escape` support, and `prefers-reduced-motion` support) plus tap-to-toggle pinning and outside-tap/header-close dismissal for touch devices.
 - **Lichii-Style Release Notes (`src/lib/release-notes.ts`, `scripts/generate-release-notes.mjs`, `.github/release-notes-instructions.md`):**
   - Standardized release bodies around `## Changes since <prevTag>`, commit span metadata (`Built from ...`), a bold-led callout blockquote, clean category sections (`### New features`, `### Bug fixes`, `### Telemetry & Map Tracking`, `### Windows Launcher`, `### Stability, docs & CI`), `## Downloads` metadata, and a `## Windows` portable ZIP checksum table.
 

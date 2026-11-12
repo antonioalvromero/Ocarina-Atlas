@@ -11,7 +11,7 @@ import {
   setStaticAssetRoots,
 } from '../src/lib/lichii-server'
 import {
-  collectLanIpv4Urls,
+  collectLanIpv4Endpoints,
   isWildcardBindHost,
   parseServerConfig,
   sanitizeHostHeader,
@@ -400,8 +400,8 @@ async function main(): Promise<void> {
     const displayHost = isWildcardBindHost(host) ? '127.0.0.1' : host
     console.log(`READY http://${displayHost}:${boundPort}`)
     if (isWildcardBindHost(host)) {
-      for (const lanUrl of collectLanIpv4Urls(os.networkInterfaces(), boundPort)) {
-        console.log(`LAN ${lanUrl}`)
+      for (const endpoint of collectLanIpv4Endpoints(os.networkInterfaces(), boundPort)) {
+        console.log(`LAN ${endpoint.url} (${endpoint.interfaceName})`)
       }
     }
   })

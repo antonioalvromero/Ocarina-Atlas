@@ -80,7 +80,7 @@ Follow these steps to run the tracker without installing Node.js or editing code
 
 6. **Play in Lichii**
    - Boot *Ocarina of Time* (`0400486024DEC000`) in Lichii and load a save slot.
-   - Confirm the launcher reads **In-game live tracking** and the bottom-left map bar shows **Lichii · Live**.
+   - Confirm the launcher reads **In-game live tracking** and the bottom-left circular Gold Skulltula medallion pulses green—hover over (or tap on touch devices) the medallion to expand the tracker card showing **Lichii · Live**, current zone/floor, and controls.
 
 ### Understanding Connection States
 

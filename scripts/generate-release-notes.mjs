@@ -6,8 +6,29 @@ import {
   buildReleasePrompt,
   composeReleaseBody,
   extractChangelogSection,
+  extractGitHubRepoSlugFromRemote,
+  formatSafeHttpError,
+  isSafeGitRef,
   normalizeTagVersion,
+  parseSafeRepoSlug,
+  sanitizeSecretText,
+  validateGitRef,
+  validateModelName,
+  validateRepoSlug,
 } from '../src/lib/release-notes.ts'
+
+function getActiveSecrets(extraSecrets = []) {
+  const candidates = [
+    process.env.GITHUB_TOKEN,
+    process.env.COPILOT_GITHUB_TOKEN,
+    process.env.GEMINI_API_KEY,
+    process.env.OPENAI_API_KEY,
+    ...extraSecrets,
+  ]
+  return candidates
+    .map((value) => (typeof value === 'string' ? value.trim() : ''))
+    .filter(Boolean)
+}
 
 function readOptionalFile(filePath) {
   if (!filePath || !fs.existsSync(filePath)) return ''
@@ -35,14 +56,37 @@ function computeFileSha256(filePath) {
 
 function resolvePreviousTag(headRef) {
   const explicit = (process.env.PREVIOUS_TAG ?? '').trim()
-  if (explicit) return explicit
-  const tag = runGit(['describe', '--tags', '--abbrev=0', '--match', 'v*', `${headRef}^`])
-  return tag || null
+  if (explicit) {
+    return validateGitRef(explicit, 'PREVIOUS_TAG')
+  }
+  const safeHead = validateGitRef(headRef, 'headRef')
+  const tag = runGit(['describe', '--tags', '--abbrev=0', '--match', 'v*', `${safeHead}^`])
+  return tag && isSafeGitRef(tag) ? tag : null
+}
+
+function resolveCommitSha(ref) {
+  if (!ref || !isSafeGitRef(ref)) return null
+  const sha = runGit(['rev-parse', '--verify', `${ref}^{commit}`])
+  return /^[0-9a-f]{7,64}$/i.test(sha) ? sha : null
+}
+
+function resolveBuildBranch(fallbackTag) {
+  const explicit = (process.env.BUILD_REF ?? process.env.HEAD_BRANCH ?? '').trim()
+  if (explicit && isSafeGitRef(explicit)) {
+    return explicit
+  }
+  const currentBranch = runGit(['symbolic-ref', '--short', 'HEAD'])
+  if (currentBranch && isSafeGitRef(currentBranch)) {
+    return currentBranch
+  }
+  return fallbackTag
 }
 
 function collectCommits(previousTag, headRef) {
-  const rangeArgs = previousTag ? [`${previousTag}..${headRef}`] : ['-n', '40', headRef]
-  const raw = runGit(['log', ...rangeArgs, '--no-merges', '--format=%H%x1f%s%x1f%an%x1e'])
+  const safeHead = validateGitRef(headRef, 'headRef')
+  const safePrev = previousTag ? validateGitRef(previousTag, 'previousTag') : null
+  const rangeArgs = safePrev ? [`${safePrev}..${safeHead}`] : ['-n', '40', safeHead]
+  const raw = runGit(['log', ...rangeArgs, '--no-merges', '--format=%H%x1f%s%x1f%an%x1e', '--'])
   if (!raw) return []
 
   const entries = []
@@ -58,13 +102,14 @@ function collectCommits(previousTag, headRef) {
 }
 
 async function fetchGithubGeneratedNotes({ repoSlug, token, tagName, previousTag }) {
-  if (!repoSlug || !token || !tagName) return ''
+  const safeSlug = parseSafeRepoSlug(repoSlug)
+  if (!safeSlug || !token || !tagName) return ''
   try {
     const payload = { tag_name: tagName }
     if (previousTag) {
       payload.previous_tag_name = previousTag
     }
-    const resp = await fetch(`https://api.github.com/repos/${repoSlug}/releases/generate-notes`, {
+    const resp = await fetch(`https://api.github.com/repos/${safeSlug}/releases/generate-notes`, {
       method: 'POST',
       headers: {
         Accept: 'application/vnd.github+json',
@@ -82,25 +127,33 @@ async function fetchGithubGeneratedNotes({ repoSlug, token, tagName, previousTag
     const data = await resp.json()
     return typeof data.body === 'string' ? data.body.trim() : ''
   } catch (err) {
-    console.warn('Unable to fetch GitHub auto-generated notes:', err instanceof Error ? err.message : err)
+    console.warn(
+      'Unable to fetch GitHub auto-generated notes:',
+      sanitizeSecretText(err, getActiveSecrets([token])),
+    )
     return ''
   }
 }
 
 async function generateWithGemini({ apiKey, model, systemPrompt, userPrompt }) {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`
+  const safeModel = validateModelName(model)
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(safeModel)}:generateContent`
   const resp = await fetch(endpoint, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-      generationConfig: { temperature: 0.2, maxOutputTokens: 800 },
+      generationConfig: { temperature: 0.2, maxOutputTokens: 900 },
     }),
     signal: AbortSignal.timeout(25000),
   })
   if (!resp.ok) {
-    throw new Error(`Gemini API HTTP ${resp.status}: ${await resp.text()}`)
+    const rawBody = await resp.text().catch(() => '')
+    throw new Error(formatSafeHttpError('Gemini API', resp.status, rawBody, getActiveSecrets([apiKey])))
   }
   const data = await resp.json()
   const parts = data?.candidates?.[0]?.content?.parts
@@ -112,6 +165,7 @@ async function generateWithGemini({ apiKey, model, systemPrompt, userPrompt }) {
 }
 
 async function generateWithOpenAI({ apiKey, model, systemPrompt, userPrompt }) {
+  const safeModel = validateModelName(model)
   const resp = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -119,9 +173,9 @@ async function generateWithOpenAI({ apiKey, model, systemPrompt, userPrompt }) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model,
+      model: safeModel,
       temperature: 0.2,
-      max_tokens: 800,
+      max_tokens: 900,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -130,7 +184,8 @@ async function generateWithOpenAI({ apiKey, model, systemPrompt, userPrompt }) {
     signal: AbortSignal.timeout(25000),
   })
   if (!resp.ok) {
-    throw new Error(`OpenAI API HTTP ${resp.status}: ${await resp.text()}`)
+    const rawBody = await resp.text().catch(() => '')
+    throw new Error(formatSafeHttpError('OpenAI API', resp.status, rawBody, getActiveSecrets([apiKey])))
   }
   const data = await resp.json()
   const content = data?.choices?.[0]?.message?.content
@@ -138,11 +193,26 @@ async function generateWithOpenAI({ apiKey, model, systemPrompt, userPrompt }) {
 }
 
 async function main() {
-  const tagName = (process.env.RELEASE_TAG || process.env.GITHUB_REF_NAME || runGit(['describe', '--tags', '--exact-match']) || 'v1.0.1').trim()
-  const headRef = (process.env.HEAD_REF || tagName || 'HEAD').trim()
-  const resolvedHeadRef = runGit(['rev-parse', '--verify', headRef]) ? headRef : 'HEAD'
+  const rawTag =
+    process.env.RELEASE_TAG ||
+    process.env.GITHUB_REF_NAME ||
+    runGit(['describe', '--tags', '--exact-match']) ||
+    'v1.0.1'
+  const tagName = validateGitRef(rawTag, 'RELEASE_TAG')
+
+  const rawHeadRef = process.env.HEAD_REF || tagName || 'HEAD'
+  const candidateHeadRef = validateGitRef(rawHeadRef, 'HEAD_REF')
+  const resolvedHeadRef = resolveCommitSha(candidateHeadRef) ? candidateHeadRef : 'HEAD'
+
   const previousTag = resolvePreviousTag(resolvedHeadRef)
-  const repoSlug = (process.env.GITHUB_REPOSITORY ?? '').trim()
+  const headSha = resolveCommitSha(resolvedHeadRef)
+  const previousTagSha = resolveCommitSha(previousTag)
+  const headBranch = resolveBuildBranch(tagName)
+
+  const envRepo = (process.env.GITHUB_REPOSITORY ?? '').trim()
+  const repoSlug = envRepo
+    ? validateRepoSlug(envRepo)
+    : extractGitHubRepoSlugFromRemote(runGit(['remote', 'get-url', 'origin'])) ?? ''
   const githubToken = (process.env.GITHUB_TOKEN ?? '').trim()
   const zipPath = process.env.ZIP_PATH || 'release/OcarinaMaps-Lichii-Windows-x64.zip'
   const outPath = process.env.OUT_PATH || 'release/RELEASE_NOTES.md'
@@ -174,7 +244,7 @@ async function main() {
 
   if (!aiSummary && (process.env.GEMINI_API_KEY ?? '').trim()) {
     try {
-      const model = (process.env.GEMINI_MODEL || 'gemini-2.5-flash').trim()
+      const model = validateModelName(process.env.GEMINI_MODEL || 'gemini-2.5-flash')
       aiSummary = await generateWithGemini({
         apiKey: process.env.GEMINI_API_KEY.trim(),
         model,
@@ -185,13 +255,16 @@ async function main() {
         aiProviderLabel = `Gemini · ${model}`
       }
     } catch (err) {
-      console.warn('Gemini release summary failed; falling back:', err instanceof Error ? err.message : err)
+      console.warn(
+        'Gemini release summary failed; falling back:',
+        sanitizeSecretText(err, getActiveSecrets()),
+      )
     }
   }
 
   if (!aiSummary && (process.env.OPENAI_API_KEY ?? '').trim()) {
     try {
-      const model = (process.env.OPENAI_MODEL || 'gpt-4o-mini').trim()
+      const model = validateModelName(process.env.OPENAI_MODEL || 'gpt-4o-mini')
       aiSummary = await generateWithOpenAI({
         apiKey: process.env.OPENAI_API_KEY.trim(),
         model,
@@ -202,7 +275,10 @@ async function main() {
         aiProviderLabel = `OpenAI · ${model}`
       }
     } catch (err) {
-      console.warn('OpenAI release summary failed; falling back:', err instanceof Error ? err.message : err)
+      console.warn(
+        'OpenAI release summary failed; falling back:',
+        sanitizeSecretText(err, getActiveSecrets()),
+      )
     }
   }
 
@@ -211,6 +287,9 @@ async function main() {
     version: tagName,
     previousTag,
     repoSlug,
+    headBranch,
+    headSha,
+    previousTagSha,
     aiSummary: aiSummary || null,
     aiProviderLabel,
     changelogSection,
@@ -226,6 +305,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error(err)
+  console.error('Release notes generation failed:', sanitizeSecretText(err, getActiveSecrets()))
   process.exit(1)
 })

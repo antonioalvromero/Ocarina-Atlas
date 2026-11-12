@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-windows-${{ github.ref }}
@@ -15,17 +15,20 @@ concurrency:
 
 jobs:
   package-windows:
-    name: Build & Publish Windows x64 Portable ZIP
+    name: Build & Verify Windows x64 Portable ZIP
     runs-on: windows-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
 
@@ -33,29 +36,43 @@ jobs:
         id: release-meta
         shell: pwsh
         env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          HAS_COPILOT: ${{ secrets.COPILOT_GITHUB_TOKEN != '' }}
+          HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+          HAS_OPENAI: ${{ secrets.OPENAI_API_KEY != '' }}
+          REF_NAME_INPUT: ${{ github.ref_name }}
         run: |
-          $headRef = if ($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME } else { "HEAD" }
-          $prevTag = git describe --tags --abbrev=0 --match "v*" "$headRef^" 2>$null
-          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($prevTag)) {
-            $prevTag = ""
-          } else {
-            $prevTag = $prevTag.Trim()
+          function Assert-SafeGitRef([string]$Value, [string]$Label) {
+            if ([string]::IsNullOrWhiteSpace($Value)) {
+              return ""
+            }
+            $trimmed = $Value.Trim()
+            if ($trimmed -match '[\r\n\t\x00-\x1f\x7f]' -or $trimmed.StartsWith('-') -or $trimmed.Contains('..') -or $trimmed.Contains('@{') -or $trimmed -notmatch '^[A-Za-z0-9._/+-]+$') {
+              throw "Unsafe characters in $Label."
+            }
+            return $trimmed
+          }
+
+          $rawHeadRef = if ([string]::IsNullOrWhiteSpace($env:REF_NAME_INPUT)) { "HEAD" } else { $env:REF_NAME_INPUT }
+          $headRef = Assert-SafeGitRef -Value $rawHeadRef -Label "head_ref"
+
+          $prevTagRaw = git describe --tags --abbrev=0 --match "v*" "$headRef^" 2>$null
+          $prevTag = ""
+          if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($prevTagRaw)) {
+            $prevTag = Assert-SafeGitRef -Value $prevTagRaw -Label "prev_tag"
           }
 
           $copilotBase = $prevTag
           if ([string]::IsNullOrWhiteSpace($copilotBase)) {
-            $copilotBase = (git rev-list --max-parents=0 HEAD | Select-Object -First 1).Trim()
+            $firstCommit = (git rev-list --max-parents=0 HEAD | Select-Object -First 1)
+            $copilotBase = Assert-SafeGitRef -Value $firstCommit -Label "copilot_base_ref"
           }
 
           $provider = "none"
-          if (-not [string]::IsNullOrWhiteSpace($env:COPILOT_GITHUB_TOKEN)) {
+          if ($env:HAS_COPILOT -eq "true") {
             $provider = "copilot"
-          } elseif (-not [string]::IsNullOrWhiteSpace($env:GEMINI_API_KEY)) {
+          } elseif ($env:HAS_GEMINI -eq "true") {
             $provider = "gemini"
-          } elseif (-not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)) {
+          } elseif ($env:HAS_OPENAI -eq "true") {
             $provider = "openai"
           }
 
@@ -93,7 +110,7 @@ jobs:
         id: copilot-notes
         if: steps.release-meta.outputs.provider == 'copilot' && steps.release-meta.outputs.copilot_base_ref != '' && steps.release-meta.outputs.copilot_base_ref != steps.release-meta.outputs.head_ref
         continue-on-error: true
-        uses: github/copilot-release-notes@main
+        uses: github/copilot-release-notes@29ba181a86b88f3acee62a03369033edfa982ab9 # v1.0.3
         with:
           base-ref: ${{ steps.release-meta.outputs.copilot_base_ref }}
           head-ref: ${{ steps.release-meta.outputs.head_ref }}
@@ -119,6 +136,8 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
           HEAD_REF: ${{ steps.release-meta.outputs.head_ref }}
           PREVIOUS_TAG: ${{ steps.release-meta.outputs.prev_tag }}
+          BUILD_REF: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -132,16 +151,55 @@ jobs:
           }
 
       - name: Upload Windows build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b8e75b540449e92b4886f43607fa02 # v4
         with:
           name: OcarinaMaps-Lichii-Windows-x64
           path: release/OcarinaMaps-Lichii-Windows-x64.zip
           if-no-files-found: error
 
-      - name: Publish GitHub Release
+      - name: Upload composed release notes artifact
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: actions/upload-artifact@ea165f8d65b8e75b540449e92b4886f43607fa02 # v4
         with:
-          files: release/OcarinaMaps-Lichii-Windows-x64.zip
-          body_path: release/RELEASE_NOTES.md
+          name: release-notes
+          path: release/RELEASE_NOTES.md
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: package-windows
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Windows portable artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: OcarinaMaps-Lichii-Windows-x64
+          path: release-artifacts
+
+      - name: Download release notes artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-notes
+          path: release-artifacts
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          name: Hyrule Atlas ${{ github.ref_name }}
+          files: release-artifacts/OcarinaMaps-Lichii-Windows-x64.zip
+          body_path: release-artifacts/RELEASE_NOTES.md
           generate_release_notes: false
+
+      - name: Verify published GitHub Release metadata
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          GITHUB_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPO" --json tagName,name,assets --jq '{tagName, name, assetCount: (.assets | length)}'

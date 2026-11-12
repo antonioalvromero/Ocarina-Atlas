@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **Lichii-Style Release Notes (`src/lib/release-notes.ts`, `scripts/generate-release-notes.mjs`, `.github/release-notes-instructions.md`):**
+  - Standardized release bodies around `## Changes since <prevTag>`, commit span metadata (`Built from ...`), a bold-led callout blockquote, clean category sections (`### New features`, `### Bug fixes`, `### Telemetry & Map Tracking`, `### Windows Launcher`, `### Stability, docs & CI`), `## Downloads` metadata, and a `## Windows` portable ZIP checksum table.
+
+### Security
+- **Release Pipeline & API Hardening (`scripts/generate-release-notes.mjs`, `.github/workflows/release-windows.yml`, `src/lib/release-notes.ts`):**
+  - Switched Gemini API authentication from URL query parameter (`?key=...`) to the `x-goog-api-key` HTTP header.
+  - Added secret redaction and structured HTTP error parsing (`sanitizeSecretText`, `formatSafeHttpError`) so API keys, tokens, and raw upstream error bodies cannot appear in logs.
+  - Pinned all GitHub Actions in `release-windows.yml` to immutable 40-character commit SHAs, separated build (`contents: read`) from release publishing (`contents: write`), removed raw secret values from metadata detection steps, and validated git refs, repo slugs, and model names before command/URL usage.
+
 ## [1.0.1] - 2026-11-11
 
 ### Added

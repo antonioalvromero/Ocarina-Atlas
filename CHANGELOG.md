@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-12
+
 ### Added
 - **Local Network / Second-Screen Access (`src/lib/server-network.ts`, `scripts/server-entry.ts`, `launcher/OcarinaMaps.cs`, `vite.config.ts`):**
   - Enabled LAN browser access (`0.0.0.0` default bind) so any tablet, iPad, phone, or secondary PC on the same local network can open the live tracker UI seamlessly.

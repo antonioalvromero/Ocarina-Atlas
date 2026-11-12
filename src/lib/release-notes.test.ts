@@ -173,7 +173,7 @@ describe('composeReleaseBody', () => {
       changelogSection: '',
       commits: [{ sha: '478f743', subject: 'chore: add MIT license and release notes' }],
       githubGeneratedNotes: "## What's Changed\n* PR #1 by @antonioalvromero",
-      zipAssetName: 'OcarinaMaps-Lichii-Windows-x64.zip',
+      zipAssetName: 'HyruleAtlas-Windows-x64.zip',
       zipSha256: 'deadbeef1234',
     })
 
@@ -188,7 +188,7 @@ describe('composeReleaseBody', () => {
     expect(body).toContain('Automatic build of `main` at 9bc568b000000000000000000000000000000000.')
     expect(body).toContain('## Windows')
     expect(body).toContain(
-      '| amd64 / x86_64 | [zip](https://github.com/antonioalvromero/Hyrule-Atlas/releases/download/v1.0.1/OcarinaMaps-Lichii-Windows-x64.zip) | `deadbeef1234` |',
+      '| amd64 / x86_64 | [zip](https://github.com/antonioalvromero/Hyrule-Atlas/releases/download/v1.0.1/HyruleAtlas-Windows-x64.zip) | `deadbeef1234` |',
     )
     expect(body).not.toContain("## What's Changed")
   })
@@ -206,14 +206,14 @@ describe('composeReleaseBody', () => {
       changelogSection: '### Added\n- **MIT License:** Permissive license for newly authored code.',
       commits: [{ sha: '478f743', subject: 'chore: add MIT license' }],
       githubGeneratedNotes: '',
-      zipAssetName: 'OcarinaMaps-Lichii-Windows-x64.zip',
+      zipAssetName: 'HyruleAtlas-Windows-x64.zip',
       zipSha256: null,
     })
 
     expect(body).toContain('## Changes since v1.0.0')
     expect(body).toContain('### New features')
     expect(body).toContain('- **MIT License:** Permissive license for newly authored code.')
-    expect(body).toContain('| amd64 / x86_64 | [zip](https://github.com/antonioalvromero/Hyrule-Atlas/releases/download/v1.0.1/OcarinaMaps-Lichii-Windows-x64.zip) | Unavailable |')
+    expect(body).toContain('| amd64 / x86_64 | [zip](https://github.com/antonioalvromero/Hyrule-Atlas/releases/download/v1.0.1/HyruleAtlas-Windows-x64.zip) | Unavailable |')
   })
 
   it('formats commits into Lichii sections without raw feat:/fix: prefixes when changelog is empty', () => {
@@ -229,7 +229,7 @@ describe('composeReleaseBody', () => {
         { sha: 'bbbb222', subject: 'fix: prevent stale floor badge' },
       ],
       githubGeneratedNotes: '',
-      zipAssetName: 'OcarinaMaps-Lichii-Windows-x64.zip',
+      zipAssetName: 'HyruleAtlas-Windows-x64.zip',
       zipSha256: 'cafebabe',
     })
 

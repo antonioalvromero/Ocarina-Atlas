@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-11-12
+
+### Changed
+- **Unified Hyrule Atlas Naming (`HyruleAtlas.exe`, `HyruleAtlas-Windows-x64.zip`):**
+  - Renamed the Windows launcher (`launcher/HyruleAtlas.cs` -> `HyruleAtlas.exe`), portable bundle folder (`HyruleAtlas-Windows-x64`), release ZIP (`HyruleAtlas-Windows-x64.zip`), CI/release workflows, smoke test, and documentation to consistently use **Hyrule Atlas**.
+- **Modern Plug & Play Launcher Redesign (`launcher/HyruleAtlas.cs`):**
+  - Redesigned `MainForm` into clean Hyrule-themed cards: Hero status card (**Start Map / Stop Map**, **Open in Browser**, live Lichii indicator), **Step 1 — Lichii Live Sync** (`1-Click Setup Lichii`), **Step 2 — Second Screen (LAN)** (`Copy URL`, explicit `Allow LAN Access`), and a collapsible **Advanced Settings & Logs** drawer.
+- **Multi-NIC & Accurate LAN IP Selection (`launcher/HyruleAtlas.cs`, `src/lib/server-network.ts`):**
+  - Added Win32 `GetBestInterface` default-route detection, IPv4 metric/gateway ranking, and expanded virtual/VPN/CGNAT filtering (`Tailscale`, `ZeroTier`, `WireGuard`, `NordLynx`, `Radmin`, `vEthernet`, `169.254.*`, `100.64–127.*`).
+  - Added a LAN adapter `ComboBox` selector and **Refresh** button in `HyruleAtlas.exe` when multiple active LAN networks are present (such as Ethernet + Mesh Wi-Fi).
+
 ## [1.0.2] - 2026-11-12
 
 ### Added

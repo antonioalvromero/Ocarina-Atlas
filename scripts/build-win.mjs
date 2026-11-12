@@ -8,16 +8,16 @@ const __dirname = path.dirname(__filename)
 const ROOT_DIR = path.resolve(__dirname, '..')
 
 const RELEASE_DIR = path.join(ROOT_DIR, 'release')
-const BUNDLE_FOLDER_NAME = 'OcarinaMaps-Windows-x64'
+const BUNDLE_FOLDER_NAME = 'HyruleAtlas-Windows-x64'
 const BUNDLE_DIR = path.join(RELEASE_DIR, BUNDLE_FOLDER_NAME)
-const ZIP_NAME = 'OcarinaMaps-Lichii-Windows-x64.zip'
+const ZIP_NAME = 'HyruleAtlas-Windows-x64.zip'
 const ZIP_PATH = path.join(RELEASE_DIR, ZIP_NAME)
 
 const DIST_DIR = path.join(ROOT_DIR, 'dist')
 const STANDALONE_ENTRY = path.join(ROOT_DIR, 'scripts', 'server-entry.ts')
 const STANDALONE_OUT = path.join(DIST_DIR, 'standalone-server.mjs')
-const LAUNCHER_CS = path.join(ROOT_DIR, 'launcher', 'OcarinaMaps.cs')
-const LAUNCHER_EXE = path.join(BUNDLE_DIR, 'OcarinaMaps.exe')
+const LAUNCHER_CS = path.join(ROOT_DIR, 'launcher', 'HyruleAtlas.cs')
+const LAUNCHER_EXE = path.join(BUNDLE_DIR, 'HyruleAtlas.exe')
 
 function runStep(label, command, args, options = {}) {
   console.log(`\n==> ${label}`)
@@ -130,7 +130,7 @@ function main() {
   fs.copyFileSync(process.execPath, bundledNodePath)
   console.log(`Copied Node.js runtime (${process.version}): ${bundledNodePath}`)
 
-  // 5. Compile native Windows launcher GUI (OcarinaMaps.exe)
+  // 5. Compile native Windows launcher GUI (HyruleAtlas.exe)
   const cscExe = findCscExe()
   runStep(`Compiling WinForms launcher with ${cscExe}`, cscExe, [
     '/nologo',
@@ -142,7 +142,7 @@ function main() {
     `/out:${LAUNCHER_EXE}`,
     LAUNCHER_CS,
   ])
-  assertExists(LAUNCHER_EXE, 'compiled OcarinaMaps.exe')
+  assertExists(LAUNCHER_EXE, 'compiled HyruleAtlas.exe')
 
   // 6. Create portable ZIP archive for GitHub Releases
   const psCommand = [

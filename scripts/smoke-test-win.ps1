@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-Verifies portable Windows release artifacts and smoke-tests OcarinaMaps.exe outside the repository.
+Verifies portable Windows release artifacts and smoke-tests HyruleAtlas.exe outside the repository.
 #>
 param(
-    [string]$ZipPath = "release/OcarinaMaps-Lichii-Windows-x64.zip",
-    [string]$StagingDir = "release/OcarinaMaps-Windows-x64",
+    [string]$ZipPath = "release/HyruleAtlas-Windows-x64.zip",
+    [string]$StagingDir = "release/HyruleAtlas-Windows-x64",
     [int]$Port = 34567,
     [string]$WorkDir = ""
 )
@@ -12,7 +12,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $expected = @(
-    (Join-Path $StagingDir "OcarinaMaps.exe"),
+    (Join-Path $StagingDir "HyruleAtlas.exe"),
     (Join-Path $StagingDir "runtime/node.exe"),
     (Join-Path $StagingDir "app/standalone-server.mjs"),
     (Join-Path $StagingDir "app/dist/client"),
@@ -40,12 +40,12 @@ New-Item -ItemType Directory -Path $WorkDir -Force | Out-Null
 $proc = $null
 try {
     Expand-Archive -Path $resolvedZip -DestinationPath $WorkDir -Force
-    $exePath = Join-Path $WorkDir "OcarinaMaps-Windows-x64/OcarinaMaps.exe"
+    $exePath = Join-Path $WorkDir "HyruleAtlas-Windows-x64/HyruleAtlas.exe"
     if (-not (Test-Path $exePath)) {
-        throw "Extracted ZIP is missing OcarinaMaps-Windows-x64/OcarinaMaps.exe at $exePath"
+        throw "Extracted ZIP is missing HyruleAtlas-Windows-x64/HyruleAtlas.exe at $exePath"
     }
 
-    Write-Host "Starting OcarinaMaps.exe smoke test on 127.0.0.1:$Port ..."
+    Write-Host "Starting HyruleAtlas.exe smoke test on 127.0.0.1:$Port ..."
     $proc = Start-Process -FilePath $exePath `
         -ArgumentList @("--port", "$Port", "--no-browser", "--auto-start", "--minimized") `
         -WorkingDirectory (Split-Path -Parent $exePath) `
@@ -59,7 +59,7 @@ try {
 
     while ((Get-Date) -lt $deadline) {
         if ($proc.HasExited) {
-            throw "OcarinaMaps.exe exited prematurely with exit code $($proc.ExitCode)"
+            throw "HyruleAtlas.exe exited prematurely with exit code $($proc.ExitCode)"
         }
         try {
             $pageResp = Invoke-WebRequest -Uri $rootUrl -UseBasicParsing -TimeoutSec 3
@@ -84,7 +84,7 @@ try {
     }
 
     if (-not $ready) {
-        throw "Timed out waiting for OcarinaMaps.exe HTTP endpoints on port ${Port}: $lastError"
+        throw "Timed out waiting for HyruleAtlas.exe HTTP endpoints on port ${Port}: $lastError"
     }
 }
 finally {
@@ -123,7 +123,7 @@ finally {
     }
 
     if (-not $portClosed) {
-        throw "Port $Port remained open after stopping OcarinaMaps.exe (possible orphan node.exe process)."
+        throw "Port $Port remained open after stopping HyruleAtlas.exe (possible orphan node.exe process)."
     }
 
     Write-Host "Smoke test completed cleanly and port $Port closed via Job Object cleanup."

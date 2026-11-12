@@ -103,7 +103,7 @@ jobs:
         shell: pwsh
         run: npm run build:win
 
-      - name: Verify release artifacts and smoke-test OcarinaMaps.exe
+      - name: Verify release artifacts and smoke-test HyruleAtlas.exe
         shell: pwsh
         run: ./scripts/smoke-test-win.ps1 -Port 34568
 
@@ -143,7 +143,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           COPILOT_NOTES_FILE: ${{ runner.temp }}/copilot-notes.md
-          ZIP_PATH: release/OcarinaMaps-Lichii-Windows-x64.zip
+          ZIP_PATH: release/HyruleAtlas-Windows-x64.zip
           OUT_PATH: release/RELEASE_NOTES.md
         run: |
           node scripts/generate-release-notes.mjs
@@ -154,8 +154,8 @@ jobs:
       - name: Upload Windows build artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: OcarinaMaps-Lichii-Windows-x64
-          path: release/OcarinaMaps-Lichii-Windows-x64.zip
+          name: HyruleAtlas-Windows-x64
+          path: release/HyruleAtlas-Windows-x64.zip
           if-no-files-found: error
 
       - name: Upload composed release notes artifact
@@ -178,7 +178,7 @@ jobs:
       - name: Download Windows portable artifact
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: OcarinaMaps-Lichii-Windows-x64
+          name: HyruleAtlas-Windows-x64
           path: release-artifacts
 
       - name: Download release notes artifact
@@ -191,7 +191,7 @@ jobs:
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           name: Hyrule Atlas ${{ github.ref_name }}
-          files: release-artifacts/OcarinaMaps-Lichii-Windows-x64.zip
+          files: release-artifacts/HyruleAtlas-Windows-x64.zip
           body_path: release-artifacts/RELEASE_NOTES.md
           generate_release_notes: false
 

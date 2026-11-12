@@ -1,6 +1,7 @@
 import { once } from 'node:events'
 import fs from 'node:fs'
 import http from 'node:http'
+import os from 'node:os'
 import path from 'node:path'
 import { Readable } from 'node:stream'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -9,14 +10,17 @@ import {
   getLichiiTelemetryState,
   setStaticAssetRoots,
 } from '../src/lib/lichii-server'
+import {
+  collectLanIpv4Urls,
+  isWildcardBindHost,
+  parseServerConfig,
+  sanitizeHostHeader,
+} from '../src/lib/server-network'
 import type { LichiiTelemetryState } from '../src/lib/lichii-types'
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'production'
 }
-
-const DEFAULT_HOST = '127.0.0.1'
-const DEFAULT_PORT = 3000
 
 const MIME_TYPES: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
@@ -42,13 +46,6 @@ type SsrFetchModule = {
   default?: {
     fetch?: (request: Request) => Promise<Response> | Response
   }
-}
-
-function parseServerPort(raw: string | undefined, fallback = DEFAULT_PORT): number {
-  const trimmed = raw?.trim()
-  if (!trimmed || !/^\d+$/.test(trimmed)) return fallback
-  const port = Number.parseInt(trimmed, 10)
-  return Number.isInteger(port) && port >= 0 && port <= 65535 ? port : fallback
 }
 
 function hasValidDistLayout(dir: string): boolean {
@@ -281,8 +278,7 @@ async function sendWebResponse(
 }
 
 async function main(): Promise<void> {
-  const host = process.env.HOST?.trim() || DEFAULT_HOST
-  const port = parseServerPort(process.env.PORT, DEFAULT_PORT)
+  const { host, port } = parseServerConfig(process.argv.slice(2), process.env)
   const distDir = resolveDistDir()
   const clientDir = path.join(distDir, 'client')
   const serverEntryPath = path.join(distDir, 'server', 'server.js')
@@ -312,9 +308,8 @@ async function main(): Promise<void> {
       res.end('Bad Request')
       return
     }
-    const fallbackOriginHost =
-      host === '0.0.0.0' || host === '::' ? '127.0.0.1' : host
-    const hostHeader = req.headers.host || `${fallbackOriginHost}:${boundPort}`
+    const fallbackOriginHost = isWildcardBindHost(host) ? '127.0.0.1' : host
+    const hostHeader = sanitizeHostHeader(req.headers.host, fallbackOriginHost, boundPort)
 
     let requestUrl: URL
     try {
@@ -402,8 +397,13 @@ async function main(): Promise<void> {
   server.listen(port, host, () => {
     const addr = server.address()
     boundPort = typeof addr === 'object' && addr ? addr.port : port
-    const displayHost = host === '0.0.0.0' || host === '::' ? '127.0.0.1' : host
+    const displayHost = isWildcardBindHost(host) ? '127.0.0.1' : host
     console.log(`READY http://${displayHost}:${boundPort}`)
+    if (isWildcardBindHost(host)) {
+      for (const lanUrl of collectLanIpv4Urls(os.networkInterfaces(), boundPort)) {
+        console.log(`LAN ${lanUrl}`)
+      }
+    }
   })
 }
 

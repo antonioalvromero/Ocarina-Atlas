@@ -38,6 +38,7 @@ Download the latest portable Windows bundle from **[GitHub Releases](../../relea
 ### Portable Windows Launcher (`OcarinaMaps.exe`)
 - **Zero Dependencies Required:** Includes an embedded portable `runtime/node.exe`, pre-bundled server (`app/standalone-server.mjs`), and compiled client/SSR assets (`app/dist/`). No separate Node.js or `npm` installation needed.
 - **1-Click Lichii RPC Setup:** Detects and updates `%APPDATA%\lichii\nx2_switches.txt` to enable `EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545`.
+- **Second-Screen LAN Ready:** Exposes your PC's detected LAN URL (for an iPad, tablet, phone, or second laptop on the same Wi-Fi/LAN), provides a 1-click **Copy URL** button, and includes an optional **Allow Firewall** helper scoped to Private networks.
 - **Clean Lifecycle Management:** Assigns the Node server to a Windows Job Object (`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`) so closing or crashing the launcher leaves zero orphan processes on port `3000`.
 
 ---
@@ -71,7 +72,13 @@ Follow these steps to run the tracker without installing Node.js or editing code
    - In `OcarinaMaps.exe`, click **Start Server**.
    - With **Auto-open browser when server starts** checked, your default browser opens `http://127.0.0.1:3000` automatically (or click **Open Map in Browser**).
 
-5. **Play in Lichii**
+5. **Open on an iPad, Tablet, or Another PC (Optional)**
+   - Ensure your gaming PC and second-screen device are on the **same local Wi-Fi or Ethernet network** (and verify Windows sets your home network profile to **Private**).
+   - Keep **Allow LAN access (iPad, tablet, other PCs)** checked (enabled by default).
+   - If the tablet cannot reach the page yet, click **Allow Firewall (:3000)** once in `OcarinaMaps.exe` and approve the Administrator prompt (creates an inbound Windows Defender Firewall rule restricted to **Private** networks).
+   - Click **Copy URL** next to **LAN / Tablet URL** (`http://192.168.x.x:3000`) and open that exact `http://` address in Safari, Chrome, or Edge on your iPad/tablet/other PC. *(Live Link coordinates and Gold Skulltula status stream automatically; pins marked on the tablet are saved in that device's browser `localStorage`.)*
+
+6. **Play in Lichii**
    - Boot *Ocarina of Time* (`0400486024DEC000`) in Lichii and load a save slot.
    - Confirm the launcher reads **In-game live tracking** and the bottom-left map bar shows **Lichii · Live**.
 
@@ -86,9 +93,12 @@ Follow these steps to run the tracker without installing Node.js or editing code
 
 ### Launcher Options & CLI Flags
 
-- **GUI Controls:** `Port` (default `3000`), `Auto-open browser when server starts`, `Hide to tray on minimize`, collapsible `Lichii ▾` (`Lichii Host` / `Lichii RPC Port`), and collapsible `Show Log` / `Hide Log` (`Activity Log`).
+- **GUI Controls:** `Port` (default `3000`), `Auto-open browser when server starts`, `Hide to tray on minimize`, `Allow LAN access (iPad, tablet, other PCs)`, `Allow Firewall (:port)`, `Copy URL` for **LAN / Tablet URL**, collapsible `Lichii ▾` (`Lichii Host` / `Lichii RPC Port`), and collapsible `Show Log` / `Hide Log` (`Activity Log`).
 - **Optional Command-Line Flags:**
   - `--port <number>` (or `--port=<number>`) — Override web UI port (`1..65535`)
+  - `--lan` — Bind all local network interfaces (`0.0.0.0`, default) for tablet/iPad/LAN browser access
+  - `--local-only` / `--localhost` — Restrict the web server strictly to `127.0.0.1`
+  - `--host <address>` — Bind a specific local interface IP or hostname
   - `--lichii-host <host>` — Override Lichii RPC host
   - `--lichii-port <number>` — Override Lichii RPC port
   - `--no-browser` — Do not open a browser tab on startup
@@ -103,7 +113,7 @@ Both `scripts/server-entry.ts` and the Vite dev/preview server (`src/lib/lichii-
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `HOST` | `127.0.0.1` | Bind address for the standalone HTTP server (`scripts/server-entry.ts`). |
+| `HOST` | `0.0.0.0` | Bind address for the standalone HTTP server (`scripts/server-entry.ts`; also accepts `--lan`, `--local-only`, `--host`, and `--port` CLI flags). Use `127.0.0.1` to restrict to localhost only. |
 | `PORT` | `3000` | HTTP port for the standalone server (`0..65535`). |
 | `APP_DIST_DIR` | Auto-resolved `dist` | Explicit path to the built `dist/` folder (`client/` + `server/`) when running `standalone-server.mjs`. |
 | `LICHII_HOST` | `127.0.0.1` | Hostname or IP of the Lichii JSON-RPC debug server. |

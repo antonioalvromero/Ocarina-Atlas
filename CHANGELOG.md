@@ -6,11 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **Local Network / Second-Screen Access (`src/lib/server-network.ts`, `scripts/server-entry.ts`, `launcher/OcarinaMaps.cs`, `vite.config.ts`):**
+  - Enabled LAN browser access (`0.0.0.0` default bind) so any tablet, iPad, phone, or secondary PC on the same local network can open the live tracker UI seamlessly.
+  - Added detected **LAN / Tablet URL** display, 1-click **Copy URL**, an **Allow LAN access** toggle (plus `--lan`, `--local-only`, and `--host` CLI flags), and an optional elevated **Allow Firewall (:port)** helper scoped strictly to Private networks (`profile=private`) in `OcarinaMaps.exe`.
+  - Updated standalone server startup output to print reachable `LAN http://<ip>:<port>` URLs prioritizing physical Wi-Fi/Ethernet adapters over virtual interfaces (`vEthernet`, `WSL`, VPN tunnels), and included the PC hostname alongside `.local` in Vite `allowedHosts`.
+
 ### Changed
 - **Lichii-Style Release Notes (`src/lib/release-notes.ts`, `scripts/generate-release-notes.mjs`, `.github/release-notes-instructions.md`):**
   - Standardized release bodies around `## Changes since <prevTag>`, commit span metadata (`Built from ...`), a bold-led callout blockquote, clean category sections (`### New features`, `### Bug fixes`, `### Telemetry & Map Tracking`, `### Windows Launcher`, `### Stability, docs & CI`), `## Downloads` metadata, and a `## Windows` portable ZIP checksum table.
 
 ### Security
+- **LAN HTTP & Service Worker Hardening (`src/lib/server-network.ts`, `scripts/server-entry.ts`, `src/routes/__root.tsx`):**
+  - Added `sanitizeHostHeader()` validation before HTTP URL parsing and guarded `navigator.serviceWorker.register('/sw.js')` cleanly on non-HTTPS LAN origins.
 - **Release Pipeline & API Hardening (`scripts/generate-release-notes.mjs`, `.github/workflows/release-windows.yml`, `src/lib/release-notes.ts`):**
   - Switched Gemini API authentication from URL query parameter (`?key=...`) to the `x-goog-api-key` HTTP header.
   - Added secret redaction and structured HTTP error parsing (`sanitizeSecretText`, `formatSafeHttpError`) so API keys, tokens, and raw upstream error bodies cannot appear in logs.

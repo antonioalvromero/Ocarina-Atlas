@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.1.4] - 2026-11-13
+
+### Fixed
+- **In-App Auto-Updater (`launcher/OcarinaAtlas.cs`):** Fixed `MainForm.AppVersion` mismatch across releases and hardened the PowerShell swap script with lingering process cleanup (`OcarinaAtlas.exe` / `node.exe`), automatic backup & rollback, per-file retry copy, post-copy executable verification, and `%LOCALAPPDATA%\OcarinaAtlas\update.log` diagnostics.
+
 ## [1.1.3] - 2026-11-13
 
 ### Added

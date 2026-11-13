@@ -2054,6 +2054,40 @@ namespace OcarinaAtlasLauncher
             File.WriteAllText(filePath, (versionTag ?? string.Empty).Trim(), Encoding.UTF8);
         }
 
+        public static string GetUpdateLogPath()
+        {
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (string.IsNullOrEmpty(localAppData))
+            {
+                localAppData = Path.GetTempPath();
+            }
+            return Path.Combine(Path.Combine(localAppData, "OcarinaAtlas"), "update.log");
+        }
+
+        public static void AppendUpdateLog(string message)
+        {
+            try
+            {
+                string logPath = GetUpdateLogPath();
+                string dir = Path.GetDirectoryName(logPath);
+                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+                string line = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "[{0:yyyy-MM-dd HH:mm:ss.fff}] {1}{2}",
+                    DateTime.Now,
+                    message ?? string.Empty,
+                    Environment.NewLine);
+                File.AppendAllText(logPath, line, Encoding.UTF8);
+            }
+            catch
+            {
+                // Never crash the launcher if diagnostics logging cannot write.
+            }
+        }
+
         public static string FindExtractedSourceRoot(string extractDir)
         {
             if (string.IsNullOrEmpty(extractDir) || !Directory.Exists(extractDir))
@@ -2061,17 +2095,31 @@ namespace OcarinaAtlasLauncher
                 throw new DirectoryNotFoundException("Extracted update directory does not exist.");
             }
 
+            // 1. Check ZIP root first (in case archive has no wrapper folder).
+            if (File.Exists(Path.Combine(extractDir, "OcarinaAtlas.exe")))
+            {
+                return extractDir;
+            }
+
+            // 2. Check standard release wrapper folder.
             string preferredDir = Path.Combine(extractDir, "OcarinaAtlas-Windows-x64");
             if (File.Exists(Path.Combine(preferredDir, "OcarinaAtlas.exe")))
             {
                 return preferredDir;
             }
 
-            if (File.Exists(Path.Combine(extractDir, "OcarinaAtlas.exe")))
+            // 3. Unwrap any single top-level directory containing OcarinaAtlas.exe.
+            string[] rootFiles = Directory.GetFiles(extractDir);
+            string[] rootDirs = Directory.GetDirectories(extractDir);
+            if (rootFiles.Length == 0 && rootDirs.Length == 1)
             {
-                return extractDir;
+                if (File.Exists(Path.Combine(rootDirs[0], "OcarinaAtlas.exe")))
+                {
+                    return rootDirs[0];
+                }
             }
 
+            // 4. Fallback recursive search.
             string[] matches = Directory.GetFiles(extractDir, "OcarinaAtlas.exe", SearchOption.AllDirectories);
             if (matches.Length > 0)
             {
@@ -2086,38 +2134,142 @@ namespace OcarinaAtlasLauncher
             return (value ?? string.Empty).Replace("'", "''");
         }
 
-        public static string BuildUpdaterPowerShellScript(int targetPid, string sourceRoot, string targetDir, string tempDir, string exeName)
+        public static string BuildUpdaterPowerShellScript(int targetPid, string sourceRoot, string targetDir, string tempDir, string exeName, string logPath)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("$ErrorActionPreference = 'SilentlyContinue'");
-            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$targetPid = {0}", targetPid));
-            sb.AppendLine("$deadline = (Get-Date).AddSeconds(20)");
-            sb.AppendLine("while ((Get-Date) -lt $deadline) {");
-            sb.AppendLine("    $p = Get-Process -Id $targetPid -ErrorAction SilentlyContinue");
-            sb.AppendLine("    if (-not $p) { break }");
-            sb.AppendLine("    Start-Sleep -Milliseconds 200");
-            sb.AppendLine("}");
-            sb.AppendLine("Start-Sleep -Milliseconds 350");
             sb.AppendLine("$ErrorActionPreference = 'Stop'");
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$targetPid = {0}", targetPid));
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$src = '{0}'", EscapePsSingleQuoted(sourceRoot)));
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$dst = '{0}'", EscapePsSingleQuoted(targetDir)));
-            sb.AppendLine("$copied = $false");
-            sb.AppendLine("for ($attempt = 1; $attempt -le 6; $attempt++) {");
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$tmp = '{0}'", EscapePsSingleQuoted(tempDir)));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$exeName = '{0}'", EscapePsSingleQuoted(exeName)));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$logPath = '{0}'", EscapePsSingleQuoted(logPath)));
+            sb.AppendLine("$logDir = Split-Path -Parent $logPath");
+            sb.AppendLine("if ($logDir -and -not (Test-Path -LiteralPath $logDir)) {");
+            sb.AppendLine("    New-Item -ItemType Directory -Path $logDir -Force | Out-Null");
+            sb.AppendLine("}");
+            sb.AppendLine("function Write-UpdateLog([string]$msg) {");
             sb.AppendLine("    try {");
-            sb.AppendLine("        Copy-Item -Path (Join-Path $src '*') -Destination $dst -Recurse -Force");
-            sb.AppendLine("        $copied = $true");
-            sb.AppendLine("        break");
+            sb.AppendLine("        $ts = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss.fff')");
+            sb.AppendLine("        Add-Content -LiteralPath $logPath -Value \"[$ts] $msg\" -Encoding UTF8 -ErrorAction SilentlyContinue");
+            sb.AppendLine("    } catch {}");
+            sb.AppendLine("}");
+            sb.AppendLine("Write-UpdateLog \"Updater started: targetPid=$targetPid src=$src dst=$dst\"");
+            sb.AppendLine("$backupDir = Join-Path $tmp 'backup'");
+            sb.AppendLine("$replaced = $false");
+            sb.AppendLine("try {");
+            sb.AppendLine("    try {");
+            sb.AppendLine("        $targetProc = Get-Process -Id $targetPid -ErrorAction SilentlyContinue");
+            sb.AppendLine("        if ($targetProc) {");
+            sb.AppendLine("            Write-UpdateLog \"Waiting for target PID $targetPid to exit...\"");
+            sb.AppendLine("            if (-not $targetProc.WaitForExit(20000)) {");
+            sb.AppendLine("                Write-UpdateLog \"Target PID $targetPid timed out; stopping process.\"");
+            sb.AppendLine("                Stop-Process -Id $targetPid -Force -ErrorAction SilentlyContinue");
+            sb.AppendLine("                $targetProc.WaitForExit(5000) | Out-Null");
+            sb.AppendLine("            }");
+            sb.AppendLine("        }");
             sb.AppendLine("    } catch {");
-            sb.AppendLine("        if ($attempt -eq 6) { throw }");
-            sb.AppendLine("        Start-Sleep -Milliseconds 350");
+            sb.AppendLine("        Write-UpdateLog \"Target wait note: $($_.Exception.Message)\"");
             sb.AppendLine("    }");
+            sb.AppendLine("    $dstNorm = [System.IO.Path]::GetFullPath($dst).TrimEnd('\\') + '\\'");
+            sb.AppendLine("    foreach ($procName in @('OcarinaAtlas', 'node')) {");
+            sb.AppendLine("        try {");
+            sb.AppendLine("            $procs = Get-Process -Name $procName -ErrorAction SilentlyContinue");
+            sb.AppendLine("            foreach ($p in $procs) {");
+            sb.AppendLine("                try {");
+            sb.AppendLine("                    $pPath = $p.MainModule.FileName");
+            sb.AppendLine("                    if ($pPath -and $pPath.StartsWith($dstNorm, [System.StringComparison]::OrdinalIgnoreCase)) {");
+            sb.AppendLine("                        Write-UpdateLog \"Stopping lingering $($p.ProcessName) (PID $($p.Id)) at $pPath\"");
+            sb.AppendLine("                        Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue");
+            sb.AppendLine("                        $p.WaitForExit(5000) | Out-Null");
+            sb.AppendLine("                    }");
+            sb.AppendLine("                } catch {}");
+            sb.AppendLine("            }");
+            sb.AppendLine("        } catch {}");
+            sb.AppendLine("    }");
+            sb.AppendLine("    Start-Sleep -Milliseconds 400");
+            sb.AppendLine("    $srcNorm = [System.IO.Path]::GetFullPath($src).TrimEnd('\\') + '\\'");
+            sb.AppendLine("    $srcFiles = [System.IO.Directory]::GetFiles($srcNorm, '*', [System.IO.SearchOption]::AllDirectories)");
+            sb.AppendLine("    Write-UpdateLog \"Copying $($srcFiles.Length) files from $srcNorm to $dstNorm\"");
+            sb.AppendLine("    $backedUp = New-Object 'System.Collections.Generic.List[string]'");
+            sb.AppendLine("    try {");
+            sb.AppendLine("        foreach ($srcFile in $srcFiles) {");
+            sb.AppendLine("            $rel = $srcFile.Substring($srcNorm.Length)");
+            sb.AppendLine("            $dstFile = Join-Path $dstNorm $rel");
+            sb.AppendLine("            $dstParent = Split-Path -Parent $dstFile");
+            sb.AppendLine("            if ($dstParent -and -not (Test-Path -LiteralPath $dstParent)) {");
+            sb.AppendLine("                New-Item -ItemType Directory -Path $dstParent -Force | Out-Null");
+            sb.AppendLine("            }");
+            sb.AppendLine("            if (Test-Path -LiteralPath $dstFile) {");
+            sb.AppendLine("                $bakFile = Join-Path $backupDir $rel");
+            sb.AppendLine("                $bakParent = Split-Path -Parent $bakFile");
+            sb.AppendLine("                if ($bakParent -and -not (Test-Path -LiteralPath $bakParent)) {");
+            sb.AppendLine("                    New-Item -ItemType Directory -Path $bakParent -Force | Out-Null");
+            sb.AppendLine("                }");
+            sb.AppendLine("                [System.IO.File]::Copy($dstFile, $bakFile, $true)");
+            sb.AppendLine("                $backedUp.Add($rel)");
+            sb.AppendLine("            }");
+            sb.AppendLine("            $fileCopied = $false");
+            sb.AppendLine("            for ($attempt = 1; $attempt -le 20; $attempt++) {");
+            sb.AppendLine("                try {");
+            sb.AppendLine("                    if (Test-Path -LiteralPath $dstFile) {");
+            sb.AppendLine("                        $attr = [System.IO.File]::GetAttributes($dstFile)");
+            sb.AppendLine("                        if (($attr -band [System.IO.FileAttributes]::ReadOnly) -ne 0) {");
+            sb.AppendLine("                            [System.IO.File]::SetAttributes($dstFile, ($attr -band (-bnot [System.IO.FileAttributes]::ReadOnly)))");
+            sb.AppendLine("                        }");
+            sb.AppendLine("                    }");
+            sb.AppendLine("                    [System.IO.File]::Copy($srcFile, $dstFile, $true)");
+            sb.AppendLine("                    $fileCopied = $true");
+            sb.AppendLine("                    break");
+            sb.AppendLine("                } catch {");
+            sb.AppendLine("                    if ($attempt -eq 20) {");
+            sb.AppendLine("                        throw \"Failed to replace '$rel' after 20 attempts: $($_.Exception.Message)\"");
+            sb.AppendLine("                    }");
+            sb.AppendLine("                    Start-Sleep -Milliseconds 500");
+            sb.AppendLine("                }");
+            sb.AppendLine("            }");
+            sb.AppendLine("        }");
+            sb.AppendLine("        $srcExe = Join-Path $srcNorm $exeName");
+            sb.AppendLine("        $dstExe = Join-Path $dstNorm $exeName");
+            sb.AppendLine("        if (-not (Test-Path -LiteralPath $dstExe)) {");
+            sb.AppendLine("            throw \"Post-copy verification failed: '$dstExe' is missing.\"");
+            sb.AppendLine("        }");
+            sb.AppendLine("        $srcLen = (Get-Item -LiteralPath $srcExe).Length");
+            sb.AppendLine("        $dstLen = (Get-Item -LiteralPath $dstExe).Length");
+            sb.AppendLine("        if ($srcLen -ne $dstLen) {");
+            sb.AppendLine("            throw \"Post-copy verification failed: '$dstExe' size ($dstLen) != source size ($srcLen).\"");
+            sb.AppendLine("        }");
+            sb.AppendLine("        Write-UpdateLog \"Update applied successfully ($($srcFiles.Length) files, $exeName=$dstLen bytes).\"");
+            sb.AppendLine("        $replaced = $true");
+            sb.AppendLine("    } catch {");
+            sb.AppendLine("        Write-UpdateLog \"ERROR during file swap: $($_.Exception.Message)\"");
+            sb.AppendLine("        foreach ($rel in $backedUp) {");
+            sb.AppendLine("            try {");
+            sb.AppendLine("                $bakFile = Join-Path $backupDir $rel");
+            sb.AppendLine("                $dstFile = Join-Path $dstNorm $rel");
+            sb.AppendLine("                if (Test-Path -LiteralPath $bakFile) {");
+            sb.AppendLine("                    [System.IO.File]::Copy($bakFile, $dstFile, $true)");
+            sb.AppendLine("                }");
+            sb.AppendLine("            } catch {}");
+            sb.AppendLine("        }");
+            sb.AppendLine("        Write-UpdateLog \"Rolled back $($backedUp.Count) backed-up files.\"");
+            sb.AppendLine("    }");
+            sb.AppendLine("} catch {");
+            sb.AppendLine("    Write-UpdateLog \"FATAL updater error: $($_.Exception.Message)\"");
+            sb.AppendLine("} finally {");
+            sb.AppendLine("    $exe = Join-Path $dst $exeName");
+            sb.AppendLine("    if (Test-Path -LiteralPath $exe) {");
+            sb.AppendLine("        Write-UpdateLog \"Relaunching $exe (replaced=$replaced)\"");
+            sb.AppendLine("        Start-Process -FilePath $exe -WorkingDirectory $dst");
+            sb.AppendLine("    } else {");
+            sb.AppendLine("        Write-UpdateLog \"ERROR: Cannot relaunch missing executable $exe\"");
+            sb.AppendLine("    }");
+            sb.AppendLine("    try {");
+            sb.AppendLine("        if (Test-Path -LiteralPath $tmp) {");
+            sb.AppendLine("            Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue");
+            sb.AppendLine("        }");
+            sb.AppendLine("    } catch {}");
             sb.AppendLine("}");
-            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$exe = Join-Path $dst '{0}'", EscapePsSingleQuoted(exeName)));
-            sb.AppendLine("if ($copied -and (Test-Path -LiteralPath $exe)) {");
-            sb.AppendLine("    Start-Process -FilePath $exe -WorkingDirectory $dst");
-            sb.AppendLine("}");
-            sb.AppendLine("$ErrorActionPreference = 'SilentlyContinue'");
-            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Remove-Item -LiteralPath '{0}' -Recurse -Force", EscapePsSingleQuoted(tempDir)));
             return sb.ToString();
         }
 
@@ -2129,7 +2281,16 @@ namespace OcarinaAtlasLauncher
                 exeName = "OcarinaAtlas.exe";
             }
 
-            string script = BuildUpdaterPowerShellScript(targetPid, sourceRoot, targetDir, tempDir, exeName);
+            string logPath = GetUpdateLogPath();
+            AppendUpdateLog(string.Format(
+                CultureInfo.InvariantCulture,
+                "Launching detached updater (pid={0}, src={1}, dst={2}, tmp={3})",
+                targetPid,
+                sourceRoot,
+                targetDir,
+                tempDir));
+
+            string script = BuildUpdaterPowerShellScript(targetPid, sourceRoot, targetDir, tempDir, exeName, logPath);
             byte[] scriptBytes = Encoding.Unicode.GetBytes(script);
             string encoded = Convert.ToBase64String(scriptBytes);
 
@@ -2139,7 +2300,11 @@ namespace OcarinaAtlasLauncher
             psi.UseShellExecute = false;
             psi.CreateNoWindow = true;
             psi.WindowStyle = ProcessWindowStyle.Hidden;
-            Process.Start(psi);
+            Process started = Process.Start(psi);
+            if (started == null)
+            {
+                throw new InvalidOperationException("Failed to start detached PowerShell updater process.");
+            }
         }
     }
 
@@ -2327,6 +2492,7 @@ namespace OcarinaAtlasLauncher
             try
             {
                 Directory.CreateDirectory(tempDir);
+                UpdateManager.AppendUpdateLog("Starting update to " + _info.DisplayTag + " from " + _info.ZipDownloadUrl);
                 ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
                 WebClient client = new WebClient();
                 client.Headers[HttpRequestHeader.UserAgent] = "OcarinaAtlas/" + MainForm.AppVersion;
@@ -2381,6 +2547,7 @@ namespace OcarinaAtlasLauncher
                             string targetDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(
                                 Path.DirectorySeparatorChar,
                                 Path.AltDirectorySeparatorChar);
+                            UpdateManager.AppendUpdateLog("Extracted update to " + sourceRoot + " -> targetDir=" + targetDir);
 
                             if (!IsDisposed && IsHandleCreated)
                             {
@@ -2399,6 +2566,8 @@ namespace OcarinaAtlasLauncher
                                             sourceRoot,
                                             targetDir,
                                             tempDir);
+                                        DialogResult = DialogResult.OK;
+                                        Close();
                                         Application.Exit();
                                     }
                                     catch (Exception applyEx)
@@ -2433,10 +2602,11 @@ namespace OcarinaAtlasLauncher
 
         private void FailUpdate(string message, string tempDir)
         {
+            UpdateManager.AppendUpdateLog("Update failed: " + message);
             _isUpdating = false;
             _progressBar.Visible = false;
             _statusLabel.ForeColor = Theme.Ember;
-            _statusLabel.Text = message;
+            _statusLabel.Text = message + " (See update.log)";
             _updateNowButton.Enabled = true;
             _skipButton.Enabled = true;
             _closeButton.Enabled = true;
@@ -2457,7 +2627,7 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "1.1.2";
+        public const string AppVersion = "1.1.3";
 
         private const int CollapsedClientHeight = 478;
         private const int ExpandedClientHeight = 700;

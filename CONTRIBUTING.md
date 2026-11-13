@@ -4,9 +4,9 @@ Thank you for your interest in contributing to **Ocarina Atlas** (the live Lichi
 
 > AI coding assistants: review [`AGENTS.md`](AGENTS.md) before editing code or build scripts.
 
-## Code of Conduct
+## Code of Conduct & Security
 
-Please review and follow our [Code of Conduct](CODE_OF_CONDUCT.md) in all repository interactions.
+Please review and follow our [Code of Conduct](CODE_OF_CONDUCT.md) in all repository interactions, and see our [Security Policy](SECURITY.md) for private vulnerability reporting guidelines.
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@ Please review and follow our [Code of Conduct](CODE_OF_CONDUCT.md) in all reposi
 ```sh
 git clone https://github.com/antonioalvromero/Ocarina-Atlas.git
 cd Ocarina-Atlas
-npm install   # or `npm ci` when package-lock.json is present, or `bun install`
+npm install   # or `bun install` (matching `bun.lock`)
 npm run dev
 ```
 

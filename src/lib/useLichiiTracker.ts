@@ -13,6 +13,7 @@ import type { Item } from './types'
 
 const gsItemIds = new Set(dataset.items.filter((item) => item.cat === 'gs').map((item) => item.id))
 const itemsById = new Map(dataset.items.map((item) => [item.id, item]))
+const placesById = new Map(dataset.places.map((p) => [p.id, p]))
 
 export const lichiiFollowSlot: Slot<boolean> = {
   key: 'lichii-follow',
@@ -74,6 +75,7 @@ let pollToken = 0
 let pollInFlight = false
 let activeSubscribers = 0
 let hasAuthoritativeSync = false
+let lastAutoSyncSignature: string | null = null
 const sessionAnnouncedIds = new Set<string>()
 
 function emitStore() {
@@ -155,6 +157,7 @@ export function reconcileSkulltulaLists(params: {
 function processAutoSkulltulas(next: LichiiTelemetryState) {
   if (!isLiveMemoryState(next)) {
     hasAuthoritativeSync = false
+    lastAutoSyncSignature = null
     sessionAnnouncedIds.clear()
     return
   }
@@ -162,6 +165,7 @@ function processAutoSkulltulas(next: LichiiTelemetryState) {
   const autoMark = read(lichiiAutoSkulltulaSlot)
   if (!autoMark) {
     hasAuthoritativeSync = false
+    lastAutoSyncSignature = null
     return
   }
 
@@ -170,8 +174,14 @@ function processAutoSkulltulas(next: LichiiTelemetryState) {
     collectedIds.push(next.lastCollectedSkulltulaId)
   }
 
-  const wasSyncedBefore = hasAuthoritativeSync
   const isAuthoritative = Boolean(next.authoritativeSkulltulas)
+  const signature = `${isAuthoritative ? 1 : 0}:${next.lastCollectedSkulltulaId ?? ''}:${collectedIds.join(',')}`
+  if (signature === lastAutoSyncSignature) {
+    return
+  }
+  lastAutoSyncSignature = signature
+
+  const wasSyncedBefore = hasAuthoritativeSync
   const { nextDone, nextRevealed, doneChanged, revealedChanged, addedIds, removedIds } =
     reconcileSkulltulaLists({
       doneList: read(officialDoneSlot),
@@ -206,7 +216,7 @@ function processAutoSkulltulas(next: LichiiTelemetryState) {
   if (newlyMarkedItems.length > 0) {
     const now = Date.now()
     const newToasts: SkulltulaToast[] = newlyMarkedItems.map((item) => {
-      const place = dataset.places.find((p) => p.id === item.place)
+      const place = placesById.get(item.place)
       return {
         id: `${item.id}-${now}`,
         itemId: item.id,
@@ -252,6 +262,7 @@ async function pollOnce() {
     emitStore()
   } catch (err) {
     hasAuthoritativeSync = false
+    lastAutoSyncSignature = null
     sessionAnnouncedIds.clear()
     storeState = {
       ...storeState,

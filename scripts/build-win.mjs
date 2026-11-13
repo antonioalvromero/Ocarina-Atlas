@@ -17,6 +17,7 @@ const DIST_DIR = path.join(ROOT_DIR, 'dist')
 const STANDALONE_ENTRY = path.join(ROOT_DIR, 'scripts', 'server-entry.ts')
 const STANDALONE_OUT = path.join(DIST_DIR, 'standalone-server.mjs')
 const LAUNCHER_CS = path.join(ROOT_DIR, 'launcher', 'OcarinaAtlas.cs')
+const LAUNCHER_ICO = path.join(ROOT_DIR, 'launcher', 'OcarinaAtlas.ico')
 const LAUNCHER_EXE = path.join(BUNDLE_DIR, 'OcarinaAtlas.exe')
 
 function runStep(label, command, args, options = {}) {
@@ -77,6 +78,7 @@ function main() {
   assertExists(rolldownCli, 'Rolldown CLI')
   assertExists(STANDALONE_ENTRY, 'standalone server entry')
   assertExists(LAUNCHER_CS, 'WinForms launcher source')
+  assertExists(LAUNCHER_ICO, 'WinForms launcher icon')
 
   // 1. Build Vite client + SSR bundle into dist/
   runStep('Building Vite client + SSR app (dist/)', process.execPath, [viteCli, 'build'])
@@ -139,6 +141,7 @@ function main() {
     '/platform:x64',
     '/warn:4',
     '/warnaserror',
+    `/win32icon:${LAUNCHER_ICO}`,
     `/out:${LAUNCHER_EXE}`,
     LAUNCHER_CS,
   ])

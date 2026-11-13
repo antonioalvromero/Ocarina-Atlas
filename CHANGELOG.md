@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **Project Logo & Windows Icon (`assets/logo.png`, `launcher/OcarinaAtlas.ico`):** Added official Ocarina Atlas branding assets for the repository README and Windows launcher executable.
+
+### Changed
+- **Client, Server & Vite Optimizations (`src/lib/lichii-server.ts`, `src/lib/useLichiiTracker.ts`, `vite.config.ts`):** Improved telemetry polling, server/build performance, and Vite integration.
+- **Documentation Refresh (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`):** Rewrote `README.md` with the new hero logo, official-release caution callout, updated launcher UI labels, collapsible CLI/environment reference, and refreshed cross-links across `CONTRIBUTING.md` and `SECURITY.md`.
+
 ## [1.0.3] - 2026-11-12
 
 ### Changed

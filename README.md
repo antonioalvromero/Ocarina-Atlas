@@ -91,6 +91,14 @@ Run the live tracker on Windows without installing Node.js or editing code:
 
 ---
 
+## Preview
+
+| Hyrule World Map & Global Progress | Dungeon Floor & Skulltula Tracker |
+| --- | --- |
+| ![Hyrule World Map](assets/screenshots/world-map.png) | ![Spirit Temple Floor Map](assets/screenshots/spirit-temple.png) |
+
+---
+
 ## Features
 
 ### Live Lichii Telemetry
@@ -102,12 +110,14 @@ Run the live tracker on Windows without installing Node.js or editing code:
 
 ### Interactive Map & Progress Tracker
 - **Complete Atlas Dataset:** 32 places (20 overworld zones and 12 dungeons) and 184 official collectibles across 8 categories (100 Gold Skulltulas, Pieces of Heart, Heart Containers, Magic Beans, Great Fairies, Bottles, Keys, and Fairy Thoughts).
+- **Global Progress Stats:** Open the **Stats** drawer from the World Map to view overall completion (`X / 184`) broken down by category and location.
 - **Custom Pins & Smart Merge:** Drop typed custom pins anywhere on a map; placing a pin near a matching official pin merges and reveals it automatically.
 - **Age & Category Filtering:** Filter by **Child**, **Adult**, or **Both**, hide completed categories, inspect **All floors** side-by-side, and persist per-map zoom/pan state in `localStorage` (`oot-map:v1:*`).
 - **Offline PWA Support:** Built with a service worker (`sw.js`) and web manifest so maps and visited item media cache locally.
 
 ### Portable Windows Launcher (`OcarinaAtlas.exe`)
 - **Self-Contained Runtime:** Bundles portable `runtime/node.exe`, `app/standalone-server.mjs`, and `app/dist/` with zero Node.js or `npm` installation required.
+- **Auto-Updater (`UpdateDialog`):** Checks GitHub Releases for newer versions and lets you download and install updates directly from the launcher.
 - **LAN Adapter Ranking:** Filters out VPNs and virtual NICs, lets you pick between multiple active physical adapters, and copies the exact second-screen URL in one click.
 - **Clean Lifecycle Management:** Supervises the Node child process via a Windows Job Object (`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`) so closing the launcher never leaves orphan processes on port `3000`.
 

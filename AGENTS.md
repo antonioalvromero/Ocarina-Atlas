@@ -1,12 +1,12 @@
 # AGENTS.md
 
-This file provides repository-specific guidance, architecture notes, and verification requirements for AI coding agents working on **Hyrule Atlas** (live Lichii telemetry + Windows launcher extension of `lucasriondel/oot-remake-map`).
+This file provides repository-specific guidance, architecture notes, and verification requirements for AI coding agents working on **Ocarina Atlas** (live Lichii telemetry + Windows launcher extension of `lucasriondel/oot-remake-map`).
 
 ## Project Overview
 
-- **Target platform:** Windows 10/11 (x64) for live emulator telemetry and the standalone desktop launcher (`HyruleAtlas.exe`). The web UI renders on any OS with Node.js `22.12+` / `24.x`.
+- **Target platform:** Windows 10/11 (x64) for live emulator telemetry and the standalone desktop launcher (`OcarinaAtlas.exe`). The web UI renders on any OS with Node.js `22.12+` / `24.x`.
 - **Target game build:** *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`) running on [Lichii](https://github.com/zortos293/Lichii).
-- **Stack:** React 19, TanStack Start / TanStack Router, Tailwind CSS v4, Vite 8, Vitest 5, TypeScript 7 (`strict`), Node.js HTTP server (`scripts/server-entry.ts`), and `.NET Framework 4.x` WinForms (`launcher/HyruleAtlas.cs`).
+- **Stack:** React 19, TanStack Start / TanStack Router, Tailwind CSS v4, Vite 8, Vitest 5, TypeScript 7 (`strict`), Node.js HTTP server (`scripts/server-entry.ts`), and `.NET Framework 4.x` WinForms (`launcher/OcarinaAtlas.cs`).
 
 ## Essential Commands
 
@@ -18,7 +18,7 @@ npm run typecheck     # tsc --noEmit
 npm test              # vitest run (all unit test suites in src/**/*.test.ts)
 npm run build         # Vite client + standalone SSR bundle (dist/)
 npm run server:build  # Vite build + Rolldown standalone server bundle (dist/standalone-server.mjs)
-npm run build:win     # Complete Windows portable bundle + release/HyruleAtlas-Windows-x64.zip
+npm run build:win     # Complete Windows portable bundle + release/OcarinaAtlas-Windows-x64.zip
 ```
 
 Notes for Windows shells:
@@ -40,9 +40,9 @@ Notes for Windows shells:
 - `src/components/` — `WorldMap.tsx`, `PlaceView.tsx`, `FloorGrid.tsx`, `PlayerPin.tsx`, `LichiiStatusPanel.tsx`.
 - `src/lib/server-network.ts` — Pure LAN/host utilities (`parseServerConfig`, `collectLanIpv4Urls`, `sanitizeHostHeader`, `resolveAllowedDevHosts`) shared across `scripts/server-entry.ts` and `vite.config.ts`.
 - `scripts/server-entry.ts` — Zero-`node_modules` standalone Node HTTP server serving `/api/lichii/state`, static files from `dist/client/`, and SSR via `dist/server/server.js` (defaulting to `0.0.0.0` for LAN second-screen access, with `--local-only` / `HOST=127.0.0.1` override).
-- `launcher/HyruleAtlas.cs` — Native C# WinForms launcher (`HyruleAtlas.exe`) compiled by `%WINDIR%\Microsoft.NET\Framework64\v4*\csc.exe` (`/target:winexe /platform:x64 /warn:4 /warnaserror`), managing the server child process with a Windows Job Object (`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`), LAN URL discovery/copying (`LanNetworkHelper`), explicit Private-profile Windows Firewall setup (`--lan` / `--local-only` / `--host`), and 1-click `%APPDATA%\lichii\nx2_switches.txt` configuration.
-- `scripts/build-win.mjs` — Cross-platform Node script orchestrating `vite build`, `rolldown`, copying `node.exe`, compiling `launcher/HyruleAtlas.cs`, and producing `release/HyruleAtlas-Windows-x64.zip`.
-- `scripts/smoke-test-win.ps1` — PowerShell verification script asserting Windows release artifacts, launching `HyruleAtlas.exe` outside the repo, validating HTTP `200` on `/` and `/api/lichii/state`, and confirming Job Object port cleanup.
+- `launcher/OcarinaAtlas.cs` — Native C# WinForms launcher (`OcarinaAtlas.exe`) compiled by `%WINDIR%\Microsoft.NET\Framework64\v4*\csc.exe` (`/target:winexe /platform:x64 /warn:4 /warnaserror`), managing the server child process with a Windows Job Object (`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`), LAN URL discovery/copying (`LanNetworkHelper`), explicit Private-profile Windows Firewall setup (`--lan` / `--local-only` / `--host`), and 1-click `%APPDATA%\lichii\nx2_switches.txt` configuration.
+- `scripts/build-win.mjs` — Cross-platform Node script orchestrating `vite build`, `rolldown`, copying `node.exe`, compiling `launcher/OcarinaAtlas.cs`, and producing `release/OcarinaAtlas-Windows-x64.zip`.
+- `scripts/smoke-test-win.ps1` — PowerShell verification script asserting Windows release artifacts, launching `OcarinaAtlas.exe` outside the repo, validating HTTP `200` on `/` and `/api/lichii/state`, and confirming Job Object port cleanup.
 - `src/lib/release-notes.ts` & `scripts/generate-release-notes.mjs` — Pure prompt/summary helpers and CI release-body composer supporting `COPILOT_GITHUB_TOKEN`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, SHA-256 digests, and `CHANGELOG.md` fallback.
 - `.github/workflows/` — CI (`ci.yml`) and Windows release packager (`release-windows.yml`).
 
@@ -53,13 +53,13 @@ Notes for Windows shells:
 3. **Never reintroduce proximity Skulltula guessing:** Gold Skulltula completion must come strictly from exact actor ID hashes (`KNOWN_SKULLTULA_HASH_MAP`, `parseMasterFlagTableBuffer`, or saved `0xa3db7114` hashes). When `authoritativeSkulltulas` is `true`, `reconcileSkulltulaLists()` must unmark and un-reveal GS IDs absent from the currently loaded save while preserving non-GS items and manually revealed uncollected pins.
 4. **ASLR safety across emulator restarts:** Do not hardcode session heap or vtable addresses as primary lookup keys. Always derive dynamic vtables from the validated NSO `MOD0` base and clear all cached pointers in `resetLiveSessionCaches()` on RPC disconnect or session restart.
 5. **Read-only guarantee & legal hygiene:** Never write to emulator memory (`write_memory` is off-limits) or mutate `.sav` files. Launcher `%APPDATA%\lichii\nx2_switches.txt` writes and Windows Defender Firewall rule creation (`profile=private`) must happen only on explicit user action, preserving unrelated switches/rules. Never commit ROMs, decryption keys, NAND dumps, `.sav` files, or memory dumps.
-6. **Zero runtime `node_modules` in Windows releases:** Any imports added to `src/lib/lichii-server.ts`, `scripts/server-entry.ts`, or TanStack Start SSR routes must bundle cleanly with `vite.config.ts` (`standaloneSsrPlugin` with `noExternal: true`) and Rolldown so `release/HyruleAtlas-Windows-x64/` executes using only `runtime/node.exe`.
+6. **Zero runtime `node_modules` in Windows releases:** Any imports added to `src/lib/lichii-server.ts`, `scripts/server-entry.ts`, or TanStack Start SSR routes must bundle cleanly with `vite.config.ts` (`standaloneSsrPlugin` with `noExternal: true`) and Rolldown so `release/OcarinaAtlas-Windows-x64/` executes using only `runtime/node.exe`.
 
 ## Verification Checklist
 
 Before finishing any change:
 1. Run `npm run typecheck` (must exit `0`).
 2. Run `npm test` (all Vitest test suites must pass without skipped or weakened assertions).
-3. If modifying `src/lib/lichii-server.ts`, `scripts/server-entry.ts`, `scripts/build-win.mjs`, `launcher/HyruleAtlas.cs`, `vite.config.ts`, or frontend bundles included in Windows releases:
-   - Run `npm run build:win` and verify `release/HyruleAtlas-Windows-x64.zip` is created cleanly.
-   - Smoke-test the extracted release outside the repo (`HyruleAtlas.exe --port <free-port> --no-browser --auto-start --minimized`) when modifying runtime or launcher lifecycle code.
+3. If modifying `src/lib/lichii-server.ts`, `scripts/server-entry.ts`, `scripts/build-win.mjs`, `launcher/OcarinaAtlas.cs`, `vite.config.ts`, or frontend bundles included in Windows releases:
+   - Run `npm run build:win` and verify `release/OcarinaAtlas-Windows-x64.zip` is created cleanly.
+   - Smoke-test the extracted release outside the repo (`OcarinaAtlas.exe --port <free-port> --no-browser --auto-start --minimized`) when modifying runtime or launcher lifecycle code.

@@ -37,13 +37,13 @@ describe('extractChangelogSection', () => {
     '',
     '## [1.0.0] - 2026-11-10',
     '### Added',
-    '- Initial Hyrule Atlas release',
+    '- Initial Ocarina Atlas release',
   ].join('\n')
 
   it('extracts only the requested version section', () => {
     const section = extractChangelogSection(sample, 'v1.0.1')
     expect(section).toContain('MIT License and AI release summaries')
-    expect(section).not.toContain('Initial Hyrule Atlas release')
+    expect(section).not.toContain('Initial Ocarina Atlas release')
   })
 
   it('returns empty string when version does not exist', () => {
@@ -159,21 +159,21 @@ describe('composeReleaseBody', () => {
     const body = composeReleaseBody({
       version: 'v1.0.1',
       previousTag: 'v1.0.0',
-      repoSlug: 'antonioalvromero/Hyrule-Atlas',
+      repoSlug: 'antonioalvromero/Ocarina-Atlas',
       headBranch: 'main',
       headSha: '9bc568b000000000000000000000000000000000',
       previousTagSha: 'e009ec8000000000000000000000000000000000',
       aiSummary: [
-        '> **Automated releases.** Hyrule Atlas now builds Lichii-style release notes automatically.',
+        '> **Automated releases.** Ocarina Atlas now builds Lichii-style release notes automatically.',
         '',
         '### New features',
-        '- **MIT License:** Added permissive MIT coverage for Hyrule Atlas telemetry and launcher code (#1).',
+        '- **MIT License:** Added permissive MIT coverage for Ocarina Atlas telemetry and launcher code (#1).',
       ].join('\n'),
       aiProviderLabel: 'Gemini',
       changelogSection: '',
       commits: [{ sha: '478f743', subject: 'chore: add MIT license and release notes' }],
       githubGeneratedNotes: "## What's Changed\n* PR #1 by @antonioalvromero",
-      zipAssetName: 'HyruleAtlas-Windows-x64.zip',
+      zipAssetName: 'OcarinaAtlas-Windows-x64.zip',
       zipSha256: 'deadbeef1234',
     })
 
@@ -182,13 +182,13 @@ describe('composeReleaseBody', () => {
     expect(body).toContain('> **Automated releases.**')
     expect(body).toContain('### New features')
     expect(body).toContain(
-      'Full list: [v1.0.0...v1.0.1](https://github.com/antonioalvromero/Hyrule-Atlas/compare/v1.0.0...v1.0.1).',
+      'Full list: [v1.0.0...v1.0.1](https://github.com/antonioalvromero/Ocarina-Atlas/compare/v1.0.0...v1.0.1).',
     )
     expect(body).toContain('## Downloads')
     expect(body).toContain('Automatic build of `main` at 9bc568b000000000000000000000000000000000.')
     expect(body).toContain('## Windows')
     expect(body).toContain(
-      '| amd64 / x86_64 | [zip](https://github.com/antonioalvromero/Hyrule-Atlas/releases/download/v1.0.1/HyruleAtlas-Windows-x64.zip) | `deadbeef1234` |',
+      '| amd64 / x86_64 | [zip](https://github.com/antonioalvromero/Ocarina-Atlas/releases/download/v1.0.1/OcarinaAtlas-Windows-x64.zip) | `deadbeef1234` |',
     )
     expect(body).not.toContain("## What's Changed")
   })
@@ -197,7 +197,7 @@ describe('composeReleaseBody', () => {
     const body = composeReleaseBody({
       version: 'v1.0.1',
       previousTag: 'v1.0.0',
-      repoSlug: 'antonioalvromero/Hyrule-Atlas',
+      repoSlug: 'antonioalvromero/Ocarina-Atlas',
       headBranch: 'main',
       headSha: '9bc568b111111111111111111111111111111111',
       previousTagSha: 'e009ec8222222222222222222222222222222222',
@@ -206,21 +206,21 @@ describe('composeReleaseBody', () => {
       changelogSection: '### Added\n- **MIT License:** Permissive license for newly authored code.',
       commits: [{ sha: '478f743', subject: 'chore: add MIT license' }],
       githubGeneratedNotes: '',
-      zipAssetName: 'HyruleAtlas-Windows-x64.zip',
+      zipAssetName: 'OcarinaAtlas-Windows-x64.zip',
       zipSha256: null,
     })
 
     expect(body).toContain('## Changes since v1.0.0')
     expect(body).toContain('### New features')
     expect(body).toContain('- **MIT License:** Permissive license for newly authored code.')
-    expect(body).toContain('| amd64 / x86_64 | [zip](https://github.com/antonioalvromero/Hyrule-Atlas/releases/download/v1.0.1/HyruleAtlas-Windows-x64.zip) | Unavailable |')
+    expect(body).toContain('| amd64 / x86_64 | [zip](https://github.com/antonioalvromero/Ocarina-Atlas/releases/download/v1.0.1/OcarinaAtlas-Windows-x64.zip) | Unavailable |')
   })
 
   it('formats commits into Lichii sections without raw feat:/fix: prefixes when changelog is empty', () => {
     const body = composeReleaseBody({
       version: 'v1.0.0',
       previousTag: null,
-      repoSlug: 'antonioalvromero/Hyrule-Atlas',
+      repoSlug: 'antonioalvromero/Ocarina-Atlas',
       aiSummary: null,
       aiProviderLabel: null,
       changelogSection: '',
@@ -229,7 +229,7 @@ describe('composeReleaseBody', () => {
         { sha: 'bbbb222', subject: 'fix: prevent stale floor badge' },
       ],
       githubGeneratedNotes: '',
-      zipAssetName: 'HyruleAtlas-Windows-x64.zip',
+      zipAssetName: 'OcarinaAtlas-Windows-x64.zip',
       zipSha256: 'cafebabe',
     })
 
@@ -287,16 +287,16 @@ describe('security sanitization and input validation', () => {
   })
 
   it('validates repo slugs, git refs, remote URLs, and AI model names strictly', () => {
-    expect(parseSafeRepoSlug('antonioalvromero/Hyrule-Atlas')).toBe('antonioalvromero/Hyrule-Atlas')
+    expect(parseSafeRepoSlug('antonioalvromero/Ocarina-Atlas')).toBe('antonioalvromero/Ocarina-Atlas')
     expect(parseSafeRepoSlug('../evil/repo')).toBeNull()
     expect(() => validateRepoSlug('invalid slug')).toThrow()
 
     expect(
-      extractGitHubRepoSlugFromRemote('https://github.com/antonioalvromero/Hyrule-Atlas.git'),
-    ).toBe('antonioalvromero/Hyrule-Atlas')
+      extractGitHubRepoSlugFromRemote('https://github.com/antonioalvromero/Ocarina-Atlas.git'),
+    ).toBe('antonioalvromero/Ocarina-Atlas')
     expect(
-      extractGitHubRepoSlugFromRemote('git@github.com:antonioalvromero/Hyrule-Atlas.git'),
-    ).toBe('antonioalvromero/Hyrule-Atlas')
+      extractGitHubRepoSlugFromRemote('git@github.com:antonioalvromero/Ocarina-Atlas.git'),
+    ).toBe('antonioalvromero/Ocarina-Atlas')
 
     expect(isSafeGitRef('v1.0.1')).toBe(true)
     expect(isSafeGitRef('-bad-flag')).toBe(false)

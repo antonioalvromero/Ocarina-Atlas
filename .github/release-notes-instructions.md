@@ -1,6 +1,6 @@
-# Hyrule Atlas Release Notes Guidelines
+# Ocarina Atlas Release Notes Guidelines
 
-Write clear, concise, player- and contributor-friendly GitHub release notes in English for **Hyrule Atlas** (live Lichii telemetry + Windows launcher extension for *The Legend of Zelda: Ocarina of Time* Remake `0400486024DEC000`), matching the release note style of [`zortos293/Lichii`](https://github.com/zortos293/Lichii/releases).
+Write clear, concise, player- and contributor-friendly GitHub release notes in English for **Ocarina Atlas** (live Lichii telemetry + Windows launcher extension for *The Legend of Zelda: Ocarina of Time* Remake `0400486024DEC000`), matching the release note style of [`zortos293/Lichii`](https://github.com/zortos293/Lichii/releases).
 
 ## Structure & Formatting Rules
 - **Do not** output a top-level `#` H1 title, a `## Changes since ...` heading, a `Built from ...` metadata line, or `## Downloads` / `## Windows` sections. Those structural blocks and checksum tables are injected deterministically around your summary.

@@ -15,6 +15,7 @@ import {
 import type { Item } from './types'
 
 const gsItemIds = new Set(dataset.items.filter((item) => item.cat === 'gs').map((item) => item.id))
+export const TRACKED_HEART_CONTAINER_IDS = new Set(['espiritu-heart-01'])
 const itemsById = new Map(dataset.items.map((item) => [item.id, item]))
 const placesById = new Map(dataset.places.map((p) => [p.id, p]))
 
@@ -81,10 +82,31 @@ let pollInFlight = false
 let pollingActive = false
 let eventSource: EventSource | null = null
 let sseReconnectTimer: ReturnType<typeof setTimeout> | null = null
+type CategorySyncState = {
+  hasAuthoritativeSync: boolean
+  lastSignature: string | null
+  sessionAnnouncedIds: Set<string>
+}
+
+function createCategorySyncState(): CategorySyncState {
+  return {
+    hasAuthoritativeSync: false,
+    lastSignature: null,
+    sessionAnnouncedIds: new Set<string>(),
+  }
+}
+
+function resetCategorySyncState(state: CategorySyncState, clearAnnounced: boolean): void {
+  state.hasAuthoritativeSync = false
+  state.lastSignature = null
+  if (clearAnnounced) {
+    state.sessionAnnouncedIds.clear()
+  }
+}
+
 let activeSubscribers = 0
-let hasAuthoritativeSync = false
-let lastAutoSyncSignature: string | null = null
-const sessionAnnouncedIds = new Set<string>()
+const gsSyncState = createCategorySyncState()
+const heartSyncState = createCategorySyncState()
 
 function emitStore() {
   for (const listener of storeListeners) listener()
@@ -94,26 +116,28 @@ export function isLiveMemoryState(state: LichiiTelemetryState): boolean {
   return Boolean(state.connected && state.emulatorRunning && state.source === 'memory')
 }
 
-/**
- * Reconciles officialDoneSlot / officialRevealedSlot with active collected GS IDs.
- * Adds collected IDs and, when `authoritative` is true, unmarks GS IDs absent from the loaded save.
- */
-export function reconcileSkulltulaLists(params: {
-  doneList: string[]
-  revealedList: string[]
-  collectedIds: string[]
-  authoritative: boolean
-  validGsIds?: Set<string>
-}): {
+export type ReconcileResult = {
   nextDone: string[]
   nextRevealed: string[]
   doneChanged: boolean
   revealedChanged: boolean
   addedIds: string[]
   removedIds: string[]
-} {
-  const validGs = params.validGsIds ?? gsItemIds
-  const collectedSet = new Set(params.collectedIds.filter((id) => validGs.has(id)))
+}
+
+/**
+ * Reconciles officialDoneSlot / officialRevealedSlot with active collected IDs within `validIds`.
+ * Adds collected IDs and, when `authoritative` is true, unmarks IDs in `validIds` absent from `collectedIds`.
+ */
+export function reconcileItemLists(params: {
+  doneList: string[]
+  revealedList: string[]
+  collectedIds: string[]
+  authoritative: boolean
+  validIds: Set<string>
+}): ReconcileResult {
+  const { validIds } = params
+  const collectedSet = new Set(params.collectedIds.filter((id) => validIds.has(id)))
 
   let nextDone = [...params.doneList]
   const doneSet = new Set(nextDone)
@@ -137,7 +161,7 @@ export function reconcileSkulltulaLists(params: {
   if (params.authoritative) {
     const removedSet = new Set<string>()
     for (const id of nextDone) {
-      if (validGs.has(id) && !collectedSet.has(id)) {
+      if (validIds.has(id) && !collectedSet.has(id)) {
         removedSet.add(id)
         removedIds.push(id)
       }
@@ -162,63 +186,104 @@ export function reconcileSkulltulaLists(params: {
   }
 }
 
-function processAutoSkulltulas(next: LichiiTelemetryState) {
+/**
+ * Reconciles officialDoneSlot / officialRevealedSlot with active collected GS IDs.
+ * Adds collected IDs and, when `authoritative` is true, unmarks GS IDs absent from the loaded save.
+ */
+export function reconcileSkulltulaLists(params: {
+  doneList: string[]
+  revealedList: string[]
+  collectedIds: string[]
+  authoritative: boolean
+  validGsIds?: Set<string>
+}): ReconcileResult {
+  return reconcileItemLists({
+    doneList: params.doneList,
+    revealedList: params.revealedList,
+    collectedIds: params.collectedIds,
+    authoritative: params.authoritative,
+    validIds: params.validGsIds ?? gsItemIds,
+  })
+}
+
+/**
+ * Reconciles officialDoneSlot / officialRevealedSlot with tracked Heart Container IDs.
+ * Unmapped Heart Containers outside `TRACKED_HEART_CONTAINER_IDS` are never unmarked.
+ */
+export function reconcileHeartContainerLists(params: {
+  doneList: string[]
+  revealedList: string[]
+  collectedIds: string[]
+  authoritative: boolean
+  validHeartIds?: Set<string>
+}): ReconcileResult {
+  return reconcileItemLists({
+    doneList: params.doneList,
+    revealedList: params.revealedList,
+    collectedIds: params.collectedIds,
+    authoritative: params.authoritative,
+    validIds: params.validHeartIds ?? TRACKED_HEART_CONTAINER_IDS,
+  })
+}
+
+function syncTrackedCategory(params: {
+  next: LichiiTelemetryState
+  syncState: CategorySyncState
+  enabled: boolean
+  collectedIds: string[]
+  authoritative: boolean
+  signature: string
+  validIds: Set<string>
+  formatItemName: (item: Item) => string
+  skulltulaCount: number | null
+}): void {
+  const { next, syncState, enabled, collectedIds, authoritative, signature, validIds } = params
   if (!isLiveMemoryState(next)) {
-    hasAuthoritativeSync = false
-    lastAutoSyncSignature = null
-    sessionAnnouncedIds.clear()
+    resetCategorySyncState(syncState, true)
     return
   }
 
-  const autoMark = read(lichiiAutoSkulltulaSlot)
-  if (!autoMark) {
-    hasAuthoritativeSync = false
-    lastAutoSyncSignature = null
+  if (!enabled) {
+    resetCategorySyncState(syncState, false)
     return
   }
 
-  const collectedIds = [...(next.collectedSkulltulaIds ?? [])]
-  if (next.lastCollectedSkulltulaId) {
-    collectedIds.push(next.lastCollectedSkulltulaId)
-  }
-
-  const isAuthoritative = Boolean(next.authoritativeSkulltulas)
-  const signature = `${isAuthoritative ? 1 : 0}:${next.lastCollectedSkulltulaId ?? ''}:${collectedIds.join(',')}`
-  if (signature === lastAutoSyncSignature) {
+  if (signature === syncState.lastSignature) {
     return
   }
-  lastAutoSyncSignature = signature
+  syncState.lastSignature = signature
 
-  const wasSyncedBefore = hasAuthoritativeSync
+  const wasSyncedBefore = syncState.hasAuthoritativeSync
   const { nextDone, nextRevealed, doneChanged, revealedChanged, addedIds, removedIds } =
-    reconcileSkulltulaLists({
+    reconcileItemLists({
       doneList: read(officialDoneSlot),
       revealedList: read(officialRevealedSlot),
       collectedIds,
-      authoritative: isAuthoritative,
+      authoritative,
+      validIds,
     })
 
   if (doneChanged) write(officialDoneSlot, nextDone)
   if (revealedChanged) write(officialRevealedSlot, nextRevealed)
 
   for (const id of removedIds) {
-    sessionAnnouncedIds.delete(id)
+    syncState.sessionAnnouncedIds.delete(id)
   }
 
   const isIncrementalPickup =
-    wasSyncedBefore && isAuthoritative && removedIds.length === 0 && addedIds.length > 0 && addedIds.length <= 2
+    wasSyncedBefore && authoritative && removedIds.length === 0 && addedIds.length > 0 && addedIds.length <= 2
 
   const newlyMarkedItems: Item[] = []
   for (const id of addedIds) {
-    if (isIncrementalPickup && !sessionAnnouncedIds.has(id)) {
+    if (isIncrementalPickup && !syncState.sessionAnnouncedIds.has(id)) {
       const item = itemsById.get(id)
       if (item) newlyMarkedItems.push(item)
     }
-    sessionAnnouncedIds.add(id)
+    syncState.sessionAnnouncedIds.add(id)
   }
 
-  if (isAuthoritative) {
-    hasAuthoritativeSync = true
+  if (authoritative) {
+    syncState.hasAuthoritativeSync = true
   }
 
   if (newlyMarkedItems.length > 0) {
@@ -228,9 +293,9 @@ function processAutoSkulltulas(next: LichiiTelemetryState) {
       return {
         id: `${item.id}-${now}`,
         itemId: item.id,
-        itemName: item.name,
+        itemName: params.formatItemName(item),
         placeName: place?.name ?? next.placeName ?? 'Hyrule',
-        skulltulaCount: next.skulltulaCount,
+        skulltulaCount: params.skulltulaCount,
         timestamp: now,
       }
     })
@@ -241,14 +306,68 @@ function processAutoSkulltulas(next: LichiiTelemetryState) {
   }
 }
 
-function applyTelemetryState(data: LichiiTelemetryState) {
+function processAutoSkulltulas(next: LichiiTelemetryState) {
+  const collectedIds = [...(next.collectedSkulltulaIds ?? [])]
+  if (next.lastCollectedSkulltulaId) {
+    collectedIds.push(next.lastCollectedSkulltulaId)
+  }
+  const isAuthoritative = Boolean(next.authoritativeSkulltulas)
+  const signature = `${isAuthoritative ? 1 : 0}:${next.lastCollectedSkulltulaId ?? ''}:${collectedIds.join(',')}`
+
+  syncTrackedCategory({
+    next,
+    syncState: gsSyncState,
+    enabled: read(lichiiAutoSkulltulaSlot),
+    collectedIds,
+    authoritative: isAuthoritative,
+    signature,
+    validIds: gsItemIds,
+    formatItemName: (item) => item.name,
+    skulltulaCount: next.skulltulaCount,
+  })
+}
+
+function processAutoHeartContainers(next: LichiiTelemetryState) {
+  const collectedIds = next.collectedHeartContainerIds ?? []
+  const isAuthoritative = Boolean(next.authoritativeHeartContainers)
+  const signature = `${isAuthoritative ? 1 : 0}:${collectedIds.join(',')}`
+
+  syncTrackedCategory({
+    next,
+    syncState: heartSyncState,
+    enabled: isAuthoritative,
+    collectedIds,
+    authoritative: isAuthoritative,
+    signature,
+    validIds: TRACKED_HEART_CONTAINER_IDS,
+    formatItemName: (item) => `Heart Container collected: ${item.name}`,
+    skulltulaCount: null,
+  })
+}
+
+export function applyTelemetryState(data: LichiiTelemetryState) {
   processAutoSkulltulas(data)
+  processAutoHeartContainers(data)
   storeState = {
     ...storeState,
     telemetry: data,
     lastError: null,
   }
   emitStore()
+}
+
+export function resetTrackerForTests() {
+  resetCategorySyncState(gsSyncState, true)
+  resetCategorySyncState(heartSyncState, true)
+  storeState = {
+    telemetry: INITIAL_TELEMETRY,
+    toasts: [],
+    lastError: null,
+  }
+}
+
+export function getTrackerSnapshotForTests(): StoreState {
+  return storeState
 }
 
 async function pollOnce() {
@@ -273,9 +392,8 @@ async function pollOnce() {
     const data = (await response.json()) as LichiiTelemetryState
     applyTelemetryState(data)
   } catch (err) {
-    hasAuthoritativeSync = false
-    lastAutoSyncSignature = null
-    sessionAnnouncedIds.clear()
+    resetCategorySyncState(gsSyncState, true)
+    resetCategorySyncState(heartSyncState, true)
     storeState = {
       ...storeState,
       telemetry: {

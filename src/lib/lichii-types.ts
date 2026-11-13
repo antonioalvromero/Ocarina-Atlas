@@ -23,6 +23,10 @@ export type LichiiTelemetryState = {
   collectedSkulltulaIds: string[]
   /** True when collectedSkulltulaIds reflects the complete active save/live flag state in RAM */
   authoritativeSkulltulas: boolean
+  /** List of oot.json Heart Container item IDs confirmed collected (e.g. ["espiritu-heart-01"]) */
+  collectedHeartContainerIds?: string[]
+  /** True when collectedHeartContainerIds reflects the complete active save/live flag state in RAM */
+  authoritativeHeartContainers?: boolean
   /** Most recently collected Gold Skulltula item ID if just picked up */
   lastCollectedSkulltulaId: string | null
   lastPickedItem: string | null

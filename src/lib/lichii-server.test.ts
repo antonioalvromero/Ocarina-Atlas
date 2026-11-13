@@ -14,6 +14,7 @@ import {
   getLichiiHost,
   getLichiiPort,
   isValidSub36Buffer,
+  KNOWN_HEART_CONTAINER_HASH_MAP,
   KNOWN_SKULLTULA_HASH_MAP,
   LichiiRpcClient,
   parseGdmSkulltulaCount,
@@ -237,7 +238,10 @@ describe('KNOWN_SKULLTULA_HASH_MAP', () => {
 })
 
 describe('parseMasterFlagTableBuffer', () => {
-  function buildSortedTable(collectedItemIds: Set<string>): Buffer {
+  function buildSortedTable(
+    collectedItemIds: Set<string>,
+    heartContainerFlags?: Map<bigint, bigint>,
+  ): Buffer {
     const records: Array<{ hash: bigint; flags: bigint }> = [
       { hash: 0x00006e56f79838e8n, flags: 0x18n },
       { hash: 0x00006e56f79838ean, flags: 0x0700000000000058n },
@@ -247,6 +251,11 @@ describe('parseMasterFlagTableBuffer', () => {
       const flags = collected ? 0x0002000100000018n : 0x18n
       for (const h of entry.hashes) {
         records.push({ hash: h, flags })
+      }
+    }
+    if (heartContainerFlags) {
+      for (const [hash, flags] of heartContainerFlags) {
+        records.push({ hash, flags })
       }
     }
     records.sort((a, b) => (a.hash < b.hash ? -1 : a.hash > b.hash ? 1 : 0))
@@ -264,6 +273,33 @@ describe('parseMasterFlagTableBuffer', () => {
     expect(parsed).not.toBeNull()
     expect(parsed?.presentItemIds.size).toBe(100)
     expect(parsed?.collectedItemIds).toEqual(['espiritu-gs-01', 'espiritu-gs-02'])
+    expect(parsed?.collectedHeartContainerIds).toEqual([])
+  })
+
+  it('detects collected Heart Containers when 0x100000000n is set and omits when unset', () => {
+    const hcEntry = KNOWN_HEART_CONTAINER_HASH_MAP.find((e) =>
+      e.itemIds.includes('espiritu-heart-01'),
+    )
+    expect(hcEntry).toBeDefined()
+    expect(hcEntry?.hashes).toContain(0x41811f125b1eedd5n)
+
+    const collectedBuf = buildSortedTable(
+      new Set(['espiritu-gs-01']),
+      new Map([[0x41811f125b1eedd5n, 0x0002000100000018n]]),
+    )
+    const parsedCollected = parseMasterFlagTableBuffer(collectedBuf)
+    expect(parsedCollected).not.toBeNull()
+    expect(parsedCollected?.collectedItemIds).toEqual(['espiritu-gs-01'])
+    expect(parsedCollected?.collectedHeartContainerIds).toEqual(['espiritu-heart-01'])
+
+    const uncollectedBuf = buildSortedTable(
+      new Set(['espiritu-gs-01']),
+      new Map([[0x41811f125b1eedd5n, 0x0000000000000018n]]),
+    )
+    const parsedUncollected = parseMasterFlagTableBuffer(uncollectedBuf)
+    expect(parsedUncollected).not.toBeNull()
+    expect(parsedUncollected?.collectedItemIds).toEqual(['espiritu-gs-01'])
+    expect(parsedUncollected?.collectedHeartContainerIds).toEqual([])
   })
 
   it('returns null on bad header or incomplete table', () => {

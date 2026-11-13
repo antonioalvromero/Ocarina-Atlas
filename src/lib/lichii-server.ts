@@ -683,6 +683,14 @@ export const KNOWN_SKULLTULA_HASH_MAP: Array<{ hashes: bigint[]; itemIds: string
   { hashes: [0xddd260afb6f2989an, 0xddd260afb6f29898n], itemIds: ['jabu-gs-04'] },
 ]
 
+/**
+ * Known Heart Container 64-bit InstanceIDs from GameDataMgr's flag table mapped to oot.json item IDs.
+ */
+export const KNOWN_HEART_CONTAINER_HASH_MAP: Array<{ hashes: bigint[]; itemIds: string[] }> = [
+  // Spirit Temple
+  { hashes: [0x41811f125b1eedd5n], itemIds: ['espiritu-heart-01'] },
+]
+
 type ViewBox = { vx: number; vy: number; vw: number; vh: number }
 const svgViewBoxCache = new Map<string, ViewBox>()
 let customStaticAssetRoots: string[] = []
@@ -1493,20 +1501,28 @@ async function readU64At(addrHex: string, timeoutMs = 400): Promise<bigint> {
   return buf.readBigUInt64LE(0)
 }
 
-// Fast lookup from known Skulltula 64-bit hashes to dataset item IDs
-const KNOWN_HASH_TO_ITEM_IDS = new Map<bigint, string[]>()
-for (const entry of KNOWN_SKULLTULA_HASH_MAP) {
-  for (const h of entry.hashes) {
-    const existing = KNOWN_HASH_TO_ITEM_IDS.get(h)
-    if (existing) {
-      for (const id of entry.itemIds) {
-        if (!existing.includes(id)) existing.push(id)
+function buildHashToItemIdsMap(
+  entries: Array<{ hashes: bigint[]; itemIds: string[] }>,
+): Map<bigint, string[]> {
+  const map = new Map<bigint, string[]>()
+  for (const entry of entries) {
+    for (const h of entry.hashes) {
+      const existing = map.get(h)
+      if (existing) {
+        for (const id of entry.itemIds) {
+          if (!existing.includes(id)) existing.push(id)
+        }
+      } else {
+        map.set(h, [...entry.itemIds])
       }
-    } else {
-      KNOWN_HASH_TO_ITEM_IDS.set(h, [...entry.itemIds])
     }
   }
+  return map
 }
+
+// Fast lookup from known Skulltula and Heart Container 64-bit hashes to dataset item IDs
+const KNOWN_HASH_TO_ITEM_IDS = buildHashToItemIdsMap(KNOWN_SKULLTULA_HASH_MAP)
+const KNOWN_HEART_CONTAINER_HASH_TO_ITEM_IDS = buildHashToItemIdsMap(KNOWN_HEART_CONTAINER_HASH_MAP)
 
 // Cached memory addresses for low-latency polling (reset to 0/0x0 on session reset)
 let cachedMainBase = 0n
@@ -1529,6 +1545,7 @@ let cachedLiveScene: string | null = null
 let cachedLiveAgeHint: 'child' | 'adult' | null = null
 let cachedLiveSavedHashes = new Set<bigint>()
 let cachedMasterCollectedIds: string[] | null = null
+let cachedMasterHeartContainerIds: string[] | null = null
 let lastHashesReadTime = 0
 let lastMasterReadTime = 0
 let lastMasterRescanTime = 0
@@ -1698,6 +1715,7 @@ async function resolveGameDataMgr(mainBase: bigint, vtables: DynamicVtables): Pr
 export function parseMasterFlagTableBuffer(buf: Buffer): {
   presentItemIds: Set<string>
   collectedItemIds: string[]
+  collectedHeartContainerIds: string[]
 } | null {
   if (
     buf.length < 32 ||
@@ -1708,18 +1726,27 @@ export function parseMasterFlagTableBuffer(buf: Buffer): {
   }
   const presentItemIds = new Set<string>()
   const collectedSet = new Set<string>()
+  const collectedHeartContainerSet = new Set<string>()
   let prevHash = 0n
   for (let off = 0; off + 16 <= buf.length; off += 16) {
     const h = buf.readBigUInt64LE(off)
     if (h === 0n || (off > 0 && h <= prevHash)) break
     prevHash = h
-    const itemIds = KNOWN_HASH_TO_ITEM_IDS.get(h)
-    if (!itemIds) continue
+    const skulltulaIds = KNOWN_HASH_TO_ITEM_IDS.get(h)
+    const heartIds = KNOWN_HEART_CONTAINER_HASH_TO_ITEM_IDS.get(h)
+    if (!skulltulaIds && !heartIds) continue
     const flags = buf.readBigUInt64LE(off + 8)
     const isCollected = (flags & MASTER_FLAG_COLLECTED_BIT) !== 0n
-    for (const id of itemIds) {
-      presentItemIds.add(id)
-      if (isCollected) collectedSet.add(id)
+    if (skulltulaIds) {
+      for (const id of skulltulaIds) {
+        presentItemIds.add(id)
+        if (isCollected) collectedSet.add(id)
+      }
+    }
+    if (heartIds && isCollected) {
+      for (const id of heartIds) {
+        collectedHeartContainerSet.add(id)
+      }
     }
   }
   if (presentItemIds.size < KNOWN_SKULLTULA_HASH_MAP.length) {
@@ -1728,6 +1755,7 @@ export function parseMasterFlagTableBuffer(buf: Buffer): {
   return {
     presentItemIds,
     collectedItemIds: Array.from(collectedSet).sort(),
+    collectedHeartContainerIds: Array.from(collectedHeartContainerSet).sort(),
   }
 }
 
@@ -1824,6 +1852,7 @@ async function readMasterFlagCollectedIds(
   const head = await readMasterFlagTableFirstChunk(mainBase, vtables)
   if (!head) {
     cachedMasterCollectedIds = null
+    cachedMasterHeartContainerIds = null
     return null
   }
 
@@ -1846,9 +1875,11 @@ async function readMasterFlagCollectedIds(
   const parsed = parseMasterFlagTableBuffer(Buffer.concat(chunks))
   if (!parsed) {
     cachedMasterCollectedIds = null
+    cachedMasterHeartContainerIds = null
     return null
   }
   cachedMasterCollectedIds = parsed.collectedItemIds
+  cachedMasterHeartContainerIds = parsed.collectedHeartContainerIds
   lastMasterReadTime = now
   return parsed.collectedItemIds
 }
@@ -1943,6 +1974,7 @@ type LiveMemoryTelemetry = {
   scene: string | null
   ageHint: 'child' | 'adult' | null
   masterCollectedIds: string[] | null
+  masterHeartContainerIds: string[] | null
   liveSavedHashes: Set<bigint>
   liveSkulltulaCount: number | null
   readFailed: boolean
@@ -1954,6 +1986,7 @@ function emptyLiveMemoryTelemetry(readFailed = false): LiveMemoryTelemetry {
     scene: null,
     ageHint: null,
     masterCollectedIds: null,
+    masterHeartContainerIds: null,
     liveSavedHashes: new Set<bigint>(),
     liveSkulltulaCount: null,
     readFailed,
@@ -2360,6 +2393,7 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
 
   // 3. Refresh authoritative 100-Skulltula runtime flag table on pickup, scene change, or every 500ms
   let masterCollectedIds = cachedMasterCollectedIds
+  let masterHeartContainerIds = cachedMasterHeartContainerIds
   if (
     lichiiRpc.isConnected() &&
     (masterCollectedIds === null ||
@@ -2368,6 +2402,7 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
       now - lastMasterReadTime > 500)
   ) {
     masterCollectedIds = await readMasterFlagCollectedIds(now, mainBase, vtables)
+    masterHeartContainerIds = cachedMasterHeartContainerIds
     prevMasterReadCount = liveSkulltulaCount
   }
 
@@ -2416,6 +2451,7 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
     scene: cachedLiveScene,
     ageHint: cachedLiveAgeHint,
     masterCollectedIds,
+    masterHeartContainerIds,
     liveSavedHashes: cachedLiveSavedHashes,
     liveSkulltulaCount,
     readFailed: false,
@@ -2457,6 +2493,7 @@ function clearPlayerAndGdmSessionCaches() {
   lastHashesReadTime = 0
   lastAgeReadTime = 0
   cachedMasterCollectedIds = null
+  cachedMasterHeartContainerIds = null
   prevMasterReadCount = null
   prevMasterCollectedSet = null
   stickyLastCollectedId = null
@@ -2613,10 +2650,14 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
 
   let collectedSkulltulaIds: string[] = []
   let authoritativeSkulltulas = false
+  let collectedHeartContainerIds: string[] = []
+  let authoritativeHeartContainers = false
 
   if (source === 'memory' && place && liveState.masterCollectedIds !== null) {
     collectedSkulltulaIds = liveState.masterCollectedIds
     authoritativeSkulltulas = true
+    collectedHeartContainerIds = liveState.masterHeartContainerIds ?? []
+    authoritativeHeartContainers = liveState.masterHeartContainerIds !== null
 
     const currentSet = new Set(collectedSkulltulaIds)
     if (prevMasterCollectedSet !== null) {
@@ -2646,13 +2687,11 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
           ? saveState.savedHashes
           : null
     if (fallbackHashes) {
-      const fallbackSet = new Set<string>()
-      for (const entry of KNOWN_SKULLTULA_HASH_MAP) {
-        if (entry.hashes.some((h) => fallbackHashes.has(h))) {
-          for (const itemId of entry.itemIds) fallbackSet.add(itemId)
-        }
-      }
-      collectedSkulltulaIds = Array.from(fallbackSet).sort()
+      collectedSkulltulaIds = collectIdsFromHashMap(KNOWN_SKULLTULA_HASH_MAP, fallbackHashes)
+      collectedHeartContainerIds = collectIdsFromHashMap(
+        KNOWN_HEART_CONTAINER_HASH_MAP,
+        fallbackHashes,
+      )
     }
   }
 
@@ -2672,11 +2711,26 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
     skulltulaCount,
     collectedSkulltulaIds,
     authoritativeSkulltulas,
+    collectedHeartContainerIds,
+    authoritativeHeartContainers,
     lastCollectedSkulltulaId: stickyLastCollectedId,
     lastPickedItem,
     source,
     updatedAt: Date.now(),
   }
+}
+
+function collectIdsFromHashMap(
+  entries: Array<{ hashes: bigint[]; itemIds: string[] }>,
+  hashes: Set<bigint>,
+): string[] {
+  const matched = new Set<string>()
+  for (const entry of entries) {
+    if (entry.hashes.some((h) => hashes.has(h))) {
+      for (const itemId of entry.itemIds) matched.add(itemId)
+    }
+  }
+  return Array.from(matched).sort()
 }
 
 function createOfflineFallbackState(): LichiiTelemetryState {
@@ -2695,6 +2749,8 @@ function createOfflineFallbackState(): LichiiTelemetryState {
     skulltulaCount: null,
     collectedSkulltulaIds: [],
     authoritativeSkulltulas: false,
+    collectedHeartContainerIds: [],
+    authoritativeHeartContainers: false,
     lastCollectedSkulltulaId: null,
     lastPickedItem: null,
     source: 'none',

@@ -1,10 +1,12 @@
 import fs from 'node:fs'
+import type http from 'node:http'
 import net from 'node:net'
 import os from 'node:os'
 import path from 'node:path'
 import type { Plugin } from 'vite'
 import { dataset } from './data'
 import type { LichiiTelemetryState } from './lichii-types'
+import { getSyncState, handleSyncApiRequest, subscribeSyncUpdates } from './sync-server'
 import type { Fraction, Place } from './types'
 
 const DEFAULT_LICHII_HOST = '127.0.0.1'
@@ -2677,57 +2679,171 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
   }
 }
 
+function createOfflineFallbackState(): LichiiTelemetryState {
+  return {
+    connected: false,
+    emulatorRunning: false,
+    scene: null,
+    placeId: null,
+    placeSlug: null,
+    placeName: null,
+    mapId: null,
+    age: null,
+    position: null,
+    mapFraction: null,
+    worldMapFraction: null,
+    skulltulaCount: null,
+    collectedSkulltulaIds: [],
+    authoritativeSkulltulas: false,
+    lastCollectedSkulltulaId: null,
+    lastPickedItem: null,
+    source: 'none',
+    updatedAt: Date.now(),
+  }
+}
+
+async function getSafeTelemetryState(): Promise<LichiiTelemetryState> {
+  try {
+    return await getLichiiTelemetryState()
+  } catch {
+    return createOfflineFallbackState()
+  }
+}
+
+function isLiveTelemetryState(state: LichiiTelemetryState): boolean {
+  return state.connected && state.emulatorRunning && state.source === 'memory'
+}
+
+function serializeComparableTelemetry(state: LichiiTelemetryState): string {
+  return JSON.stringify({ ...state, updatedAt: 0 })
+}
+
+/** Handles `GET /api/lichii/stream` Server-Sent Events for live telemetry and sync state. */
+export function handleLichiiStreamRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream; charset=utf-8',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  })
+  res.flushHeaders?.()
+
+  let closed = false
+  let pollTimer: ReturnType<typeof setTimeout> | null = null
+  let keepaliveTimer: ReturnType<typeof setInterval> | null = null
+  let lastComparable = ''
+
+  const sendEvent = (event: string, data: unknown) => {
+    if (closed || res.writableEnded || res.destroyed) return
+    try {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+    } catch {
+      cleanup()
+    }
+  }
+
+  const unsubscribeSync = subscribeSyncUpdates((syncState) => {
+    sendEvent('sync', syncState)
+  })
+
+  const cleanup = () => {
+    if (closed) return
+    closed = true
+    if (pollTimer !== null) {
+      clearTimeout(pollTimer)
+      pollTimer = null
+    }
+    if (keepaliveTimer !== null) {
+      clearInterval(keepaliveTimer)
+      keepaliveTimer = null
+    }
+    unsubscribeSync()
+    req.off('close', cleanup)
+    res.off('close', cleanup)
+  }
+
+  req.on('close', cleanup)
+  res.on('close', cleanup)
+
+  keepaliveTimer = setInterval(() => {
+    if (closed || res.writableEnded || res.destroyed) {
+      cleanup()
+      return
+    }
+    try {
+      res.write(': keepalive\n\n')
+    } catch {
+      cleanup()
+    }
+  }, 15000)
+  keepaliveTimer.unref?.()
+
+  // Push current sync state immediately without waiting for telemetry I/O.
+  sendEvent('sync', getSyncState())
+
+  const scheduleNext = (delayMs: number) => {
+    if (closed) return
+    pollTimer = setTimeout(() => {
+      void tick(false)
+    }, delayMs)
+    pollTimer.unref?.()
+  }
+
+  const tick = async (isInitial: boolean) => {
+    const state = await getSafeTelemetryState()
+    if (closed) return
+
+    const comparable = serializeComparableTelemetry(state)
+    if (isInitial || comparable !== lastComparable) {
+      lastComparable = comparable
+      sendEvent('telemetry', state)
+    }
+
+    scheduleNext(isLiveTelemetryState(state) ? 120 : 750)
+  }
+
+  void tick(true)
+}
+
 export function lichiiTelemetryPlugin(): Plugin {
   const registerMiddleware = (middlewares: {
     use: (
       route: string,
-      fn: (
-        req: { method?: string },
-        res: {
-          statusCode: number
-          setHeader: (name: string, value: string) => void
-          end: (body: string) => void
-        },
-        next: () => void,
-      ) => void,
+      fn: (req: http.IncomingMessage, res: http.ServerResponse, next: () => void) => void,
     ) => void
   }) => {
+    middlewares.use('/api/lichii/stream', (req, res, next) => {
+      if (req.method && req.method !== 'GET') {
+        next()
+        return
+      }
+      handleLichiiStreamRequest(req, res)
+    })
+
+    middlewares.use('/api/sync/state', (req, res, next) => {
+      void handleSyncApiRequest(req, res, '/api/sync/state')
+        .then((handled) => {
+          if (!handled) next()
+        })
+        .catch(() => {
+          if (!res.headersSent) {
+            res.statusCode = 500
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify({ error: 'Internal Server Error' }))
+          }
+        })
+    })
+
     middlewares.use('/api/lichii/state', async (req, res, next) => {
       if (req.method && req.method !== 'GET') {
         next()
         return
       }
-      try {
-        const state = await getLichiiTelemetryState()
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json; charset=utf-8')
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
-        res.end(JSON.stringify(state))
-      } catch (err) {
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json; charset=utf-8')
-        const fallback: LichiiTelemetryState = {
-          connected: false,
-          emulatorRunning: false,
-          scene: null,
-          placeId: null,
-          placeSlug: null,
-          placeName: null,
-          mapId: null,
-          age: null,
-          position: null,
-          mapFraction: null,
-          worldMapFraction: null,
-          skulltulaCount: null,
-          collectedSkulltulaIds: [],
-          authoritativeSkulltulas: false,
-          lastCollectedSkulltulaId: null,
-          lastPickedItem: null,
-          source: 'none',
-          updatedAt: Date.now(),
-        }
-        res.end(JSON.stringify(fallback))
-      }
+      const state = await getSafeTelemetryState()
+      res.statusCode = 200
+      res.setHeader('Content-Type', 'application/json; charset=utf-8')
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+      res.end(JSON.stringify(state))
     })
   }
 

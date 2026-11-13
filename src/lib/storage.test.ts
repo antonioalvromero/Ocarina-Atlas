@@ -5,6 +5,9 @@ import { INITIAL_VIEW } from './coords'
 import {
   addPin,
   ageFilterSlot,
+  applyRemoteSyncState,
+  initRemoteSync,
+  isSyncableKey,
   itemCountVisibleSlot,
   officialDoneSlot,
   officialRevealedSlot,
@@ -12,6 +15,7 @@ import {
   pinsSlot,
   read,
   removePin,
+  resetSyncForTests,
   setInList,
   toggleInList,
   updatePin,
@@ -26,13 +30,21 @@ function fakeWindow() {
     addEventListener: () => {},
     removeEventListener: () => {},
     localStorage: {
+      get length() {
+        return entries.size
+      },
+      key: (index: number) => Array.from(entries.keys())[index] ?? null,
       getItem: (key: string) => entries.get(key) ?? null,
       setItem: (key: string, value: string) => void entries.set(key, value),
     },
   }
 }
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  resetSyncForTests()
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+})
 
 describe('without a window', () => {
   it('reads empty values and ignores writes', () => {
@@ -167,5 +179,119 @@ describe('saved views', () => {
   ])('falls back to the initial view on %s', (_, stored) => {
     write(viewSlot('bad') as never, stored as never)
     expect(read(viewSlot('bad'))).toEqual(INITIAL_VIEW)
+  })
+})
+
+describe('PC↔tablet remote sync', () => {
+  beforeEach(() => {
+    resetSyncForTests()
+    vi.stubGlobal('window', fakeWindow())
+  })
+
+  it('distinguishes syncable progress keys from per-device view keys', () => {
+    expect(isSyncableKey('official-visible')).toBe(true)
+    expect(isSyncableKey('official-done')).toBe(true)
+    expect(isSyncableKey('official-revealed')).toBe(true)
+    expect(isSyncableKey('hidden-categories')).toBe(true)
+    expect(isSyncableKey('item-count-visible')).toBe(true)
+    expect(isSyncableKey('age-filter')).toBe(true)
+    expect(isSyncableKey('age')).toBe(true)
+    expect(isSyncableKey('pins:kokiri:principal')).toBe(true)
+    expect(isSyncableKey('oot-map:v1:pins:deku:1F')).toBe(true)
+
+    expect(isSyncableKey('view:world')).toBe(false)
+    expect(isSyncableKey('oot-map:v1:view:forest:1F')).toBe(false)
+    expect(isSyncableKey('lichii-follow')).toBe(false)
+    expect(isSyncableKey('lichii-auto-skulltula')).toBe(false)
+  })
+
+  it('applies remote sync state without triggering a PUT echo loop and ignores view:* keys', () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+
+    write(viewSlot('world'), { cx: 0.25, cy: 0.75, zoom: 2 })
+    fetchMock.mockClear()
+
+    const changed = applyRemoteSyncState({
+      version: 2,
+      entries: {
+        'oot-map:v1:official-done': JSON.stringify(['kokiri-gs-01']),
+        'oot-map:v1:age-filter': JSON.stringify('adult'),
+        'oot-map:v1:pins:kokiri:principal': JSON.stringify([
+          { id: 'p1', name: 'Remote Pin', type: 'other', x: 0.3, y: 0.4, done: false },
+        ]),
+        'oot-map:v1:view:world': JSON.stringify({ cx: 0.9, cy: 0.9, zoom: 4 }),
+      },
+    })
+
+    expect(changed).toBe(true)
+    expect(read(officialDoneSlot)).toEqual(['kokiri-gs-01'])
+    expect(read(ageFilterSlot)).toBe('adult')
+    expect(read(pinsSlot('kokiri', 'principal'))).toHaveLength(1)
+    expect(read(viewSlot('world'))).toEqual({ cx: 0.25, cy: 0.75, zoom: 2 })
+    expect(fetchMock).not.toHaveBeenCalled()
+
+    // Stale or duplicate versions are ignored.
+    expect(
+      applyRemoteSyncState({
+        version: 2,
+        entries: { 'oot-map:v1:official-done': JSON.stringify([]) },
+      }),
+    ).toBe(false)
+    expect(read(officialDoneSlot)).toEqual(['kokiri-gs-01'])
+  })
+
+  it('debounces PUT /api/sync/state for syncable writes and skips view:* writes', async () => {
+    vi.useFakeTimers()
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ version: 3, updatedAt: Date.now(), entries: {} }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    write(viewSlot('world'), { cx: 0.4, cy: 0.6, zoom: 3 })
+    await vi.advanceTimersByTimeAsync(200)
+    expect(fetchMock).not.toHaveBeenCalled()
+
+    write(officialDoneSlot, ['item-1'])
+    write(officialDoneSlot, ['item-1', 'item-2'])
+    expect(fetchMock).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(150)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/sync/state',
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({
+          entries: { 'oot-map:v1:official-done': JSON.stringify(['item-1', 'item-2']) },
+        }),
+      }),
+    )
+  })
+
+  it('initRemoteSync merges server entries and pushes local entries when server is empty', async () => {
+    write(officialDoneSlot, ['local-only-gs'])
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ version: 0, updatedAt: 0, entries: {} }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          version: 1,
+          updatedAt: Date.now(),
+          entries: { 'oot-map:v1:official-done': JSON.stringify(['local-only-gs']) },
+        }),
+      })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await initRemoteSync()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/sync/state')
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('/api/sync/state')
+    expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({ method: 'PUT' })
   })
 })

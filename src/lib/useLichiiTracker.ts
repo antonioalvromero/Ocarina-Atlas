@@ -2,12 +2,15 @@ import { useEffect, useSyncExternalStore } from 'react'
 import { dataset } from './data'
 import type { LichiiTelemetryState } from './lichii-types'
 import {
+  applyRemoteSyncState,
+  initRemoteSync,
   officialDoneSlot,
   officialRevealedSlot,
   read,
   useStored,
   write,
   type Slot,
+  type SyncStatePayload,
 } from './storage'
 import type { Item } from './types'
 
@@ -69,10 +72,15 @@ let storeState: StoreState = {
   lastError: null,
 }
 
+const SSE_RECONNECT_MS = 3000
+
 const storeListeners = new Set<() => void>()
 let pollTimer: ReturnType<typeof setTimeout> | null = null
 let pollToken = 0
 let pollInFlight = false
+let pollingActive = false
+let eventSource: EventSource | null = null
+let sseReconnectTimer: ReturnType<typeof setTimeout> | null = null
 let activeSubscribers = 0
 let hasAuthoritativeSync = false
 let lastAutoSyncSignature: string | null = null
@@ -233,6 +241,16 @@ function processAutoSkulltulas(next: LichiiTelemetryState) {
   }
 }
 
+function applyTelemetryState(data: LichiiTelemetryState) {
+  processAutoSkulltulas(data)
+  storeState = {
+    ...storeState,
+    telemetry: data,
+    lastError: null,
+  }
+  emitStore()
+}
+
 async function pollOnce() {
   if (typeof window === 'undefined' || pollInFlight) return
   pollInFlight = true
@@ -253,13 +271,7 @@ async function pollOnce() {
       throw new Error(`HTTP ${response.status}`)
     }
     const data = (await response.json()) as LichiiTelemetryState
-    processAutoSkulltulas(data)
-    storeState = {
-      ...storeState,
-      telemetry: data,
-      lastError: null,
-    }
-    emitStore()
+    applyTelemetryState(data)
   } catch (err) {
     hasAuthoritativeSync = false
     lastAutoSyncSignature = null
@@ -280,34 +292,112 @@ async function pollOnce() {
 }
 
 function scheduleNextPoll(token: number) {
-  if (activeSubscribers === 0 || token !== pollToken) return
+  if (!pollingActive || activeSubscribers === 0 || token !== pollToken) return
   const delayMs = isLiveMemoryState(storeState.telemetry) ? 150 : 750
   pollTimer = setTimeout(() => {
     pollTimer = null
-    if (activeSubscribers === 0 || token !== pollToken) return
+    if (!pollingActive || activeSubscribers === 0 || token !== pollToken) return
     void pollOnce().finally(() => {
       scheduleNextPoll(token)
     })
   }, delayMs)
 }
 
+function startFallbackPolling() {
+  if (pollingActive || activeSubscribers === 0 || typeof window === 'undefined') return
+  pollingActive = true
+  const token = ++pollToken
+  void pollOnce().finally(() => {
+    if (pollingActive) scheduleNextPoll(token)
+  })
+}
+
+function stopPolling() {
+  pollingActive = false
+  pollToken += 1
+  if (pollTimer !== null) {
+    clearTimeout(pollTimer)
+    pollTimer = null
+  }
+}
+
+function closeEventSource() {
+  if (eventSource) {
+    eventSource.close()
+    eventSource = null
+  }
+}
+
+function connectEventSource() {
+  if (activeSubscribers === 0 || typeof window === 'undefined') return
+  if (typeof EventSource === 'undefined') {
+    startFallbackPolling()
+    return
+  }
+  closeEventSource()
+  if (sseReconnectTimer !== null) {
+    clearTimeout(sseReconnectTimer)
+    sseReconnectTimer = null
+  }
+
+  const es = new EventSource('/api/lichii/stream')
+  eventSource = es
+
+  es.addEventListener('open', () => {
+    if (eventSource !== es) return
+    stopPolling()
+  })
+
+  es.addEventListener('telemetry', (event) => {
+    if (eventSource !== es) return
+    stopPolling()
+    try {
+      const data = JSON.parse((event as MessageEvent<string>).data) as LichiiTelemetryState
+      applyTelemetryState(data)
+    } catch {
+      // Ignore malformed SSE telemetry frame
+    }
+  })
+
+  es.addEventListener('sync', (event) => {
+    if (eventSource !== es) return
+    try {
+      const payload = JSON.parse((event as MessageEvent<string>).data) as SyncStatePayload
+      applyRemoteSyncState(payload)
+    } catch {
+      // Ignore malformed SSE sync frame
+    }
+  })
+
+  es.addEventListener('error', () => {
+    if (eventSource !== es) return
+    closeEventSource()
+    startFallbackPolling()
+    if (activeSubscribers > 0 && sseReconnectTimer === null) {
+      sseReconnectTimer = setTimeout(() => {
+        sseReconnectTimer = null
+        connectEventSource()
+      }, SSE_RECONNECT_MS)
+    }
+  })
+}
+
 function subscribeStore(listener: () => void): () => void {
   storeListeners.add(listener)
   activeSubscribers += 1
   if (activeSubscribers === 1 && typeof window !== 'undefined') {
-    const token = ++pollToken
-    void pollOnce().finally(() => {
-      scheduleNextPoll(token)
-    })
+    void initRemoteSync()
+    connectEventSource()
   }
   return () => {
     storeListeners.delete(listener)
     activeSubscribers = Math.max(0, activeSubscribers - 1)
     if (activeSubscribers === 0) {
-      pollToken += 1
-      if (pollTimer !== null) {
-        clearTimeout(pollTimer)
-        pollTimer = null
+      stopPolling()
+      closeEventSource()
+      if (sseReconnectTimer !== null) {
+        clearTimeout(sseReconnectTimer)
+        sseReconnectTimer = null
       }
     }
   }

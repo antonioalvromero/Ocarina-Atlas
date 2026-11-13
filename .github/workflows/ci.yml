@@ -87,7 +87,7 @@ jobs:
         shell: pwsh
         run: npm run build:win
 
-      - name: Verify release artifacts and smoke-test HyruleAtlas.exe
+      - name: Verify release artifacts and smoke-test OcarinaAtlas.exe
         shell: pwsh
         run: ./scripts/smoke-test-win.ps1 -Port 34567
 

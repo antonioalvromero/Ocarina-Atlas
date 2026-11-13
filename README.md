@@ -1,4 +1,4 @@
-# Hyrule Atlas — Ocarina of Time Interactive Map & Lichii Live Tracker
+# Ocarina Atlas — Ocarina of Time Interactive Map & Lichii Live Tracker
 
 An interactive Hyrule field atlas and dungeon floor tracker for *The Legend of Zelda: Ocarina of Time* Remake, featuring **real-time player tracking**, **automatic Gold Skulltula completion**, and a **Windows Plug & Play desktop launcher** built for the [Lichii](https://github.com/zortos293/Lichii) emulator.
 
@@ -10,11 +10,11 @@ Built on top of [`lucasriondel/oot-remake-map`](https://github.com/lucasriondel/
 
 Download the latest portable Windows bundle from **[GitHub Releases](../../releases)**:
 
-- **Asset:** `HyruleAtlas-Windows-x64.zip`
-- **Releases URL:** [`https://github.com/antonioalvromero/Hyrule-Atlas/releases`](https://github.com/antonioalvromero/Hyrule-Atlas/releases)
+- **Asset:** `OcarinaAtlas-Windows-x64.zip`
+- **Releases URL:** [`https://github.com/antonioalvromero/Ocarina-Atlas/releases`](https://github.com/antonioalvromero/Ocarina-Atlas/releases)
 
 > **Platform Support Notice:**
-> - **Windows 10 / 11 (x64) only** for the standalone `HyruleAtlas.exe` launcher and live Lichii emulator integration.
+> - **Windows 10 / 11 (x64) only** for the standalone `OcarinaAtlas.exe` launcher and live Lichii emulator integration.
 > - **Supported Game Build:** *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`).
 > - The standalone web map UI can also be run on Linux/macOS via Node.js or Docker without Windows emulator features.
 
@@ -30,12 +30,12 @@ Download the latest portable Windows bundle from **[GitHub Releases](../../relea
 - **Offline Save Fallback:** When Lichii's debug RPC (`:6545`) is closed, the bridge reads the newest local save slot (`caption.sav` / `progress.sav`) read-only and clearly indicates **Lichii · Save only** (`(Saved)`) so stale save pins are never confused with live RAM movement.
 
 ### Interactive Map & Progress Tracker
-- **Complete Hyrule Atlas:** 32 places (20 overworld zones and 12 dungeons) and 184 official collectible items across 8 categories (100 Gold Skulltulas, Pieces of Heart, Heart Containers, Magic Beans, Great Fairies, Bottles, Keys, and Fairy Thoughts).
+- **Complete Ocarina Atlas:** 32 places (20 overworld zones and 12 dungeons) and 184 official collectible items across 8 categories (100 Gold Skulltulas, Pieces of Heart, Heart Containers, Magic Beans, Great Fairies, Bottles, Keys, and Fairy Thoughts).
 - **Custom Pins & Smart Merge:** Drop typed custom pins anywhere on a map; placing a pin near a matching official pin merges and reveals it automatically.
 - **Age & Category Filtering:** Filter pins by **Child**, **Adult**, or **Both**, hide completed categories, inspect **All floors** side-by-side in dungeons, and save per-map zoom/pan state locally in browser `localStorage` (`oot-map:v1:*`).
 - **Offline PWA Support:** Built with a service worker (`sw.js`) and web manifest so maps and visited item media cache locally.
 
-### Portable Windows Launcher (`HyruleAtlas.exe`)
+### Portable Windows Launcher (`OcarinaAtlas.exe`)
 - **Zero Dependencies Required:** Includes an embedded portable `runtime/node.exe`, pre-bundled server (`app/standalone-server.mjs`), and compiled client/SSR assets (`app/dist/`). No separate Node.js or `npm` installation needed.
 - **1-Click Lichii RPC Setup:** Detects and updates `%APPDATA%\lichii\nx2_switches.txt` to enable `EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545`.
 - **Second-Screen LAN Ready:** Automatically ranks your active physical network adapters (filtering out VPNs/virtual NICs), lets you switch between multiple active LAN adapters if needed, provides a 1-click **Copy URL** button, and includes an optional **Allow LAN Access** firewall helper scoped to Private networks.
@@ -48,11 +48,11 @@ Download the latest portable Windows bundle from **[GitHub Releases](../../relea
 Follow these steps to run the tracker without installing Node.js or editing code:
 
 1. **Download & Extract**
-   - Download `HyruleAtlas-Windows-x64.zip` from **[GitHub Releases](https://github.com/antonioalvromero/Hyrule-Atlas/releases)**.
-   - Right-click the `.zip` file, choose **Extract All...**, and extract the `HyruleAtlas-Windows-x64` folder anywhere (for example, `Desktop` or `Documents`).
+   - Download `OcarinaAtlas-Windows-x64.zip` from **[GitHub Releases](https://github.com/antonioalvromero/Ocarina-Atlas/releases)**.
+   - Right-click the `.zip` file, choose **Extract All...**, and extract the `OcarinaAtlas-Windows-x64` folder anywhere (for example, `Desktop` or `Documents`).
 
-2. **Launch `HyruleAtlas.exe`**
-   - Open the extracted `HyruleAtlas-Windows-x64` folder and double-click **`HyruleAtlas.exe`**.
+2. **Launch `OcarinaAtlas.exe`**
+   - Open the extracted `OcarinaAtlas-Windows-x64` folder and double-click **`OcarinaAtlas.exe`**.
    - *(If Windows SmartScreen shows "Windows protected your PC" for an unsigned open-source binary, click **More info** -> **Run anyway**.)*
 
 3. **Enable Lichii Debug RPC (Port `6545`)**
@@ -69,7 +69,7 @@ Follow these steps to run the tracker without installing Node.js or editing code
      - *(Note: `%APPDATA%\lichii\nx2_switches.txt` persists across Lichii updates and overrides the `nx2_switches.txt` next to `lichii.exe`. You can also launch `lichii.exe` with `EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545` set as a Windows environment variable.)*
 
 4. **Start the Map Server**
-   - In `HyruleAtlas.exe`, click **Start Map**.
+   - In `OcarinaAtlas.exe`, click **Start Map**.
    - With **Auto-open browser** enabled, your default browser opens `http://127.0.0.1:3000` automatically (or click **Open in Browser**).
 
 5. **Open on an iPad, Tablet, or Another PC (Optional)**
@@ -155,7 +155,7 @@ npm run server:build
 npm run build:win
 ```
 
-`npm run build:win` stages the self-contained runtime in `release/HyruleAtlas-Windows-x64/` and packages `release/HyruleAtlas-Windows-x64.zip`.
+`npm run build:win` stages the self-contained runtime in `release/OcarinaAtlas-Windows-x64/` and packages `release/OcarinaAtlas-Windows-x64.zip`.
 
 ### Docker (Map Web App Only)
 
@@ -191,7 +191,7 @@ The repository retains the upstream [`Dockerfile`](Dockerfile) using Bun (`oven/
                                        ^
                                        | Supervised via Windows Job Object
 +----------------------------------------------------------------------------------+
-|  Windows Launcher (launcher/HyruleAtlas.cs -> HyruleAtlas.exe)                   |
+|  Windows Launcher (launcher/OcarinaAtlas.cs -> OcarinaAtlas.exe)                   |
 |  - Starts/stops runtime/node.exe + app/standalone-server.mjs (or repo dev/dist)  |
 |  - Polls /api/lichii/state & TCP :6545; configures nx2_switches.txt in 1 click   |
 +----------------------------------------------------------------------------------+
@@ -209,11 +209,11 @@ The repository retains the upstream [`Dockerfile`](Dockerfile) using Bun (`oven/
 | `src/data/oot.json` | Atlas dataset (32 places, 184 official items, categories, requirements). |
 | `public/` | Static map SVGs/WebPs (`content/maps/`), item screenshots (`content/media/`), PWA icons, and `manifest.webmanifest`. |
 | `pwa/` | Build-time service worker generator (`plugin.ts`) and offline cache template (`sw.js`). |
-| `launcher/` | Native C# WinForms Windows launcher source (`HyruleAtlas.cs`). |
+| `launcher/` | Native C# WinForms Windows launcher source (`OcarinaAtlas.cs`). |
 | `scripts/` | Standalone production Node HTTP server (`server-entry.ts`), Windows portable packager (`build-win.mjs`), smoke test (`smoke-test-win.ps1`), and AI release notes composer (`generate-release-notes.mjs`). |
 | `.github/` | Issue templates, PR template, release category/AI guidelines (`release.yml`, `release-notes-instructions.md`), CI workflow (`ci.yml`), and Windows release workflow (`release-windows.yml`). |
 | `AGENTS.md` | Architecture notes, engineering invariants, and verification commands for AI coding agents. |
-| `LICENSE` | MIT License covering newly authored **Hyrule Atlas** components and documentation. |
+| `LICENSE` | MIT License covering newly authored **Ocarina Atlas** components and documentation. |
 
 ---
 
@@ -229,6 +229,6 @@ The repository retains the upstream [`Dockerfile`](Dockerfile) using Bun (`oven/
 
 ## License
 
-Newly authored **Hyrule Atlas** components — including the live Lichii telemetry bridge (`src/lib/lichii-*`, `src/lib/useLichiiTracker.ts`, `src/components/LichiiStatusPanel.tsx`, `src/components/PlayerPin.tsx`), Windows launcher (`launcher/`), build and release automation scripts (`scripts/`, `.github/`), and documentation — are licensed under the **[MIT License](LICENSE)** (permissive free use, modification, and distribution).
+Newly authored **Ocarina Atlas** components — including the live Lichii telemetry bridge (`src/lib/lichii-*`, `src/lib/useLichiiTracker.ts`, `src/components/LichiiStatusPanel.tsx`, `src/components/PlayerPin.tsx`), Windows launcher (`launcher/`), build and release automation scripts (`scripts/`, `.github/`), and documentation — are licensed under the **[MIT License](LICENSE)** (permissive free use, modification, and distribution).
 
 The upstream repository ([`lucasriondel/oot-remake-map`](https://github.com/lucasriondel/oot-remake-map)) does **not** include a `LICENSE` file in its root directory; upstream base code remains subject to its upstream terms, and map assets/game IP remain the property of their respective owners as noted in **Credits & Attribution**.

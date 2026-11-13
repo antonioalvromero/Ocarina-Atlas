@@ -15,7 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace HyruleAtlasLauncher
+namespace OcarinaAtlasLauncher
 {
     internal static class Program
     {
@@ -396,7 +396,7 @@ namespace HyruleAtlasLauncher
 
         public static string GetFirewallRuleName(int port)
         {
-            return string.Format(CultureInfo.InvariantCulture, "Hyrule Atlas (TCP {0})", port);
+            return string.Format(CultureInfo.InvariantCulture, "Ocarina Atlas (TCP {0})", port);
         }
 
         public static bool IsFirewallRulePresent(int port)
@@ -667,7 +667,7 @@ namespace HyruleAtlasLauncher
             string exeDir = (AppDomain.CurrentDomain.BaseDirectory ?? Environment.CurrentDirectory)
                 .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-            // 1. Standalone Release layout beside HyruleAtlas.exe:
+            // 1. Standalone Release layout beside OcarinaAtlas.exe:
             //    runtime\node.exe + app\standalone-server.mjs + app\dist\
             string bundledNode = Path.Combine(exeDir, "runtime", "node.exe");
             string bundledEntry = Path.Combine(exeDir, "app", "standalone-server.mjs");
@@ -898,7 +898,7 @@ namespace HyruleAtlasLauncher
             }
             else
             {
-                outLines.Add("# Lichii NX2 switches (configured by Hyrule Atlas)");
+                outLines.Add("# Lichii NX2 switches (configured by Ocarina Atlas)");
                 outLines.Add("# Restart Lichii after editing.");
                 outLines.Add(newLine);
             }
@@ -1382,7 +1382,7 @@ namespace HyruleAtlasLauncher
             _appIcon = CreateTriforceIcon();
             Icon = _appIcon;
 
-            Text = "Hyrule Atlas — Ocarina of Time Map Tracker";
+            Text = "Ocarina Atlas — Ocarina of Time Map Tracker";
             BackColor = Theme.Ink950;
             ForeColor = Theme.Parchment200;
             Font = new Font("Segoe UI", 9f, FontStyle.Regular);
@@ -1422,7 +1422,7 @@ namespace HyruleAtlasLauncher
             Controls.Add(_heroCard);
 
             Label titleLabel = new Label();
-            titleLabel.Text = "Hyrule Atlas";
+            titleLabel.Text = "Ocarina Atlas";
             titleLabel.Font = new Font("Georgia", 15f, FontStyle.Bold);
             titleLabel.ForeColor = Theme.Parchment50;
             titleLabel.AutoSize = true;
@@ -1550,7 +1550,7 @@ namespace HyruleAtlasLauncher
             _step1Card.Controls.Add(_enableRpcButton);
 
             _lichiiStepDetailLabel = new Label();
-            _lichiiStepDetailLabel.Text = "Allows Hyrule Atlas to follow Link and mark Gold Skulltulas automatically.";
+            _lichiiStepDetailLabel.Text = "Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.";
             _lichiiStepDetailLabel.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
             _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
             _lichiiStepDetailLabel.AutoSize = false;
@@ -1812,7 +1812,7 @@ namespace HyruleAtlasLauncher
         private void BuildTrayIcon()
         {
             ContextMenuStrip menu = new ContextMenuStrip();
-            ToolStripMenuItem showItem = new ToolStripMenuItem("Show Hyrule Atlas");
+            ToolStripMenuItem showItem = new ToolStripMenuItem("Show Ocarina Atlas");
             showItem.Font = new Font(showItem.Font, FontStyle.Bold);
             showItem.Click += delegate { RestoreFromTray(); };
 
@@ -1838,7 +1838,7 @@ namespace HyruleAtlasLauncher
 
             _trayIcon = new NotifyIcon();
             _trayIcon.Icon = _appIcon;
-            _trayIcon.Text = "Hyrule Atlas";
+            _trayIcon.Text = "Ocarina Atlas";
             _trayIcon.ContextMenuStrip = menu;
             _trayIcon.Visible = true;
             _trayIcon.DoubleClick += delegate { RestoreFromTray(); };
@@ -1923,7 +1923,7 @@ namespace HyruleAtlasLauncher
                 _trayHintShown = true;
                 _trayIcon.ShowBalloonTip(
                     2500,
-                    "Hyrule Atlas",
+                    "Ocarina Atlas",
                     "Still running in the system tray. Double-click the icon to reopen.",
                     ToolTipIcon.Info);
             }
@@ -1971,7 +1971,7 @@ namespace HyruleAtlasLauncher
             {
                 _configuredPill.Visible = true;
                 _enableRpcButton.Visible = false;
-                _lichiiStepDetailLabel.Text = "Allows Hyrule Atlas to follow Link and mark Gold Skulltulas automatically.";
+                _lichiiStepDetailLabel.Text = "Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.";
                 _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
                 _toolTip.SetToolTip(_configuredPill, "Configured: EDEN_NX2_DEBUG_SERVER=" + status.ConfiguredTarget);
             }
@@ -2889,8 +2889,8 @@ namespace HyruleAtlasLauncher
             if (_trayIcon != null)
             {
                 _trayIcon.Text = isRunning
-                    ? "Hyrule Atlas \u2014 Running (" + GetServerUrl() + ")"
-                    : "Hyrule Atlas \u2014 " + _lifecycle.ToString();
+                    ? "Ocarina Atlas \u2014 Running (" + GetServerUrl() + ")"
+                    : "Ocarina Atlas \u2014 " + _lifecycle.ToString();
             }
         }
 
@@ -3066,7 +3066,7 @@ namespace HyruleAtlasLauncher
                 }
                 else if (_configuredPill.Visible)
                 {
-                    _lichiiStepDetailLabel.Text = "Allows Hyrule Atlas to follow Link and mark Gold Skulltulas automatically.";
+                    _lichiiStepDetailLabel.Text = "Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.";
                     _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
                 }
                 else

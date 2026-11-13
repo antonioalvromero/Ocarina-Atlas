@@ -72,7 +72,7 @@ function formatScopeLabel(scope: string): string {
     pwa: 'PWA',
     ssr: 'SSR',
     aslr: 'ASLR',
-    'hyrule-atlas': 'Hyrule Atlas',
+    'ocarina-atlas': 'Ocarina Atlas',
   }
   const lower = cleaned.toLowerCase()
   if (upperMap[lower]) return upperMap[lower]
@@ -355,7 +355,7 @@ export function groupCommitsForLichii(commits: readonly CommitEntry[]): LichiiGr
     const isLauncherScope = /\b(launcher|win|windows|exe|build-win|smoke)\b/.test(scope)
     const isTelemetryScope = /\b(telemetry|lichii|skulltula|rpc|map|tracker|pin|floor)\b/.test(scope)
 
-    const mentionsLauncher = /\b(launcher|hyruleatlas\.exe|ocarinamaps\.exe|build-win|smoke-test|nx2_switches|tray|winforms)\b/.test(body)
+    const mentionsLauncher = /\b(launcher|ocarinaatlas\.exe|ocarinamaps\.exe|build-win|smoke-test|nx2_switches|tray|winforms)\b/.test(body)
     const mentionsTelemetry = /\b(telemetry|lichii|skulltula|mod0|aslr|rpc|playerpin|placeview|floorgrid|worldmap|mastertable|save fallback)\b/.test(body)
 
     if (type === 'fix') {
@@ -658,7 +658,7 @@ export function composeReleaseBody(input: ComposeReleaseBodyInput): string {
   } else {
     const changelogRaw = input.changelogSection.trim()
     const defaultCallout =
-      '> **Quick start.** Extract the portable Windows ZIP under **Downloads** and run **HyruleAtlas.exe** (includes 1-click Lichii RPC **6545** setup for *Ocarina of Time* Remake `0400486024DEC000`).'
+      '> **Quick start.** Extract the portable Windows ZIP under **Downloads** and run **OcarinaAtlas.exe** (includes 1-click Lichii RPC **6545** setup for *Ocarina of Time* Remake `0400486024DEC000`).'
 
     if (changelogRaw) {
       const formattedChangelog = formatChangelogForLichii(changelogRaw)
@@ -688,7 +688,7 @@ export function composeReleaseBody(input: ComposeReleaseBodyInput): string {
         changeSections.push(groupBlocks.join('\n\n'))
       } else {
         changeSections.push(
-          `### Release notes\n- **Hyrule Atlas \`${input.version}\`:** Portable Windows build and interactive Hyrule atlas release.`,
+          `### Release notes\n- **Ocarina Atlas \`${input.version}\`:** Portable Windows build and interactive Ocarina atlas release.`,
         )
       }
     }
@@ -729,9 +729,9 @@ export function composeReleaseBody(input: ComposeReleaseBodyInput): string {
     '## Downloads',
     downloadsMeta,
     '## Windows',
-    'Windows packages are in-place zip files: extract and run `HyruleAtlas.exe`.',
+    'Windows packages are in-place zip files: extract and run `OcarinaAtlas.exe`.',
     windowsTable,
-    'Quick start: extract the ZIP anywhere on Windows 10/11 x64, launch `HyruleAtlas.exe`, click **1-Click Setup Lichii** if needed, and click **Start Map** to open Hyrule Atlas for *Ocarina of Time* Remake (`0400486024DEC000`).',
+    'Quick start: extract the ZIP anywhere on Windows 10/11 x64, launch `OcarinaAtlas.exe`, click **1-Click Setup Lichii** if needed, and click **Start Map** to open Ocarina Atlas for *Ocarina of Time* Remake (`0400486024DEC000`).',
   ].join('\n\n')
 
   return `${changeSections.join('\n\n')}\n\n${downloadsBlock}\n`

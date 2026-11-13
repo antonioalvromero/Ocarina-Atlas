@@ -214,7 +214,7 @@ async function main() {
     ? validateRepoSlug(envRepo)
     : extractGitHubRepoSlugFromRemote(runGit(['remote', 'get-url', 'origin'])) ?? ''
   const githubToken = (process.env.GITHUB_TOKEN ?? '').trim()
-  const zipPath = process.env.ZIP_PATH || 'release/HyruleAtlas-Windows-x64.zip'
+  const zipPath = process.env.ZIP_PATH || 'release/OcarinaAtlas-Windows-x64.zip'
   const outPath = process.env.OUT_PATH || 'release/RELEASE_NOTES.md'
 
   const commits = collectCommits(previousTag, resolvedHeadRef)

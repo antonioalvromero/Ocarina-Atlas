@@ -8,7 +8,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { name: 'apple-mobile-web-app-title', content: 'Hyrule Atlas' },
+      { name: 'apple-mobile-web-app-title', content: 'Ocarina Atlas' },
       { name: 'theme-color', content: '#13100c' },
       { title: 'Field Atlas' },
     ],

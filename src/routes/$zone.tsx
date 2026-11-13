@@ -10,7 +10,7 @@ export const Route = createFileRoute('/$zone')({
     return { place }
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: loaderData ? `${loaderData.place.name} | Field Atlas` : 'Not found' }],
+    meta: [{ title: loaderData ? `${loaderData.place.name} | Ocarina Atlas` : 'Not found' }],
   }),
   component: ZonePage,
   notFoundComponent: NotFound,

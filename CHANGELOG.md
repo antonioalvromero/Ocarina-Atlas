@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-13
+
+### Fixed
+- **QR Code Pairing Encoding (`launcher/OcarinaAtlas.cs`):** Fixed ISO/IEC 18004 QR code generation (version/EC table, format/version info placement, and masking) so phone and tablet cameras reliably scan the LAN pairing QR code, and added a click-to-enlarge modal preview.
+
+### Changed
+- **Web & PWA Ocarina Atlas Branding (`src/routes/__root.tsx`, `src/routes/$zone.tsx`, `src/components/WorldMap.tsx`, `public/manifest.webmanifest`, `public/icons/*`):** Replaced remaining **Field Atlas** page titles, map header, and PWA manifest names with **Ocarina Atlas**, updated `<link rel="icon">` to `/icons/favicon.ico` and `/icons/icon-192.png`, and regenerated all web/PWA icons from `assets/logo.png` and `launcher/OcarinaAtlas.ico`.
+
 ## [1.1.0] - 2026-11-13
 
 ### Added

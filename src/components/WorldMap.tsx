@@ -187,7 +187,7 @@ export function WorldMap() {
         )}
       </MapViewport>
       <header className="pointer-events-none absolute top-3 left-3 rounded-lg border border-ink-600 bg-ink-900/90 px-4 py-3 shadow-lg">
-        <h1 className="font-serif text-xl text-parchment-50">Field Atlas</h1>
+        <h1 className="font-serif text-xl text-parchment-50">Ocarina Atlas</h1>
         <p className="mt-0.5 text-xs text-parchment-400 tabular-nums">
           {doneTotal} of {dataset.items.length} items completed
         </p>

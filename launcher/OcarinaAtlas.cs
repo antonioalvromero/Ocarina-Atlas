@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -1251,30 +1252,56 @@ namespace OcarinaAtlasLauncher
             if (matrix == null || targetSizePx <= 0) return null;
 
             int modules = matrix.GetLength(0);
-            int scale = Math.Max(1, (targetSizePx - 8) / modules);
+            int totalModules = modules + 8; // ISO/IEC 18004 requires a 4-module quiet zone on each side
+            int scale = Math.Max(1, targetSizePx / totalModules);
             int qrPx = modules * scale;
             int offset = (targetSizePx - qrPx) / 2;
 
-            Color bg = Color.FromArgb(0xF5, 0xED, 0xE0);
-            Color fg = Theme.Ink950;
+            const int whiteArgb = unchecked((int)0xFFFFFFFF);
+            const int blackArgb = unchecked((int)0xFF000000);
 
-            Bitmap bmp = new Bitmap(targetSizePx, targetSizePx);
-            using (Graphics g = Graphics.FromImage(bmp))
+            int[] pixels = new int[targetSizePx * targetSizePx];
+            for (int i = 0; i < pixels.Length; i++)
             {
-                g.Clear(bg);
-                using (Brush darkBrush = new SolidBrush(fg))
+                pixels[i] = whiteArgb;
+            }
+
+            for (int r = 0; r < modules; r++)
+            {
+                int baseY = offset + r * scale;
+                for (int c = 0; c < modules; c++)
                 {
-                    for (int r = 0; r < modules; r++)
+                    if (!matrix[r, c]) continue;
+                    int baseX = offset + c * scale;
+                    for (int dy = 0; dy < scale; dy++)
                     {
-                        for (int c = 0; c < modules; c++)
+                        int y = baseY + dy;
+                        if (y < 0 || y >= targetSizePx) continue;
+                        int rowOffset = y * targetSizePx;
+                        for (int dx = 0; dx < scale; dx++)
                         {
-                            if (matrix[r, c])
+                            int x = baseX + dx;
+                            if (x >= 0 && x < targetSizePx)
                             {
-                                g.FillRectangle(darkBrush, offset + c * scale, offset + r * scale, scale, scale);
+                                pixels[rowOffset + x] = blackArgb;
                             }
                         }
                     }
                 }
+            }
+
+            Bitmap bmp = new Bitmap(targetSizePx, targetSizePx, PixelFormat.Format32bppArgb);
+            BitmapData data = bmp.LockBits(
+                new Rectangle(0, 0, targetSizePx, targetSizePx),
+                ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+            try
+            {
+                Marshal.Copy(pixels, 0, data.Scan0, pixels.Length);
+            }
+            finally
+            {
+                bmp.UnlockBits(data);
             }
             return bmp;
         }
@@ -1534,23 +1561,23 @@ namespace OcarinaAtlasLauncher
 
             for (int i = 0; i <= 5; i++)
             {
-                modules[8, i] = ((bits >> i) & 1) != 0;
+                modules[8, i] = ((bits >> (14 - i)) & 1) != 0;
             }
-            modules[8, 7] = ((bits >> 6) & 1) != 0;
+            modules[8, 7] = ((bits >> 8) & 1) != 0;
             modules[8, 8] = ((bits >> 7) & 1) != 0;
-            modules[7, 8] = ((bits >> 8) & 1) != 0;
+            modules[7, 8] = ((bits >> 6) & 1) != 0;
             for (int i = 9; i < 15; i++)
             {
-                modules[14 - i, 8] = ((bits >> i) & 1) != 0;
+                modules[14 - i, 8] = ((bits >> (14 - i)) & 1) != 0;
             }
 
             for (int i = 0; i < 7; i++)
             {
-                modules[size - 1 - i, 8] = ((bits >> i) & 1) != 0;
+                modules[size - 1 - i, 8] = ((bits >> (14 - i)) & 1) != 0;
             }
             for (int i = 7; i < 15; i++)
             {
-                modules[8, size - 15 + i] = ((bits >> i) & 1) != 0;
+                modules[8, size - 15 + i] = ((bits >> (14 - i)) & 1) != 0;
             }
         }
 
@@ -1607,6 +1634,28 @@ namespace OcarinaAtlasLauncher
                 }
             }
 
+            // N3: 1:1:3:1:1 finder-like pattern preceded or followed by 4 light modules
+            for (int r = 0; r < size; r++)
+            {
+                for (int c = 0; c <= size - 11; c++)
+                {
+                    if (IsFinderLikeRow(modules, r, c))
+                    {
+                        penalty += 40;
+                    }
+                }
+            }
+            for (int c = 0; c < size; c++)
+            {
+                for (int r = 0; r <= size - 11; r++)
+                {
+                    if (IsFinderLikeCol(modules, r, c))
+                    {
+                        penalty += 40;
+                    }
+                }
+            }
+
             // N4: dark module ratio deviation from 50%
             int dark = 0;
             for (int r = 0; r < size; r++)
@@ -1621,6 +1670,33 @@ namespace OcarinaAtlasLauncher
             penalty += k * 10;
 
             return penalty;
+        }
+
+        private static bool IsFinderLikeRow(bool[,] modules, int r, int c)
+        {
+            // 1011101 + 0000 or 0000 + 1011101
+            bool forward =
+                modules[r, c] && !modules[r, c + 1] && modules[r, c + 2] && modules[r, c + 3] &&
+                modules[r, c + 4] && !modules[r, c + 5] && modules[r, c + 6] &&
+                !modules[r, c + 7] && !modules[r, c + 8] && !modules[r, c + 9] && !modules[r, c + 10];
+            bool backward =
+                !modules[r, c] && !modules[r, c + 1] && !modules[r, c + 2] && !modules[r, c + 3] &&
+                modules[r, c + 4] && !modules[r, c + 5] && modules[r, c + 6] && modules[r, c + 7] &&
+                modules[r, c + 8] && !modules[r, c + 9] && modules[r, c + 10];
+            return forward || backward;
+        }
+
+        private static bool IsFinderLikeCol(bool[,] modules, int r, int c)
+        {
+            bool forward =
+                modules[r, c] && !modules[r + 1, c] && modules[r + 2, c] && modules[r + 3, c] &&
+                modules[r + 4, c] && !modules[r + 5, c] && modules[r + 6, c] &&
+                !modules[r + 7, c] && !modules[r + 8, c] && !modules[r + 9, c] && !modules[r + 10, c];
+            bool backward =
+                !modules[r, c] && !modules[r + 1, c] && !modules[r + 2, c] && !modules[r + 3, c] &&
+                modules[r + 4, c] && !modules[r + 5, c] && modules[r + 6, c] && modules[r + 7, c] &&
+                modules[r + 8, c] && !modules[r + 9, c] && modules[r + 10, c];
+            return forward || backward;
         }
     }
 
@@ -1749,7 +1825,7 @@ namespace OcarinaAtlasLauncher
         private const string LatestReleaseApiUrl = "https://api.github.com/repos/antonioalvromero/Ocarina-Atlas/releases/latest";
         private const string LatestReleaseFallbackUrl = "https://github.com/antonioalvromero/Ocarina-Atlas/releases/latest";
 
-        private const int CollapsedClientHeight = 470;
+        private const int CollapsedClientHeight = 478;
         private const int ExpandedClientHeight = 700;
 
         private readonly LaunchOptions _options;
@@ -2047,7 +2123,7 @@ namespace OcarinaAtlasLauncher
             // 3. Step 2 Card: Play on Another Device (LAN)
             _step2Card = new BorderedPanel();
             _step2Card.Location = new Point(16, 268);
-            _step2Card.Size = new Size(528, 148);
+            _step2Card.Size = new Size(528, 156);
             _step2Card.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             Controls.Add(_step2Card);
 
@@ -2073,7 +2149,7 @@ namespace OcarinaAtlasLauncher
             _lanComboBox.ForeColor = Theme.Parchment50;
             _lanComboBox.Font = new Font("Segoe UI", 8.75f, FontStyle.Regular);
             _lanComboBox.Location = new Point(16, 44);
-            _lanComboBox.Size = new Size(386, 24);
+            _lanComboBox.Size = new Size(374, 24);
             _lanComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _lanComboBox.Visible = false;
             _lanComboBox.SelectedIndexChanged += OnLanComboSelectedIndexChanged;
@@ -2097,7 +2173,7 @@ namespace OcarinaAtlasLauncher
             _lanStatusLabel.ForeColor = Theme.Parchment200;
             _lanStatusLabel.AutoSize = false;
             _lanStatusLabel.Location = new Point(16, 47);
-            _lanStatusLabel.Size = new Size(386, 22);
+            _lanStatusLabel.Size = new Size(374, 22);
             _lanStatusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _step2Card.Controls.Add(_lanStatusLabel);
 
@@ -2121,22 +2197,24 @@ namespace OcarinaAtlasLauncher
             _lanHintLabel.ForeColor = Theme.Parchment400;
             _lanHintLabel.AutoSize = false;
             _lanHintLabel.Location = new Point(16, 108);
-            _lanHintLabel.Size = new Size(386, 30);
+            _lanHintLabel.Size = new Size(374, 30);
             _lanHintLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _step2Card.Controls.Add(_lanHintLabel);
 
             _qrPictureBox = new PictureBox();
-            _qrPictureBox.Location = new Point(416, 42);
-            _qrPictureBox.Size = new Size(96, 96);
+            _qrPictureBox.Location = new Point(400, 40);
+            _qrPictureBox.Size = new Size(112, 112);
             _qrPictureBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _qrPictureBox.BackColor = Color.FromArgb(0xF5, 0xED, 0xE0);
+            _qrPictureBox.BackColor = Color.White;
             _qrPictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+            _qrPictureBox.Cursor = Cursors.Hand;
             _qrPictureBox.Visible = false;
+            _qrPictureBox.Click += OnQrPictureBoxClick;
             _step2Card.Controls.Add(_qrPictureBox);
-            _toolTip.SetToolTip(_qrPictureBox, "Scan with your phone or tablet camera to open Ocarina Atlas on the same Wi-Fi.");
+            _toolTip.SetToolTip(_qrPictureBox, "Click to enlarge QR — scan with your phone or tablet camera to open Ocarina Atlas on the same Wi-Fi.");
 
             // 4. Collapsible Advanced Settings & Logs Drawer
-            _advancedToggleButton = CreateButton("\u25B8 Advanced Settings & Logs", 16, 426, 528, 30, false);
+            _advancedToggleButton = CreateButton("\u25B8 Advanced Settings & Logs", 16, 434, 528, 30, false);
             _advancedToggleButton.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _advancedToggleButton.TextAlign = ContentAlignment.MiddleLeft;
             _advancedToggleButton.Padding = new Padding(8, 0, 0, 0);
@@ -2146,8 +2224,8 @@ namespace OcarinaAtlasLauncher
             Controls.Add(_advancedToggleButton);
 
             _advancedDrawerPanel = new BorderedPanel();
-            _advancedDrawerPanel.Location = new Point(16, 462);
-            _advancedDrawerPanel.Size = new Size(528, 224);
+            _advancedDrawerPanel.Location = new Point(16, 470);
+            _advancedDrawerPanel.Size = new Size(528, 216);
             _advancedDrawerPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             _advancedDrawerPanel.Visible = false;
             Controls.Add(_advancedDrawerPanel);
@@ -2820,6 +2898,55 @@ namespace OcarinaAtlasLauncher
             _qrPictureBox.Image = bmp;
             _qrPictureBox.Visible = true;
             if (oldImg != null) oldImg.Dispose();
+        }
+
+        private void OnQrPictureBoxClick(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(_selectedLanUrl)) return;
+
+            Bitmap largeBmp = QrCodeEncoder.RenderBitmap(_selectedLanUrl, 280);
+            if (largeBmp == null) return;
+
+            using (largeBmp)
+            using (Form modal = new Form())
+            {
+                modal.Text = "Scan QR Code \u2014 Ocarina Atlas";
+                modal.BackColor = Theme.Ink950;
+                modal.ForeColor = Theme.Parchment200;
+                modal.Font = new Font("Segoe UI", 9f, FontStyle.Regular);
+                modal.FormBorderStyle = FormBorderStyle.FixedDialog;
+                modal.StartPosition = FormStartPosition.CenterParent;
+                modal.MaximizeBox = false;
+                modal.MinimizeBox = false;
+                modal.ShowInTaskbar = false;
+                modal.ClientSize = new Size(328, 376);
+                if (_appIcon != null) modal.Icon = _appIcon;
+
+                PictureBox largeBox = new PictureBox();
+                largeBox.Location = new Point(24, 16);
+                largeBox.Size = new Size(280, 280);
+                largeBox.BackColor = Color.White;
+                largeBox.SizeMode = PictureBoxSizeMode.CenterImage;
+                largeBox.Image = largeBmp;
+                modal.Controls.Add(largeBox);
+
+                Label urlLabel = new Label();
+                urlLabel.Text = _selectedLanUrl;
+                urlLabel.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+                urlLabel.ForeColor = Theme.Moss;
+                urlLabel.TextAlign = ContentAlignment.MiddleCenter;
+                urlLabel.AutoSize = false;
+                urlLabel.Location = new Point(16, 304);
+                urlLabel.Size = new Size(296, 24);
+                modal.Controls.Add(urlLabel);
+
+                Button closeBtn = CreateButton("Close", 114, 336, 100, 28, false);
+                closeBtn.DialogResult = DialogResult.Cancel;
+                modal.Controls.Add(closeBtn);
+                modal.CancelButton = closeBtn;
+
+                modal.ShowDialog(this);
+            }
         }
 
         private void OnLanUrlLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

@@ -109,6 +109,22 @@ describe('getConnectionView', () => {
     expect(view.dotClass).toBe('bg-ember')
     expect(view.pulse).toBe(false)
   })
+
+  it('uses Fritchii label and offline RPC note when emulator is fritchii', () => {
+    const liveView = getConnectionView(
+      makeState({ connected: true, emulatorRunning: true, emulator: 'fritchii', source: 'memory' }),
+    )
+    expect(liveView.label).toBe('Fritchii · Live')
+
+    const saveView = getConnectionView(
+      makeState({ connected: false, emulatorRunning: false, emulator: 'fritchii', source: 'save' }),
+    )
+    expect(saveView.label).toBe('Fritchii · Save only')
+    expect(saveView.note).toBe('Offline (Fritchii RPC :6545 closed)')
+    expect(buildOrbAriaLabel(makeState({ emulator: 'fritchii', source: 'save' }), saveView)).toBe(
+      'Fritchii emulator tracker: Fritchii · Save only. Gold Skulltula count unavailable',
+    )
+  })
 })
 
 describe('orb helpers', () => {

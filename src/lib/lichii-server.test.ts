@@ -8,6 +8,7 @@ import {
   deriveConnectionStatus,
   deriveDynamicVtables,
   deriveLastPickedItem,
+  detectEmulatorFromPath,
   determineDungeonFloor,
   findLatestSaveSlotDir,
   getCandidateSaveDirs,
@@ -58,13 +59,15 @@ describe('formatFloorLabel', () => {
 })
 
 describe('Lichii environment config helpers', () => {
-  it('resolves LICHII_HOST with whitespace trimming and 127.0.0.1 fallback', () => {
+  it('resolves LICHII_HOST / FRITCHII_HOST with whitespace trimming and 127.0.0.1 fallback', () => {
     expect(getLichiiHost({})).toBe('127.0.0.1')
     expect(getLichiiHost({ LICHII_HOST: '   ' })).toBe('127.0.0.1')
     expect(getLichiiHost({ LICHII_HOST: ' 192.168.1.42 ' })).toBe('192.168.1.42')
+    expect(getLichiiHost({ FRITCHII_HOST: ' 127.0.0.2 ' })).toBe('127.0.0.2')
+    expect(getLichiiHost({ LICHII_HOST: '10.0.0.2', FRITCHII_HOST: '127.0.0.2' })).toBe('10.0.0.2')
   })
 
-  it('validates LICHII_PORT within 1..65535 and falls back to 6545', () => {
+  it('validates LICHII_PORT / FRITCHII_PORT within 1..65535 and falls back to 6545', () => {
     expect(parseLichiiPort(undefined)).toBe(6545)
     expect(parseLichiiPort('')).toBe(6545)
     expect(parseLichiiPort('0')).toBe(6545)
@@ -78,22 +81,106 @@ describe('Lichii environment config helpers', () => {
 
     expect(getLichiiPort({})).toBe(6545)
     expect(getLichiiPort({ LICHII_PORT: '7777' })).toBe(7777)
+    expect(getLichiiPort({ FRITCHII_PORT: '7788' })).toBe(7788)
+    expect(getLichiiPort({ LICHII_PORT: '7777', FRITCHII_PORT: '7788' })).toBe(7777)
     expect(getLichiiPort({ LICHII_PORT: 'invalid' })).toBe(6545)
   })
 
-  it('checks LICHII_SAVE_DIR before default APPDATA save directory', () => {
+  it('checks LICHII_SAVE_DIR / FRITCHII_SAVE_DIR before default APPDATA save directories', () => {
     const appData = path.join(os.tmpdir(), 'fake-appdata')
     const explicit = path.join(os.tmpdir(), 'custom-lichii-saves')
-    const defaultExpected = path.join(appData, 'lichii', 'nand', 'user', 'save', '0000000000000000')
+    const explicitFritchii = path.join(os.tmpdir(), 'custom-fritchii-saves')
+    const fritchiiDefault = path.join(appData, 'fritchii', 'nand', 'user', 'save', '0000000000000000')
+    const lichiiDefault = path.join(appData, 'lichii', 'nand', 'user', 'save', '0000000000000000')
+    const edenDefault = path.join(appData, 'eden', 'nand', 'user', 'save', '0000000000000000')
 
-    expect(getCandidateSaveDirs({ APPDATA: appData })).toEqual([defaultExpected])
+    expect(getCandidateSaveDirs({ APPDATA: appData })).toEqual([
+      fritchiiDefault,
+      lichiiDefault,
+      edenDefault,
+    ])
     expect(getCandidateSaveDirs({ APPDATA: appData, LICHII_SAVE_DIR: '   ' })).toEqual([
-      defaultExpected,
+      fritchiiDefault,
+      lichiiDefault,
+      edenDefault,
     ])
-    expect(getCandidateSaveDirs({ APPDATA: appData, LICHII_SAVE_DIR: explicit })).toEqual([
+    expect(
+      getCandidateSaveDirs({
+        APPDATA: appData,
+        LICHII_SAVE_DIR: explicit,
+        FRITCHII_SAVE_DIR: explicitFritchii,
+      }),
+    ).toEqual([
       path.resolve(explicit),
-      defaultExpected,
+      path.resolve(explicitFritchii),
+      fritchiiDefault,
+      lichiiDefault,
+      edenDefault,
     ])
+  })
+
+  it('selects the most recently modified save slot across fritchii, lichii, and eden defaults', () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'fritchii-save-test-'))
+    try {
+      const appDataDir = path.join(tmpRoot, 'appdata')
+      const lichiiSlot = path.join(
+        appDataDir,
+        'lichii',
+        'nand',
+        'user',
+        'save',
+        '0000000000000000',
+        '0000000000000001',
+        '0400486024DEC000',
+        'slot_00',
+      )
+      const fritchiiSlot = path.join(
+        appDataDir,
+        'fritchii',
+        'nand',
+        'user',
+        'save',
+        '0000000000000000',
+        'B20831C4ABF20667A1EF55C894868D34',
+        '0400486024DEC000',
+        'slot_00',
+      )
+      fs.mkdirSync(lichiiSlot, { recursive: true })
+      fs.mkdirSync(fritchiiSlot, { recursive: true })
+
+      const lichiiCap = path.join(lichiiSlot, 'caption.sav')
+      const fritchiiCap = path.join(fritchiiSlot, 'caption.sav')
+      fs.writeFileSync(lichiiCap, Buffer.alloc(0x30))
+      fs.writeFileSync(fritchiiCap, Buffer.alloc(0x30))
+
+      // Case 1: Fritchii save is newer than Lichii save -> picks Fritchii
+      fs.utimesSync(lichiiCap, new Date(1000), new Date(1000))
+      fs.utimesSync(fritchiiCap, new Date(5000), new Date(5000))
+      const newerFritchii = findLatestSaveSlotDir(getCandidateSaveDirs({ APPDATA: appDataDir }))
+      expect(newerFritchii?.dir).toBe(fritchiiSlot)
+      expect(detectEmulatorFromPath(newerFritchii!.dir)).toBe('fritchii')
+
+      // Case 2: Lichii save is newer than Fritchii save -> picks Lichii (no shadowing)
+      fs.utimesSync(lichiiCap, new Date(9000), new Date(9000))
+      const newerLichii = findLatestSaveSlotDir(getCandidateSaveDirs({ APPDATA: appDataDir }))
+      expect(newerLichii?.dir).toBe(lichiiSlot)
+      expect(detectEmulatorFromPath(newerLichii!.dir)).toBe('lichii')
+
+      // Case 3: FRITCHII_SAVE_DIR explicit override beats newer default saves
+      const customFritchiiSlot = path.join(tmpRoot, 'custom-fritchii', 'slot_03')
+      fs.mkdirSync(customFritchiiSlot, { recursive: true })
+      const customCap = path.join(customFritchiiSlot, 'caption.sav')
+      fs.writeFileSync(customCap, Buffer.alloc(0x30))
+      fs.utimesSync(customCap, new Date(500), new Date(500))
+      const overrideFound = findLatestSaveSlotDir(
+        getCandidateSaveDirs({ APPDATA: appDataDir, FRITCHII_SAVE_DIR: customFritchiiSlot }),
+      )
+      expect(overrideFound?.dir).toBe(customFritchiiSlot)
+      expect(detectEmulatorFromPath(path.join(appDataDir, 'eden', 'slot_00'))).toBe('eden')
+      expect(detectEmulatorFromPath(customFritchiiSlot)).toBeUndefined()
+    } finally {
+      fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
   })
 
   it('supports direct slot_*, title, and full user/save structures with LICHII_SAVE_DIR priority', () => {

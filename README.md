@@ -4,7 +4,7 @@
 
 # Ocarina Atlas
 
-Interactive Hyrule field atlas and dungeon floor tracker for *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`),<br>featuring live [Lichii](https://github.com/zortos293/Lichii) memory telemetry, automatic Gold Skulltula tracking, and a portable Windows launcher.
+Interactive Hyrule field atlas and dungeon floor tracker for *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`),<br>featuring live [Lichii](https://github.com/zortos293/Lichii) &amp; [Fritchii](https://github.com/Frizti/Fritchii) memory telemetry, automatic Gold Skulltula tracking, and a portable Windows launcher.
 
 [![Windows x64](https://img.shields.io/badge/Platform-Windows%20x64-0078D6?logo=windows)](https://github.com/antonioalvromero/Ocarina-Atlas/releases)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -29,17 +29,17 @@ Run the live tracker on Windows without installing Node.js or editing code:
    - Open the extracted folder and double-click **`OcarinaAtlas.exe`**.
    - *(If Windows SmartScreen shows "Windows protected your PC" for an unsigned open-source binary, click **More info** -> **Run anyway**.)*
 
-3. **Step 1 · Lichii Live Sync**
-   - **Recommended (1-Click Setup):** In the **Step 1 · Lichii Live Sync** card, click **1-Click Setup Lichii**.
-     - This creates or updates `%APPDATA%\lichii\nx2_switches.txt` with `EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545` while preserving your existing switches.
-     - **If Lichii is already running, close and restart Lichii completely** so it loads the debug server on startup.
+3. **Step 1 · Emulator Live Sync (Lichii / Fritchii)**
+   - **Recommended (1-Click Setup):** In the **Step 1 · Emulator Live Sync** card, click **1-Click Setup Sync**.
+     - This creates or updates `nx2_switches.txt` in your detected emulator profile folder(s) (`%APPDATA%\fritchii\nx2_switches.txt` and/or `%APPDATA%\lichii\nx2_switches.txt`) with `EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545` while preserving your existing switches.
+     - **If Lichii or Fritchii is already running, close and restart it completely** so it loads the debug server on startup.
    - **Manual Fallback:**
-     1. Press `Win + R`, paste `%APPDATA%\lichii`, and press **Enter** (create the `lichii` folder if it does not exist).
+     1. Press `Win + R`, paste `%APPDATA%\fritchii` (for Fritchii) or `%APPDATA%\lichii` (for Lichii), and press **Enter** (create the folder if it does not exist).
      2. Create or edit `nx2_switches.txt` inside that folder and add:
         ```text
         EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545
         ```
-     3. Save the file and restart `lichii.exe`.
+     3. Save the file and restart `lichii.exe` / `fritchii.exe`.
 
 4. **Start Map**
    - Click **Start Map** in `OcarinaAtlas.exe`.
@@ -50,8 +50,8 @@ Run the live tracker on Windows without installing Node.js or editing code:
    - In **Step 2 · Play on Another Device (Optional)**, click **Allow LAN Access** once and approve the Administrator prompt if your tablet cannot reach the page yet (creates an inbound Windows Defender Firewall rule scoped strictly to **Private** networks).
    - If your PC has multiple active networks (such as Ethernet + Mesh Wi-Fi), choose the matching adapter from the LAN URL selector, click **Copy URL**, and open that `http://` address in your browser. *(Live Link coordinates and Gold Skulltula status stream automatically; pins marked on a second screen are stored in that device's browser `localStorage`.)*
 
-6. **Play in Lichii**
-   - Boot *Ocarina of Time* Remake (`0400486024DEC000`) in Lichii and load a save slot.
+6. **Play in Lichii or Fritchii**
+   - Boot *Ocarina of Time* Remake (`0400486024DEC000`) in Lichii or Fritchii and load a save slot.
    - Confirm the launcher reads **In-game live tracking** and the bottom-left Gold Skulltula medallion pulses green. Hover (or tap on touch devices) over the medallion to expand the tracker card.
 
 ### Connection States
@@ -85,7 +85,7 @@ Run the live tracker on Windows without installing Node.js or editing code:
 | `APP_DIST_DIR` | Auto-resolved `dist` | Explicit path to the built `dist/` folder (`client/` + `server/`) when running `standalone-server.mjs`. |
 | `LICHII_HOST` | `127.0.0.1` | Hostname or IP of the Lichii JSON-RPC debug server. |
 | `LICHII_PORT` | `6545` | TCP port of the Lichii JSON-RPC debug server (`1..65535`). |
-| `LICHII_SAVE_DIR` | `%APPDATA%\lichii\nand\user\save\0000000000000000` | Optional save folder override. Supports direct `slot_*`, title ID (`0400486024DEC000`), profile, or `nand/user/save` layouts. |
+| `LICHII_SAVE_DIR` | `%APPDATA%\fritchii\nand\user\save\0000000000000000` / `%APPDATA%\lichii\nand\user\save\0000000000000000` | Optional save folder override. Supports direct `slot_*`, title ID (`0400486024DEC000`), profile, or `nand/user/save` layouts. |
 
 </details>
 
@@ -189,7 +189,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md), [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT
 ## Credits
 
 - **Original Map Tracker:** Built upon [`lucasriondel/oot-remake-map`](https://github.com/lucasriondel/oot-remake-map) (Field Atlas).
-- **Emulator Integration:** Built for [`zortos293/Lichii`](https://github.com/zortos293/Lichii).
+- **Emulator Integration:** Built for [`zortos293/Lichii`](https://github.com/zortos293/Lichii) and [`Frizti/Fritchii`](https://github.com/Frizti/Fritchii).
 - **Map Assets & Item Data:** Map images and location data originate from [Nintendúo](https://nintenduo.com/juegos/the-legend-of-zelda-ocarina-of-time/mapa/en/) and belong to their respective owner.
 - **Documentation Co-Authorship:** Repository documentation was co-authored with **Antigravity AI** (Google DeepMind).
 - **Disclaimer:** Non-commercial fan project, not affiliated with Nintendo.

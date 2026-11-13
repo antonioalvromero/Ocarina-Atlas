@@ -42,27 +42,34 @@ export type ConnectionView = {
   note: string | null
 }
 
+function getEmulatorDisplayName(emulator?: LichiiTelemetryState['emulator']): string {
+  if (emulator === 'fritchii') return 'Fritchii'
+  if (emulator === 'eden') return 'Eden'
+  return 'Lichii'
+}
+
 function getBaseConnectionMeta(state: LichiiTelemetryState): Pick<ConnectionView, 'label' | 'note'> {
+  const emulatorName = getEmulatorDisplayName(state.emulator)
   if (isLiveMemoryState(state)) {
     return {
-      label: 'Lichii · Live',
+      label: `${emulatorName} · Live`,
       note: null,
     }
   }
   if (state.connected) {
     return {
-      label: 'Lichii · Waiting for game',
+      label: `${emulatorName} · Waiting for game`,
       note: state.source === 'save' ? 'RPC connected; showing save data until in-game' : null,
     }
   }
   if (state.source === 'save') {
     return {
-      label: 'Lichii · Save only',
-      note: 'Offline (Lichii RPC :6545 closed)',
+      label: `${emulatorName} · Save only`,
+      note: `Offline (${emulatorName} RPC :6545 closed)`,
     }
   }
   return {
-    label: 'Lichii · Disconnected',
+    label: `${emulatorName} · Disconnected`,
     note: null,
   }
 }
@@ -188,7 +195,7 @@ export function buildOrbAriaLabel(
   connection: ConnectionView,
   error?: string | null,
 ): string {
-  const parts = [`Lichii emulator tracker: ${connection.label}`]
+  const parts = [`${getEmulatorDisplayName(state.emulator)} emulator tracker: ${connection.label}`]
   if (error) {
     parts.push(`Error: ${error}`)
   }
@@ -468,7 +475,7 @@ export function LichiiStatusPanel({
           ref={panelRef}
           id={panelId}
           role="region"
-          aria-label="Lichii emulator tracker"
+          aria-label={`${getEmulatorDisplayName(state.emulator)} emulator tracker`}
           aria-hidden={!isOpen}
           inert={!isOpen}
           className={`max-w-full origin-bottom-left pb-2 transition-[opacity,transform,visibility] duration-200 ease-out motion-reduce:transition-none ${

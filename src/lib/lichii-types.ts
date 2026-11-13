@@ -1,6 +1,9 @@
+export type EmulatorKind = 'lichii' | 'fritchii' | 'eden'
+
 export type LichiiTelemetryState = {
   connected: boolean
   emulatorRunning: boolean
+  emulator?: EmulatorKind
   titleId?: string
   scene: string | null          // e.g. "SpiritTemple"
   placeId: string | null        // e.g. "espiritu"

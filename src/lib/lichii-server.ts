@@ -5,7 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import type { Plugin } from 'vite'
 import { dataset } from './data'
-import type { LichiiTelemetryState } from './lichii-types'
+import type { EmulatorKind, LichiiTelemetryState } from './lichii-types'
 import { getSyncState, handleSyncApiRequest, subscribeSyncUpdates } from './sync-server'
 import type { Fraction, Place } from './types'
 
@@ -14,9 +14,11 @@ const DEFAULT_LICHII_PORT = 6545
 const OOT_REMAKE_TITLE_ID = '0400486024DEC000'
 const placesById = new Map<string, Place>(dataset.places.map((p) => [p.id, p]))
 
-/** Resolves the Lichii TCP debug host from LICHII_HOST (default '127.0.0.1'). */
+const DEFAULT_EMULATOR_SAVE_ROOTS: readonly EmulatorKind[] = ['fritchii', 'lichii', 'eden']
+
+/** Resolves the Lichii/Fritchii TCP debug host from LICHII_HOST or FRITCHII_HOST (default '127.0.0.1'). */
 export function getLichiiHost(env: NodeJS.ProcessEnv = process.env): string {
-  const raw = env.LICHII_HOST?.trim()
+  const raw = env.LICHII_HOST?.trim() || env.FRITCHII_HOST?.trim()
   return raw ? raw : DEFAULT_LICHII_HOST
 }
 
@@ -28,25 +30,34 @@ export function parseLichiiPort(raw: string | undefined, fallback = DEFAULT_LICH
   return Number.isInteger(port) && port >= 1 && port <= 65535 ? port : fallback
 }
 
-/** Resolves the Lichii TCP debug port from LICHII_PORT (default 6545). */
+/** Resolves the Lichii/Fritchii TCP debug port from LICHII_PORT or FRITCHII_PORT (default 6545). */
 export function getLichiiPort(env: NodeJS.ProcessEnv = process.env): number {
-  return parseLichiiPort(env.LICHII_PORT, DEFAULT_LICHII_PORT)
+  const raw = env.LICHII_PORT?.trim() ? env.LICHII_PORT : env.FRITCHII_PORT
+  return parseLichiiPort(raw, DEFAULT_LICHII_PORT)
 }
 
 /**
- * Returns candidate Lichii save root directories in priority order:
- * explicit LICHII_SAVE_DIR override first, then %APPDATA%\lichii\nand\user\save\0000000000000000.
+ * Returns candidate emulator save root directories in priority order:
+ * explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR overrides first, then default
+ * %APPDATA%\{fritchii,lichii,eden}\nand\user\save\0000000000000000 paths.
  */
 export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): string[] {
   const dirs: string[] = []
-  const explicit = env.LICHII_SAVE_DIR?.trim()
-  if (explicit) {
-    dirs.push(path.resolve(explicit))
+  for (const explicitRaw of [env.LICHII_SAVE_DIR, env.FRITCHII_SAVE_DIR]) {
+    const explicit = explicitRaw?.trim()
+    if (explicit) {
+      const resolved = path.resolve(explicit)
+      if (!dirs.includes(resolved)) {
+        dirs.push(resolved)
+      }
+    }
   }
   const appData = env.APPDATA?.trim() || path.join(os.homedir(), 'AppData', 'Roaming')
-  const defaultBase = path.join(appData, 'lichii', 'nand', 'user', 'save', '0000000000000000')
-  if (!dirs.includes(defaultBase)) {
-    dirs.push(defaultBase)
+  for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
+    const defaultBase = path.join(appData, emu, 'nand', 'user', 'save', '0000000000000000')
+    if (!dirs.includes(defaultBase)) {
+      dirs.push(defaultBase)
+    }
   }
   return dirs
 }
@@ -985,45 +996,87 @@ function collectSlotsInCandidateRoot(rootDir: string): string[] {
   return Array.from(slots)
 }
 
+/** Detects which emulator owns a save slot path based on its path segments. */
+export function detectEmulatorFromPath(dirPath: string): EmulatorKind | undefined {
+  const segments = path.resolve(dirPath).toLowerCase().split(path.sep)
+  for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
+    if (segments.includes(emu)) return emu
+  }
+  return undefined
+}
+
+function isDefaultEmulatorSaveDir(dir: string): boolean {
+  const normalized = path.resolve(dir).toLowerCase()
+  return DEFAULT_EMULATOR_SAVE_ROOTS.some((emu) =>
+    normalized.endsWith(path.join(emu, 'nand', 'user', 'save', '0000000000000000').toLowerCase()),
+  )
+}
+
+function findBestSlotInRoot(
+  candidateRoot: string,
+): { dir: string; key: string; mtimeMs: number } | null {
+  const slotDirs = collectSlotsInCandidateRoot(candidateRoot)
+  if (slotDirs.length === 0) return null
+
+  let bestDir: string | null = null
+  let bestMtime = -1
+  let bestKey = ''
+
+  try {
+    for (const slotDir of slotDirs) {
+      const capPath = path.join(slotDir, 'caption.sav')
+      const progPath = path.join(slotDir, 'progress.sav')
+      const capStat = fs.existsSync(capPath) ? fs.statSync(capPath) : null
+      const progStat = fs.existsSync(progPath) ? fs.statSync(progPath) : null
+      if (!capStat && !progStat) continue
+      const mtime = Math.max(capStat?.mtimeMs ?? 0, progStat?.mtimeMs ?? 0)
+      if (mtime > bestMtime) {
+        bestMtime = mtime
+        bestDir = slotDir
+        bestKey = `${slotDir}:${capStat?.mtimeMs ?? 0}:${progStat?.mtimeMs ?? 0}`
+      }
+    }
+  } catch {
+    return null
+  }
+
+  return bestDir ? { dir: bestDir, key: bestKey, mtimeMs: bestMtime } : null
+}
+
 /**
- * Finds the most recently modified save slot directory across candidate save roots
- * (checking explicit LICHII_SAVE_DIR before the default %APPDATA%\lichii path).
+ * Finds the most recently modified save slot directory across candidate save roots.
+ * Explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR overrides take priority over default
+ * %APPDATA%\{fritchii,lichii,eden} roots; among default roots, the most recently
+ * modified save slot wins across all installed emulators.
  */
 export function findLatestSaveSlotDir(
   candidateDirs: string[] = getCandidateSaveDirs(),
 ): { dir: string; key: string; mtimeMs: number } | null {
+  const explicitDirs: string[] = []
+  const defaultDirs: string[] = []
+
   for (const candidateRoot of candidateDirs) {
-    const slotDirs = collectSlotsInCandidateRoot(candidateRoot)
-    if (slotDirs.length === 0) continue
-
-    let bestDir: string | null = null
-    let bestMtime = -1
-    let bestKey = ''
-
-    try {
-      for (const slotDir of slotDirs) {
-        const capPath = path.join(slotDir, 'caption.sav')
-        const progPath = path.join(slotDir, 'progress.sav')
-        const capStat = fs.existsSync(capPath) ? fs.statSync(capPath) : null
-        const progStat = fs.existsSync(progPath) ? fs.statSync(progPath) : null
-        if (!capStat && !progStat) continue
-        const mtime = Math.max(capStat?.mtimeMs ?? 0, progStat?.mtimeMs ?? 0)
-        if (mtime > bestMtime) {
-          bestMtime = mtime
-          bestDir = slotDir
-          bestKey = `${slotDir}:${capStat?.mtimeMs ?? 0}:${progStat?.mtimeMs ?? 0}`
-        }
-      }
-    } catch {
-      continue
-    }
-
-    if (bestDir) {
-      return { dir: bestDir, key: bestKey, mtimeMs: bestMtime }
+    if (isDefaultEmulatorSaveDir(candidateRoot)) {
+      defaultDirs.push(candidateRoot)
+    } else {
+      explicitDirs.push(candidateRoot)
     }
   }
 
-  return null
+  for (const explicitRoot of explicitDirs) {
+    const found = findBestSlotInRoot(explicitRoot)
+    if (found) return found
+  }
+
+  let bestOverall: { dir: string; key: string; mtimeMs: number } | null = null
+  for (const defaultRoot of defaultDirs) {
+    const found = findBestSlotInRoot(defaultRoot)
+    if (found && (!bestOverall || found.mtimeMs > bestOverall.mtimeMs)) {
+      bestOverall = found
+    }
+  }
+
+  return bestOverall
 }
 
 function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: number }): ParsedSaveSlot | null {
@@ -2695,9 +2748,12 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
     }
   }
 
+  const emulator = cachedLatestSlotInfo ? detectEmulatorFromPath(cachedLatestSlotInfo.dir) : undefined
+
   return {
     connected,
     emulatorRunning: activeEmulatorRunning,
+    ...(emulator ? { emulator } : {}),
     titleId,
     scene: sceneKey,
     placeId: place?.id ?? null,

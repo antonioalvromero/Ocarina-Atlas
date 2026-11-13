@@ -1821,7 +1821,7 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "1.1.0";
+        public const string AppVersion = "1.1.1";
         private const string LatestReleaseApiUrl = "https://api.github.com/repos/antonioalvromero/Ocarina-Atlas/releases/latest";
         private const string LatestReleaseFallbackUrl = "https://github.com/antonioalvromero/Ocarina-Atlas/releases/latest";
 

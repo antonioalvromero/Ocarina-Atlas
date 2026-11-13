@@ -7,6 +7,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -56,10 +57,17 @@ namespace OcarinaAtlasLauncher
         public bool AutoOpenBrowser = true;
         public bool StartMinimized = false;
         public bool AutoStart = false;
+        public string UpdateFeedUrl = null;
 
         public static LaunchOptions Parse(string[] args)
         {
             LaunchOptions opts = new LaunchOptions();
+            string envUpdateFeed = Environment.GetEnvironmentVariable("OCARINA_ATLAS_UPDATE_URL");
+            if (!string.IsNullOrEmpty(envUpdateFeed))
+            {
+                opts.UpdateFeedUrl = envUpdateFeed.Trim();
+            }
+
             if (args == null) return opts;
 
             for (int i = 0; i < args.Length; i++)
@@ -132,6 +140,14 @@ namespace OcarinaAtlasLauncher
                 else if (string.Equals(key, "--auto-start", StringComparison.OrdinalIgnoreCase))
                 {
                     opts.AutoStart = true;
+                }
+                else if (string.Equals(key, "--update-feed", StringComparison.OrdinalIgnoreCase))
+                {
+                    string raw = value ?? (i + 1 < args.Length ? args[++i] : null);
+                    if (!string.IsNullOrEmpty(raw))
+                    {
+                        opts.UpdateFeedUrl = raw.Trim();
+                    }
                 }
             }
 
@@ -988,6 +1004,16 @@ namespace OcarinaAtlasLauncher
             return null;
         }
 
+        public static List<object> GetArray(Dictionary<string, object> obj, string key)
+        {
+            object val;
+            if (obj != null && obj.TryGetValue(key, out val))
+            {
+                return val as List<object>;
+            }
+            return null;
+        }
+
         private void SkipWhitespace()
         {
             while (_pos < _src.Length && char.IsWhiteSpace(_src[_pos]))
@@ -1819,11 +1845,619 @@ namespace OcarinaAtlasLauncher
         }
     }
 
+    internal sealed class UpdateInfo
+    {
+        public string DisplayTag = string.Empty;
+        public string ReleaseName = string.Empty;
+        public string ReleaseNotes = string.Empty;
+        public string HtmlUrl = UpdateManager.DefaultReleaseFallbackUrl;
+        public string ZipDownloadUrl = string.Empty;
+        public Version ParsedVersion;
+    }
+
+    internal static class UpdateManager
+    {
+        public const string DefaultReleaseApiUrl = "https://api.github.com/repos/antonioalvromero/Ocarina-Atlas/releases/latest";
+        public const string DefaultReleaseFallbackUrl = "https://github.com/antonioalvromero/Ocarina-Atlas/releases/latest";
+
+        public static string ResolveFeedUrl(string overrideUrl)
+        {
+            if (!string.IsNullOrEmpty(overrideUrl) && IsAllowedUpdateUrl(overrideUrl))
+            {
+                return overrideUrl.Trim();
+            }
+            return DefaultReleaseApiUrl;
+        }
+
+        public static bool IsAllowedUpdateUrl(string rawUrl)
+        {
+            if (string.IsNullOrEmpty(rawUrl)) return false;
+            string trimmed = rawUrl.Trim();
+            Uri uri;
+            if (!Uri.TryCreate(trimmed, UriKind.Absolute, out uri)) return false;
+
+            if (string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase))
+            {
+                return uri.IsLoopback;
+            }
+
+            if (string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            {
+                string host = uri.Host ?? string.Empty;
+                return string.Equals(host, "github.com", StringComparison.OrdinalIgnoreCase) ||
+                       host.EndsWith(".github.com", StringComparison.OrdinalIgnoreCase) ||
+                       host.EndsWith(".githubusercontent.com", StringComparison.OrdinalIgnoreCase);
+            }
+
+            return false;
+        }
+
+        public static Version ParseComparableVersion(string raw)
+        {
+            if (string.IsNullOrEmpty(raw)) return null;
+            string s = raw.Trim();
+            if (s.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+            {
+                s = s.Substring(1);
+            }
+            int dash = s.IndexOf('-');
+            if (dash >= 0)
+            {
+                s = s.Substring(0, dash);
+            }
+            int plus = s.IndexOf('+');
+            if (plus >= 0)
+            {
+                s = s.Substring(0, plus);
+            }
+            Version parsed;
+            if (Version.TryParse(s, out parsed))
+            {
+                return parsed;
+            }
+            return null;
+        }
+
+        public static UpdateInfo ParseReleaseJson(string json, string currentAppVersion)
+        {
+            Dictionary<string, object> obj = SimpleJsonParser.ParseObject(json);
+            if (obj == null) return null;
+
+            string tagName = SimpleJsonParser.GetString(obj, "tag_name");
+            Version latestVer = ParseComparableVersion(tagName);
+            Version currentVer = ParseComparableVersion(currentAppVersion);
+            if (latestVer == null || currentVer == null || latestVer <= currentVer)
+            {
+                return null;
+            }
+
+            string displayTag = tagName.Trim();
+            if (!displayTag.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+            {
+                displayTag = "v" + displayTag;
+            }
+
+            string releaseName = SimpleJsonParser.GetString(obj, "name");
+            if (string.IsNullOrEmpty(releaseName))
+            {
+                releaseName = displayTag;
+            }
+            else
+            {
+                releaseName = releaseName.Trim();
+            }
+
+            string rawBody = SimpleJsonParser.GetString(obj, "body");
+            string cleanNotes = CleanReleaseNotes(rawBody);
+
+            string htmlUrl = SimpleJsonParser.GetString(obj, "html_url");
+            string targetHtmlUrl = DefaultReleaseFallbackUrl;
+            if (!string.IsNullOrEmpty(htmlUrl) && IsAllowedUpdateUrl(htmlUrl))
+            {
+                targetHtmlUrl = htmlUrl.Trim();
+            }
+
+            string zipUrl = string.Empty;
+            string fallbackZipUrl = string.Empty;
+            List<object> assets = SimpleJsonParser.GetArray(obj, "assets");
+            if (assets != null)
+            {
+                for (int i = 0; i < assets.Count; i++)
+                {
+                    Dictionary<string, object> asset = assets[i] as Dictionary<string, object>;
+                    if (asset == null) continue;
+
+                    string assetName = SimpleJsonParser.GetString(asset, "name");
+                    string downloadUrl = SimpleJsonParser.GetString(asset, "browser_download_url");
+                    if (string.IsNullOrEmpty(assetName) || string.IsNullOrEmpty(downloadUrl)) continue;
+                    if (!IsAllowedUpdateUrl(downloadUrl)) continue;
+
+                    if (string.Equals(assetName, "OcarinaAtlas-Windows-x64.zip", StringComparison.OrdinalIgnoreCase))
+                    {
+                        zipUrl = downloadUrl.Trim();
+                        break;
+                    }
+                    if (string.IsNullOrEmpty(fallbackZipUrl) &&
+                        assetName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                    {
+                        fallbackZipUrl = downloadUrl.Trim();
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(zipUrl))
+            {
+                zipUrl = fallbackZipUrl;
+            }
+
+            UpdateInfo info = new UpdateInfo();
+            info.DisplayTag = displayTag;
+            info.ReleaseName = releaseName;
+            info.ReleaseNotes = cleanNotes;
+            info.HtmlUrl = targetHtmlUrl;
+            info.ZipDownloadUrl = zipUrl;
+            info.ParsedVersion = latestVer;
+            return info;
+        }
+
+        public static string CleanReleaseNotes(string raw)
+        {
+            if (string.IsNullOrEmpty(raw))
+            {
+                return "No release notes provided.";
+            }
+            string normalized = raw.Replace("\r\n", "\n").Replace("\r", "\n").Trim();
+            if (normalized.Length == 0)
+            {
+                return "No release notes provided.";
+            }
+            return normalized.Replace("\n", Environment.NewLine);
+        }
+
+        public static string GetSkippedVersionFilePath()
+        {
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            return Path.Combine(Path.Combine(localAppData, "OcarinaAtlas"), "skipped-version.txt");
+        }
+
+        public static string ReadSkippedVersion()
+        {
+            return ReadSkippedVersion(GetSkippedVersionFilePath());
+        }
+
+        public static string ReadSkippedVersion(string filePath)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) return string.Empty;
+                return (File.ReadAllText(filePath, Encoding.UTF8) ?? string.Empty).Trim();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        public static void WriteSkippedVersion(string versionTag)
+        {
+            WriteSkippedVersion(versionTag, GetSkippedVersionFilePath());
+        }
+
+        public static void WriteSkippedVersion(string versionTag, string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath)) return;
+            string dir = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            File.WriteAllText(filePath, (versionTag ?? string.Empty).Trim(), Encoding.UTF8);
+        }
+
+        public static string FindExtractedSourceRoot(string extractDir)
+        {
+            if (string.IsNullOrEmpty(extractDir) || !Directory.Exists(extractDir))
+            {
+                throw new DirectoryNotFoundException("Extracted update directory does not exist.");
+            }
+
+            string preferredDir = Path.Combine(extractDir, "OcarinaAtlas-Windows-x64");
+            if (File.Exists(Path.Combine(preferredDir, "OcarinaAtlas.exe")))
+            {
+                return preferredDir;
+            }
+
+            if (File.Exists(Path.Combine(extractDir, "OcarinaAtlas.exe")))
+            {
+                return extractDir;
+            }
+
+            string[] matches = Directory.GetFiles(extractDir, "OcarinaAtlas.exe", SearchOption.AllDirectories);
+            if (matches.Length > 0)
+            {
+                return Path.GetDirectoryName(matches[0]);
+            }
+
+            throw new InvalidOperationException("OcarinaAtlas.exe was not found inside the extracted update archive.");
+        }
+
+        private static string EscapePsSingleQuoted(string value)
+        {
+            return (value ?? string.Empty).Replace("'", "''");
+        }
+
+        public static string BuildUpdaterPowerShellScript(int targetPid, string sourceRoot, string targetDir, string tempDir, string exeName)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("$ErrorActionPreference = 'SilentlyContinue'");
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$targetPid = {0}", targetPid));
+            sb.AppendLine("$deadline = (Get-Date).AddSeconds(20)");
+            sb.AppendLine("while ((Get-Date) -lt $deadline) {");
+            sb.AppendLine("    $p = Get-Process -Id $targetPid -ErrorAction SilentlyContinue");
+            sb.AppendLine("    if (-not $p) { break }");
+            sb.AppendLine("    Start-Sleep -Milliseconds 200");
+            sb.AppendLine("}");
+            sb.AppendLine("Start-Sleep -Milliseconds 350");
+            sb.AppendLine("$ErrorActionPreference = 'Stop'");
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$src = '{0}'", EscapePsSingleQuoted(sourceRoot)));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$dst = '{0}'", EscapePsSingleQuoted(targetDir)));
+            sb.AppendLine("$copied = $false");
+            sb.AppendLine("for ($attempt = 1; $attempt -le 6; $attempt++) {");
+            sb.AppendLine("    try {");
+            sb.AppendLine("        Copy-Item -Path (Join-Path $src '*') -Destination $dst -Recurse -Force");
+            sb.AppendLine("        $copied = $true");
+            sb.AppendLine("        break");
+            sb.AppendLine("    } catch {");
+            sb.AppendLine("        if ($attempt -eq 6) { throw }");
+            sb.AppendLine("        Start-Sleep -Milliseconds 350");
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "$exe = Join-Path $dst '{0}'", EscapePsSingleQuoted(exeName)));
+            sb.AppendLine("if ($copied -and (Test-Path -LiteralPath $exe)) {");
+            sb.AppendLine("    Start-Process -FilePath $exe -WorkingDirectory $dst");
+            sb.AppendLine("}");
+            sb.AppendLine("$ErrorActionPreference = 'SilentlyContinue'");
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Remove-Item -LiteralPath '{0}' -Recurse -Force", EscapePsSingleQuoted(tempDir)));
+            return sb.ToString();
+        }
+
+        public static void LaunchDetachedUpdater(int targetPid, string sourceRoot, string targetDir, string tempDir)
+        {
+            string exeName = Path.GetFileName(Application.ExecutablePath);
+            if (string.IsNullOrEmpty(exeName))
+            {
+                exeName = "OcarinaAtlas.exe";
+            }
+
+            string script = BuildUpdaterPowerShellScript(targetPid, sourceRoot, targetDir, tempDir, exeName);
+            byte[] scriptBytes = Encoding.Unicode.GetBytes(script);
+            string encoded = Convert.ToBase64String(scriptBytes);
+
+            ProcessStartInfo psi = new ProcessStartInfo();
+            psi.FileName = "powershell.exe";
+            psi.Arguments = "-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -EncodedCommand " + encoded;
+            psi.UseShellExecute = false;
+            psi.CreateNoWindow = true;
+            psi.WindowStyle = ProcessWindowStyle.Hidden;
+            Process.Start(psi);
+        }
+    }
+
+    internal sealed class UpdateDialog : Form
+    {
+        private readonly MainForm _ownerForm;
+        private readonly UpdateInfo _info;
+        private readonly TextBox _notesBox;
+        private readonly Label _statusLabel;
+        private readonly ProgressBar _progressBar;
+        private readonly Button _updateNowButton;
+        private readonly Button _skipButton;
+        private readonly Button _closeButton;
+        private bool _isUpdating;
+
+        public UpdateDialog(MainForm ownerForm, UpdateInfo info, Icon appIcon)
+        {
+            _ownerForm = ownerForm;
+            _info = info;
+
+            Text = "Update Available \u2014 Ocarina Atlas";
+            BackColor = Theme.Ink950;
+            ForeColor = Theme.Parchment200;
+            Font = new Font("Segoe UI", 9f, FontStyle.Regular);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            StartPosition = FormStartPosition.CenterParent;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            ShowInTaskbar = false;
+            ClientSize = new Size(520, 412);
+            if (appIcon != null) Icon = appIcon;
+
+            Label headerLabel = new Label();
+            headerLabel.Text = "Update Available: " + info.DisplayTag;
+            headerLabel.Font = new Font("Segoe UI", 12.5f, FontStyle.Bold);
+            headerLabel.ForeColor = Theme.Parchment50;
+            headerLabel.AutoSize = true;
+            headerLabel.Location = new Point(20, 16);
+            Controls.Add(headerLabel);
+
+            Label versionLabel = new Label();
+            versionLabel.Text = string.Format(
+                CultureInfo.InvariantCulture,
+                "Installed: v{0}   \u2192   Latest: {1}",
+                MainForm.AppVersion,
+                info.DisplayTag);
+            versionLabel.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
+            versionLabel.ForeColor = Theme.Moss;
+            versionLabel.AutoSize = true;
+            versionLabel.Location = new Point(22, 46);
+            Controls.Add(versionLabel);
+
+            Label notesTitle = new Label();
+            notesTitle.Text = "Release Notes";
+            notesTitle.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+            notesTitle.ForeColor = Theme.Parchment400;
+            notesTitle.AutoSize = true;
+            notesTitle.Location = new Point(20, 72);
+            Controls.Add(notesTitle);
+
+            _notesBox = new TextBox();
+            _notesBox.Multiline = true;
+            _notesBox.ReadOnly = true;
+            _notesBox.ScrollBars = ScrollBars.Vertical;
+            _notesBox.WordWrap = true;
+            _notesBox.BorderStyle = BorderStyle.FixedSingle;
+            _notesBox.BackColor = Theme.Ink900;
+            _notesBox.ForeColor = Theme.Parchment200;
+            _notesBox.Font = new Font("Segoe UI", 9f, FontStyle.Regular);
+            _notesBox.Location = new Point(20, 94);
+            _notesBox.Size = new Size(480, 212);
+            _notesBox.Text = info.ReleaseNotes;
+            Controls.Add(_notesBox);
+
+            _statusLabel = new Label();
+            _statusLabel.Text = string.Empty;
+            _statusLabel.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            _statusLabel.ForeColor = Theme.Parchment400;
+            _statusLabel.AutoSize = false;
+            _statusLabel.Location = new Point(20, 314);
+            _statusLabel.Size = new Size(480, 18);
+            _statusLabel.Visible = false;
+            Controls.Add(_statusLabel);
+
+            _progressBar = new ProgressBar();
+            _progressBar.Location = new Point(20, 336);
+            _progressBar.Size = new Size(480, 16);
+            _progressBar.Minimum = 0;
+            _progressBar.Maximum = 100;
+            _progressBar.Visible = false;
+            Controls.Add(_progressBar);
+
+            _updateNowButton = CreateDialogButton("Update Now", 20, 364, 148, 32, true);
+            _updateNowButton.BackColor = Color.FromArgb(0x2D, 0x4A, 0x2A);
+            _updateNowButton.ForeColor = Theme.Parchment50;
+            _updateNowButton.FlatAppearance.BorderColor = Theme.Moss;
+            _updateNowButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0x39, 0x5D, 0x35);
+            _updateNowButton.Click += OnUpdateNowClick;
+            Controls.Add(_updateNowButton);
+
+            _skipButton = CreateDialogButton("Skip Version", 296, 364, 108, 32, false);
+            _skipButton.Click += OnSkipVersionClick;
+            Controls.Add(_skipButton);
+
+            _closeButton = CreateDialogButton("Close", 412, 364, 88, 32, false);
+            _closeButton.DialogResult = DialogResult.Cancel;
+            Controls.Add(_closeButton);
+            CancelButton = _closeButton;
+
+            Shown += delegate
+            {
+                _notesBox.Select(0, 0);
+                _updateNowButton.Focus();
+            };
+
+            FormClosing += delegate(object sender, FormClosingEventArgs e)
+            {
+                if (_isUpdating)
+                {
+                    e.Cancel = true;
+                }
+            };
+        }
+
+        private static Button CreateDialogButton(string text, int x, int y, int width, int height, bool bold)
+        {
+            Button btn = new Button();
+            btn.Text = text;
+            btn.Location = new Point(x, y);
+            btn.Size = new Size(width, height);
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 1;
+            btn.FlatAppearance.BorderColor = Theme.Ink600;
+            btn.FlatAppearance.MouseOverBackColor = Theme.Ink700;
+            btn.BackColor = Theme.Ink800;
+            btn.ForeColor = Theme.Parchment200;
+            btn.Font = new Font("Segoe UI", 9f, bold ? FontStyle.Bold : FontStyle.Regular);
+            btn.Cursor = Cursors.Hand;
+            btn.UseVisualStyleBackColor = false;
+            return btn;
+        }
+
+        private void OnSkipVersionClick(object sender, EventArgs e)
+        {
+            try
+            {
+                UpdateManager.WriteSkippedVersion(_info.DisplayTag);
+            }
+            catch
+            {
+                // Non-fatal if %LOCALAPPDATA% is not writable.
+            }
+            DialogResult = DialogResult.Ignore;
+            Close();
+        }
+
+        private void OnUpdateNowClick(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(_info.ZipDownloadUrl))
+            {
+                if (_ownerForm != null)
+                {
+                    _ownerForm.OpenUrlInBrowser(_info.HtmlUrl);
+                }
+                Close();
+                return;
+            }
+
+            _isUpdating = true;
+            _updateNowButton.Enabled = false;
+            _skipButton.Enabled = false;
+            _closeButton.Enabled = false;
+
+            _statusLabel.ForeColor = Theme.Parchment400;
+            _statusLabel.Text = "Downloading " + _info.DisplayTag + "...";
+            _statusLabel.Visible = true;
+            _progressBar.Style = ProgressBarStyle.Blocks;
+            _progressBar.Value = 0;
+            _progressBar.Visible = true;
+
+            string tempDir = Path.Combine(Path.GetTempPath(), "OcarinaAtlas-Update-" + Guid.NewGuid().ToString("N"));
+            string zipPath = Path.Combine(tempDir, "update.zip");
+            string extractDir = Path.Combine(tempDir, "extracted");
+
+            try
+            {
+                Directory.CreateDirectory(tempDir);
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+                WebClient client = new WebClient();
+                client.Headers[HttpRequestHeader.UserAgent] = "OcarinaAtlas/" + MainForm.AppVersion;
+
+                client.DownloadProgressChanged += delegate(object s, DownloadProgressChangedEventArgs args)
+                {
+                    if (IsDisposed) return;
+                    if (args.TotalBytesToReceive > 0)
+                    {
+                        _progressBar.Style = ProgressBarStyle.Blocks;
+                        int pct = Math.Max(0, Math.Min(100, args.ProgressPercentage));
+                        _progressBar.Value = pct;
+                        _statusLabel.Text = string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Downloading {0}... {1}%",
+                            _info.DisplayTag,
+                            pct);
+                    }
+                    else
+                    {
+                        _progressBar.Style = ProgressBarStyle.Marquee;
+                        double mb = args.BytesReceived / (1024.0 * 1024.0);
+                        _statusLabel.Text = string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Downloading {0}... {1:0.0} MB",
+                            _info.DisplayTag,
+                            mb);
+                    }
+                };
+
+                client.DownloadFileCompleted += delegate(object s, AsyncCompletedEventArgs args)
+                {
+                    client.Dispose();
+                    if (IsDisposed) return;
+
+                    if (args.Error != null || args.Cancelled)
+                    {
+                        string msg = args.Error != null ? args.Error.Message : "Download cancelled.";
+                        FailUpdate("Download failed: " + msg, tempDir);
+                        return;
+                    }
+
+                    _progressBar.Style = ProgressBarStyle.Marquee;
+                    _statusLabel.Text = "Extracting update archive...";
+
+                    Thread extractThread = new Thread(delegate()
+                    {
+                        try
+                        {
+                            ZipFile.ExtractToDirectory(zipPath, extractDir);
+                            string sourceRoot = UpdateManager.FindExtractedSourceRoot(extractDir);
+                            string targetDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(
+                                Path.DirectorySeparatorChar,
+                                Path.AltDirectorySeparatorChar);
+
+                            if (!IsDisposed && IsHandleCreated)
+                            {
+                                BeginInvoke((MethodInvoker)delegate()
+                                {
+                                    try
+                                    {
+                                        _statusLabel.Text = "Applying update and restarting...";
+                                        _isUpdating = false;
+                                        if (_ownerForm != null)
+                                        {
+                                            _ownerForm.PrepareForSelfUpdate();
+                                        }
+                                        UpdateManager.LaunchDetachedUpdater(
+                                            Process.GetCurrentProcess().Id,
+                                            sourceRoot,
+                                            targetDir,
+                                            tempDir);
+                                        Application.Exit();
+                                    }
+                                    catch (Exception applyEx)
+                                    {
+                                        FailUpdate("Failed to launch updater: " + applyEx.Message, tempDir);
+                                    }
+                                });
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (!IsDisposed && IsHandleCreated)
+                            {
+                                BeginInvoke((MethodInvoker)delegate()
+                                {
+                                    FailUpdate("Extraction failed: " + ex.Message, tempDir);
+                                });
+                            }
+                        }
+                    });
+                    extractThread.IsBackground = true;
+                    extractThread.Start();
+                };
+
+                client.DownloadFileAsync(new Uri(_info.ZipDownloadUrl), zipPath);
+            }
+            catch (Exception ex)
+            {
+                FailUpdate("Failed to start download: " + ex.Message, tempDir);
+            }
+        }
+
+        private void FailUpdate(string message, string tempDir)
+        {
+            _isUpdating = false;
+            _progressBar.Visible = false;
+            _statusLabel.ForeColor = Theme.Ember;
+            _statusLabel.Text = message;
+            _updateNowButton.Enabled = true;
+            _skipButton.Enabled = true;
+            _closeButton.Enabled = true;
+
+            try
+            {
+                if (!string.IsNullOrEmpty(tempDir) && Directory.Exists(tempDir))
+                {
+                    Directory.Delete(tempDir, true);
+                }
+            }
+            catch
+            {
+                // Ignore temp cleanup failure.
+            }
+        }
+    }
+
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "1.1.1";
-        private const string LatestReleaseApiUrl = "https://api.github.com/repos/antonioalvromero/Ocarina-Atlas/releases/latest";
-        private const string LatestReleaseFallbackUrl = "https://github.com/antonioalvromero/Ocarina-Atlas/releases/latest";
+        public const string AppVersion = "1.1.2";
 
         private const int CollapsedClientHeight = 478;
         private const int ExpandedClientHeight = 700;
@@ -1850,7 +2484,8 @@ namespace OcarinaAtlasLauncher
         private int _copyFeedbackTicks = 0;
         private string _selectedLanUrl = string.Empty;
         private string _renderedQrUrl = string.Empty;
-        private string _updateReleaseUrl = LatestReleaseFallbackUrl;
+        private UpdateInfo _pendingUpdateInfo;
+        private UpdateDialog _activeUpdateDialog;
         private List<LanEndpoint> _lanEndpoints = new List<LanEndpoint>();
         private ToolTip _toolTip;
 
@@ -3104,7 +3739,7 @@ namespace OcarinaAtlasLauncher
             OpenUrlInBrowser(GetServerUrl());
         }
 
-        private void OpenUrlInBrowser(string url)
+        internal void OpenUrlInBrowser(string url)
         {
             try
             {
@@ -3803,14 +4438,51 @@ namespace OcarinaAtlasLauncher
             _logTextBox.AppendText(line + Environment.NewLine);
         }
 
+        internal void PrepareForSelfUpdate()
+        {
+            if (_pollTimer != null)
+            {
+                _pollTimer.Stop();
+                _pollTimer.Dispose();
+            }
+
+            Process proc;
+            lock (_procLock)
+            {
+                proc = _serverProcess;
+                _serverProcess = null;
+            }
+
+            if (proc != null)
+            {
+                _lifecycle = ServerLifecycle.Stopping;
+                TerminateProcessTree(proc);
+                try { proc.Dispose(); } catch { }
+            }
+
+            if (_jobObject != null)
+            {
+                _jobObject.Dispose();
+                _jobObject = null;
+            }
+
+            if (_trayIcon != null)
+            {
+                _trayIcon.Visible = false;
+                _trayIcon.Dispose();
+                _trayIcon = null;
+            }
+        }
+
         private void StartUpdateCheck()
         {
+            string feedUrl = UpdateManager.ResolveFeedUrl(_options.UpdateFeedUrl);
             Thread t = new Thread(delegate()
             {
                 try
                 {
                     ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-                    HttpWebRequest req = (HttpWebRequest)WebRequest.Create(LatestReleaseApiUrl);
+                    HttpWebRequest req = (HttpWebRequest)WebRequest.Create(feedUrl);
                     req.Method = "GET";
                     req.Timeout = 4000;
                     req.ReadWriteTimeout = 4000;
@@ -3831,37 +4503,27 @@ namespace OcarinaAtlasLauncher
                         }
                     }
 
-                    Dictionary<string, object> obj = SimpleJsonParser.ParseObject(body);
-                    string tagName = SimpleJsonParser.GetString(obj, "tag_name");
-                    string htmlUrl = SimpleJsonParser.GetString(obj, "html_url");
-
-                    Version latestVer = ParseComparableVersion(tagName);
-                    Version currentVer = ParseComparableVersion(AppVersion);
-                    if (latestVer == null || currentVer == null || latestVer <= currentVer)
+                    UpdateInfo info = UpdateManager.ParseReleaseJson(body, AppVersion);
+                    if (info == null)
                     {
                         return;
                     }
 
-                    string displayTag = tagName.Trim();
-                    if (!displayTag.StartsWith("v", StringComparison.OrdinalIgnoreCase))
-                    {
-                        displayTag = "v" + displayTag;
-                    }
-
-                    string targetUrl = LatestReleaseFallbackUrl;
-                    if (!string.IsNullOrEmpty(htmlUrl) &&
-                        htmlUrl.StartsWith("https://github.com/antonioalvromero/Ocarina-Atlas/", StringComparison.OrdinalIgnoreCase))
-                    {
-                        targetUrl = htmlUrl;
-                    }
+                    string skippedVersion = UpdateManager.ReadSkippedVersion();
+                    bool shouldAutoOpen = !string.Equals(info.DisplayTag, skippedVersion, StringComparison.OrdinalIgnoreCase);
 
                     BeginInvokeSafe(delegate()
                     {
                         if (_updateLinkLabel == null || _updateLinkLabel.IsDisposed || _heroStatusPill == null) return;
-                        _updateReleaseUrl = targetUrl;
-                        _updateLinkLabel.Text = "Update available: " + displayTag;
+                        _pendingUpdateInfo = info;
+                        _updateLinkLabel.Text = "Update available: " + info.DisplayTag;
                         _updateLinkLabel.Visible = true;
                         _updateLinkLabel.Left = Math.Max(_versionLabel.Right + 10, _heroStatusPill.Left - _updateLinkLabel.Width - 10);
+
+                        if (shouldAutoOpen)
+                        {
+                            ShowUpdateDialog();
+                        }
                     });
                 }
                 catch
@@ -3873,37 +4535,33 @@ namespace OcarinaAtlasLauncher
             t.Start();
         }
 
-        private static Version ParseComparableVersion(string raw)
+        private void ShowUpdateDialog()
         {
-            if (string.IsNullOrEmpty(raw)) return null;
-            string s = raw.Trim();
-            if (s.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+            if (_pendingUpdateInfo == null || IsDisposed) return;
+
+            if (_activeUpdateDialog != null && !_activeUpdateDialog.IsDisposed)
             {
-                s = s.Substring(1);
+                if (_activeUpdateDialog.WindowState == FormWindowState.Minimized)
+                {
+                    _activeUpdateDialog.WindowState = FormWindowState.Normal;
+                }
+                _activeUpdateDialog.Activate();
+                return;
             }
-            int dash = s.IndexOf('-');
-            if (dash >= 0)
+
+            using (UpdateDialog dlg = new UpdateDialog(this, _pendingUpdateInfo, _appIcon))
             {
-                s = s.Substring(0, dash);
+                _activeUpdateDialog = dlg;
+                dlg.ShowDialog(this);
+                _activeUpdateDialog = null;
             }
-            int plus = s.IndexOf('+');
-            if (plus >= 0)
-            {
-                s = s.Substring(0, plus);
-            }
-            Version parsed;
-            if (Version.TryParse(s, out parsed))
-            {
-                return parsed;
-            }
-            return null;
         }
 
         private void OnUpdateLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(_updateReleaseUrl))
+            if (_pendingUpdateInfo != null)
             {
-                OpenUrlInBrowser(_updateReleaseUrl);
+                ShowUpdateDialog();
             }
         }
 

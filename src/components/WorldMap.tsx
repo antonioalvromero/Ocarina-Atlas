@@ -1,11 +1,13 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Check } from 'lucide-react'
-import { useEffect, useMemo, useRef } from 'react'
+import { BarChart3, Check } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { pinPosition } from '../lib/coords'
 import { dataset, formatFloorLabel } from '../lib/data'
+import { computeGlobalProgress } from '../lib/progress-stats'
 import { itemCountVisibleSlot, officialDoneSlot, useStored } from '../lib/storage'
 import type { Place } from '../lib/types'
 import { isLiveMemoryState, useLichiiTracker } from '../lib/useLichiiTracker'
+import { GlobalStatsDrawer } from './GlobalStatsDrawer'
 import { LichiiStatusPanel } from './LichiiStatusPanel'
 import { MapViewport, type MapViewportHandle } from './MapViewport'
 import { PlayerPin } from './PlayerPin'
@@ -82,16 +84,13 @@ export function WorldMap() {
   const doneIds = useStored(officialDoneSlot)
   const countsShown = useStored(itemCountVisibleSlot)
   const tracker = useLichiiTracker()
+  const [statsOpen, setStatsOpen] = useState(false)
 
-  const donePerPlace = useMemo(() => {
-    const done = new Set(doneIds)
-    const counts = new Map<string, number>()
-    for (const item of dataset.items) {
-      if (done.has(item.id)) counts.set(item.place, (counts.get(item.place) ?? 0) + 1)
-    }
-    return counts
-  }, [doneIds])
-  const doneTotal = [...donePerPlace.values()].reduce((sum, n) => sum + n, 0)
+  const summary = useMemo(() => computeGlobalProgress(doneIds, dataset), [doneIds])
+  const donePerPlace = useMemo(
+    () => new Map(summary.places.map((place) => [place.id, place.done])),
+    [summary.places],
+  )
 
   const activePlace = useMemo(
     () =>
@@ -187,10 +186,40 @@ export function WorldMap() {
         )}
       </MapViewport>
       <header className="pointer-events-none absolute top-3 left-3 rounded-lg border border-ink-600 bg-ink-900/90 px-4 py-3 shadow-lg">
-        <h1 className="font-serif text-xl text-parchment-50">Ocarina Atlas</h1>
-        <p className="mt-0.5 text-xs text-parchment-400 tabular-nums">
-          {doneTotal} of {dataset.items.length} items completed
-        </p>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="font-serif text-xl text-parchment-50">Ocarina Atlas</h1>
+          <button
+            type="button"
+            onClick={() => setStatsOpen(true)}
+            aria-label="Open global progress stats"
+            className="pointer-events-auto inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/90 px-2.5 py-1 text-xs font-medium text-parchment-50 transition-colors hover:border-parchment-400 hover:bg-ink-700"
+          >
+            <BarChart3 size={13} className="text-[#e8c04a]" />
+            Stats
+          </button>
+        </div>
+        <div className="mt-1.5 flex items-center gap-2.5">
+          <div
+            className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-800"
+            role="progressbar"
+            aria-valuenow={summary.percentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Global completion"
+          >
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${
+                summary.totalItems > 0 && summary.totalDone === summary.totalItems
+                  ? 'bg-moss'
+                  : 'bg-[#e8c04a]'
+              }`}
+              style={{ width: `${summary.percentage}%` }}
+            />
+          </div>
+          <p className="shrink-0 text-xs text-parchment-400 tabular-nums">
+            {summary.totalDone} / {summary.totalItems} ({summary.percentage}%)
+          </p>
+        </div>
         <ul className="mt-2 flex gap-4 text-xs text-parchment-200">
           <li className="flex items-center gap-1.5">
             <span className="size-2.5 rounded-full bg-parchment-200" /> Zone
@@ -203,6 +232,7 @@ export function WorldMap() {
           </li>
         </ul>
       </header>
+      <GlobalStatsDrawer open={statsOpen} onClose={() => setStatsOpen(false)} summary={summary} />
       <LichiiStatusPanel
         state={tracker.state}
         followPlayer={tracker.followPlayer}

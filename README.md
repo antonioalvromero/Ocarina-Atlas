@@ -6,8 +6,6 @@
 
 Interactive Hyrule field atlas and dungeon floor tracker for *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`),<br>featuring live [Lichii](https://github.com/zortos293/Lichii) memory telemetry, automatic Gold Skulltula tracking, and a portable Windows launcher.
 
-[![CI](https://img.shields.io/github/actions/workflow/status/antonioalvromero/Ocarina-Atlas/ci.yml?branch=main&label=CI)](https://github.com/antonioalvromero/Ocarina-Atlas/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/antonioalvromero/Ocarina-Atlas?label=Release)](https://github.com/antonioalvromero/Ocarina-Atlas/releases)
 [![Windows x64](https://img.shields.io/badge/Platform-Windows%20x64-0078D6?logo=windows)](https://github.com/antonioalvromero/Ocarina-Atlas/releases)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 

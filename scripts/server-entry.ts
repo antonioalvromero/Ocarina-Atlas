@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
   closeLichiiRpc,
   getLichiiTelemetryState,
+  handleLichiiStreamRequest,
   setStaticAssetRoots,
 } from '../src/lib/lichii-server'
 import {
@@ -16,6 +17,7 @@ import {
   parseServerConfig,
   sanitizeHostHeader,
 } from '../src/lib/server-network'
+import { handleSyncApiRequest } from '../src/lib/sync-server'
 import type { LichiiTelemetryState } from '../src/lib/lichii-types'
 
 if (!process.env.NODE_ENV) {
@@ -317,6 +319,15 @@ async function main(): Promise<void> {
     } catch {
       res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' })
       res.end('Bad Request')
+      return
+    }
+
+    if (requestUrl.pathname === '/api/lichii/stream' && method === 'GET') {
+      handleLichiiStreamRequest(req, res)
+      return
+    }
+
+    if (await handleSyncApiRequest(req, res, requestUrl.pathname)) {
       return
     }
 

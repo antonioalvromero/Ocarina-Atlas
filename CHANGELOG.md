@@ -6,11 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-13
+
 ### Added
+- **Real-Time SSE Telemetry Streaming (`/api/lichii/stream`):** Replaced fixed-interval client polling with Server-Sent Events (`text/event-stream`) backed by live memory/save state change detection, reducing latency and idle HTTP traffic while retaining automatic reconnect fallback.
+- **PC ↔ Tablet Pin & Progress Sync (`/api/sync/state`):** Added server-mediated state synchronization (`GET`/`POST /api/sync/state`) so collected Gold Skulltulas, official item completion, revealed pins, and custom pins stay synchronized in real time between the PC browser and paired second-screen devices.
+- **Second-Screen QR Code Pairing (`launcher/OcarinaAtlas.cs`):** Added a self-contained C# 5 Byte-mode QR Code generator (`QrCodeEncoder`) and compact QR preview inside **Step 2 · Play on Another Device (Optional)** synced to the active LAN URL and port for instant phone/tablet scanning.
+- **Non-Blocking GitHub Release Update Check (`launcher/OcarinaAtlas.cs`):** Added a startup background check (4s timeout, TLS 1.2) against GitHub Releases that surfaces a subtle `Update available: vX.Y.Z` link in the Hero header when a newer version is published, failing silently when offline or rate-limited.
 - **Project Logo & Windows Icon (`assets/logo.png`, `launcher/OcarinaAtlas.ico`):** Added official Ocarina Atlas branding assets for the repository README and Windows launcher executable.
 
 ### Changed
-- **Client, Server & Vite Optimizations (`src/lib/lichii-server.ts`, `src/lib/useLichiiTracker.ts`, `vite.config.ts`):** Improved telemetry polling, server/build performance, and Vite integration.
+- **Client, Server & Vite Optimizations (`src/lib/lichii-server.ts`, `src/lib/useLichiiTracker.ts`, `vite.config.ts`):** Improved telemetry streaming, server/build performance, and Vite integration.
 - **Documentation Refresh (`README.md`, `CONTRIBUTING.md`, `SECURITY.md`):** Rewrote `README.md` with the new hero logo, official-release caution callout, updated launcher UI labels, collapsible CLI/environment reference, and refreshed cross-links across `CONTRIBUTING.md` and `SECURITY.md`.
 
 ## [1.0.3] - 2026-11-12

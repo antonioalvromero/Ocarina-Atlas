@@ -1169,6 +1169,461 @@ namespace OcarinaAtlasLauncher
         }
     }
 
+    internal sealed class QrCodeEncoder
+    {
+        // Byte-mode capacity & Reed-Solomon parameters for Versions 1-6, ECC Level M.
+        private static readonly int[] MaxBytes = { 0, 14, 26, 42, 62, 84, 106 };
+        private static readonly int[] DataCodewords = { 0, 16, 28, 44, 64, 86, 108 };
+        private static readonly int[] EcPerBlock = { 0, 10, 16, 26, 18, 24, 16 };
+        private static readonly int[] BlockCount = { 0, 1, 1, 1, 2, 2, 4 };
+
+        private static readonly int[] GfExp = new int[512];
+        private static readonly int[] GfLog = new int[256];
+
+        static QrCodeEncoder()
+        {
+            int x = 1;
+            for (int i = 0; i < 255; i++)
+            {
+                GfExp[i] = x;
+                GfLog[x] = i;
+                x <<= 1;
+                if ((x & 0x100) != 0)
+                {
+                    x ^= 0x11D;
+                }
+            }
+            for (int i = 255; i < 512; i++)
+            {
+                GfExp[i] = GfExp[i - 255];
+            }
+        }
+
+        public static bool[,] Encode(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return null;
+            byte[] utf8 = Encoding.UTF8.GetBytes(text);
+            int version = 0;
+            for (int v = 1; v <= 6; v++)
+            {
+                if (utf8.Length <= MaxBytes[v])
+                {
+                    version = v;
+                    break;
+                }
+            }
+            if (version == 0) return null;
+
+            int dataCount = DataCodewords[version];
+            byte[] dataBytes = BuildDataCodewords(utf8, dataCount);
+            byte[] allCodewords = BuildInterleavedCodewords(dataBytes, version);
+
+            int size = 17 + version * 4;
+            bool[,] modules = new bool[size, size];
+            bool[,] isFunction = new bool[size, size];
+
+            PlaceFunctionPatterns(modules, isFunction, size, version);
+            PlaceDataBits(modules, isFunction, size, allCodewords);
+
+            int bestMask = 0;
+            int bestPenalty = int.MaxValue;
+            for (int mask = 0; mask < 8; mask++)
+            {
+                bool[,] trial = (bool[,])modules.Clone();
+                ApplyMask(trial, isFunction, size, mask);
+                WriteFormatInfo(trial, size, mask);
+                int penalty = ComputePenalty(trial, size);
+                if (penalty < bestPenalty)
+                {
+                    bestPenalty = penalty;
+                    bestMask = mask;
+                }
+            }
+
+            ApplyMask(modules, isFunction, size, bestMask);
+            WriteFormatInfo(modules, size, bestMask);
+            return modules;
+        }
+
+        public static Bitmap RenderBitmap(string text, int targetSizePx)
+        {
+            bool[,] matrix = Encode(text);
+            if (matrix == null || targetSizePx <= 0) return null;
+
+            int modules = matrix.GetLength(0);
+            int scale = Math.Max(1, (targetSizePx - 8) / modules);
+            int qrPx = modules * scale;
+            int offset = (targetSizePx - qrPx) / 2;
+
+            Color bg = Color.FromArgb(0xF5, 0xED, 0xE0);
+            Color fg = Theme.Ink950;
+
+            Bitmap bmp = new Bitmap(targetSizePx, targetSizePx);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.Clear(bg);
+                using (Brush darkBrush = new SolidBrush(fg))
+                {
+                    for (int r = 0; r < modules; r++)
+                    {
+                        for (int c = 0; c < modules; c++)
+                        {
+                            if (matrix[r, c])
+                            {
+                                g.FillRectangle(darkBrush, offset + c * scale, offset + r * scale, scale, scale);
+                            }
+                        }
+                    }
+                }
+            }
+            return bmp;
+        }
+
+        private static byte[] BuildDataCodewords(byte[] utf8, int dataCount)
+        {
+            byte[] result = new byte[dataCount];
+            int bitPos = 0;
+            int capacityBits = dataCount * 8;
+
+            AppendBits(result, ref bitPos, 0x4, 4);
+            AppendBits(result, ref bitPos, utf8.Length, 8);
+            for (int i = 0; i < utf8.Length; i++)
+            {
+                AppendBits(result, ref bitPos, utf8[i], 8);
+            }
+
+            int terminatorBits = Math.Min(4, capacityBits - bitPos);
+            if (terminatorBits > 0)
+            {
+                AppendBits(result, ref bitPos, 0, terminatorBits);
+            }
+
+            int padByteStart = (bitPos + 7) / 8;
+            for (int i = padByteStart; i < dataCount; i++)
+            {
+                result[i] = ((i - padByteStart) % 2 == 0) ? (byte)0xEC : (byte)0x11;
+            }
+            return result;
+        }
+
+        private static void AppendBits(byte[] buffer, ref int bitPos, int value, int bitCount)
+        {
+            for (int i = bitCount - 1; i >= 0; i--)
+            {
+                if (((value >> i) & 1) != 0)
+                {
+                    buffer[bitPos >> 3] |= (byte)(1 << (7 - (bitPos & 7)));
+                }
+                bitPos++;
+            }
+        }
+
+        private static byte[] BuildInterleavedCodewords(byte[] data, int version)
+        {
+            int numBlocks = BlockCount[version];
+            int ecCount = EcPerBlock[version];
+            int dataPerBlock = data.Length / numBlocks;
+
+            byte[] gen = BuildRsGenerator(ecCount);
+            byte[][] dataBlocks = new byte[numBlocks][];
+            byte[][] ecBlocks = new byte[numBlocks][];
+
+            for (int b = 0; b < numBlocks; b++)
+            {
+                byte[] block = new byte[dataPerBlock];
+                Array.Copy(data, b * dataPerBlock, block, 0, dataPerBlock);
+                dataBlocks[b] = block;
+                ecBlocks[b] = ComputeRsRemainder(block, gen, ecCount);
+            }
+
+            byte[] output = new byte[data.Length + numBlocks * ecCount];
+            int idx = 0;
+            for (int i = 0; i < dataPerBlock; i++)
+            {
+                for (int b = 0; b < numBlocks; b++)
+                {
+                    output[idx++] = dataBlocks[b][i];
+                }
+            }
+            for (int i = 0; i < ecCount; i++)
+            {
+                for (int b = 0; b < numBlocks; b++)
+                {
+                    output[idx++] = ecBlocks[b][i];
+                }
+            }
+            return output;
+        }
+
+        private static int GfMul(int a, int b)
+        {
+            if (a == 0 || b == 0) return 0;
+            return GfExp[GfLog[a] + GfLog[b]];
+        }
+
+        private static byte[] BuildRsGenerator(int degree)
+        {
+            byte[] gen = new byte[degree + 1];
+            gen[0] = 1;
+            for (int i = 0; i < degree; i++)
+            {
+                int root = GfExp[i];
+                for (int k = i + 1; k >= 1; k--)
+                {
+                    gen[k] = (byte)(gen[k] ^ GfMul(gen[k - 1], root));
+                }
+            }
+            return gen;
+        }
+
+        private static byte[] ComputeRsRemainder(byte[] data, byte[] gen, int ecCount)
+        {
+            byte[] rem = new byte[ecCount];
+            for (int i = 0; i < data.Length; i++)
+            {
+                byte factor = (byte)(data[i] ^ rem[0]);
+                for (int j = 0; j < ecCount - 1; j++)
+                {
+                    rem[j] = rem[j + 1];
+                }
+                rem[ecCount - 1] = 0;
+                if (factor != 0)
+                {
+                    for (int j = 0; j < ecCount; j++)
+                    {
+                        rem[j] = (byte)(rem[j] ^ GfMul(gen[j + 1], factor));
+                    }
+                }
+            }
+            return rem;
+        }
+
+        private static void PlaceFunctionPatterns(bool[,] modules, bool[,] isFunction, int size, int version)
+        {
+            PlaceFinderPattern(modules, isFunction, size, 0, 0);
+            PlaceFinderPattern(modules, isFunction, size, 0, size - 7);
+            PlaceFinderPattern(modules, isFunction, size, size - 7, 0);
+
+            for (int i = 8; i < size - 8; i++)
+            {
+                bool dark = (i % 2) == 0;
+                modules[6, i] = dark;
+                isFunction[6, i] = true;
+                modules[i, 6] = dark;
+                isFunction[i, 6] = true;
+            }
+
+            if (version >= 2)
+            {
+                int center = size - 7;
+                for (int dr = -2; dr <= 2; dr++)
+                {
+                    for (int dc = -2; dc <= 2; dc++)
+                    {
+                        modules[center + dr, center + dc] = Math.Max(Math.Abs(dr), Math.Abs(dc)) != 1;
+                        isFunction[center + dr, center + dc] = true;
+                    }
+                }
+            }
+
+            // Reserve format info areas and dark module
+            for (int i = 0; i <= 8; i++)
+            {
+                isFunction[8, i] = true;
+                isFunction[i, 8] = true;
+            }
+            for (int c = size - 8; c < size; c++)
+            {
+                isFunction[8, c] = true;
+            }
+            for (int r = size - 8; r < size; r++)
+            {
+                isFunction[r, 8] = true;
+            }
+            modules[size - 8, 8] = true;
+        }
+
+        private static void PlaceFinderPattern(bool[,] modules, bool[,] isFunction, int size, int top, int left)
+        {
+            for (int dr = -1; dr <= 7; dr++)
+            {
+                int r = top + dr;
+                if (r < 0 || r >= size) continue;
+                for (int dc = -1; dc <= 7; dc++)
+                {
+                    int c = left + dc;
+                    if (c < 0 || c >= size) continue;
+                    int dist = Math.Max(Math.Abs(dr - 3), Math.Abs(dc - 3));
+                    modules[r, c] = (dist != 2 && dist != 4);
+                    isFunction[r, c] = true;
+                }
+            }
+        }
+
+        private static void PlaceDataBits(bool[,] modules, bool[,] isFunction, int size, byte[] codewords)
+        {
+            int bitIdx = 0;
+            int totalBits = codewords.Length * 8;
+            bool upward = true;
+
+            for (int right = size - 1; right >= 1; right -= 2)
+            {
+                if (right == 6) right = 5;
+                for (int vert = 0; vert < size; vert++)
+                {
+                    int r = upward ? (size - 1 - vert) : vert;
+                    for (int j = 0; j < 2; j++)
+                    {
+                        int c = right - j;
+                        if (!isFunction[r, c])
+                        {
+                            bool bit = false;
+                            if (bitIdx < totalBits)
+                            {
+                                bit = ((codewords[bitIdx >> 3] >> (7 - (bitIdx & 7))) & 1) != 0;
+                                bitIdx++;
+                            }
+                            modules[r, c] = bit;
+                        }
+                    }
+                }
+                upward = !upward;
+            }
+        }
+
+        private static void ApplyMask(bool[,] modules, bool[,] isFunction, int size, int mask)
+        {
+            for (int r = 0; r < size; r++)
+            {
+                for (int c = 0; c < size; c++)
+                {
+                    if (isFunction[r, c]) continue;
+                    bool invert = false;
+                    switch (mask)
+                    {
+                        case 0: invert = ((r + c) % 2) == 0; break;
+                        case 1: invert = (r % 2) == 0; break;
+                        case 2: invert = (c % 3) == 0; break;
+                        case 3: invert = ((r + c) % 3) == 0; break;
+                        case 4: invert = (((r / 2) + (c / 3)) % 2) == 0; break;
+                        case 5: invert = (((r * c) % 2) + ((r * c) % 3)) == 0; break;
+                        case 6: invert = ((((r * c) % 2) + ((r * c) % 3)) % 2) == 0; break;
+                        case 7: invert = ((((r + c) % 2) + ((r * c) % 3)) % 2) == 0; break;
+                    }
+                    if (invert)
+                    {
+                        modules[r, c] = !modules[r, c];
+                    }
+                }
+            }
+        }
+
+        private static void WriteFormatInfo(bool[,] modules, int size, int mask)
+        {
+            // ECC Level M = 00
+            int data = mask & 0x7;
+            int rem = data << 10;
+            for (int i = 4; i >= 0; i--)
+            {
+                if (((rem >> (i + 10)) & 1) != 0)
+                {
+                    rem ^= (0x537 << i);
+                }
+            }
+            int bits = ((data << 10) | rem) ^ 0x5412;
+
+            for (int i = 0; i <= 5; i++)
+            {
+                modules[8, i] = ((bits >> i) & 1) != 0;
+            }
+            modules[8, 7] = ((bits >> 6) & 1) != 0;
+            modules[8, 8] = ((bits >> 7) & 1) != 0;
+            modules[7, 8] = ((bits >> 8) & 1) != 0;
+            for (int i = 9; i < 15; i++)
+            {
+                modules[14 - i, 8] = ((bits >> i) & 1) != 0;
+            }
+
+            for (int i = 0; i < 7; i++)
+            {
+                modules[size - 1 - i, 8] = ((bits >> i) & 1) != 0;
+            }
+            for (int i = 7; i < 15; i++)
+            {
+                modules[8, size - 15 + i] = ((bits >> i) & 1) != 0;
+            }
+        }
+
+        private static int ComputePenalty(bool[,] modules, int size)
+        {
+            int penalty = 0;
+
+            // N1: 5+ consecutive modules in row or col
+            for (int r = 0; r < size; r++)
+            {
+                int run = 1;
+                for (int c = 1; c < size; c++)
+                {
+                    if (modules[r, c] == modules[r, c - 1])
+                    {
+                        run++;
+                        if (run == 5) penalty += 3;
+                        else if (run > 5) penalty += 1;
+                    }
+                    else
+                    {
+                        run = 1;
+                    }
+                }
+            }
+            for (int c = 0; c < size; c++)
+            {
+                int run = 1;
+                for (int r = 1; r < size; r++)
+                {
+                    if (modules[r, c] == modules[r - 1, c])
+                    {
+                        run++;
+                        if (run == 5) penalty += 3;
+                        else if (run > 5) penalty += 1;
+                    }
+                    else
+                    {
+                        run = 1;
+                    }
+                }
+            }
+
+            // N2: 2x2 blocks of same color
+            for (int r = 0; r < size - 1; r++)
+            {
+                for (int c = 0; c < size - 1; c++)
+                {
+                    bool v = modules[r, c];
+                    if (modules[r, c + 1] == v && modules[r + 1, c] == v && modules[r + 1, c + 1] == v)
+                    {
+                        penalty += 3;
+                    }
+                }
+            }
+
+            // N4: dark module ratio deviation from 50%
+            int dark = 0;
+            for (int r = 0; r < size; r++)
+            {
+                for (int c = 0; c < size; c++)
+                {
+                    if (modules[r, c]) dark++;
+                }
+            }
+            int total = size * size;
+            int k = Math.Abs(dark * 20 - total * 10) / total;
+            penalty += k * 10;
+
+            return penalty;
+        }
+    }
+
     internal sealed class PollSnapshot
     {
         public bool ServerHttpOk;
@@ -1290,8 +1745,12 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        private const int CollapsedClientHeight = 434;
-        private const int ExpandedClientHeight = 664;
+        public const string AppVersion = "1.1.0";
+        private const string LatestReleaseApiUrl = "https://api.github.com/repos/antonioalvromero/Ocarina-Atlas/releases/latest";
+        private const string LatestReleaseFallbackUrl = "https://github.com/antonioalvromero/Ocarina-Atlas/releases/latest";
+
+        private const int CollapsedClientHeight = 470;
+        private const int ExpandedClientHeight = 700;
 
         private readonly LaunchOptions _options;
         private readonly object _procLock = new object();
@@ -1314,6 +1773,8 @@ namespace OcarinaAtlasLauncher
         private bool _firewallAllowed = false;
         private int _copyFeedbackTicks = 0;
         private string _selectedLanUrl = string.Empty;
+        private string _renderedQrUrl = string.Empty;
+        private string _updateReleaseUrl = LatestReleaseFallbackUrl;
         private List<LanEndpoint> _lanEndpoints = new List<LanEndpoint>();
         private ToolTip _toolTip;
 
@@ -1327,6 +1788,8 @@ namespace OcarinaAtlasLauncher
         private Panel _logContainer;
 
         // Hero controls
+        private Label _versionLabel;
+        private LinkLabel _updateLinkLabel;
         private StatusDot _serverDot;
         private Label _serverStatusLabel;
         private Label _heroSummaryLabel;
@@ -1348,6 +1811,7 @@ namespace OcarinaAtlasLauncher
         private Button _refreshLanButton;
         private Button _copyLanUrlButton;
         private Label _lanHintLabel;
+        private PictureBox _qrPictureBox;
 
         // Advanced drawer controls
         private Button _advancedToggleButton;
@@ -1428,6 +1892,27 @@ namespace OcarinaAtlasLauncher
             titleLabel.AutoSize = true;
             titleLabel.Location = new Point(16, 12);
             _heroCard.Controls.Add(titleLabel);
+
+            _versionLabel = new Label();
+            _versionLabel.Text = "v" + AppVersion;
+            _versionLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
+            _versionLabel.ForeColor = Theme.Parchment600;
+            _versionLabel.AutoSize = true;
+            _versionLabel.Location = new Point(titleLabel.Right + 6, 20);
+            _heroCard.Controls.Add(_versionLabel);
+
+            _updateLinkLabel = new LinkLabel();
+            _updateLinkLabel.Text = string.Empty;
+            _updateLinkLabel.LinkColor = Theme.Ember;
+            _updateLinkLabel.ActiveLinkColor = Theme.Parchment50;
+            _updateLinkLabel.VisitedLinkColor = Theme.Ember;
+            _updateLinkLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _updateLinkLabel.AutoSize = true;
+            _updateLinkLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _updateLinkLabel.Visible = false;
+            _updateLinkLabel.Location = new Point(250, 19);
+            _updateLinkLabel.LinkClicked += OnUpdateLinkClicked;
+            _heroCard.Controls.Add(_updateLinkLabel);
 
             _heroStatusPill = new BorderedPanel();
             _heroStatusPill.Location = new Point(406, 14);
@@ -1562,7 +2047,7 @@ namespace OcarinaAtlasLauncher
             // 3. Step 2 Card: Play on Another Device (LAN)
             _step2Card = new BorderedPanel();
             _step2Card.Location = new Point(16, 268);
-            _step2Card.Size = new Size(528, 112);
+            _step2Card.Size = new Size(528, 148);
             _step2Card.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             Controls.Add(_step2Card);
 
@@ -1588,7 +2073,7 @@ namespace OcarinaAtlasLauncher
             _lanComboBox.ForeColor = Theme.Parchment50;
             _lanComboBox.Font = new Font("Segoe UI", 8.75f, FontStyle.Regular);
             _lanComboBox.Location = new Point(16, 44);
-            _lanComboBox.Size = new Size(322, 24);
+            _lanComboBox.Size = new Size(386, 24);
             _lanComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _lanComboBox.Visible = false;
             _lanComboBox.SelectedIndexChanged += OnLanComboSelectedIndexChanged;
@@ -1612,36 +2097,46 @@ namespace OcarinaAtlasLauncher
             _lanStatusLabel.ForeColor = Theme.Parchment200;
             _lanStatusLabel.AutoSize = false;
             _lanStatusLabel.Location = new Point(16, 47);
-            _lanStatusLabel.Size = new Size(322, 22);
+            _lanStatusLabel.Size = new Size(386, 22);
             _lanStatusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _step2Card.Controls.Add(_lanStatusLabel);
 
-            _refreshLanButton = CreateButton("Refresh", 346, 43, 72, 26, false);
-            _refreshLanButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _refreshLanButton = CreateButton("Refresh", 16, 74, 78, 26, false);
+            _refreshLanButton.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             _refreshLanButton.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
             _refreshLanButton.Click += OnRefreshLanClick;
             _step2Card.Controls.Add(_refreshLanButton);
             _toolTip.SetToolTip(_refreshLanButton, "Re-scan active Wi-Fi and Ethernet network adapters.");
 
-            _copyLanUrlButton = CreateButton("Copy URL", 424, 43, 88, 26, false);
-            _copyLanUrlButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _copyLanUrlButton = CreateButton("Copy URL", 102, 74, 96, 26, false);
+            _copyLanUrlButton.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             _copyLanUrlButton.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
             _copyLanUrlButton.Click += OnCopyLanUrlClick;
             _step2Card.Controls.Add(_copyLanUrlButton);
             _toolTip.SetToolTip(_copyLanUrlButton, "Copy the selected LAN address to open on your tablet, iPad, or phone.");
 
             _lanHintLabel = new Label();
-            _lanHintLabel.Text = "Open this address on your tablet, iPad, or phone on the same Wi-Fi network.";
+            _lanHintLabel.Text = "Open this address or scan the QR code on your tablet, iPad, or phone.";
             _lanHintLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
             _lanHintLabel.ForeColor = Theme.Parchment400;
             _lanHintLabel.AutoSize = false;
-            _lanHintLabel.Location = new Point(16, 78);
-            _lanHintLabel.Size = new Size(496, 22);
+            _lanHintLabel.Location = new Point(16, 108);
+            _lanHintLabel.Size = new Size(386, 30);
             _lanHintLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _step2Card.Controls.Add(_lanHintLabel);
 
+            _qrPictureBox = new PictureBox();
+            _qrPictureBox.Location = new Point(416, 42);
+            _qrPictureBox.Size = new Size(96, 96);
+            _qrPictureBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _qrPictureBox.BackColor = Color.FromArgb(0xF5, 0xED, 0xE0);
+            _qrPictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+            _qrPictureBox.Visible = false;
+            _step2Card.Controls.Add(_qrPictureBox);
+            _toolTip.SetToolTip(_qrPictureBox, "Scan with your phone or tablet camera to open Ocarina Atlas on the same Wi-Fi.");
+
             // 4. Collapsible Advanced Settings & Logs Drawer
-            _advancedToggleButton = CreateButton("\u25B8 Advanced Settings & Logs", 16, 390, 528, 30, false);
+            _advancedToggleButton = CreateButton("\u25B8 Advanced Settings & Logs", 16, 426, 528, 30, false);
             _advancedToggleButton.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _advancedToggleButton.TextAlign = ContentAlignment.MiddleLeft;
             _advancedToggleButton.Padding = new Padding(8, 0, 0, 0);
@@ -1651,7 +2146,7 @@ namespace OcarinaAtlasLauncher
             Controls.Add(_advancedToggleButton);
 
             _advancedDrawerPanel = new BorderedPanel();
-            _advancedDrawerPanel.Location = new Point(16, 426);
+            _advancedDrawerPanel.Location = new Point(16, 462);
             _advancedDrawerPanel.Size = new Size(528, 224);
             _advancedDrawerPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             _advancedDrawerPanel.Visible = false;
@@ -1873,7 +2368,7 @@ namespace OcarinaAtlasLauncher
             if (_advancedExpanded)
             {
                 _advancedDrawerPanel.Visible = true;
-                MinimumSize = new Size(550 + nonClientW, 600 + nonClientH);
+                MinimumSize = new Size(550 + nonClientW, 636 + nonClientH);
                 if (ClientSize.Height < ExpandedClientHeight)
                 {
                     ClientSize = new Size(ClientSize.Width, ExpandedClientHeight);
@@ -1895,6 +2390,7 @@ namespace OcarinaAtlasLauncher
             RefreshLanDisplays();
             TriggerFirewallStatusCheck();
             TriggerPollNow();
+            StartUpdateCheck();
 
             if (_options.AutoStart)
             {
@@ -2138,6 +2634,7 @@ namespace OcarinaAtlasLauncher
             if (selected != null)
             {
                 _selectedLanUrl = selected.Url;
+                UpdateQrPreview();
             }
         }
 
@@ -2235,6 +2732,7 @@ namespace OcarinaAtlasLauncher
                 _lanStatusLabel.Visible = true;
                 _copyLanUrlButton.Enabled = false;
                 _lanHintLabel.Text = "Enable \"Allow LAN access\" in Advanced Settings to connect a tablet or phone.";
+                UpdateQrPreview();
                 return;
             }
 
@@ -2247,6 +2745,7 @@ namespace OcarinaAtlasLauncher
                 _lanStatusLabel.Visible = true;
                 _copyLanUrlButton.Enabled = false;
                 _lanHintLabel.Text = "Connect your PC to Wi-Fi or Ethernet, then click Refresh.";
+                UpdateQrPreview();
                 return;
             }
 
@@ -2283,8 +2782,44 @@ namespace OcarinaAtlasLauncher
                     _lanStatusLabel.Visible = true;
                 }
 
-                _lanHintLabel.Text = "Open this address on your tablet, iPad, or phone on the same Wi-Fi network.";
+                _lanHintLabel.Text = "Open this address or scan the QR code on your tablet, iPad, or phone.";
             }
+
+            UpdateQrPreview();
+        }
+
+        private void UpdateQrPreview()
+        {
+            if (_qrPictureBox == null || _qrPictureBox.IsDisposed) return;
+
+            if (string.IsNullOrEmpty(_selectedLanUrl))
+            {
+                _renderedQrUrl = string.Empty;
+                _qrPictureBox.Visible = false;
+                Image oldEmpty = _qrPictureBox.Image;
+                _qrPictureBox.Image = null;
+                if (oldEmpty != null) oldEmpty.Dispose();
+                return;
+            }
+
+            if (string.Equals(_renderedQrUrl, _selectedLanUrl, StringComparison.Ordinal) && _qrPictureBox.Image != null)
+            {
+                _qrPictureBox.Visible = true;
+                return;
+            }
+
+            Bitmap bmp = QrCodeEncoder.RenderBitmap(_selectedLanUrl, _qrPictureBox.Width);
+            if (bmp == null)
+            {
+                _qrPictureBox.Visible = false;
+                return;
+            }
+
+            _renderedQrUrl = _selectedLanUrl;
+            Image oldImg = _qrPictureBox.Image;
+            _qrPictureBox.Image = bmp;
+            _qrPictureBox.Visible = true;
+            if (oldImg != null) oldImg.Dispose();
         }
 
         private void OnLanUrlLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -2790,6 +3325,13 @@ namespace OcarinaAtlasLauncher
                 _toolTip.Dispose();
                 _toolTip = null;
             }
+
+            if (_qrPictureBox != null && _qrPictureBox.Image != null)
+            {
+                Image img = _qrPictureBox.Image;
+                _qrPictureBox.Image = null;
+                img.Dispose();
+            }
         }
 
         private void UpdateControlStates()
@@ -3132,6 +3674,110 @@ namespace OcarinaAtlasLauncher
                 _logTextBox.Clear();
             }
             _logTextBox.AppendText(line + Environment.NewLine);
+        }
+
+        private void StartUpdateCheck()
+        {
+            Thread t = new Thread(delegate()
+            {
+                try
+                {
+                    ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+                    HttpWebRequest req = (HttpWebRequest)WebRequest.Create(LatestReleaseApiUrl);
+                    req.Method = "GET";
+                    req.Timeout = 4000;
+                    req.ReadWriteTimeout = 4000;
+                    req.UserAgent = "OcarinaAtlas/" + AppVersion;
+                    req.Accept = "application/vnd.github+json";
+
+                    string body;
+                    using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
+                    {
+                        if (resp.StatusCode != HttpStatusCode.OK) return;
+                        using (Stream stream = resp.GetResponseStream())
+                        {
+                            if (stream == null) return;
+                            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+                            {
+                                body = reader.ReadToEnd();
+                            }
+                        }
+                    }
+
+                    Dictionary<string, object> obj = SimpleJsonParser.ParseObject(body);
+                    string tagName = SimpleJsonParser.GetString(obj, "tag_name");
+                    string htmlUrl = SimpleJsonParser.GetString(obj, "html_url");
+
+                    Version latestVer = ParseComparableVersion(tagName);
+                    Version currentVer = ParseComparableVersion(AppVersion);
+                    if (latestVer == null || currentVer == null || latestVer <= currentVer)
+                    {
+                        return;
+                    }
+
+                    string displayTag = tagName.Trim();
+                    if (!displayTag.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+                    {
+                        displayTag = "v" + displayTag;
+                    }
+
+                    string targetUrl = LatestReleaseFallbackUrl;
+                    if (!string.IsNullOrEmpty(htmlUrl) &&
+                        htmlUrl.StartsWith("https://github.com/antonioalvromero/Ocarina-Atlas/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetUrl = htmlUrl;
+                    }
+
+                    BeginInvokeSafe(delegate()
+                    {
+                        if (_updateLinkLabel == null || _updateLinkLabel.IsDisposed || _heroStatusPill == null) return;
+                        _updateReleaseUrl = targetUrl;
+                        _updateLinkLabel.Text = "Update available: " + displayTag;
+                        _updateLinkLabel.Visible = true;
+                        _updateLinkLabel.Left = Math.Max(_versionLabel.Right + 10, _heroStatusPill.Left - _updateLinkLabel.Width - 10);
+                    });
+                }
+                catch
+                {
+                    // Fail silently when offline, firewalled, or rate-limited.
+                }
+            });
+            t.IsBackground = true;
+            t.Start();
+        }
+
+        private static Version ParseComparableVersion(string raw)
+        {
+            if (string.IsNullOrEmpty(raw)) return null;
+            string s = raw.Trim();
+            if (s.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+            {
+                s = s.Substring(1);
+            }
+            int dash = s.IndexOf('-');
+            if (dash >= 0)
+            {
+                s = s.Substring(0, dash);
+            }
+            int plus = s.IndexOf('+');
+            if (plus >= 0)
+            {
+                s = s.Substring(0, plus);
+            }
+            Version parsed;
+            if (Version.TryParse(s, out parsed))
+            {
+                return parsed;
+            }
+            return null;
+        }
+
+        private void OnUpdateLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(_updateReleaseUrl))
+            {
+                OpenUrlInBrowser(_updateReleaseUrl);
+            }
         }
 
         private void BeginInvokeSafe(MethodInvoker action)

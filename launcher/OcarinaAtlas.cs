@@ -2627,7 +2627,7 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "1.1.3";
+        public const string AppVersion = "1.1.4";
 
         private const int CollapsedClientHeight = 478;
         private const int ExpandedClientHeight = 700;

@@ -793,6 +793,7 @@ namespace OcarinaAtlasLauncher
     internal sealed class LichiiConfigStatus
     {
         public string FilePath = string.Empty;
+        public List<string> TargetPaths = new List<string>();
         public bool FileExists = false;
         public bool IsEnabled = false;
         public string ConfiguredTarget = string.Empty;
@@ -801,52 +802,108 @@ namespace OcarinaAtlasLauncher
 
     internal static class LichiiConfigManager
     {
+        private static readonly string[] ProfileDirNames = new[] { "fritchii", "lichii" };
+
         private static readonly Regex ActiveSwitchRegex = new Regex(
             @"^\s*EDEN_NX2_DEBUG_SERVER\s*=\s*(.+?)\s*$",
             RegexOptions.Compiled);
 
         public static string GetConfigPath()
         {
+            List<string> paths = GetTargetConfigPaths();
+            return paths.Count > 0 ? paths[0] : string.Empty;
+        }
+
+        public static List<string> GetTargetConfigPaths()
+        {
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            return Path.Combine(appData, "lichii", "nx2_switches.txt");
+            List<string> existing = new List<string>();
+            List<string> all = new List<string>();
+
+            for (int i = 0; i < ProfileDirNames.Length; i++)
+            {
+                string dir = Path.Combine(appData, ProfileDirNames[i]);
+                string cfg = Path.Combine(dir, "nx2_switches.txt");
+                all.Add(cfg);
+                if (Directory.Exists(dir))
+                {
+                    existing.Add(cfg);
+                }
+            }
+
+            return existing.Count > 0 ? existing : all;
+        }
+
+        private static bool TryReadSwitchTarget(string configPath, out bool fileExists, out string target)
+        {
+            fileExists = File.Exists(configPath);
+            target = string.Empty;
+            if (!fileExists)
+            {
+                return false;
+            }
+
+            bool enabled = false;
+            string[] lines = File.ReadAllLines(configPath, Encoding.UTF8);
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i] ?? string.Empty;
+                string trimmed = line.TrimStart();
+                if (trimmed.StartsWith("#", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                Match match = ActiveSwitchRegex.Match(line);
+                if (match.Success)
+                {
+                    string val = match.Groups[1].Value.Trim();
+                    if (!string.IsNullOrEmpty(val))
+                    {
+                        enabled = true;
+                        target = val;
+                    }
+                }
+            }
+
+            return enabled;
         }
 
         public static LichiiConfigStatus Inspect()
         {
             LichiiConfigStatus status = new LichiiConfigStatus();
-            status.FilePath = GetConfigPath();
+            List<string> targetPaths = GetTargetConfigPaths();
+            status.TargetPaths.AddRange(targetPaths);
+            status.FilePath = targetPaths.Count > 0 ? targetPaths[0] : string.Empty;
 
             try
             {
-                if (!File.Exists(status.FilePath))
-                {
-                    status.FileExists = false;
-                    status.IsEnabled = false;
-                    return status;
-                }
+                bool anyExists = false;
+                bool allEnabled = targetPaths.Count > 0;
+                string lastTarget = string.Empty;
 
-                status.FileExists = true;
-                string[] lines = File.ReadAllLines(status.FilePath, Encoding.UTF8);
-                for (int i = 0; i < lines.Length; i++)
+                for (int i = 0; i < targetPaths.Count; i++)
                 {
-                    string line = lines[i] ?? string.Empty;
-                    string trimmed = line.TrimStart();
-                    if (trimmed.StartsWith("#", StringComparison.Ordinal))
+                    bool exists;
+                    string target;
+                    bool enabled = TryReadSwitchTarget(targetPaths[i], out exists, out target);
+                    if (exists)
                     {
-                        continue;
+                        anyExists = true;
                     }
-
-                    Match match = ActiveSwitchRegex.Match(line);
-                    if (match.Success)
+                    if (!enabled)
                     {
-                        string val = match.Groups[1].Value.Trim();
-                        if (!string.IsNullOrEmpty(val))
-                        {
-                            status.IsEnabled = true;
-                            status.ConfiguredTarget = val;
-                        }
+                        allEnabled = false;
+                    }
+                    else if (!string.IsNullOrEmpty(target))
+                    {
+                        lastTarget = target;
                     }
                 }
+
+                status.FileExists = anyExists;
+                status.IsEnabled = allEnabled;
+                status.ConfiguredTarget = lastTarget;
             }
             catch (Exception ex)
             {
@@ -856,15 +913,8 @@ namespace OcarinaAtlasLauncher
             return status;
         }
 
-        public static LichiiConfigStatus EnableDebugServer(string host, int port)
+        private static void UpdateSingleConfigFile(string configPath, string newLine)
         {
-            string target = string.Format(
-                CultureInfo.InvariantCulture,
-                "{0}:{1}",
-                string.IsNullOrEmpty(host) ? "127.0.0.1" : host.Trim(),
-                port);
-            string newLine = "EDEN_NX2_DEBUG_SERVER=" + target;
-            string configPath = GetConfigPath();
             string configDir = Path.GetDirectoryName(configPath);
 
             if (!string.IsNullOrEmpty(configDir) && !Directory.Exists(configDir))
@@ -915,8 +965,8 @@ namespace OcarinaAtlasLauncher
             }
             else
             {
-                outLines.Add("# Lichii NX2 switches (configured by Ocarina Atlas)");
-                outLines.Add("# Restart Lichii after editing.");
+                outLines.Add("# Emulator NX2 switches (configured by Ocarina Atlas)");
+                outLines.Add("# Restart Lichii / Fritchii after editing.");
                 outLines.Add(newLine);
             }
 
@@ -927,12 +977,31 @@ namespace OcarinaAtlasLauncher
             }
 
             File.WriteAllText(configPath, finalContent, new UTF8Encoding(false));
+        }
+
+        public static LichiiConfigStatus EnableDebugServer(string host, int port)
+        {
+            string target = string.Format(
+                CultureInfo.InvariantCulture,
+                "{0}:{1}",
+                string.IsNullOrEmpty(host) ? "127.0.0.1" : host.Trim(),
+                port);
+            string newLine = "EDEN_NX2_DEBUG_SERVER=" + target;
+            List<string> targetPaths = GetTargetConfigPaths();
+
+            for (int i = 0; i < targetPaths.Count; i++)
+            {
+                UpdateSingleConfigFile(targetPaths[i], newLine);
+            }
+
             return Inspect();
         }
 
-        public static bool IsLichiiRunning()
+        public static string DetectRunningEmulator()
         {
-            string[] names = new[] { "lichii", "eden" };
+            string[] names = new[] { "fritchii", "lichii", "eden" };
+            string detected = null;
+
             for (int i = 0; i < names.Length; i++)
             {
                 try
@@ -942,9 +1011,13 @@ namespace OcarinaAtlasLauncher
                     {
                         for (int j = 0; j < procs.Length; j++)
                         {
-                            procs[j].Dispose();
+                            Process proc = procs[j];
+                            if (detected == null)
+                            {
+                                detected = ClassifyEmulatorProcess(proc, names[i]);
+                            }
+                            proc.Dispose();
                         }
-                        return true;
                     }
                 }
                 catch
@@ -952,7 +1025,61 @@ namespace OcarinaAtlasLauncher
                     // Ignore process inspection failure.
                 }
             }
-            return false;
+
+            return detected;
+        }
+
+        private static string ClassifyEmulatorProcess(Process proc, string fallbackName)
+        {
+            if (string.Equals(fallbackName, "fritchii", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Fritchii";
+            }
+
+            try
+            {
+                string title = proc.MainWindowTitle ?? string.Empty;
+                if (title.IndexOf("fritchii", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return "Fritchii";
+                }
+                if (title.IndexOf("lichii", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return "Lichii";
+                }
+            }
+            catch
+            {
+                // Ignore window title inspection failure.
+            }
+
+            try
+            {
+                if (proc.MainModule != null && !string.IsNullOrEmpty(proc.MainModule.FileName))
+                {
+                    string exePath = proc.MainModule.FileName;
+                    if (exePath.IndexOf("fritchii", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        return "Fritchii";
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore module path inspection failure.
+            }
+
+            if (string.Equals(fallbackName, "lichii", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Lichii";
+            }
+
+            return "Emulator";
+        }
+
+        public static bool IsLichiiRunning()
+        {
+            return DetectRunningEmulator() != null;
         }
     }
 
@@ -1732,6 +1859,7 @@ namespace OcarinaAtlasLauncher
         public bool RpcPortOpen;
         public bool Connected;
         public bool EmulatorRunning;
+        public string RunningEmulator;
         public string Source;
         public string Scene;
         public string PlaceName;
@@ -2863,7 +2991,7 @@ namespace OcarinaAtlasLauncher
             _heroCard.Controls.Add(_heroLichiiDot);
 
             _heroLichiiLabel = new Label();
-            _heroLichiiLabel.Text = "Lichii: Not detected";
+            _heroLichiiLabel.Text = "Emulator: Not detected";
             _heroLichiiLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
             _heroLichiiLabel.ForeColor = Theme.Parchment400;
             _heroLichiiLabel.AutoSize = false;
@@ -2873,7 +3001,7 @@ namespace OcarinaAtlasLauncher
             _heroLichiiLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _heroCard.Controls.Add(_heroLichiiLabel);
 
-            // 2. Step 1 Card: Lichii Live Sync
+            // 2. Step 1 Card: Emulator Live Sync (Lichii / Fritchii)
             _step1Card = new BorderedPanel();
             _step1Card.Location = new Point(16, 172);
             _step1Card.Size = new Size(528, 86);
@@ -2881,7 +3009,7 @@ namespace OcarinaAtlasLauncher
             Controls.Add(_step1Card);
 
             Label step1Title = new Label();
-            step1Title.Text = "Step 1 \u00B7 Lichii Live Sync";
+            step1Title.Text = "Step 1 \u00B7 Emulator Live Sync";
             step1Title.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
             step1Title.ForeColor = Theme.Parchment50;
             step1Title.AutoSize = true;
@@ -2907,7 +3035,7 @@ namespace OcarinaAtlasLauncher
             configuredLabel.TextAlign = ContentAlignment.MiddleCenter;
             _configuredPill.Controls.Add(configuredLabel);
 
-            _enableRpcButton = CreateButton("1-Click Setup Lichii", 360, 12, 152, 30, true);
+            _enableRpcButton = CreateButton("1-Click Setup Sync", 360, 12, 152, 30, true);
             _enableRpcButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _enableRpcButton.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
             _enableRpcButton.ForeColor = Theme.Parchment50;
@@ -3055,7 +3183,7 @@ namespace OcarinaAtlasLauncher
             _advancedDrawerPanel.Controls.Add(_portInput);
 
             Label lHostLabel = new Label();
-            lHostLabel.Text = "Lichii Host:";
+            lHostLabel.Text = "RPC Host:";
             lHostLabel.ForeColor = Theme.Parchment400;
             lHostLabel.AutoSize = true;
             lHostLabel.Location = new Point(152, 15);
@@ -3341,7 +3469,7 @@ namespace OcarinaAtlasLauncher
             {
                 _configuredPill.Visible = false;
                 _enableRpcButton.Visible = true;
-                _lichiiStepDetailLabel.Text = "Could not read Lichii config: " + status.ErrorMessage;
+                _lichiiStepDetailLabel.Text = "Could not read emulator config: " + status.ErrorMessage;
                 _lichiiStepDetailLabel.ForeColor = Theme.Ember;
                 return;
             }
@@ -3352,13 +3480,16 @@ namespace OcarinaAtlasLauncher
                 _enableRpcButton.Visible = false;
                 _lichiiStepDetailLabel.Text = "Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.";
                 _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
-                _toolTip.SetToolTip(_configuredPill, "Configured: EDEN_NX2_DEBUG_SERVER=" + status.ConfiguredTarget);
+                string pathsSummary = status.TargetPaths != null && status.TargetPaths.Count > 0
+                    ? string.Join("\n", status.TargetPaths.ToArray())
+                    : status.FilePath;
+                _toolTip.SetToolTip(_configuredPill, "Configured: EDEN_NX2_DEBUG_SERVER=" + status.ConfiguredTarget + "\n" + pathsSummary);
             }
             else
             {
                 _configuredPill.Visible = false;
                 _enableRpcButton.Visible = true;
-                _lichiiStepDetailLabel.Text = "Click to enable live tracking in Lichii so the map follows Link automatically.";
+                _lichiiStepDetailLabel.Text = "Click to enable live tracking in Lichii / Fritchii so the map follows Link automatically.";
                 _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
             }
         }
@@ -3367,8 +3498,8 @@ namespace OcarinaAtlasLauncher
         {
             int lPort = (int)_lichiiPortInput.Value;
             _enableRpcButton.Text = lPort == 6545
-                ? "1-Click Setup Lichii"
-                : string.Format(CultureInfo.InvariantCulture, "Setup Lichii (:{0})", lPort);
+                ? "1-Click Setup Sync"
+                : string.Format(CultureInfo.InvariantCulture, "Setup Sync (:{0})", lPort);
         }
 
         private void OnLichiiPortChanged(object sender, EventArgs e)
@@ -3406,28 +3537,32 @@ namespace OcarinaAtlasLauncher
             {
                 LichiiConfigStatus updated = LichiiConfigManager.EnableDebugServer(host, port);
                 RefreshLichiiConfigStatus();
+                string updatedPaths = updated.TargetPaths != null && updated.TargetPaths.Count > 0
+                    ? string.Join("\n", updated.TargetPaths.ToArray())
+                    : updated.FilePath;
                 AppendLog(string.Format(
                     CultureInfo.InvariantCulture,
                     "Updated {0} with EDEN_NX2_DEBUG_SERVER={1}:{2}.",
-                    updated.FilePath,
+                    updatedPaths.Replace("\n", ", "),
                     host,
                     port));
 
-                bool running = LichiiConfigManager.IsLichiiRunning();
-                string message = running
+                string runningEmulator = LichiiConfigManager.DetectRunningEmulator();
+                string message = runningEmulator != null
                     ? string.Format(
                         CultureInfo.InvariantCulture,
-                        "Lichii live sync is now configured in:\n{0}\n\nLichii appears to be running right now. Please restart Lichii for live sync to take effect.",
-                        updated.FilePath)
+                        "Emulator live sync is now configured in:\n{0}\n\n{1} appears to be running right now. Please restart {1} for live sync to take effect.",
+                        updatedPaths,
+                        runningEmulator)
                     : string.Format(
                         CultureInfo.InvariantCulture,
-                        "Lichii live sync is now configured in:\n{0}\n\nStart Lichii and load Ocarina of Time to activate live tracking.",
-                        updated.FilePath);
+                        "Emulator live sync is now configured in:\n{0}\n\nStart Lichii or Fritchii and load Ocarina of Time to activate live tracking.",
+                        updatedPaths);
 
                 MessageBox.Show(
                     this,
                     message,
-                    "Lichii Live Sync Configured",
+                    "Emulator Live Sync Configured",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
@@ -3436,7 +3571,7 @@ namespace OcarinaAtlasLauncher
                 AppendLog("Failed to update nx2_switches.txt: " + ex.Message);
                 MessageBox.Show(
                     this,
-                    "Could not write Lichii config:\n" + ex.Message,
+                    "Could not write emulator config:\n" + ex.Message,
                     "Config Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -4461,6 +4596,7 @@ namespace OcarinaAtlasLauncher
             }
 
             snap.RpcPortOpen = ProbeTcpPort(lichiiHost, lichiiPort, 300);
+            snap.RunningEmulator = LichiiConfigManager.DetectRunningEmulator();
             return snap;
         }
 
@@ -4473,11 +4609,13 @@ namespace OcarinaAtlasLauncher
                 MarkServerRunning();
             }
 
+            string emuName = !string.IsNullOrEmpty(snap.RunningEmulator) ? snap.RunningEmulator : "Emulator";
+
             if (snap.ServerHttpOk && snap.Connected && snap.EmulatorRunning &&
                 string.Equals(snap.Source, "memory", StringComparison.OrdinalIgnoreCase))
             {
                 _heroLichiiDot.DotColor = Theme.Moss;
-                _heroLichiiLabel.Text = "Lichii: Live Sync";
+                _heroLichiiLabel.Text = emuName + ": Live Sync";
                 _heroLichiiLabel.ForeColor = Theme.Moss;
 
                 List<string> parts = new List<string>();
@@ -4502,39 +4640,56 @@ namespace OcarinaAtlasLauncher
 
                 _lichiiStepDetailLabel.Text = parts.Count > 0
                     ? "Live: " + string.Join("  \u00B7  ", parts.ToArray())
-                    : "Streaming live player coordinates from Lichii.";
+                    : "Streaming live player coordinates from " + emuName + ".";
                 _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
             }
             else if ((snap.ServerHttpOk && snap.Connected) || snap.RpcPortOpen)
             {
                 _heroLichiiDot.DotColor = Theme.Ember;
-                _heroLichiiLabel.Text = "Lichii: Waiting for game";
+                _heroLichiiLabel.Text = emuName + ": Waiting for game";
                 _heroLichiiLabel.ForeColor = Theme.Ember;
 
                 if (snap.ServerHttpOk && string.Equals(snap.Source, "save", StringComparison.OrdinalIgnoreCase) && snap.SkulltulaCount.HasValue)
                 {
                     _lichiiStepDetailLabel.Text = string.Format(
                         CultureInfo.InvariantCulture,
-                        "Save loaded ({0}/100 Gold Skulltulas). Start Ocarina of Time in Lichii for live sync.",
-                        snap.SkulltulaCount.Value);
+                        "Save loaded ({0}/100 Gold Skulltulas). Start Ocarina of Time in {1} for live sync.",
+                        snap.SkulltulaCount.Value,
+                        emuName);
                 }
                 else
                 {
-                    _lichiiStepDetailLabel.Text = "Lichii is ready. Load your Ocarina of Time save to start live sync.";
+                    _lichiiStepDetailLabel.Text = emuName + " is ready. Load your Ocarina of Time save to start live sync.";
                 }
                 _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
+            }
+            else if (!string.IsNullOrEmpty(snap.RunningEmulator))
+            {
+                _heroLichiiDot.DotColor = Theme.Ember;
+                _heroLichiiLabel.Text = snap.RunningEmulator + ": RPC closed";
+                _heroLichiiLabel.ForeColor = Theme.Ember;
+
+                if (_configuredPill.Visible)
+                {
+                    _lichiiStepDetailLabel.Text = "Restart " + snap.RunningEmulator + " so its debug server starts on the configured port.";
+                }
+                else
+                {
+                    _lichiiStepDetailLabel.Text = "Click 1-Click Setup Sync, then restart " + snap.RunningEmulator + " to enable live tracking.";
+                }
+                _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
             }
             else
             {
                 _heroLichiiDot.DotColor = Theme.Parchment600;
-                _heroLichiiLabel.Text = "Lichii: Not detected";
+                _heroLichiiLabel.Text = "Emulator: Not detected";
                 _heroLichiiLabel.ForeColor = Theme.Parchment400;
 
                 if (snap.ServerHttpOk && string.Equals(snap.Source, "save", StringComparison.OrdinalIgnoreCase) && snap.SkulltulaCount.HasValue)
                 {
                     _lichiiStepDetailLabel.Text = string.Format(
                         CultureInfo.InvariantCulture,
-                        "Save data found ({0}/100 Gold Skulltulas). Open Lichii for live player tracking.",
+                        "Save data found ({0}/100 Gold Skulltulas). Open Lichii or Fritchii for live player tracking.",
                         snap.SkulltulaCount.Value);
                     _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
                 }
@@ -4545,7 +4700,7 @@ namespace OcarinaAtlasLauncher
                 }
                 else
                 {
-                    _lichiiStepDetailLabel.Text = "Click 1-Click Setup Lichii so the map can follow Link automatically.";
+                    _lichiiStepDetailLabel.Text = "Click 1-Click Setup Sync so the map can follow Link automatically.";
                     _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
                 }
             }

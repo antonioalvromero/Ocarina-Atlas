@@ -141,6 +141,7 @@ function main() {
     '/platform:x64',
     '/warn:4',
     '/warnaserror',
+    '/r:System.IO.Compression.FileSystem.dll',
     `/win32icon:${LAUNCHER_ICO}`,
     `/out:${LAUNCHER_EXE}`,
     LAUNCHER_CS,

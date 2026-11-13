@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-11-13
+
+### Added
+- **In-App Auto-Updater (`launcher/OcarinaAtlas.cs`):** Added `UpdateDialog` with release notes preview, **Skip Version** persistence (`%LOCALAPPDATA%\OcarinaAtlas\skipped-version.txt`), and 1-click **Update Now** self-update (ZIP download with progress bar, `System.IO.Compression.ZipFile` extraction, detached PowerShell file swap, and automatic relaunch), plus `--update-feed <url>` / `OCARINA_ATLAS_UPDATE_URL` override support.
+
 ## [1.1.1] - 2026-11-13
 
 ### Fixed

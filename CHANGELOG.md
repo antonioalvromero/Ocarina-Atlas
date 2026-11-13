@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-11-13
+
+### Added
+- **Global Progress Stats Drawer (`src/components/GlobalStatsDrawer.tsx`, `src/lib/stats.ts`):** Added a `Stats` button and completion progress bar in the world-map header with a full breakdown (`X / 184`) across all categories and locations.
+- **Verified Heart Container Tracking (`src/lib/lichii-server.ts`):** Added verified master flag table hash tracking for the Spirit Temple boss Heart Container (Twinrova).
+- **UI Preview Screenshots (`README.md`, `assets/screenshots/`):** Added crisp `1440x900` world-map and Spirit Temple screenshots and updated feature documentation for the public community release.
+
 ## [1.1.2] - 2026-11-13
 
 ### Added

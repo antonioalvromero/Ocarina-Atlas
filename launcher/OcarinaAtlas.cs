@@ -1379,8 +1379,8 @@ namespace OcarinaAtlasLauncher
             _activeLichiiHost = _options.LichiiHost;
             _activeLichiiPort = _options.LichiiPort;
 
-            _appIcon = CreateTriforceIcon();
-            Icon = _appIcon;
+            _appIcon = LoadAppIcon();
+            this.Icon = _appIcon;
 
             Text = "Ocarina Atlas — Ocarina of Time Map Tracker";
             BackColor = Theme.Ink950;
@@ -3152,46 +3152,26 @@ namespace OcarinaAtlasLauncher
             return Regex.Replace(input, @"\x1B\[[0-9;]*[A-Za-z]", string.Empty);
         }
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool DestroyIcon(IntPtr hIcon);
-
-        private static Icon CreateTriforceIcon()
+        private static Icon LoadAppIcon()
         {
-            using (Bitmap bmp = new Bitmap(32, 32))
-            using (Graphics g = Graphics.FromImage(bmp))
+            try
             {
-                g.SmoothingMode = SmoothingMode.AntiAlias;
-                g.Clear(Theme.Ink950);
-
-                using (Pen border = new Pen(Theme.Ink600, 1.5f))
+                string exePath = Application.ExecutablePath;
+                if (!string.IsNullOrEmpty(exePath))
                 {
-                    g.DrawRectangle(border, 1, 1, 29, 29);
-                }
-
-                using (SolidBrush gold = new SolidBrush(Theme.Parchment400))
-                using (SolidBrush highlight = new SolidBrush(Theme.Parchment50))
-                {
-                    Point[] top = { new Point(16, 4), new Point(10, 15), new Point(22, 15) };
-                    Point[] left = { new Point(10, 16), new Point(4, 27), new Point(16, 27) };
-                    Point[] right = { new Point(22, 16), new Point(16, 27), new Point(28, 27) };
-                    g.FillPolygon(highlight, top);
-                    g.FillPolygon(gold, left);
-                    g.FillPolygon(gold, right);
-                }
-
-                IntPtr hIcon = bmp.GetHicon();
-                try
-                {
-                    using (Icon tempIcon = Icon.FromHandle(hIcon))
+                    Icon extracted = Icon.ExtractAssociatedIcon(exePath);
+                    if (extracted != null)
                     {
-                        return (Icon)tempIcon.Clone();
+                        return extracted;
                     }
                 }
-                finally
-                {
-                    DestroyIcon(hIcon);
-                }
             }
+            catch
+            {
+                // Fall back to the default system application icon if extraction fails.
+            }
+
+            return (Icon)SystemIcons.Application.Clone();
         }
     }
 }

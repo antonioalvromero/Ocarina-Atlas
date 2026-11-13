@@ -10,6 +10,7 @@ import type { Fraction, Place } from './types'
 const DEFAULT_LICHII_HOST = '127.0.0.1'
 const DEFAULT_LICHII_PORT = 6545
 const OOT_REMAKE_TITLE_ID = '0400486024DEC000'
+const placesById = new Map<string, Place>(dataset.places.map((p) => [p.id, p]))
 
 /** Resolves the Lichii TCP debug host from LICHII_HOST (default '127.0.0.1'). */
 export function getLichiiHost(env: NodeJS.ProcessEnv = process.env): string {
@@ -2505,6 +2506,19 @@ export async function getLichiiTelemetryState(): Promise<LichiiTelemetryState> {
   return inFlightStatePromise
 }
 
+const SAVE_SLOT_SCAN_TTL_MS = 1500
+let cachedLatestSlotInfo: { dir: string; key: string; mtimeMs: number } | null = null
+let lastSaveSlotScanTime = 0
+
+function getCachedSaveState(): ParsedSaveSlot | null {
+  const now = Date.now()
+  if (now - lastSaveSlotScanTime >= SAVE_SLOT_SCAN_TTL_MS) {
+    cachedLatestSlotInfo = findLatestSaveSlotDir()
+    lastSaveSlotScanTime = now
+  }
+  return cachedLatestSlotInfo ? parseSaveSlot(cachedLatestSlotInfo) : null
+}
+
 async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
   const now = Date.now()
   // Always pass fps_window_ms: 0 so status responds in <1ms instead of sleeping 500ms,
@@ -2523,9 +2537,6 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
   let tcpConnected = cachedStatusRes !== null && lichiiRpc.isConnected()
   let emulatorRunning = tcpConnected && Boolean(cachedStatusRes?.powered_on)
   let titleId = typeof cachedStatusRes?.program_id === 'string' ? cachedStatusRes.program_id : undefined
-
-  const latestSlotInfo = findLatestSaveSlotDir()
-  const saveState = latestSlotInfo ? parseSaveSlot(latestSlotInfo) : null
 
   let liveState =
     tcpConnected && emulatorRunning
@@ -2559,6 +2570,10 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
     resetLiveSessionCaches()
   }
 
+  // Skip synchronous save-directory I/O when live memory already provides position and scene.
+  const needsSaveFallback = !tcpConnected || !emulatorRunning || !liveState.position || !liveState.scene
+  const saveState = needsSaveFallback ? getCachedSaveState() : null
+
   const { connected, emulatorRunning: activeEmulatorRunning, source } = deriveConnectionStatus({
     tcpConnected,
     emulatorRunning,
@@ -2571,9 +2586,7 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
   const sceneKey = normalizedScene ?? (saveState?.scene ? normalizeSceneName(saveState.scene).scene : null)
 
   const sceneMapping = sceneKey ? SCENE_TO_PLACE[sceneKey] : undefined
-  const place: Place | undefined = sceneMapping
-    ? dataset.places.find((p) => p.id === sceneMapping.placeId)
-    : undefined
+  const place: Place | undefined = sceneMapping ? placesById.get(sceneMapping.placeId) : undefined
 
   const age: 'child' | 'adult' | null =
     sceneAgeHint ??

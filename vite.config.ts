@@ -33,6 +33,42 @@ function standaloneSsrPlugin(): Plugin {
   }
 }
 
+/** Splits large client vendor and static dataset modules into separate cacheable chunks without affecting SSR. */
+function clientChunkSplittingPlugin(): Plugin {
+  return {
+    name: 'client-chunk-splitting',
+    apply: 'build',
+    configEnvironment(environmentName) {
+      if (environmentName === 'client') {
+        return {
+          build: {
+            rolldownOptions: {
+              output: {
+                manualChunks(id) {
+                  const normalized = id.replace(/\\/g, '/')
+                  if (
+                    normalized.includes('/node_modules/react/') ||
+                    normalized.includes('/node_modules/react-dom/') ||
+                    normalized.includes('/node_modules/scheduler/')
+                  ) {
+                    return 'react-vendor'
+                  }
+                  if (normalized.includes('/node_modules/@tanstack/')) {
+                    return 'router-vendor'
+                  }
+                  if (normalized.endsWith('/src/data/oot.json')) {
+                    return 'oot-data'
+                  }
+                },
+              },
+            },
+          },
+        }
+      }
+    },
+  }
+}
+
 const allowedHosts = resolveAllowedDevHosts(hostname())
 
 export default defineConfig({
@@ -42,6 +78,7 @@ export default defineConfig({
   plugins: [
     lichiiTelemetryPlugin(),
     standaloneSsrPlugin(),
+    clientChunkSplittingPlugin(),
     tailwindcss(),
     tanstackStart(),
     viteReact(),

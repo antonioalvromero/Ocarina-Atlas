@@ -45,3 +45,5 @@ When filing public issues or sharing logs:
 
 - **Never** attach copyrighted game ROMs, decryption keys, or full NAND dumps.
 - **Avoid** uploading full save archives or raw memory dumps unless specifically requested, and sanitize local Windows usernames/paths if needed.
+
+For contribution guidelines and community standards, see [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).

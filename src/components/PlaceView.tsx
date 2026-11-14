@@ -1,6 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { ArrowLeft, Check, EyeOff, Maximize2, Minimize2, Trash2, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { dataset, formatFloorLabel, isUnplaced, itemsOfPlace, matchesAge, startMapOf } from '../lib/data'
 import { floorToGrid, gridPoint, layoutFloors } from '../lib/floorGrid'
 import { findMerge, type Merge } from '../lib/merge'
@@ -14,24 +14,29 @@ import {
   officialRevealedSlot,
   officialVisibleSlot,
   pinsSlot,
+  removePin,
   setInList,
   toggleInList,
+  updatePin,
   useStored,
   write,
   type CustomPin,
 } from '../lib/storage'
 import type { Fraction, Item, Place, PlaceMap } from '../lib/types'
+import { useFullscreenMap } from '../lib/useFullscreenMap'
 import { isLiveMemoryState, useLichiiTracker } from '../lib/useLichiiTracker'
+import { categoryStyle } from './categories'
 import { FloorGrid, type FloorDraft } from './FloorGrid'
+import { ItemDetail } from './ItemDetail'
 import { LichiiStatusPanel } from './LichiiStatusPanel'
-import { MapViewport, type MapViewportHandle } from './MapViewport'
+import { MapViewport, type MapViewportHandle, type Projection } from './MapViewport'
 import { MergeNotice } from './MergeNotice'
 import { NewPinPopover } from './NewPinPopover'
 import { CustomPinList, OfficialList, OfficialToggle, RevealedList, Section } from './Panels'
 import { CustomMarker, DraftMarker, MergeTrail, OfficialMarker } from './Pins'
 import { PlayerPin } from './PlayerPin'
 
-type Selection = { kind: 'custom' | 'item'; id: string } | null
+type Selection = { kind: 'custom'; id: string; mapId: string } | { kind: 'item'; id: string } | null
 
 function useOfficialProgress(items: Item[]) {
   const doneIds = useStored(officialDoneSlot)
@@ -56,13 +61,39 @@ function ItemCount({ placeId, progress, total }: { placeId: string; progress: nu
   )
 }
 
-function Sidebar({ place, progress, total, children }: { place: Place; progress: number; total: number; children: ReactNode }) {
+function Sidebar({
+  place,
+  progress,
+  total,
+  onEnterFullscreen,
+  children,
+}: {
+  place: Place
+  progress: number
+  total: number
+  onEnterFullscreen?: () => void
+  children: ReactNode
+}) {
   return (
-    <aside className="flex min-h-0 flex-1 flex-col overflow-y-auto border-ink-700 bg-ink-900 max-lg:border-t lg:w-96 lg:flex-none lg:border-l">
+    <aside className="flex min-h-0 flex-1 flex-col overflow-y-auto border-ink-700 bg-ink-900 max-lg:border-t max-lg:landscape:w-72 max-lg:landscape:flex-none max-lg:landscape:border-t-0 max-lg:landscape:border-l lg:w-96 lg:flex-none lg:border-l">
       <header className="px-4 pt-3 pb-3">
-        <Link to="/" className="inline-flex items-center gap-1 text-xs text-parchment-400 hover:text-parchment-50">
-          <ArrowLeft size={13} /> Atlas
-        </Link>
+        <div className="flex items-center justify-between gap-2">
+          <Link to="/" className="inline-flex items-center gap-1 text-xs text-parchment-400 hover:text-parchment-50">
+            <ArrowLeft size={13} /> Atlas
+          </Link>
+          {onEnterFullscreen && (
+            <button
+              type="button"
+              onClick={onEnterFullscreen}
+              aria-label="Enter fullscreen map"
+              title="Fullscreen map"
+              className="inline-flex cursor-pointer items-center gap-1 rounded border border-ink-600 bg-ink-800/90 px-2 py-0.5 text-xs font-medium text-parchment-200 transition-colors hover:border-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
+            >
+              <Maximize2 size={12} />
+              Fullscreen
+            </button>
+          )}
+        </div>
         <h1 className="mt-1.5 font-serif text-2xl leading-tight text-parchment-50">{place.name}</h1>
         <p className="mt-0.5 text-xs text-parchment-400">
           <span className={place.kind === 'dungeon' ? 'text-ember' : ''}>
@@ -97,13 +128,17 @@ function MapSwitcher({
   allFloors?: { active: boolean; onShow: () => void }
 }) {
   return (
-    <div role="group" aria-label="Choose a map" className="absolute top-3 left-3 z-30 flex overflow-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg">
+    <div
+      role="group"
+      aria-label="Choose a map"
+      className="absolute top-3 left-3 z-30 flex max-w-[calc(100%-8.5rem)] overflow-x-auto overflow-y-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg"
+    >
       {allFloors && (
         <button
           type="button"
           aria-pressed={allFloors.active}
           onClick={allFloors.onShow}
-          className={`cursor-pointer px-3 py-1.5 text-sm ${
+          className={`shrink-0 cursor-pointer px-3 py-1.5 text-sm ${
             allFloors.active ? 'bg-parchment-200 font-medium text-ink-950' : 'text-parchment-200 hover:bg-ink-700'
           }`}
         >
@@ -118,7 +153,7 @@ function MapSwitcher({
             type="button"
             aria-pressed={map.id === current}
             onClick={() => onChange(map.id)}
-            className={` inline-flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm ${
+            className={`inline-flex shrink-0 cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm ${
               map.id === current ? 'bg-parchment-200 font-medium text-ink-950' : 'text-parchment-200 hover:bg-ink-700'
             }`}
           >
@@ -169,6 +204,203 @@ function FloorPinList({
   )
 }
 
+function PinPopoverFrame({
+  at,
+  projection,
+  title,
+  children,
+}: {
+  at: Fraction
+  projection: Projection
+  title: string
+  children: ReactNode
+}) {
+  const width = Math.min(288, Math.max(220, projection.size.width - 24))
+  const pt = projection.project(at)
+  const left = Math.min(Math.max(12, pt.x - width / 2), Math.max(12, projection.size.width - width - 12))
+  const placeAbove = pt.y > projection.size.height * 0.55
+  const style = placeAbove
+    ? { left, bottom: Math.max(12, projection.size.height - pt.y + 18), width }
+    : { left, top: Math.min(Math.max(12, pt.y + 18), Math.max(12, projection.size.height - 200)), width }
+
+  return (
+    <div
+      data-pin-popover
+      role="dialog"
+      aria-label={`${title} details`}
+      style={style}
+      className="pointer-events-auto absolute z-50 max-h-[min(65dvh,360px)] overflow-y-auto rounded-lg border border-ink-600 bg-ink-900/95 p-3 text-parchment-50 shadow-xl backdrop-blur-sm"
+    >
+      {children}
+    </div>
+  )
+}
+
+function ItemPinPopover({
+  item,
+  at,
+  projection,
+  done,
+  revealed,
+  onClose,
+}: {
+  item: Item
+  at: Fraction
+  projection: Projection
+  done: boolean
+  revealed: boolean
+  onClose: () => void
+}) {
+  const { icon: Icon, color } = categoryStyle(item.cat)
+  return (
+    <PinPopoverFrame at={at} projection={projection} title={item.name}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <Icon size={15} style={{ color }} className="shrink-0" aria-hidden />
+          <h2 className="truncate font-serif text-base leading-tight text-parchment-50">{item.name}</h2>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close pin info"
+          className="-mt-0.5 -mr-0.5 grid size-6 shrink-0 cursor-pointer place-items-center rounded text-parchment-400 transition-colors hover:bg-ink-800 hover:text-parchment-50"
+        >
+          <X size={14} />
+        </button>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        <button
+          type="button"
+          aria-pressed={done}
+          onClick={() => toggleInList(officialDoneSlot, item.id)}
+          className={`inline-flex cursor-pointer items-center gap-1.5 rounded border px-2 py-1 text-xs font-medium transition-colors ${
+            done
+              ? 'border-moss bg-moss/20 text-moss'
+              : 'border-ink-600 bg-ink-800 text-parchment-200 hover:border-parchment-400 hover:text-parchment-50'
+          }`}
+        >
+          <Check size={12} strokeWidth={3} />
+          {done ? 'Completed' : 'Mark completed'}
+        </button>
+        {revealed && (
+          <button
+            type="button"
+            onClick={() => {
+              setInList(officialRevealedSlot, item.id, false)
+              onClose()
+            }}
+            className="inline-flex cursor-pointer items-center gap-1 rounded border border-ink-600 px-2 py-1 text-xs text-parchment-200 hover:border-parchment-400"
+          >
+            <EyeOff size={12} />
+            Hide again
+          </button>
+        )}
+      </div>
+      <div className="mt-2 -mx-2">
+        <ItemDetail item={item} />
+      </div>
+    </PinPopoverFrame>
+  )
+}
+
+function CustomPinPopover({
+  placeId,
+  mapId,
+  pinId,
+  projection,
+  projectAnchor,
+  onClose,
+}: {
+  placeId: string
+  mapId: string
+  pinId: string
+  projection: Projection
+  projectAnchor?: (pin: CustomPin) => Fraction | null
+  onClose: () => void
+}) {
+  const pins = useStored(pinsSlot(placeId, mapId))
+  const pin = pins.find((p) => p.id === pinId)
+  const [name, setName] = useState(pin?.name ?? '')
+
+  useEffect(() => {
+    if (pin) setName(pin.name)
+  }, [pin?.id, pin?.name])
+
+  if (!pin) return null
+  const anchor = projectAnchor ? projectAnchor(pin) : pin
+  if (!anchor) return null
+  const { icon: Icon, color } = categoryStyle(pin.type)
+
+  function rename(event: FormEvent) {
+    event.preventDefault()
+    if (!pin) return
+    const trimmed = name.trim()
+    if (trimmed) updatePin(placeId, mapId, pin.id, { name: trimmed })
+    else setName(pin.name)
+  }
+
+  return (
+    <PinPopoverFrame at={anchor} projection={projection} title={pin.name}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <Icon size={15} style={{ color }} className="shrink-0" aria-hidden />
+          <h2 className="truncate font-serif text-base leading-tight text-parchment-50">{pin.name}</h2>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close pin info"
+          className="-mt-0.5 -mr-0.5 grid size-6 shrink-0 cursor-pointer place-items-center rounded text-parchment-400 transition-colors hover:bg-ink-800 hover:text-parchment-50"
+        >
+          <X size={14} />
+        </button>
+      </div>
+      <div className="mt-2 flex items-center gap-1.5">
+        <button
+          type="button"
+          aria-pressed={pin.done}
+          onClick={() => updatePin(placeId, mapId, pin.id, { done: !pin.done })}
+          className={`inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded border px-2 py-1 text-xs font-medium transition-colors ${
+            pin.done
+              ? 'border-moss bg-moss/20 text-moss'
+              : 'border-ink-600 bg-ink-800 text-parchment-200 hover:border-parchment-400 hover:text-parchment-50'
+          }`}
+        >
+          <Check size={12} strokeWidth={3} />
+          {pin.done ? 'Completed' : 'Mark completed'}
+        </button>
+        <button
+          type="button"
+          aria-label={`Delete ${pin.name}`}
+          onClick={() => {
+            removePin(placeId, mapId, pin.id)
+            onClose()
+          }}
+          className="grid size-7 shrink-0 cursor-pointer place-items-center rounded border border-ink-600 text-ember hover:border-ember"
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
+      <form onSubmit={rename} className="mt-2 flex gap-1.5">
+        <input
+          aria-label={`Rename ${pin.name}`}
+          value={name}
+          maxLength={80}
+          onChange={(event) => setName(event.target.value)}
+          className="min-w-0 flex-1 rounded border border-ink-600 bg-ink-950 px-2 py-1 text-xs text-parchment-50 outline-none focus:border-parchment-400"
+        />
+        <button
+          type="submit"
+          disabled={!name.trim() || name.trim() === pin.name}
+          className="cursor-pointer rounded bg-parchment-200 px-2 py-1 text-xs font-medium text-ink-950 hover:bg-parchment-50 disabled:opacity-40"
+        >
+          Rename
+        </button>
+      </form>
+    </PinPopoverFrame>
+  )
+}
+
 function resolvePlayerMapId(place: Place, rawMapId: string | null, age: 'child' | 'adult' | null): string | null {
   if (rawMapId && place.maps.some((m) => m.id === rawMapId)) {
     return rawMapId
@@ -208,7 +440,35 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
   const [draft, setDraft] = useState<FloorDraft | null>(null)
   const [showAllFloors, setShowAllFloors] = useState(false)
   const [merge, setMerge] = useState<Merge | null>(null)
+  const mainRef = useRef<HTMLElement>(null)
+  const mapContainerRef = useRef<HTMLDivElement>(null)
   const viewport = useRef<MapViewportHandle>(null)
+  const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreenMap(mainRef)
+  const [isCompactViewport, setIsCompactViewport] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+    const query = window.matchMedia('(max-width: 1023px), (pointer: coarse)')
+    const sync = () => setIsCompactViewport(query.matches)
+    sync()
+    query.addEventListener('change', sync)
+    return () => query.removeEventListener('change', sync)
+  }, [])
+
+  const showPinPopover = isFullscreen || isCompactViewport
+
+  useEffect(() => {
+    if (!showPinPopover || !selection || typeof document === 'undefined') return
+    const onPointerDown = (event: globalThis.PointerEvent) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      if (target.closest('[data-pin], [data-pin-popover]')) return
+      if (mapContainerRef.current?.contains(target) && !target.closest('button, a')) return
+      setSelection(null)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [showPinPopover, selection])
 
   const pins = useStored(pinsSlot(place.id, map.id))
   const showOfficial = useStored(officialVisibleSlot)
@@ -349,7 +609,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
     }
     const pin = addPin(place.id, draft.mapId, name, draft.at, type)
     setDraft(null)
-    setSelection({ kind: 'custom', id: pin.id })
+    setSelection({ kind: 'custom', id: pin.id, mapId: draft.mapId })
   }
 
   function undoMerge() {
@@ -359,7 +619,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
     if (merge.previousAge) write(ageFilterSlot, merge.previousAge)
     const pin = addPin(place.id, merge.mapId, merge.name, merge.from, merge.type)
     setMerge(null)
-    setSelection({ kind: 'custom', id: pin.id })
+    setSelection({ kind: 'custom', id: pin.id, mapId: merge.mapId })
   }
 
   /** Where to centre for a point on a floor, in the view on screen. */
@@ -396,9 +656,40 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
     }
   }
 
+  function renderPinPopover(projection: Projection) {
+    if (!showPinPopover || !selection || draft) return null
+    if (selection.kind === 'item') {
+      const item = items.find((i) => i.id === selection.id)
+      if (!item?.at) return null
+      const anchor = focusPoint(item.at.map, item.at)
+      if (!anchor) return null
+      return (
+        <ItemPinPopover
+          item={item}
+          at={anchor}
+          projection={projection}
+          done={done.has(item.id)}
+          revealed={revealed.has(item.id)}
+          onClose={() => setSelection(null)}
+        />
+      )
+    }
+    const customMapId = selection.mapId
+    return (
+      <CustomPinPopover
+        placeId={place.id}
+        mapId={customMapId}
+        pinId={selection.id}
+        projection={projection}
+        projectAnchor={(pin) => focusPoint(customMapId, pin)}
+        onClose={() => setSelection(null)}
+      />
+    )
+  }
+
   return (
-    <main className="flex h-dvh flex-col bg-ink-950 lg:flex-row">
-      <div className="relative min-h-0 flex-[1.3] lg:flex-1">
+    <main ref={mainRef} className="flex h-dvh flex-col bg-ink-950 max-lg:landscape:flex-row lg:flex-row">
+      <div ref={mapContainerRef} className="relative min-h-0 flex-[1.3] max-lg:landscape:flex-1 lg:flex-1">
         {allFloors ? (
           <FloorGrid
             place={place}
@@ -409,6 +700,8 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
               setDraft(next)
               if (next) setSelection(null)
             }}
+            onDismiss={selection ? () => setSelection(null) : undefined}
+            pinOverlay={renderPinPopover}
             onCreate={createPin}
             officialItems={shownOnMap}
             done={done}
@@ -432,7 +725,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
                   }
                 : null
             }
-            onSelectCustom={(id) => toggleSelection({ kind: 'custom', id })}
+            onSelectCustom={(id, floorId) => toggleSelection({ kind: 'custom', id, mapId: floorId })}
             onSelectItem={(id) => toggleSelection({ kind: 'item', id })}
           />
         ) : (
@@ -447,18 +740,28 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
               setDraft({ mapId: map.id, at })
               setSelection(null)
             }}
-            onDismiss={draft ? () => setDraft(null) : undefined}
-            overlay={(projection) =>
-              draft && (
-                <NewPinPopover
-                  key={`${draft.at.x},${draft.at.y}`}
-                  at={draft.at}
-                  projection={projection}
-                  onCancel={() => setDraft(null)}
-                  onCreate={createPin}
-                />
-              )
+            onDismiss={
+              draft || selection
+                ? () => {
+                    setDraft(null)
+                    setSelection(null)
+                  }
+                : undefined
             }
+            overlay={(projection) => (
+              <>
+                {draft && (
+                  <NewPinPopover
+                    key={`${draft.at.x},${draft.at.y}`}
+                    at={draft.at}
+                    projection={projection}
+                    onCancel={() => setDraft(null)}
+                    onCreate={createPin}
+                  />
+                )}
+                {renderPinPopover(projection)}
+              </>
+            )}
           >
             {shownOnMap.map(
               (item) =>
@@ -479,7 +782,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
                 key={pin.id}
                 pin={pin}
                 selected={pin.id === selectedCustom}
-                onSelect={() => toggleSelection({ kind: 'custom', id: pin.id })}
+                onSelect={() => toggleSelection({ kind: 'custom', id: pin.id, mapId: map.id })}
               />
             ))}
             {isPlayerInPlace &&
@@ -521,65 +824,92 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
             onDismiss={() => setMerge(null)}
           />
         )}
-        <LichiiStatusPanel
-          state={tracker.state}
-          followPlayer={tracker.followPlayer}
-          onToggleFollow={tracker.toggleFollowPlayer}
-          autoMarkSkulltulas={tracker.autoMarkSkulltulas}
-          onToggleAutoMark={tracker.toggleAutoMarkSkulltulas}
-          toasts={tracker.toasts}
-          onDismissToast={tracker.dismissToast}
-          onJumpToPlayer={jumpToPlayer}
-          onSelectItem={(itemId) => {
-            const target = items.find((i) => i.id === itemId)
-            if (target) selectOfficial(target)
-          }}
-          error={tracker.error}
-          onRetry={tracker.refresh}
-        />
-      </div>
-
-      <Sidebar place={place} progress={count} total={items.length}>
-        {allFloors ? (
-          <>
-            <Section title="Your pins">
-              <p className="text-sm text-parchment-400">Click any floor to add a pin.</p>
-            </Section>
-            {place.maps.map((floor) => (
-              <FloorPinList
-                key={floor.id}
-                place={place}
-                map={floor}
-                selectedId={selectedCustom}
-                onSelect={(pin) => toggleSelection({ kind: 'custom', id: pin.id }, focusPoint(floor.id, pin))}
-              />
-            ))}
-          </>
+        {isFullscreen ? (
+          <button
+            type="button"
+            onClick={() => void exitFullscreen()}
+            aria-label="Exit fullscreen map"
+            title="Exit fullscreen map"
+            className="absolute top-3 right-3 z-40 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-3 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800"
+          >
+            <Minimize2 size={14} />
+            Exit fullscreen
+          </button>
         ) : (
-          <CustomPinList
-            pins={pins}
-            placeId={place.id}
-            mapId={map.id}
-            selectedId={selectedCustom}
-            onSelect={(pin) => toggleSelection({ kind: 'custom', id: pin.id }, pin)}
+          <button
+            type="button"
+            onClick={() => void enterFullscreen()}
+            aria-label="Enter fullscreen map"
+            title="Fullscreen map"
+            className="absolute top-3 right-3 z-30 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-2.5 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800 lg:hidden"
+          >
+            <Maximize2 size={14} />
+            <span className="max-sm:hidden">Fullscreen</span>
+          </button>
+        )}
+        {!isFullscreen && (
+          <LichiiStatusPanel
+            state={tracker.state}
+            followPlayer={tracker.followPlayer}
+            onToggleFollow={tracker.toggleFollowPlayer}
+            autoMarkSkulltulas={tracker.autoMarkSkulltulas}
+            onToggleAutoMark={tracker.toggleAutoMarkSkulltulas}
+            toasts={tracker.toasts}
+            onDismissToast={tracker.dismissToast}
+            onJumpToPlayer={jumpToPlayer}
+            onSelectItem={(itemId) => {
+              const target = items.find((i) => i.id === itemId)
+              if (target) selectOfficial(target)
+            }}
+            error={tracker.error}
+            onRetry={tracker.refresh}
           />
         )}
-        <Section title="Official pins" aside={<OfficialToggle on={showOfficial} />}>
-          {showOfficial ? (
-            <OfficialList
-              onMap={onMap}
-              unplaced={unplaced}
-              age={age}
-              hidden={hidden}
-              done={done}
-              selectedId={selectedItem}
-              onSelect={selectOfficial}
-            />
+      </div>
+
+      {!isFullscreen && (
+        <Sidebar place={place} progress={count} total={items.length} onEnterFullscreen={() => void enterFullscreen()}>
+          {allFloors ? (
+            <>
+              <Section title="Your pins">
+                <p className="text-sm text-parchment-400">Click any floor to add a pin.</p>
+              </Section>
+              {place.maps.map((floor) => (
+                <FloorPinList
+                  key={floor.id}
+                  place={place}
+                  map={floor}
+                  selectedId={selectedCustom}
+                  onSelect={(pin) => toggleSelection({ kind: 'custom', id: pin.id, mapId: floor.id }, focusPoint(floor.id, pin))}
+                />
+              ))}
+            </>
           ) : (
-            <RevealedList items={shownOnMap} done={done} selectedId={selectedItem} onSelect={selectOfficial} />
+            <CustomPinList
+              pins={pins}
+              placeId={place.id}
+              mapId={map.id}
+              selectedId={selectedCustom}
+              onSelect={(pin) => toggleSelection({ kind: 'custom', id: pin.id, mapId: map.id }, pin)}
+            />
           )}
-        </Section>
-      </Sidebar>
+          <Section title="Official pins" aside={<OfficialToggle on={showOfficial} />}>
+            {showOfficial ? (
+              <OfficialList
+                onMap={onMap}
+                unplaced={unplaced}
+                age={age}
+                hidden={hidden}
+                done={done}
+                selectedId={selectedItem}
+                onSelect={selectOfficial}
+              />
+            ) : (
+              <RevealedList items={shownOnMap} done={done} selectedId={selectedItem} onSelect={selectOfficial} />
+            )}
+          </Section>
+        </Sidebar>
+      )}
     </main>
   )
 }
@@ -623,8 +953,8 @@ function MaplessPlace({ place }: { place: Place }) {
   }, [tracker.followPlayer, isLiveMemory, targetPlace, place.slug, navigate])
 
   return (
-    <main className="flex h-dvh flex-col bg-ink-950 lg:flex-row">
-      <div className="relative grid flex-none place-items-center p-8 text-center lg:flex-1">
+    <main className="flex h-dvh flex-col bg-ink-950 max-lg:landscape:flex-row lg:flex-row">
+      <div className="relative grid flex-none place-items-center p-8 text-center max-lg:landscape:flex-1 lg:flex-1">
         <div className="max-w-sm rounded-lg border border-parchment-600/50 bg-ink-900 px-6 py-5">
           <h2 className="font-serif text-lg text-parchment-50">No map for this place</h2>
           <p className="mt-1 text-sm text-parchment-400">

@@ -1,11 +1,11 @@
-import { type MouseEvent, type Ref } from 'react'
+import { type MouseEvent, type ReactNode, type Ref } from 'react'
 import { boxToFraction, isInsideImage, pinPosition } from '../lib/coords'
 import { formatFloorLabel } from '../lib/data'
 import { floorToGrid, type FloorCell, type FloorGrid as Grid } from '../lib/floorGrid'
 import type { Merge } from '../lib/merge'
 import { pinsSlot, useStored } from '../lib/storage'
 import type { Fraction, Item, Place } from '../lib/types'
-import { MapViewport, type MapViewportHandle } from './MapViewport'
+import { MapViewport, type MapViewportHandle, type Projection } from './MapViewport'
 import { NewPinPopover } from './NewPinPopover'
 import { CustomMarker, DraftMarker, MergeTrail, OfficialMarker } from './Pins'
 import { PlayerPin } from './PlayerPin'
@@ -29,7 +29,7 @@ type Shared = {
   selectedItem: string | null
   merge: Merge | null
   player?: FloorPlayer | null
-  onSelectCustom: (id: string) => void
+  onSelectCustom: (id: string, mapId: string) => void
   onSelectItem: (id: string) => void
 }
 
@@ -91,7 +91,7 @@ function Floor({
           key={pin.id}
           pin={pin}
           selected={pin.id === selectedCustom}
-          onSelect={() => onSelectCustom(pin.id)}
+          onSelect={() => onSelectCustom(pin.id, cell.map.id)}
         />
       ))}
       {draft && <DraftMarker at={draft} />}
@@ -118,6 +118,8 @@ export function FloorGrid({
   viewport,
   draft,
   onDraft,
+  onDismiss,
+  pinOverlay,
   onCreate,
   ...shared
 }: Omit<Shared, 'placeId'> & {
@@ -126,6 +128,8 @@ export function FloorGrid({
   viewport: Ref<MapViewportHandle>
   draft: FloorDraft | null
   onDraft: (draft: FloorDraft | null) => void
+  onDismiss?: () => void
+  pinOverlay?: (projection: Projection) => ReactNode
   onCreate: (type: string, name?: string) => void
 }) {
   const draftCell = draft && grid.cells.find((cell) => cell.map.id === draft.mapId)
@@ -135,19 +139,28 @@ export function FloorGrid({
       viewId={`${place.id}:all-floors`}
       alt={`All floors of ${place.name}`}
       aspect={grid.aspect}
-      onDismiss={draft ? () => onDraft(null) : undefined}
-      overlay={(projection) =>
-        draft &&
-        draftCell && (
-          <NewPinPopover
-            key={`${draft.mapId},${draft.at.x},${draft.at.y}`}
-            at={floorToGrid(draftCell, draft.at)}
-            projection={projection}
-            onCancel={() => onDraft(null)}
-            onCreate={onCreate}
-          />
-        )
+      onDismiss={
+        draft || onDismiss
+          ? () => {
+              onDraft(null)
+              onDismiss?.()
+            }
+          : undefined
       }
+      overlay={(projection) => (
+        <>
+          {draft && draftCell && (
+            <NewPinPopover
+              key={`${draft.mapId},${draft.at.x},${draft.at.y}`}
+              at={floorToGrid(draftCell, draft.at)}
+              projection={projection}
+              onCancel={() => onDraft(null)}
+              onCreate={onCreate}
+            />
+          )}
+          {!draft && pinOverlay?.(projection)}
+        </>
+      )}
     >
       {grid.cells.map((cell) => (
         <Floor

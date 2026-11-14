@@ -1,11 +1,12 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { BarChart3, Check } from 'lucide-react'
+import { BarChart3, Check, Compass, Maximize2, Minimize2, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { pinPosition } from '../lib/coords'
 import { dataset, formatFloorLabel } from '../lib/data'
 import { computeGlobalProgress } from '../lib/progress-stats'
 import { itemCountVisibleSlot, officialDoneSlot, useStored } from '../lib/storage'
 import type { Place } from '../lib/types'
+import { useFullscreenMap } from '../lib/useFullscreenMap'
 import { isLiveMemoryState, useLichiiTracker } from '../lib/useLichiiTracker'
 import { GlobalStatsDrawer } from './GlobalStatsDrawer'
 import { LichiiStatusPanel } from './LichiiStatusPanel'
@@ -21,30 +22,53 @@ function PlaceLink({
   showCount,
   isPlayerHere,
   isPlayerLive,
+  selected,
+  preferPopover,
+  onSelect,
 }: {
   place: Place
   done: number
   showCount: boolean
   isPlayerHere?: boolean
   isPlayerLive?: boolean
+  selected?: boolean
+  preferPopover?: boolean
+  onSelect: (placeId: string) => void
 }) {
   const total = totals.get(place.id) ?? 0
   const complete = total > 0 && done === total
   const dungeon = place.kind === 'dungeon'
   const progress = total === 0 ? 'no tracked items' : showCount ? `${done} of ${total} items completed` : null
+  const touchPressRef = useRef(false)
 
   return (
-    <div data-pin className="absolute size-0 hover:z-10 focus-within:z-10" style={pinPosition(place.pin)}>
+    <div
+      data-pin
+      className={`absolute size-0 hover:z-10 focus-within:z-10 ${selected ? 'z-20' : ''}`}
+      style={pinPosition(place.pin)}
+    >
       <Link
         to="/$zone"
         params={{ zone: place.slug }}
         draggable={false}
+        onPointerDown={(event) => {
+          touchPressRef.current = event.pointerType === 'touch'
+        }}
+        onClick={(event) => {
+          if (preferPopover || touchPressRef.current) {
+            event.preventDefault()
+            onSelect(place.id)
+          }
+        }}
         aria-label={[place.name, dungeon ? 'dungeon' : 'zone', progress].filter(Boolean).join(', ')}
+        aria-expanded={selected || undefined}
         className="group absolute -top-6 left-0 flex w-max -translate-x-1/2 cursor-pointer flex-col items-center rounded-lg"
       >
         <span className="grid size-12 place-items-center">
           <span
             className={`grid place-items-center border-2 shadow-md shadow-black/60 transition-transform group-hover:scale-125 group-focus-visible:scale-125 ${
+              selected ? 'scale-125' : ''
+            } ${
               dungeon
                 ? 'size-4 rotate-45 border-ink-950 bg-ember'
                 : 'size-4.5 rounded-full border-ink-950 bg-parchment-200'
@@ -61,13 +85,15 @@ function PlaceLink({
         </span>
         <span
           className={`-mt-2.5 flex items-center gap-1 rounded border bg-ink-950/85 px-1.5 py-0.5 text-[11px] leading-tight font-medium text-parchment-50 transition-colors group-hover:bg-parchment-200 group-hover:text-ink-950 group-focus-visible:bg-parchment-200 group-focus-visible:text-ink-950 ${
-            isPlayerHere
-              ? isPlayerLive
-                ? 'border-moss text-moss'
-                : 'border-ember/70 text-parchment-50'
-              : dungeon
-                ? 'border-ember/70'
-                : 'border-parchment-600/50'
+            selected
+              ? 'border-parchment-200 bg-parchment-200 text-ink-950'
+              : isPlayerHere
+                ? isPlayerLive
+                  ? 'border-moss text-moss'
+                  : 'border-ember/70 text-parchment-50'
+                : dungeon
+                  ? 'border-ember/70'
+                  : 'border-parchment-600/50'
           }`}
         >
           {place.name}
@@ -80,16 +106,47 @@ function PlaceLink({
 
 export function WorldMap() {
   const navigate = useNavigate()
+  const mainRef = useRef<HTMLElement>(null)
   const viewport = useRef<MapViewportHandle>(null)
   const doneIds = useStored(officialDoneSlot)
   const countsShown = useStored(itemCountVisibleSlot)
   const tracker = useLichiiTracker()
   const [statsOpen, setStatsOpen] = useState(false)
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false)
+  const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreenMap(mainRef)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+    const query = window.matchMedia('(pointer: coarse)')
+    const sync = () => setIsCoarsePointer(query.matches)
+    sync()
+    query.addEventListener('change', sync)
+    return () => query.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
+    if (!isFullscreen) setSelectedPlaceId(null)
+  }, [isFullscreen])
+
+  useEffect(() => {
+    if (!selectedPlaceId || typeof document === 'undefined') return
+    const onPointerDown = (event: globalThis.PointerEvent) => {
+      if (event.target instanceof Element && event.target.closest('[data-pin], [data-pin-popover]')) return
+      setSelectedPlaceId(null)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [selectedPlaceId])
 
   const summary = useMemo(() => computeGlobalProgress(doneIds, dataset), [doneIds])
   const donePerPlace = useMemo(
     () => new Map(summary.places.map((place) => [place.id, place.done])),
     [summary.places],
+  )
+  const selectedPlace = useMemo(
+    () => (selectedPlaceId ? dataset.places.find((p) => p.id === selectedPlaceId) ?? null : null),
+    [selectedPlaceId],
   )
 
   const activePlace = useMemo(
@@ -139,8 +196,10 @@ export function WorldMap() {
     }
   }
 
+  const preferPinPopover = isFullscreen || isCoarsePointer
+
   return (
-    <main className="relative h-dvh overflow-clip bg-ink-950">
+    <main ref={mainRef} className="relative h-dvh overflow-clip bg-ink-950">
       <img
         src="/content/maps/hyrule.webp"
         alt=""
@@ -153,6 +212,73 @@ export function WorldMap() {
         image={dataset.map.image}
         alt="Map of Hyrule"
         aspect={dataset.map.width / dataset.map.height}
+        onDismiss={selectedPlaceId ? () => setSelectedPlaceId(null) : undefined}
+        overlay={({ size, project }) => {
+          if (!selectedPlace) return null
+          const pt = project(selectedPlace.pin)
+          const total = totals.get(selectedPlace.id) ?? 0
+          const done = donePerPlace.get(selectedPlace.id) ?? 0
+          const isPlayerHere = hasPlayerPin && activePlace?.id === selectedPlace.id
+          const popoverWidth = 240
+          const left = Math.min(Math.max(12, pt.x - popoverWidth / 2), Math.max(12, size.width - popoverWidth - 12))
+          const placeAbove = pt.y > size.height * 0.55
+          const style = placeAbove
+            ? { left, bottom: Math.max(12, size.height - pt.y + 18) }
+            : { left, top: Math.min(Math.max(12, pt.y + 18), Math.max(12, size.height - 156)) }
+
+          return (
+            <div
+              data-pin-popover
+              role="dialog"
+              aria-label={`${selectedPlace.name} details`}
+              style={style}
+              className="pointer-events-auto absolute z-50 w-60 rounded-lg border border-ink-600 bg-ink-900/95 p-3 text-parchment-50 shadow-xl backdrop-blur-sm"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h2 className="truncate font-serif text-base leading-tight text-parchment-50">
+                    {selectedPlace.name}
+                  </h2>
+                  <p className="mt-0.5 text-xs text-parchment-400">
+                    {selectedPlace.kind === 'dungeon' ? 'Dungeon' : 'Zone'} · {selectedPlace.region}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPlaceId(null)}
+                  aria-label="Close place info"
+                  className="-mt-0.5 -mr-0.5 grid size-6 shrink-0 cursor-pointer place-items-center rounded text-parchment-400 transition-colors hover:bg-ink-800 hover:text-parchment-50"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              {isPlayerHere && (
+                <div
+                  className={`mt-2 inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] font-medium ${
+                    isLiveMemory
+                      ? 'border-moss/40 bg-moss/15 text-moss'
+                      : 'border-ember/40 bg-ember/15 text-ember'
+                  }`}
+                >
+                  <Compass size={11} />
+                  {isLiveMemory ? 'Link is here (Live)' : 'Link is here (Saved)'}
+                </div>
+              )}
+              <p className="mt-2 text-xs text-parchment-200 tabular-nums">
+                {total > 0 ? `${done} / ${total} items completed` : 'No tracked items'}
+              </p>
+              <div className="mt-2.5 flex items-center justify-end gap-2">
+                <Link
+                  to="/$zone"
+                  params={{ zone: selectedPlace.slug }}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[#e8c04a]/50 bg-[#e8c04a]/15 px-2.5 py-1 text-xs font-medium text-[#f3d473] transition-colors hover:bg-[#e8c04a]/25"
+                >
+                  Open map
+                </Link>
+              </div>
+            </div>
+          )
+        }}
       >
         {dataset.places.map((place) => (
           <PlaceLink
@@ -162,6 +288,9 @@ export function WorldMap() {
             showCount={countsShown.includes(place.id)}
             isPlayerHere={hasPlayerPin && activePlace?.id === place.id}
             isPlayerLive={isLiveMemory}
+            selected={selectedPlaceId === place.id}
+            preferPopover={preferPinPopover}
+            onSelect={(placeId) => setSelectedPlaceId((prev) => (prev === placeId ? null : placeId))}
           />
         ))}
         {playerWorldAt && hasPlayerPin && (
@@ -185,66 +314,93 @@ export function WorldMap() {
           />
         )}
       </MapViewport>
-      <header className="pointer-events-none absolute top-3 left-3 rounded-lg border border-ink-600 bg-ink-900/90 px-4 py-3 shadow-lg">
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="font-serif text-xl text-parchment-50">Ocarina Atlas</h1>
-          <button
-            type="button"
-            onClick={() => setStatsOpen(true)}
-            aria-label="Open global progress stats"
-            className="pointer-events-auto inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/90 px-2.5 py-1 text-xs font-medium text-parchment-50 transition-colors hover:border-parchment-400 hover:bg-ink-700"
-          >
-            <BarChart3 size={13} className="text-[#e8c04a]" />
-            Stats
-          </button>
-        </div>
-        <div className="mt-1.5 flex items-center gap-2.5">
-          <div
-            className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-800"
-            role="progressbar"
-            aria-valuenow={summary.percentage}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Global completion"
-          >
-            <div
-              className={`h-full rounded-full transition-all duration-300 ${
-                summary.totalItems > 0 && summary.totalDone === summary.totalItems
-                  ? 'bg-moss'
-                  : 'bg-[#e8c04a]'
-              }`}
-              style={{ width: `${summary.percentage}%` }}
-            />
-          </div>
-          <p className="shrink-0 text-xs text-parchment-400 tabular-nums">
-            {summary.totalDone} / {summary.totalItems} ({summary.percentage}%)
-          </p>
-        </div>
-        <ul className="mt-2 flex gap-4 text-xs text-parchment-200">
-          <li className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full bg-parchment-200" /> Zone
-          </li>
-          <li className="flex items-center gap-1.5">
-            <span className="size-2.5 rotate-45 bg-ember" /> Dungeon
-          </li>
-          <li className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full bg-moss" /> Link
-          </li>
-        </ul>
-      </header>
-      <GlobalStatsDrawer open={statsOpen} onClose={() => setStatsOpen(false)} summary={summary} />
-      <LichiiStatusPanel
-        state={tracker.state}
-        followPlayer={tracker.followPlayer}
-        onToggleFollow={tracker.toggleFollowPlayer}
-        autoMarkSkulltulas={tracker.autoMarkSkulltulas}
-        onToggleAutoMark={tracker.toggleAutoMarkSkulltulas}
-        toasts={tracker.toasts}
-        onDismissToast={tracker.dismissToast}
-        onJumpToPlayer={jumpToPlayer}
-        error={tracker.error}
-        onRetry={tracker.refresh}
-      />
+      {isFullscreen ? (
+        <button
+          type="button"
+          onClick={() => void exitFullscreen()}
+          aria-label="Exit fullscreen map"
+          title="Exit fullscreen map"
+          className="absolute top-3 right-3 z-40 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-3 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800"
+        >
+          <Minimize2 size={14} />
+          Exit fullscreen
+        </button>
+      ) : (
+        <>
+          <header className="pointer-events-none absolute top-3 left-3 max-h-[calc(100dvh-1.5rem)] max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-lg border border-ink-600 bg-ink-900/90 px-4 py-3 shadow-lg max-lg:landscape:px-3 max-lg:landscape:py-2">
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="font-serif text-xl text-parchment-50 max-lg:landscape:text-lg">Ocarina Atlas</h1>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setStatsOpen(true)}
+                  aria-label="Open global progress stats"
+                  className="pointer-events-auto inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/90 px-2.5 py-1 text-xs font-medium text-parchment-50 transition-colors hover:border-parchment-400 hover:bg-ink-700"
+                >
+                  <BarChart3 size={13} className="text-[#e8c04a]" />
+                  Stats
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void enterFullscreen()}
+                  aria-label="Enter fullscreen map"
+                  title="Fullscreen map"
+                  className="pointer-events-auto inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/90 px-2.5 py-1 text-xs font-medium text-parchment-50 transition-colors hover:border-parchment-400 hover:bg-ink-700"
+                >
+                  <Maximize2 size={13} />
+                  <span className="max-sm:hidden">Fullscreen</span>
+                </button>
+              </div>
+            </div>
+            <div className="mt-1.5 flex items-center gap-2.5 max-lg:landscape:mt-1">
+              <div
+                className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-800"
+                role="progressbar"
+                aria-valuenow={summary.percentage}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Global completion"
+              >
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    summary.totalItems > 0 && summary.totalDone === summary.totalItems
+                      ? 'bg-moss'
+                      : 'bg-[#e8c04a]'
+                  }`}
+                  style={{ width: `${summary.percentage}%` }}
+                />
+              </div>
+              <p className="shrink-0 text-xs text-parchment-400 tabular-nums">
+                {summary.totalDone} / {summary.totalItems} ({summary.percentage}%)
+              </p>
+            </div>
+            <ul className="mt-2 flex gap-4 text-xs text-parchment-200 max-lg:landscape:mt-1.5">
+              <li className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded-full bg-parchment-200" /> Zone
+              </li>
+              <li className="flex items-center gap-1.5">
+                <span className="size-2.5 rotate-45 bg-ember" /> Dungeon
+              </li>
+              <li className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded-full bg-moss" /> Link
+              </li>
+            </ul>
+          </header>
+          <GlobalStatsDrawer open={statsOpen} onClose={() => setStatsOpen(false)} summary={summary} />
+          <LichiiStatusPanel
+            state={tracker.state}
+            followPlayer={tracker.followPlayer}
+            onToggleFollow={tracker.toggleFollowPlayer}
+            autoMarkSkulltulas={tracker.autoMarkSkulltulas}
+            onToggleAutoMark={tracker.toggleAutoMarkSkulltulas}
+            toasts={tracker.toasts}
+            onDismissToast={tracker.dismissToast}
+            onJumpToPlayer={jumpToPlayer}
+            error={tracker.error}
+            onRetry={tracker.refresh}
+          />
+        </>
+      )}
     </main>
   )
 }

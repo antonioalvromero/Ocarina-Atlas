@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-13
+
+### Added
+- **Fritchii (Switch 2 Emulator) Support (`src/lib/lichii-server.ts`, `launcher/OcarinaAtlas.cs`, `README.md`):** Added full read-only live telemetry and save-slot fallback support for [Fritchii](https://github.com/Frizti/Fritchii) alongside Lichii, including automatic `%APPDATA%\fritchii` / `%APPDATA%\lichii` profile detection and 1-click `nx2_switches.txt` sync setup in `OcarinaAtlas.exe`.
+- **Mobile & Tablet Fullscreen / Landscape Mode (`src/components/WorldMap.tsx`, `src/components/PlaceView.tsx`, `src/lib/useFullscreenMap.ts`):** Added a **Fullscreen** (`Exit fullscreen`) map-only toggle that hides the header and sidebar, a landscape-optimized layout for phones and tablets, and a tap-a-pin info popover (`data-pin-popover`) that dismisses automatically when tapping outside.
+
 ## [1.1.4] - 2026-11-13
 
 ### Fixed

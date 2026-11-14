@@ -122,7 +122,16 @@ const SCENE_TO_PLACE: Record<
   },
   HyruleField: {
     placeId: 'llanura',
-    capture: { camX: -23.0, camY: 200.0, camZ: 197.0, height: 736.0 },
+    capture: {
+      camX: -23.0,
+      camY: 200.0,
+      camZ: 197.0,
+      height: 736.0,
+      scaleX: 1.8983,
+      cx: 501.02,
+      scaleZ: 1.7797,
+      cz: -38.33,
+    },
   },
   LonLonRanch: {
     placeId: 'lonlon',
@@ -843,7 +852,7 @@ function determineMapId(place: Place, age: 'child' | 'adult' | null, y: number |
   return place.startMap ?? place.maps[0]!.id
 }
 
-function projectToPlaceMap(
+export function projectToPlaceMap(
   sceneKey: string,
   place: Place,
   mapId: string | null,
@@ -861,8 +870,9 @@ function projectToPlaceMap(
   if (cap && vb) {
     const scaleX = cap.scaleX ?? 1260.0 / cap.height
     const scaleZ = cap.scaleZ ?? 1260.0 / cap.height
-    const cx = cap.cx ?? 420.0 - cap.camX * scaleX
-    const cz = cap.cz ?? 420.0 - cap.camZ * scaleZ
+    // Default capture origin to the SVG viewBox center when explicit cx/cz calibration is absent.
+    const cx = cap.cx ?? vb.vx + vb.vw / 2 - cap.camX * scaleX
+    const cz = cap.cz ?? vb.vy + vb.vh / 2 - cap.camZ * scaleZ
 
     const sx = cx + x * scaleX
     const sy = cz + z * scaleZ

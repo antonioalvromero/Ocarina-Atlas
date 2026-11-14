@@ -22,6 +22,7 @@ import {
   parseGdmStockNumBuffer,
   parseLichiiPort,
   parseMasterFlagTableBuffer,
+  projectToPlaceMap,
   validateMainBaseHeader,
 } from './lichii-server'
 import { reconcileSkulltulaLists } from './useLichiiTracker'
@@ -740,5 +741,55 @@ describe('LichiiRpcClient', () => {
       for (const s of serverSockets) s.destroy()
       await new Promise<void>((resolve) => server.close(() => resolve()))
     }
+  })
+})
+
+describe('projectToPlaceMap', () => {
+  it('centers uncalibrated scenes on the actual SVG viewBox center rather than (420, 420)', () => {
+    const zoraRiver = dataset.places.find((p) => p.id === 'rio')!
+    expect(zoraRiver).toBeDefined()
+    // ZoraRiver capture center is (camX: 20, camZ: -15)
+    expect(projectToPlaceMap('ZoraRiver', zoraRiver, zoraRiver.startMap ?? 'principal', 20.0, -15.0)).toEqual({
+      x: 0.5,
+      y: 0.5,
+    })
+
+    const lonLon = dataset.places.find((p) => p.id === 'lonlon')!
+    expect(lonLon).toBeDefined()
+    // LonLonRanch capture center is (camX: -86, camZ: 239)
+    expect(projectToPlaceMap('LonLonRanch', lonLon, lonLon.startMap ?? 'principal', -86.0, 239.0)).toEqual({
+      x: 0.5,
+      y: 0.5,
+    })
+  })
+
+  it('projects calibrated HyruleField landmarks accurately', () => {
+    const hyruleField = dataset.places.find((p) => p.id === 'llanura')!
+    expect(hyruleField).toBeDefined()
+    const mapId = hyruleField.startMap ?? 'principal'
+
+    // Castle Town drawbridge
+    expect(projectToPlaceMap('HyruleField', hyruleField, mapId, 0.62, 46.82)).toEqual({
+      x: 0.5813,
+      y: 0.1272,
+    })
+    // Kokiri Forest entrance
+    expect(projectToPlaceMap('HyruleField', hyruleField, mapId, 154.86, 286.18)).toEqual({
+      x: 0.8895,
+      y: 0.7036,
+    })
+  })
+
+  it('preserves explicit cx/cz calibration when provided and returns null for missing mapId', () => {
+    const kokiri = dataset.places.find((p) => p.id === 'kokiri')!
+    expect(kokiri).toBeDefined()
+    expect(projectToPlaceMap('KokiriForest', kokiri, null, 0, 0)).toBeNull()
+
+    const projected = projectToPlaceMap('KokiriForest', kokiri, kokiri.startMap ?? 'principal', 0, 0)
+    expect(projected).not.toBeNull()
+    expect(projected!.x).toBeGreaterThan(0.02)
+    expect(projected!.x).toBeLessThan(0.98)
+    expect(projected!.y).toBeGreaterThan(0.02)
+    expect(projected!.y).toBeLessThan(0.98)
   })
 })

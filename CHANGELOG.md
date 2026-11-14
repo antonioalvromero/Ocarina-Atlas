@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-11-14
+
+### Fixed
+- **Overworld, Dungeon & Hyrule Field Sub-Region Calibration (`src/lib/lichii-server.ts`):** Aligned live player pin projection using SVG `viewBox` centers, calibrated 2-point `captureByMapId` transforms across major overworld towns, castles, and dungeons, and added `HyruleField` sub-region routing (`GerudoValley`, `LakeHylia`, `LonLonRanch`, `ZorasRiver`).
+- **Persistent Fullscreen Across Zone Transitions (`src/lib/useFullscreenMap.ts`):** Preserved browser fullscreen and map-only mode across client-side route navigation on mobile, tablet, and desktop when moving between zones with `followPlayer` enabled.
+
 ## [1.2.0] - 2026-11-13
 
 ### Added

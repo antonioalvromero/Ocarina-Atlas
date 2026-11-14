@@ -23,6 +23,7 @@ import {
   parseLichiiPort,
   parseMasterFlagTableBuffer,
   projectToPlaceMap,
+  resolveEffectiveScene,
   validateMainBaseHeader,
 } from './lichii-server'
 import { reconcileSkulltulaLists } from './useLichiiTracker'
@@ -746,20 +747,240 @@ describe('LichiiRpcClient', () => {
 
 describe('projectToPlaceMap', () => {
   it('centers uncalibrated scenes on the actual SVG viewBox center rather than (420, 420)', () => {
-    const zoraRiver = dataset.places.find((p) => p.id === 'rio')!
-    expect(zoraRiver).toBeDefined()
-    // ZoraRiver capture center is (camX: 20, camZ: -15)
-    expect(projectToPlaceMap('ZoraRiver', zoraRiver, zoraRiver.startMap ?? 'principal', 20.0, -15.0)).toEqual({
+    const castle = dataset.places.find((p) => p.id === 'castillo')!
+    expect(castle).toBeDefined()
+    // GanonsCastleExterior capture center is (camX: 0, camZ: -80)
+    expect(projectToPlaceMap('GanonsCastleExterior', castle, 'adulto', 0.0, -80.0)).toEqual({
       x: 0.5,
       y: 0.5,
     })
+  })
 
+  it('projects calibrated HyruleCastle landmarks accurately', () => {
+    const castle = dataset.places.find((p) => p.id === 'castillo')!
+    expect(castle).toBeDefined()
+
+    // South entrance from Market (nino map)
+    expect(projectToPlaceMap('HyruleCastle', castle, 'nino', 13.49, -14.0)).toEqual({
+      x: 0.4726,
+      y: 0.8888,
+    })
+    // NW castle tower / moat (nino map)
+    expect(projectToPlaceMap('HyruleCastle', castle, 'nino', -27.14, -119.52)).toEqual({
+      x: 0.1193,
+      y: 0.2413,
+    })
+  })
+
+  it('projects calibrated Market landmarks accurately', () => {
+    const market = dataset.places.find((p) => p.id === 'ciudadela')!
+    expect(market).toBeDefined()
+
+    // South entrance from Hyrule Field (adulto map)
+    expect(projectToPlaceMap('Market', market, 'adulto', -1.7, 62.43)).toEqual({
+      x: 0.2373,
+      y: 0.8395,
+    })
+    // Temple of Time entrance at NE (adulto map)
+    expect(projectToPlaceMap('Market', market, 'adulto', 47.21, -33.14)).toEqual({
+      x: 0.699,
+      y: 0.2007,
+    })
+    // Temple of Time entrance at NE (nino map)
+    expect(projectToPlaceMap('Market', market, 'nino', 49.38, -34.0)).toEqual({
+      x: 0.8174,
+      y: 0.2083,
+    })
+    // South entrance from Hyrule Field (nino map)
+    expect(projectToPlaceMap('Market', market, 'nino', -1.71, 64.96)).toEqual({
+      x: 0.5046,
+      y: 0.858,
+    })
+  })
+
+  it('projects calibrated DodongoCavern landmarks accurately', () => {
+    const dodongos = dataset.places.find((p) => p.id === 'dodongos')!
+    expect(dodongos).toBeDefined()
+
+    // South entrance on 1F
+    expect(projectToPlaceMap('DodongoCavern', dodongos, '1F', 0.0, 40.16)).toEqual({
+      x: 0.356,
+      y: 0.8711,
+    })
+    // North corridor/block room
+    expect(projectToPlaceMap('DodongoCavern', dodongos, '1F', -1.42, -106.48)).toEqual({
+      x: 0.3489,
+      y: 0.0967,
+    })
+  })
+
+  it('projects calibrated GoronCity landmarks accurately', () => {
+    const goronCity = dataset.places.find((p) => p.id === 'goron')!
+    expect(goronCity).toBeDefined()
+    const mapId = goronCity.startMap ?? 'principal'
+
+    // South entrance from Death Mountain Trail
+    expect(projectToPlaceMap('GoronCity', goronCity, mapId, 1.63, 34.39)).toEqual({
+      x: 0.5565,
+      y: 0.8585,
+    })
+    // North exit to Death Mountain Crater
+    expect(projectToPlaceMap('GoronCity', goronCity, mapId, -0.15, -46.53)).toEqual({
+      x: 0.5395,
+      y: 0.1228,
+    })
+  })
+
+  it('projects calibrated DeathMountainCrater landmarks accurately', () => {
+    const crater = dataset.places.find((p) => p.id === 'crater')!
+    expect(crater).toBeDefined()
+    const mapId = crater.startMap ?? 'principal'
+
+    // NW entrance from Goron City
+    expect(projectToPlaceMap('DeathMountainCrater', crater, mapId, -57.37, -20.2)).toEqual({
+      x: 0.1564,
+      y: 0.2787,
+    })
+    // SE exit to Death Mountain Trail
+    expect(projectToPlaceMap('DeathMountainCrater', crater, mapId, 15.56, 58.53)).toEqual({
+      x: 0.7457,
+      y: 0.8433,
+    })
+  })
+
+  it('projects calibrated GerudoFortress landmarks accurately', () => {
+    const gerudoFortress = dataset.places.find((p) => p.id === 'fortaleza')!
+    expect(gerudoFortress).toBeDefined()
+    const mapId = gerudoFortress.startMap ?? 'principal'
+
+    // SW entrance from Gerudo Valley
+    expect(projectToPlaceMap('GerudoFortress', gerudoFortress, mapId, -25.95, -23.92)).toEqual({
+      x: 0.1654,
+      y: 0.4772,
+    })
+    // NW gate to Haunted Wasteland
+    expect(projectToPlaceMap('GerudoFortress', gerudoFortress, mapId, -30.55, -104.2)).toEqual({
+      x: 0.1502,
+      y: 0.1604,
+    })
+    // NE Horseback Archery loop
+    expect(projectToPlaceMap('GerudoFortress', gerudoFortress, mapId, 179.08, -87.38)).toEqual({
+      x: 0.8429,
+      y: 0.2268,
+    })
+  })
+
+  it('projects calibrated GerudoValley landmarks accurately', () => {
+    const gerudoValley = dataset.places.find((p) => p.id === 'valle')!
+    expect(gerudoValley).toBeDefined()
+    const mapId = gerudoValley.startMap ?? 'principal'
+
+    // SE entrance from Hyrule Field
+    expect(projectToPlaceMap('GerudoValley', gerudoValley, mapId, 77.82, 27.37)).toEqual({
+      x: 0.9214,
+      y: 0.7037,
+    })
+    // West exit to Gerudo's Fortress
+    expect(projectToPlaceMap('GerudoValley', gerudoValley, mapId, -61.54, -6.45)).toEqual({
+      x: 0.1423,
+      y: 0.5157,
+    })
+  })
+
+  it('projects calibrated LakeHylia landmarks accurately', () => {
+    const lakeHylia = dataset.places.find((p) => p.id === 'lago')!
+    expect(lakeHylia).toBeDefined()
+    const mapId = lakeHylia.startMap ?? 'principal'
+
+    // NE entrance from Hyrule Field
+    expect(projectToPlaceMap('LakeHylia', lakeHylia, mapId, -96.78, 404.15)).toEqual({
+      x: 0.8055,
+      y: 0.1305,
+    })
+    // SW shore
+    expect(projectToPlaceMap('LakeHylia', lakeHylia, mapId, -307.44, 529.44)).toEqual({
+      x: 0.1416,
+      y: 0.6445,
+    })
+  })
+
+  it('routes seamless HyruleField coordinates into LonLonRanch and LakeHylia sub-regions', () => {
+    expect(resolveEffectiveScene('HyruleField', -62.64, 186.58)).toBe('LonLonRanch')
+    expect(resolveEffectiveScene('HyruleField', -142.54, 263.59)).toBe('LonLonRanch')
+    expect(resolveEffectiveScene('HyruleField', -62.07, 184.59)).toBe('HyruleField')
+
+    expect(resolveEffectiveScene('HyruleField', -96.78, 404.15)).toBe('LakeHylia')
+    expect(resolveEffectiveScene('HyruleField', -307.44, 529.44)).toBe('LakeHylia')
+
+    expect(resolveEffectiveScene('HyruleField', -0.05, 33.03)).toBe('HyruleField')
+    expect(resolveEffectiveScene('HyruleField', 197.31, 309.95)).toBe('HyruleField')
+    expect(resolveEffectiveScene('ZoraRiver', -96.78, 404.15)).toBe('ZoraRiver')
+  })
+
+  it('projects calibrated ZoraFountain landmarks accurately', () => {
+    const zoraFountain = dataset.places.find((p) => p.id === 'fuente')!
+    expect(zoraFountain).toBeDefined()
+
+    // West entrance from Zora's Domain (adulto map)
+    expect(projectToPlaceMap('ZoraFountain', zoraFountain, 'adulto', -15.79, -24.33)).toEqual({
+      x: 0.1431,
+      y: 0.3813,
+    })
+    // Great Fairy Fountain entrance at SE (adulto map)
+    expect(projectToPlaceMap('ZoraFountain', zoraFountain, 'adulto', 60.28, 46.41)).toEqual({
+      x: 0.7141,
+      y: 0.9408,
+    })
+  })
+
+  it('projects calibrated ZoraDomain landmarks accurately', () => {
+    const zoraDomain = dataset.places.find((p) => p.id === 'dominio')!
+    expect(zoraDomain).toBeDefined()
+    const mapId = zoraDomain.startMap ?? 'principal'
+
+    // North entrance from Zora River
+    expect(projectToPlaceMap('ZoraDomain', zoraDomain, mapId, 4.61, -36.16)).toEqual({
+      x: 0.3109,
+      y: 0.2199,
+    })
+    // Corridor leading to Zora's Fountain
+    expect(projectToPlaceMap('ZoraDomain', zoraDomain, mapId, 87.98, 15.58)).toEqual({
+      x: 0.8731,
+      y: 0.7529,
+    })
+  })
+
+  it('projects calibrated ZoraRiver landmarks accurately', () => {
+    const zoraRiver = dataset.places.find((p) => p.id === 'rio')!
+    expect(zoraRiver).toBeDefined()
+    const mapId = zoraRiver.startMap ?? 'principal'
+
+    // SW entrance from Hyrule Field
+    expect(projectToPlaceMap('ZoraRiver', zoraRiver, mapId, -89.61, 24.63)).toEqual({
+      x: 0.112,
+      y: 0.7811,
+    })
+    // Triforce emblem platform in front of Zora's Domain waterfall
+    expect(projectToPlaceMap('ZoraRiver', zoraRiver, mapId, 125.93, -40.9)).toEqual({
+      x: 0.8545,
+      y: 0.2947,
+    })
+  })
+
+  it('projects calibrated LonLonRanch landmarks accurately', () => {
     const lonLon = dataset.places.find((p) => p.id === 'lonlon')!
     expect(lonLon).toBeDefined()
-    // LonLonRanch capture center is (camX: -86, camZ: 239)
-    expect(projectToPlaceMap('LonLonRanch', lonLon, lonLon.startMap ?? 'principal', -86.0, 239.0)).toEqual({
-      x: 0.5,
-      y: 0.5,
+    const mapId = lonLon.startMap ?? 'principal'
+
+    // North gate to Hyrule Field
+    expect(projectToPlaceMap('LonLonRanch', lonLon, mapId, -62.64, 186.58)).toEqual({
+      x: 0.6558,
+      y: 0.1503,
+    })
+    // SW tower/silo
+    expect(projectToPlaceMap('LonLonRanch', lonLon, mapId, -142.54, 263.59)).toEqual({
+      x: 0.1777,
+      y: 0.6769,
     })
   })
 
@@ -768,15 +989,15 @@ describe('projectToPlaceMap', () => {
     expect(hyruleField).toBeDefined()
     const mapId = hyruleField.startMap ?? 'principal'
 
-    // Castle Town drawbridge
-    expect(projectToPlaceMap('HyruleField', hyruleField, mapId, 0.62, 46.82)).toEqual({
-      x: 0.5813,
-      y: 0.1272,
+    // Hyrule Castle Town bridge
+    expect(projectToPlaceMap('HyruleField', hyruleField, mapId, -0.05, 33.03)).toEqual({
+      x: 0.5834,
+      y: 0.1488,
     })
     // Kokiri Forest entrance
-    expect(projectToPlaceMap('HyruleField', hyruleField, mapId, 154.86, 286.18)).toEqual({
-      x: 0.8895,
-      y: 0.7036,
+    expect(projectToPlaceMap('HyruleField', hyruleField, mapId, 197.31, 309.95)).toEqual({
+      x: 0.8857,
+      y: 0.7059,
     })
   })
 

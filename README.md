@@ -58,10 +58,10 @@ Run the live tracker on Windows without installing Node.js or editing code:
 
 | Map Tracker Status | Launcher RPC Status | Meaning |
 | --- | --- | --- |
-| **Lichii · Live** (pulsing green) | **In-game live tracking** | Connected to Lichii `:6545` and streaming live RAM coordinates, floor, and Gold Skulltula flags. |
-| **Waiting for game** (amber) | **Lichii RPC open (Waiting for game)** | Lichii `:6545` is open, but Link is not in an active gameplay scene yet (title/boot screen). Displays save fallback data if available. |
+| **Lichii · Live** (pulsing green) | **In-game live tracking** | Connected to Lichii or Fritchii `:6545` and streaming live RAM coordinates, floor, and Gold Skulltula flags. |
+| **Waiting for game** (amber) | **RPC open (Waiting for game)** | Emulator RPC `:6545` is open, but Link is not in an active gameplay scene yet (title/boot screen). Displays save fallback data if available. |
 | **Save only** (static amber) | **Port 6545 closed (Not detected)** | RPC `:6545` is unreachable; displaying the latest local `caption.sav` / `progress.sav` snapshot (`(Saved)`). Live movement and Auto-Skulltula are paused. |
-| **Disconnected** (muted) | **Port 6545 closed (Not detected)** | Neither Lichii RPC `:6545` nor a local save directory was found (or the local server stopped). Click **Retry** once ready. |
+| **Disconnected** (muted) | **Port 6545 closed (Not detected)** | Neither emulator RPC `:6545` nor a local save directory was found (or the local server stopped). Click **Retry** once ready. |
 
 <details>
 <summary>Launcher CLI Flags &amp; Environment Variables</summary>
@@ -101,9 +101,9 @@ Run the live tracker on Windows without installing Node.js or editing code:
 
 ## Features
 
-### Live Lichii Telemetry
+### Live Emulator Telemetry (Lichii & Fritchii)
 - **Real-Time `PlayerPin`:** Displays Link's live position, compass heading cone (`yaw`), current floor badge (`1F`–`5F`, `B1`–`B4`), and 3D `(X, Y, Z)` hover coordinates across the Hyrule World Map, zone/dungeon maps, and All-Floors grid view.
-- **ASLR-Safe `MOD0` Reader:** Dynamically resolves the Switch `MOD0` main NSO base and `.bss` singletons over Lichii's JSON-RPC server (`127.0.0.1:6545`), recovering cleanly across emulator restarts.
+- **ASLR-Safe `MOD0` Reader:** Dynamically resolves the Switch `MOD0` main NSO base and `.bss` singletons over Lichii / Fritchii JSON-RPC (`127.0.0.1:6545`), recovering cleanly across emulator restarts.
 - **Automatic Gold Skulltula Tracking (`100 / 100`):** Reads exact collected actor ID hashes (`masterTable` / `0xa3db7114`) and `PouchData.Item_Token_Gold.StockNum` in RAM to mark, reveal, and reconcile Gold Skulltulas automatically (including unmarking Skulltulas when reloading an earlier save) with pickup toast notifications.
 - **Follow Link & Jump Controls:** Toggle **Follow Link** to switch zones and dungeon floors automatically as Link moves, or click **Go to Link** anytime.
 - **Read-Only Save Fallback:** When RPC `:6545` is closed, reads the newest local save slot (`caption.sav` / `progress.sav`) in read-only mode and labels the state **Save only** (`(Saved)`).
@@ -111,6 +111,7 @@ Run the live tracker on Windows without installing Node.js or editing code:
 ### Interactive Map & Progress Tracker
 - **Complete Atlas Dataset:** 32 places (20 overworld zones and 12 dungeons) and 184 official collectibles across 8 categories (100 Gold Skulltulas, Pieces of Heart, Heart Containers, Magic Beans, Great Fairies, Bottles, Keys, and Fairy Thoughts).
 - **Global Progress Stats:** Open the **Stats** drawer from the World Map to view overall completion (`X / 184`) broken down by category and location.
+- **Mobile & Tablet Fullscreen / Landscape Mode:** Use the **Fullscreen** (`Exit fullscreen`) toggle on the World Map or any zone/dungeon view to hide the header and sidebar for a dedicated map-only canvas, enjoy a landscape-optimized layout on phones and tablets, and tap any pin to open a floating info popover that dismisses automatically when tapping outside.
 - **Custom Pins & Smart Merge:** Drop typed custom pins anywhere on a map; placing a pin near a matching official pin merges and reveals it automatically.
 - **Age & Category Filtering:** Filter by **Child**, **Adult**, or **Both**, hide completed categories, inspect **All floors** side-by-side, and persist per-map zoom/pan state in `localStorage` (`oot-map:v1:*`).
 - **Offline PWA Support:** Built with a service worker (`sw.js`) and web manifest so maps and visited item media cache locally.
@@ -125,10 +126,10 @@ Run the live tracker on Windows without installing Node.js or editing code:
 
 ## Compatibility & Issue Reporting
 
-- **Windows 10 / 11 (x64):** Required for `OcarinaAtlas.exe` and live Lichii emulator telemetry.
+- **Windows 10 / 11 (x64):** Required for `OcarinaAtlas.exe` and live Lichii & Fritchii emulator telemetry.
 - **Supported Game Build:** *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`).
 - **Web-Only (Linux / macOS / Docker):** The interactive web map UI runs on any OS via Node.js or the included [`Dockerfile`](Dockerfile) (`oven/bun:1.4`) without Windows emulator features.
-- **Reporting Bugs:** Open an issue with your **Ocarina Atlas** release version, Lichii version, and relevant output copied from **`▸ Advanced Settings & Logs`** in `OcarinaAtlas.exe`. Please **never** attach ROMs, decryption keys, NAND dumps, or personal save archives.
+- **Reporting Bugs:** Open an issue with your **Ocarina Atlas** release version, emulator version (Lichii / Fritchii), and relevant output copied from **`▸ Advanced Settings & Logs`** in `OcarinaAtlas.exe`. Please **never** attach ROMs, decryption keys, NAND dumps, or personal save archives.
 
 ---
 
@@ -155,7 +156,7 @@ npm run build:win     # Build portable Windows bundle + release/OcarinaAtlas-Win
 <summary>Architecture &amp; Repository Layout</summary>
 
 ```text
-Lichii Emulator (:6545) / Local Save Slots (Read-Only Fallback)
+Lichii / Fritchii Emulator (:6545) / Local Save Slots (Read-Only Fallback)
         │
         ▼
 Telemetry Bridge (src/lib/lichii-server.ts)

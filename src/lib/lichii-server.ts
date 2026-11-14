@@ -73,6 +73,28 @@ type MapCaptureConfig = {
   scaleZ?: number
 }
 
+const CIUDADELA_ADULTO_CAPTURE: MapCaptureConfig = {
+  camX: 0.0,
+  camY: 200.0,
+  camZ: 3.0,
+  height: 214.0,
+  scaleX: 8.4001,
+  cx: 190.51,
+  scaleZ: 8.0681,
+  cz: 467.58,
+}
+
+const CIUDADELA_NINO_CAPTURE: MapCaptureConfig = {
+  camX: 0.0,
+  camY: 200.0,
+  camZ: 3.0,
+  height: 214.0,
+  scaleX: 5.4314,
+  cx: 422.86,
+  scaleZ: 5.2191,
+  cz: 305.08,
+}
+
 /**
  * Scene / BancName to oot.json placeId and orthographic capture parameters
  * from Game/MapCaptureInfo/MapCaptureInfo.game__MapCaptureInfo.bgyml
@@ -84,6 +106,7 @@ const SCENE_TO_PLACE: Record<
     placeId: string
     defaultAge?: 'child' | 'adult'
     capture?: MapCaptureConfig
+    captureByMapId?: Record<string, MapCaptureConfig>
   }
 > = {
   KokiriForest: {
@@ -127,80 +150,49 @@ const SCENE_TO_PLACE: Record<
       camY: 200.0,
       camZ: 197.0,
       height: 736.0,
-      scaleX: 1.8983,
-      cx: 501.02,
-      scaleZ: 1.7797,
-      cz: -38.33,
+      scaleX: 1.4552,
+      cx: 504.27,
+      scaleZ: 1.4867,
+      cz: 11.89,
     },
   },
   LonLonRanch: {
     placeId: 'lonlon',
-    capture: { camX: -86.0, camY: 200.0, camZ: 239.0, height: 276.0 },
+    capture: {
+      camX: -86.0,
+      camY: 200.0,
+      camZ: 239.0,
+      height: 276.0,
+      scaleX: 5.5232,
+      cx: 917.27,
+      scaleZ: 5.7915,
+      cz: -996.27,
+    },
   },
   Market: {
     placeId: 'ciudadela',
-    capture: {
-      camX: 0.0,
-      camY: 200.0,
-      camZ: 3.0,
-      height: 214.0,
-      scaleX: 6.15,
-      cx: 412.06,
-      scaleZ: 6.15,
-      cz: 269.08,
-    },
+    capture: CIUDADELA_ADULTO_CAPTURE,
+    captureByMapId: { nino: CIUDADELA_NINO_CAPTURE },
   },
   MarketEntrance: {
     placeId: 'ciudadela',
-    capture: {
-      camX: 0.0,
-      camY: 200.0,
-      camZ: 3.0,
-      height: 214.0,
-      scaleX: 6.15,
-      cx: 412.06,
-      scaleZ: 6.15,
-      cz: 269.08,
-    },
+    capture: CIUDADELA_ADULTO_CAPTURE,
+    captureByMapId: { nino: CIUDADELA_NINO_CAPTURE },
   },
   BackAlley: {
     placeId: 'ciudadela',
-    capture: {
-      camX: 0.0,
-      camY: 200.0,
-      camZ: 3.0,
-      height: 214.0,
-      scaleX: 6.15,
-      cx: 412.06,
-      scaleZ: 6.15,
-      cz: 269.08,
-    },
+    capture: CIUDADELA_ADULTO_CAPTURE,
+    captureByMapId: { nino: CIUDADELA_NINO_CAPTURE },
   },
   TempleOfTimeExterior: {
     placeId: 'ciudadela',
-    capture: {
-      camX: 0.0,
-      camY: 200.0,
-      camZ: 3.0,
-      height: 214.0,
-      scaleX: 6.15,
-      cx: 412.06,
-      scaleZ: 6.15,
-      cz: 269.08,
-    },
+    capture: CIUDADELA_ADULTO_CAPTURE,
+    captureByMapId: { nino: CIUDADELA_NINO_CAPTURE },
   },
   TempleOfTime: {
     placeId: 'ciudadela',
-    capture: {
-      camX: 0.0,
-      camY: 200.0,
-      camZ: 3.0,
-      height: 214.0,
-      scaleX: 6.15,
-      cx: 412.06,
-      scaleZ: 6.15,
-      cz: 269.08,
-    },
+    capture: CIUDADELA_ADULTO_CAPTURE,
+    captureByMapId: { nino: CIUDADELA_NINO_CAPTURE },
   },
   GuardHouse: {
     placeId: 'ciudadela',
@@ -219,10 +211,34 @@ const SCENE_TO_PLACE: Record<
     placeId: 'castillo',
     defaultAge: 'child',
     capture: { camX: 0.0, camY: 200.0, camZ: -80.0, height: 242.0 },
+    captureByMapId: {
+      nino: {
+        camX: 0.0,
+        camY: 200.0,
+        camZ: -80.0,
+        height: 242.0,
+        scaleX: 8.2959,
+        cx: 286.92,
+        scaleZ: 8.5297,
+        cz: 1319.87,
+      },
+    },
   },
   CastleGrounds: {
     placeId: 'castillo',
     capture: { camX: 0.0, camY: 200.0, camZ: -80.0, height: 242.0 },
+    captureByMapId: {
+      nino: {
+        camX: 0.0,
+        camY: 200.0,
+        camZ: -80.0,
+        height: 242.0,
+        scaleX: 8.2959,
+        cx: 286.92,
+        scaleZ: 8.5297,
+        cz: 1319.87,
+      },
+    },
   },
   GanonsCastleExterior: {
     placeId: 'castillo',
@@ -303,8 +319,8 @@ const SCENE_TO_PLACE: Record<
       height: 156.0,
       scaleX: 8.97,
       cx: 463.57,
-      scaleZ: 6.5707,
-      cz: 500.06,
+      scaleZ: 9.1644,
+      cz: 502.25,
     },
   },
   DeathMountainCrater: {
@@ -314,35 +330,89 @@ const SCENE_TO_PLACE: Record<
       camY: 200.0,
       camZ: 12.0,
       height: 188.0,
-      scaleX: 3.3323,
-      cx: 522.18,
-      scaleZ: 7.436,
-      cz: 368.77,
+      scaleX: 7.5556,
+      cx: 535.67,
+      scaleZ: 7.0278,
+      cz: 376.06,
     },
   },
   ZoraRiver: {
     placeId: 'rio',
-    capture: { camX: 20.0, camY: 200.0, camZ: -15.0, height: 265.0 },
+    capture: {
+      camX: 20.0,
+      camY: 200.0,
+      camZ: -15.0,
+      height: 265.0,
+      scaleX: 3.2759,
+      cx: 352.05,
+      scaleZ: 3.2953,
+      cz: 225.64,
+    },
   },
   ZorasRiver: {
     placeId: 'rio',
-    capture: { camX: 20.0, camY: 200.0, camZ: -15.0, height: 265.0 },
+    capture: {
+      camX: 20.0,
+      camY: 200.0,
+      camZ: -15.0,
+      height: 265.0,
+      scaleX: 3.2759,
+      cx: 352.05,
+      scaleZ: 3.2953,
+      cz: 225.64,
+    },
   },
   ZoraDomain: {
     placeId: 'dominio',
-    capture: { camX: 30.0, camY: 225.0, camZ: -14.0, height: 151.0 },
+    capture: {
+      camX: 30.0,
+      camY: 225.0,
+      camZ: -14.0,
+      height: 151.0,
+      scaleX: 6.4055,
+      cx: 218.87,
+      scaleZ: 6.3045,
+      cz: 315.57,
+    },
   },
   ZorasDomain: {
     placeId: 'dominio',
-    capture: { camX: 30.0, camY: 225.0, camZ: -14.0, height: 151.0 },
+    capture: {
+      camX: 30.0,
+      camY: 225.0,
+      camZ: -14.0,
+      height: 151.0,
+      scaleX: 6.4055,
+      cx: 218.87,
+      scaleZ: 6.3045,
+      cz: 315.57,
+    },
   },
   ZoraFountain: {
     placeId: 'fuente',
-    capture: { camX: 30.0, camY: 200.0, camZ: -13.0, height: 195.0 },
+    capture: {
+      camX: 30.0,
+      camY: 200.0,
+      camZ: -13.0,
+      height: 195.0,
+      scaleX: 7.0485,
+      cx: 200.7,
+      scaleZ: 7.1346,
+      cz: 527.48,
+    },
   },
   ZorasFountain: {
     placeId: 'fuente',
-    capture: { camX: 30.0, camY: 200.0, camZ: -13.0, height: 195.0 },
+    capture: {
+      camX: 30.0,
+      camY: 200.0,
+      camZ: -13.0,
+      height: 195.0,
+      scaleX: 7.0485,
+      cx: 200.7,
+      scaleZ: 7.1346,
+      cz: 527.48,
+    },
   },
   LakeHylia: {
     placeId: 'lago',
@@ -351,10 +421,10 @@ const SCENE_TO_PLACE: Record<
       camY: 200.0,
       camZ: 490.0,
       height: 422.0,
-      scaleX: 2.9336,
-      cx: 976.97,
-      scaleZ: 2.7077,
-      cz: -996.48,
+      scaleX: 2.9309,
+      cx: 995.76,
+      scaleZ: 3.044,
+      cz: -1162.42,
     },
   },
   GerudoValley: {
@@ -364,26 +434,53 @@ const SCENE_TO_PLACE: Record<
       camY: 200.0,
       camZ: -13.0,
       height: 240.0,
-      scaleX: 5.5131,
-      cx: 410.1,
-      scaleZ: 5.6454,
-      cz: 500.3,
+      scaleX: 5.2663,
+      cx: 412.17,
+      scaleZ: 5.2871,
+      cz: 480.49,
     },
   },
   GerudoFortress: {
     placeId: 'fortaleza',
     defaultAge: 'adult',
-    capture: { camX: 86.0, camY: 130.0, camZ: -22.0, height: 340.0 },
+    capture: {
+      camX: 86.0,
+      camY: 130.0,
+      camZ: -22.0,
+      height: 340.0,
+      scaleX: 3.0667,
+      cx: 199.04,
+      scaleZ: 3.0306,
+      cz: 421.96,
+    },
   },
   GerudosFortress: {
     placeId: 'fortaleza',
     defaultAge: 'adult',
-    capture: { camX: 86.0, camY: 130.0, camZ: -22.0, height: 340.0 },
+    capture: {
+      camX: 86.0,
+      camY: 130.0,
+      camZ: -22.0,
+      height: 340.0,
+      scaleX: 3.0667,
+      cx: 199.04,
+      scaleZ: 3.0306,
+      cz: 421.96,
+    },
   },
   ThievesHideout: {
     placeId: 'fortaleza',
     defaultAge: 'adult',
-    capture: { camX: 86.0, camY: 130.0, camZ: -22.0, height: 340.0 },
+    capture: {
+      camX: 86.0,
+      camY: 130.0,
+      camZ: -22.0,
+      height: 340.0,
+      scaleX: 3.0667,
+      cx: 199.04,
+      scaleZ: 3.0306,
+      cz: 421.96,
+    },
   },
   HountedWasteland: {
     placeId: 'desierto',
@@ -420,11 +517,29 @@ const SCENE_TO_PLACE: Record<
   },
   DodongoCavern: {
     placeId: 'dodongos',
-    capture: { camX: 31.0, camY: 115.0, camZ: -30.0, height: 256.0 },
+    capture: {
+      camX: 31.0,
+      camY: 115.0,
+      camZ: -30.0,
+      height: 256.0,
+      scaleX: 4.2462,
+      cx: 284.07,
+      scaleZ: 4.2462,
+      cz: 505.86,
+    },
   },
   DodongosCavern: {
     placeId: 'dodongos',
-    capture: { camX: 31.0, camY: 115.0, camZ: -30.0, height: 256.0 },
+    capture: {
+      camX: 31.0,
+      camY: 115.0,
+      camZ: -30.0,
+      height: 256.0,
+      scaleX: 4.2462,
+      cx: 284.07,
+      scaleZ: 4.2462,
+      cz: 505.86,
+    },
   },
   InsideJabuJabuBelly: {
     placeId: 'jabu',
@@ -852,6 +967,21 @@ function determineMapId(place: Place, age: 'child' | 'adult' | null, y: number |
   return place.startMap ?? place.maps[0]!.id
 }
 
+/**
+ * Routes seamless overworld `HyruleField.bcett` coordinates into `LonLonRanch` or
+ * `LakeHylia` when the player is inside those sub-regions.
+ */
+export function resolveEffectiveScene(
+  sceneKey: string | null,
+  x: number | null,
+  z: number | null,
+): string | null {
+  if (sceneKey !== 'HyruleField' || x === null || z === null) return sceneKey
+  if (x >= -165 && x <= -14 && z >= 186 && z <= 305) return 'LonLonRanch'
+  if (x >= -350 && x <= -40 && z >= 395 && z <= 620) return 'LakeHylia'
+  return sceneKey
+}
+
 export function projectToPlaceMap(
   sceneKey: string,
   place: Place,
@@ -864,7 +994,7 @@ export function projectToPlaceMap(
   if (!placeMap) return null
 
   const sceneInfo = SCENE_TO_PLACE[sceneKey]
-  const cap = sceneInfo?.capture
+  const cap = sceneInfo?.captureByMapId?.[placeMap.id] ?? sceneInfo?.capture
   const vb = getSvgViewBox(placeMap.image)
 
   if (cap && vb) {
@@ -2683,9 +2813,11 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
     hasSavePosition: Boolean(saveState?.position),
   })
 
+  const position = liveState.position ?? saveState?.position ?? null
   const rawScene = liveState.scene ?? saveState?.subScene ?? saveState?.scene ?? null
   const { scene: normalizedScene, ageHint: sceneAgeHint } = normalizeSceneName(rawScene)
-  const sceneKey = normalizedScene ?? (saveState?.scene ? normalizeSceneName(saveState.scene).scene : null)
+  const baseSceneKey = normalizedScene ?? (saveState?.scene ? normalizeSceneName(saveState.scene).scene : null)
+  const sceneKey = resolveEffectiveScene(baseSceneKey, position?.x ?? null, position?.z ?? null)
 
   const sceneMapping = sceneKey ? SCENE_TO_PLACE[sceneKey] : undefined
   const place: Place | undefined = sceneMapping ? placesById.get(sceneMapping.placeId) : undefined
@@ -2696,7 +2828,6 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
     sceneMapping?.defaultAge ??
     (saveState ? 'adult' : null)
 
-  const position = liveState.position ?? saveState?.position ?? null
   const mapId = place ? determineMapId(place, age, position?.y ?? null) : null
   const mapFraction =
     place && sceneKey && position

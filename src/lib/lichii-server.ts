@@ -819,12 +819,180 @@ export const KNOWN_SKULLTULA_HASH_MAP: Array<{ hashes: bigint[]; itemIds: string
 ]
 
 /**
- * Known Heart Container 64-bit InstanceIDs from GameDataMgr's flag table mapped to oot.json item IDs.
+ * Known Heart Container 64-bit ActorHashes from GameDataMgr's flag table mapped to oot.json item IDs.
  */
 export const KNOWN_HEART_CONTAINER_HASH_MAP: Array<{ hashes: bigint[]; itemIds: string[] }> = [
+  // Inside the Deku Tree
+  { hashes: [0xf914fa367471a3e3n], itemIds: ['deku-heart-01'] },
+  // Dodongo's Cavern
+  { hashes: [0x5262cea56c53554dn], itemIds: ['dodongos-heart-01'] },
+  // Inside Jabu-Jabu's Belly
+  { hashes: [0xf45f5319d88e7ac7n], itemIds: ['jabu-heart-01'] },
+  // Forest Temple
+  { hashes: [0xff11593a22778e7en], itemIds: ['bosque-heart-01'] },
+  // Fire Temple
+  { hashes: [0x8389cafb1277d318n], itemIds: ['fuego-heart-01'] },
+  // Water Temple
+  { hashes: [0xc835e1d03656bf46n], itemIds: ['agua-heart-01'] },
+  // Shadow Temple
+  { hashes: [0xf43ccb260f5576dcn], itemIds: ['sombra-heart-01'] },
   // Spirit Temple
   { hashes: [0x41811f125b1eedd5n], itemIds: ['espiritu-heart-01'] },
 ]
+
+/**
+ * Known Type 0 (overworld pickup) and Type 1 (treasure chest) Heart Piece 64-bit ActorHashes
+ * from GameDataMgr's flag table mapped to oot.json item IDs.
+ */
+export const KNOWN_HEART_PIECE_HASH_MAP: Array<{ hashes: bigint[]; itemIds: string[] }> = [
+  // Type 0 (14 overworld Heart Pieces)
+  { hashes: [0x88358af5b5300aa9n], itemIds: ['lonlon-heart-01'] },
+  { hashes: [0xf8c7601da7dd887en], itemIds: ['kakariko-heart-01'] },
+  { hashes: [0xb9d0070b468f26d2n], itemIds: ['kakariko-heart-02'] },
+  { hashes: [0x1df0dbf50c1732b7n], itemIds: ['cementerio-heart-04'] },
+  { hashes: [0x09ecb6a0150fee97n], itemIds: ['sendero-heart-01'] },
+  { hashes: [0x8f5f3d3321aeb7cdn], itemIds: ['crater-heart-01'] },
+  { hashes: [0x0a564328faf93c71n], itemIds: ['crater-heart-02'] },
+  { hashes: [0x9efabd5b0516c341n], itemIds: ['rio-heart-01'] },
+  { hashes: [0x3a23b59eaedc0510n], itemIds: ['rio-heart-02'] },
+  { hashes: [0xac2e26b5ec7da3a2n], itemIds: ['fuente-heart-01'] },
+  { hashes: [0x6f736fc80f7b0acan], itemIds: ['fuente-heart-02'] },
+  { hashes: [0xbaec91d6ed8dd96bn], itemIds: ['lago-heart-02'] },
+  { hashes: [0xdfd66c63357cdea7n], itemIds: ['valle-heart-01'] },
+  { hashes: [0x92feab9a9810c619n], itemIds: ['coloso-heart-01'] },
+  // Type 1 (6 Obj_TBox_A_02 chest Heart Pieces)
+  { hashes: [0x292e3ed6acacbe44n], itemIds: ['llanura-heart-02'] },
+  { hashes: [0x4ccffbd5778b67e2n], itemIds: ['cementerio-heart-02'] },
+  { hashes: [0x8588aaeeac14eed7n], itemIds: ['cementerio-heart-03'] },
+  { hashes: [0xdc0cbd0ac9f0b18an], itemIds: ['valle-heart-02'] },
+  { hashes: [0xab4dd26b0113ac53n], itemIds: ['fortaleza-heart-02'] },
+  { hashes: [0x2b702a67d25f1421n], itemIds: ['dominio-heart-01'] },
+]
+
+/**
+ * Known Type 2 (NPC/minigame/event) Heart Piece 32-bit MurmurHash3_32 bool hashes
+ * stored in SaveBuf Section 1 (and progress.sav) mapped to oot.json item IDs.
+ */
+export const KNOWN_HEART_PIECE_BOOL_HASH_MAP: Array<{ hash: number; itemId: string }> = [
+  { hash: 0x5ff7aa30, itemId: 'perdido-heart-01' },
+  { hash: 0x1657d7d8, itemId: 'perdido-heart-02' },
+  { hash: 0xe41e1597, itemId: 'llanura-heart-01' },
+  { hash: 0xb599aeed, itemId: 'ciudadela-heart-01' },
+  { hash: 0xf2fab510, itemId: 'ciudadela-heart-02' },
+  { hash: 0x61cf7ba1, itemId: 'ciudadela-heart-03' },
+  { hash: 0xa666baa8, itemId: 'kakariko-heart-03' },
+  { hash: 0x85d8113a, itemId: 'kakariko-heart-04' },
+  { hash: 0xb5127e75, itemId: 'cementerio-heart-01' },
+  { hash: 0x1d1793e9, itemId: 'goron-heart-01' },
+  { hash: 0x6b8fc751, itemId: 'crater-heart-03' },
+  { hash: 0x8ffec767, itemId: 'rio-heart-03' },
+  { hash: 0xd578df95, itemId: 'rio-heart-04' },
+  { hash: 0xad7a21ce, itemId: 'lago-heart-01' },
+  { hash: 0xf1891f6e, itemId: 'lago-heart-03' },
+  { hash: 0x3f43245b, itemId: 'fortaleza-heart-01' },
+]
+
+const KNOWN_HEART_PIECE_BOOL_HASH_TO_ITEM_ID = new Map<number, string>(
+  KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((entry) => [entry.hash >>> 0, entry.itemId]),
+)
+
+/**
+ * Known planted Magic Bean (`IsPlantedMagicBean_SmallFarm`) 32-bit MurmurHash3_32
+ * bool hashes stored in SaveBuf Section 1 (and progress.sav) mapped to oot.json item IDs.
+ */
+export const KNOWN_BEAN_BOOL_HASH_MAP: Array<{ hash: number; itemId: string }> = [
+  { hash: 0xb55acadd, itemId: 'kokiri-bean-01' },
+  { hash: 0x5ebf7c8b, itemId: 'perdido-bean-01' },
+  { hash: 0x610eb13c, itemId: 'perdido-bean-02' },
+  { hash: 0x274b7e3d, itemId: 'cementerio-bean-01' },
+  { hash: 0xf2ceba92, itemId: 'sendero-bean-01' },
+  { hash: 0x562fab76, itemId: 'crater-bean-01' },
+  { hash: 0x5eea40a6, itemId: 'rio-bean-01' },
+  { hash: 0xb0377637, itemId: 'lago-bean-01' },
+  { hash: 0x50a1775e, itemId: 'valle-bean-01' },
+  { hash: 0x2a1c58ce, itemId: 'coloso-bean-01' },
+]
+
+const KNOWN_BEAN_BOOL_HASH_TO_ITEM_ID = new Map<number, string>(
+  KNOWN_BEAN_BOOL_HASH_MAP.map((entry) => [entry.hash >>> 0, entry.itemId]),
+)
+
+/**
+ * Known Great Fairy Fountain 32-bit MurmurHash3_32 bool hashes
+ * stored in SaveBuf Section 1 (and progress.sav) mapped to oot.json item IDs.
+ */
+export const KNOWN_FAIRY_BOOL_HASH_MAP: Array<{ hash: number; itemId: string }> = [
+  { hash: 0x8fa2608e, itemId: 'castillo-fairy-01' },
+  { hash: 0x6d0523e3, itemId: 'sendero-fairy-01' },
+  { hash: 0xe36744cf, itemId: 'crater-fairy-01' },
+  { hash: 0xca320c10, itemId: 'fuente-fairy-01' },
+  { hash: 0x75b6f007, itemId: 'coloso-fairy-01' },
+  { hash: 0x1330a253, itemId: 'castillo-fairy-02' },
+]
+
+const KNOWN_FAIRY_BOOL_HASH_TO_ITEM_ID = new Map<number, string>(
+  KNOWN_FAIRY_BOOL_HASH_MAP.map((entry) => [entry.hash >>> 0, entry.itemId]),
+)
+
+/**
+ * Known Bottle 32-bit MurmurHash3_32 bool hashes
+ * stored in SaveBuf Section 1 (and progress.sav) mapped to oot.json item IDs.
+ */
+export const KNOWN_BOTTLE_BOOL_HASH_MAP: Array<{ hash: number; itemId: string }> = [
+  { hash: 0x7a7961c3, itemId: 'kakariko-bottle-01' },
+  { hash: 0x084da83f, itemId: 'lonlon-bottle-01' },
+  { hash: 0x77dc0488, itemId: 'lago-bottle-01' },
+  { hash: 0x4d62de75, itemId: 'ciudadela-bottle-02' },
+]
+
+const KNOWN_BOTTLE_BOOL_HASH_TO_ITEM_ID = new Map<number, string>(
+  KNOWN_BOTTLE_BOOL_HASH_MAP.map((entry) => [entry.hash >>> 0, entry.itemId]),
+)
+
+/**
+ * Known Fairy Thought (HrlField_Note_* / HaveReadHrlField_Note*) 32-bit MurmurHash3_32 bool hashes
+ * stored in SaveBuf Section 1 (and progress.sav) mapped to oot.json item IDs.
+ */
+export const KNOWN_THOUGHT_BOOL_HASH_MAP: Array<{ hash: number; itemId: string }> = [
+  { hash: 0x2e9d02ca, itemId: 'cementerio-thought-01' },
+  { hash: 0x444057da, itemId: 'cementerio-thought-02' },
+  { hash: 0xbb7912c6, itemId: 'coloso-thought-01' },
+  { hash: 0x304c49c8, itemId: 'hielo-thought-01' },
+  { hash: 0x8b8f3a34, itemId: 'lago-thought-01' },
+  { hash: 0xea520731, itemId: 'llanura-thought-01' },
+  { hash: 0x668de3c8, itemId: 'llanura-thought-02' },
+  { hash: 0x74f0b017, itemId: 'llanura-thought-03' },
+  { hash: 0x8e8f3ae5, itemId: 'llanura-thought-04' },
+  { hash: 0x00f5171f, itemId: 'llanura-thought-05' },
+  { hash: 0x151ed981, itemId: 'llanura-thought-06' },
+  { hash: 0xed1a38ad, itemId: 'llanura-thought-07' },
+  { hash: 0x4ac77991, itemId: 'llanura-thought-08' },
+  { hash: 0x87917159, itemId: 'llanura-thought-09' },
+  { hash: 0x80dffa7d, itemId: 'llanura-thought-10' },
+  { hash: 0x494cf2ac, itemId: 'lonlon-thought-01' },
+  { hash: 0xd74884be, itemId: 'pozo-thought-01' },
+  { hash: 0x39885d67, itemId: 'sendero-thought-01' },
+  { hash: 0xa2c78425, itemId: 'sombra-thought-01' },
+]
+
+const KNOWN_THOUGHT_BOOL_HASH_TO_ITEM_ID = new Map<number, string>(
+  KNOWN_THOUGHT_BOOL_HASH_MAP.map((entry) => [entry.hash >>> 0, entry.itemId]),
+)
+
+/** SaveBuf Section 3 Int hash for Poe Collector points (`GhostShop_CouponNum`); >= 500 awards ciudadela-bottle-01. */
+export const GHOST_SHOP_COUPON_NUM_HASH = 0xe3407cee
+export const GHOST_SHOP_COUPON_BOTTLE_ITEM_ID = 'ciudadela-bottle-01'
+export const GHOST_SHOP_COUPON_THRESHOLD = 500
+
+const ALL_SAVEBUF_SEC1_BOOL_HASHES = new Set<number>([
+  ...KNOWN_HEART_PIECE_BOOL_HASH_TO_ITEM_ID.keys(),
+  ...KNOWN_BEAN_BOOL_HASH_TO_ITEM_ID.keys(),
+  ...KNOWN_FAIRY_BOOL_HASH_TO_ITEM_ID.keys(),
+  ...KNOWN_BOTTLE_BOOL_HASH_TO_ITEM_ID.keys(),
+  ...KNOWN_THOUGHT_BOOL_HASH_TO_ITEM_ID.keys(),
+])
+
+const EXPECTED_SAVEBUF_COLLECTIBLE_HASH_COUNT = ALL_SAVEBUF_SEC1_BOOL_HASHES.size + 1
 
 type ViewBox = { vx: number; vy: number; vw: number; vh: number }
 const svgViewBoxCache = new Map<string, ViewBox>()
@@ -1052,6 +1220,11 @@ type ParsedSaveSlot = {
   skulltulaCount: number | null
   lastPickedItem: string | null
   savedHashes: Set<bigint>
+  savedHeartPieceBoolIds: string[]
+  savedBeanIds: string[]
+  savedFairyIds: string[]
+  savedBottleIds: string[]
+  savedThoughtIds: string[]
 }
 
 let cachedSaveSlot: ParsedSaveSlot | null = null
@@ -1219,7 +1392,7 @@ export function findLatestSaveSlotDir(
   return bestOverall
 }
 
-function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: number }): ParsedSaveSlot | null {
+export function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: number }): ParsedSaveSlot | null {
   if (cachedSaveSlot && cachedSaveKey === slotInfo.key) {
     return cachedSaveSlot
   }
@@ -1234,6 +1407,11 @@ function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: number }):
   let skulltulaCount: number | null = null
   let lastPickedItem: string | null = null
   const savedHashes = new Set<bigint>()
+  const savedHeartPieceBoolIds = new Set<string>()
+  const savedBeanIds = new Set<string>()
+  const savedFairyIds = new Set<string>()
+  const savedBottleIds = new Set<string>()
+  const savedThoughtIds = new Set<string>()
 
   try {
     if (fs.existsSync(capPath)) {
@@ -1281,6 +1459,21 @@ function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: number }):
               skulltulaCount = v
             } else if (h === 0xa4aee8cd) {
               yaw = prog.readFloatLE(off + 4)
+            } else if (sec === 1 && v !== 0) {
+              const hpId = KNOWN_HEART_PIECE_BOOL_HASH_TO_ITEM_ID.get(h)
+              if (hpId) savedHeartPieceBoolIds.add(hpId)
+              const beanId = KNOWN_BEAN_BOOL_HASH_TO_ITEM_ID.get(h)
+              if (beanId) savedBeanIds.add(beanId)
+              const fairyId = KNOWN_FAIRY_BOOL_HASH_TO_ITEM_ID.get(h)
+              if (fairyId) savedFairyIds.add(fairyId)
+              const bottleId = KNOWN_BOTTLE_BOOL_HASH_TO_ITEM_ID.get(h)
+              if (bottleId) savedBottleIds.add(bottleId)
+              const thoughtId = KNOWN_THOUGHT_BOOL_HASH_TO_ITEM_ID.get(h)
+              if (thoughtId) savedThoughtIds.add(thoughtId)
+            } else if (sec === 3 && h === GHOST_SHOP_COUPON_NUM_HASH) {
+              if (prog.readInt32LE(off + 4) >= GHOST_SHOP_COUPON_THRESHOLD) {
+                savedBottleIds.add(GHOST_SHOP_COUPON_BOTTLE_ITEM_ID)
+              }
             }
           } else if (v >= dataOff && v < prog.length) {
             ptrs.push({ off: v, h })
@@ -1326,6 +1519,11 @@ function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: number }):
     skulltulaCount,
     lastPickedItem,
     savedHashes,
+    savedHeartPieceBoolIds: Array.from(savedHeartPieceBoolIds).sort(),
+    savedBeanIds: Array.from(savedBeanIds).sort(),
+    savedFairyIds: Array.from(savedFairyIds).sort(),
+    savedBottleIds: Array.from(savedBottleIds).sort(),
+    savedThoughtIds: Array.from(savedThoughtIds).sort(),
   }
   cachedSaveKey = slotInfo.key
   cachedSaveSlot = parsed
@@ -1713,9 +1911,10 @@ function buildHashToItemIdsMap(
   return map
 }
 
-// Fast lookup from known Skulltula and Heart Container 64-bit hashes to dataset item IDs
+// Fast lookup from known Skulltula, Heart Container, and Heart Piece 64-bit hashes to dataset item IDs
 const KNOWN_HASH_TO_ITEM_IDS = buildHashToItemIdsMap(KNOWN_SKULLTULA_HASH_MAP)
 const KNOWN_HEART_CONTAINER_HASH_TO_ITEM_IDS = buildHashToItemIdsMap(KNOWN_HEART_CONTAINER_HASH_MAP)
+const KNOWN_HEART_PIECE_HASH_TO_ITEM_IDS = buildHashToItemIdsMap(KNOWN_HEART_PIECE_HASH_MAP)
 
 // Cached memory addresses for low-latency polling (reset to 0/0x0 on session reset)
 let cachedMainBase = 0n
@@ -1734,13 +1933,30 @@ let cachedLiveHashesAddr = '0x0'
 let cachedMasterFlagTableAddr = '0x0'
 let cachedMasterFlagTableCount = 0
 
+let cachedSaveBufPtr = 0n
+let cachedSaveBufCollectibleOffsets: Map<number, number> | null = null
+let cachedSaveBufCollectibleMinOff = 0
+let cachedSaveBufCollectibleMaxEnd = 0
+interface GdmBoolWindowDescriptor {
+  startHex: string
+  size: number
+  entries: Array<{ hash: number; offset: number }>
+}
+
+let cachedGdmBoolEntryAddrs: Map<number, bigint> | null = null
+let cachedGdmBoolWindows: GdmBoolWindowDescriptor[] | null = null
+let cachedGdmCouponAddr = 0n
+
 let cachedLiveScene: string | null = null
 let cachedLiveAgeHint: 'child' | 'adult' | null = null
 let cachedLiveSavedHashes = new Set<bigint>()
 let cachedMasterCollectedIds: string[] | null = null
 let cachedMasterHeartContainerIds: string[] | null = null
+let cachedMasterHeartPieceIds: string[] | null = null
+let cachedSaveBufCollectibles: SaveBufCollectibles | null = null
 let lastHashesReadTime = 0
 let lastMasterReadTime = 0
+let lastSaveBufCollectibleReadTime = 0
 let lastMasterRescanTime = 0
 let lastGdmRescanTime = 0
 let prevMasterReadCount: number | null = null
@@ -1762,6 +1978,10 @@ const LEGACY_GDM_COUNT_VT = 0x8504de98n
 const GDM_STOCK_TAG = 0x20
 const GDM_COUNT_TAG = 8
 const GDM_STOCK_TOKEN_HASH = 0x04735978
+const GDM_BOOL_CONTAINER_OFFSET = 0x170n
+const GDM_INT_CONTAINER_OFFSET = 0x230n
+const GDM_BOOL_ENTRY_STRIDE = 0x18n
+const GDM_INT_ENTRY_STRIDE = 0x28n
 const WORK_BANC_SCENE_PATTERN_HEX = '576f726b2f42616e632f5363656e652f' // "Work/Banc/Scene/"
 
 const MASTER_FLAG_ENTRY_0_HASH = 0x00006e56f79838e8n
@@ -1776,6 +1996,7 @@ export type DynamicVtables = {
   sub36Vt2: bigint
   pObjVt: bigint
   gdmVt: bigint
+  gdmBoolVt: bigint
   gdmStockVt: bigint
   gdmCountVt: bigint
 }
@@ -1793,6 +2014,7 @@ export function deriveDynamicVtables(mainBase: bigint): DynamicVtables {
     sub36Vt2: mainBase + 0x03ee4f8cn,
     pObjVt: mainBase + 0x04ba27c8n,
     gdmVt: mainBase + 0x04c58270n,
+    gdmBoolVt: mainBase + 0x04c20658n,
     gdmStockVt: mainBase + 0x04c20718n,
     gdmCountVt: mainBase + 0x04c20e98n,
   }
@@ -1901,33 +2123,38 @@ async function resolveGameDataMgr(mainBase: bigint, vtables: DynamicVtables): Pr
   return gdmPtr
 }
 
-/**
- * Parses GameDataMgr's sorted (uint64 InstanceID, uint64 flags) table.
- * Returns null unless the header matches and all known Skulltulas are present.
- */
-export function parseMasterFlagTableBuffer(buf: Buffer): {
+function parseMasterFlagTableChunks(chunks: Buffer[]): {
   presentItemIds: Set<string>
   collectedItemIds: string[]
   collectedHeartContainerIds: string[]
+  collectedHeartPieceIds: string[]
 } | null {
+  const first = chunks[0]
   if (
-    buf.length < 32 ||
-    buf.readBigUInt64LE(0) !== MASTER_FLAG_ENTRY_0_HASH ||
-    buf.readBigUInt64LE(16) !== MASTER_FLAG_ENTRY_1_HASH
+    !first ||
+    first.length < 32 ||
+    first.readBigUInt64LE(0) !== MASTER_FLAG_ENTRY_0_HASH ||
+    first.readBigUInt64LE(16) !== MASTER_FLAG_ENTRY_1_HASH
   ) {
     return null
   }
   const presentItemIds = new Set<string>()
   const collectedSet = new Set<string>()
   const collectedHeartContainerSet = new Set<string>()
+  const collectedHeartPieceSet = new Set<string>()
   let prevHash = 0n
-  for (let off = 0; off + 16 <= buf.length; off += 16) {
+  let isFirstEntry = true
+  let stopped = false
+
+  const processEntry = (buf: Buffer, off: number): boolean => {
     const h = buf.readBigUInt64LE(off)
-    if (h === 0n || (off > 0 && h <= prevHash)) break
+    if (h === 0n || (!isFirstEntry && h <= prevHash)) return false
+    isFirstEntry = false
     prevHash = h
     const skulltulaIds = KNOWN_HASH_TO_ITEM_IDS.get(h)
     const heartIds = KNOWN_HEART_CONTAINER_HASH_TO_ITEM_IDS.get(h)
-    if (!skulltulaIds && !heartIds) continue
+    const heartPieceIds = KNOWN_HEART_PIECE_HASH_TO_ITEM_IDS.get(h)
+    if (!skulltulaIds && !heartIds && !heartPieceIds) return true
     const flags = buf.readBigUInt64LE(off + 8)
     const isCollected = (flags & MASTER_FLAG_COLLECTED_BIT) !== 0n
     if (skulltulaIds) {
@@ -1941,7 +2168,43 @@ export function parseMasterFlagTableBuffer(buf: Buffer): {
         collectedHeartContainerSet.add(id)
       }
     }
+    if (heartPieceIds && isCollected) {
+      for (const id of heartPieceIds) {
+        collectedHeartPieceSet.add(id)
+      }
+    }
+    return true
   }
+
+  let carry: Buffer | null = null
+  for (const chunk of chunks) {
+    if (stopped) break
+    let off = 0
+    if (carry) {
+      const needed = 16 - carry.length
+      if (chunk.length < needed) {
+        carry = Buffer.concat([carry, chunk])
+        continue
+      }
+      const stitched = Buffer.concat([carry, chunk.subarray(0, needed)])
+      carry = null
+      off = needed
+      if (!processEntry(stitched, 0)) {
+        stopped = true
+        break
+      }
+    }
+    for (; off + 16 <= chunk.length; off += 16) {
+      if (!processEntry(chunk, off)) {
+        stopped = true
+        break
+      }
+    }
+    if (!stopped && off < chunk.length) {
+      carry = chunk.subarray(off)
+    }
+  }
+
   if (presentItemIds.size < KNOWN_SKULLTULA_HASH_MAP.length) {
     return null
   }
@@ -1949,7 +2212,21 @@ export function parseMasterFlagTableBuffer(buf: Buffer): {
     presentItemIds,
     collectedItemIds: Array.from(collectedSet).sort(),
     collectedHeartContainerIds: Array.from(collectedHeartContainerSet).sort(),
+    collectedHeartPieceIds: Array.from(collectedHeartPieceSet).sort(),
   }
+}
+
+/**
+ * Parses GameDataMgr's sorted (uint64 InstanceID, uint64 flags) table.
+ * Returns null unless the header matches and all known Skulltulas are present.
+ */
+export function parseMasterFlagTableBuffer(buf: Buffer): {
+  presentItemIds: Set<string>
+  collectedItemIds: string[]
+  collectedHeartContainerIds: string[]
+  collectedHeartPieceIds: string[]
+} | null {
+  return parseMasterFlagTableChunks([buf])
 }
 
 function isValidMasterTableHeader(buf: Buffer | null): buf is Buffer {
@@ -2046,6 +2323,7 @@ async function readMasterFlagCollectedIds(
   if (!head) {
     cachedMasterCollectedIds = null
     cachedMasterHeartContainerIds = null
+    cachedMasterHeartPieceIds = null
     return null
   }
 
@@ -2065,14 +2343,16 @@ async function readMasterFlagCollectedIds(
     chunks.push(chunk)
   }
 
-  const parsed = parseMasterFlagTableBuffer(Buffer.concat(chunks))
+  const parsed = parseMasterFlagTableChunks(chunks)
   if (!parsed) {
     cachedMasterCollectedIds = null
     cachedMasterHeartContainerIds = null
+    cachedMasterHeartPieceIds = null
     return null
   }
   cachedMasterCollectedIds = parsed.collectedItemIds
   cachedMasterHeartContainerIds = parsed.collectedHeartContainerIds
+  cachedMasterHeartPieceIds = parsed.collectedHeartPieceIds
   lastMasterReadTime = now
   return parsed.collectedItemIds
 }
@@ -2103,6 +2383,126 @@ export function isValidSub36Buffer(
   const y = buf.readFloatLE(0x20)
   const z = buf.readFloatLE(0x24)
   return isValidCoord(x, y, z)
+}
+
+/** Validates a GameDataMgr container header (`cnt`, `entriesPtr`, `hashTablePtr`, `cap`). */
+export function parseGdmContainerHeader(
+  buf: Buffer | null,
+  maxCnt = 65536,
+  maxCap = 131072,
+): { cnt: number; entriesPtr: bigint; hashTablePtr: bigint; cap: number } | null {
+  if (!buf || buf.length < 0x28) return null
+  const cnt = buf.readUInt32LE(0x08)
+  const entriesPtr = buf.readBigUInt64LE(0x10)
+  const hashTablePtr = buf.readBigUInt64LE(0x18)
+  const cap = buf.readUInt32LE(0x24)
+  if (
+    cnt === 0 ||
+    cnt > maxCnt ||
+    cap < cnt ||
+    cap > maxCap ||
+    entriesPtr <= 0x2000000000n ||
+    hashTablePtr <= 0x2000000000n
+  ) {
+    return null
+  }
+  return { cnt, entriesPtr, hashTablePtr, cap }
+}
+
+/** Scans a GameDataMgr `(u32 hash, u32 idx)` hash table buffer and maps target hashes to entry addresses. */
+export function scanGdmContainerHashTableBuffer(
+  hashBuf: Buffer,
+  cnt: number,
+  targetHashes: ReadonlySet<number>,
+  entriesPtr: bigint,
+  stride: bigint,
+  out = new Map<number, bigint>(),
+): Map<number, bigint> {
+  for (let off = 0; off + 8 <= hashBuf.length; off += 8) {
+    const h = hashBuf.readUInt32LE(off)
+    if (!targetHashes.has(h)) continue
+    const idx = hashBuf.readUInt32LE(off + 4)
+    if (idx >= cnt) continue
+    out.set(h, entriesPtr + BigInt(idx) * stride)
+  }
+  return out
+}
+
+/** Validates a GameDataMgr `Bool` container entry (`0x18` bytes, vtable `gdmBoolVt`) and returns `u8` at `+0x16`. */
+export function parseGdmBoolEntryBuffer(
+  buf: Buffer | null,
+  expectedVt: bigint,
+  offset = 0,
+): boolean | null {
+  if (!buf || offset < 0 || offset + 0x18 > buf.length) return null
+  if (buf.readBigUInt64LE(offset) !== expectedVt) return null
+  return buf.readUInt8(offset + 0x16) !== 0
+}
+
+/** Validates a GameDataMgr `Int` container entry (`0x28` bytes, vtable `gdmStockVt`) and returns `i32` at `+0x1c`. */
+export function parseGdmIntEntryBuffer(
+  buf: Buffer | null,
+  expectedVt: bigint,
+  offset = 0,
+): number | null {
+  if (!buf || offset < 0 || offset + 0x28 > buf.length) return null
+  if (buf.readBigUInt64LE(offset) !== expectedVt) return null
+  return buf.readInt32LE(offset + 0x1c)
+}
+
+/** Classifies live `gdm + 0x170` Bool values and `GhostShop_CouponNum` (`gdm + 0x230`) into collectible IDs. */
+export function classifyGdmCollectibles(
+  boolValues: ReadonlyMap<number, boolean>,
+  couponCount: number | null,
+): SaveBufCollectibles | null {
+  if (boolValues.size < ALL_SAVEBUF_SEC1_BOOL_HASHES.size || couponCount === null) {
+    return null
+  }
+  const heartPieceIds: string[] = []
+  const beanIds: string[] = []
+  const fairyIds: string[] = []
+  const bottleIds: string[] = []
+  const thoughtIds: string[] = []
+
+  for (const [hash, collected] of boolValues) {
+    if (!collected) continue
+    const hpId = KNOWN_HEART_PIECE_BOOL_HASH_TO_ITEM_ID.get(hash)
+    if (hpId) {
+      heartPieceIds.push(hpId)
+      continue
+    }
+    const beanId = KNOWN_BEAN_BOOL_HASH_TO_ITEM_ID.get(hash)
+    if (beanId) {
+      beanIds.push(beanId)
+      continue
+    }
+    const fairyId = KNOWN_FAIRY_BOOL_HASH_TO_ITEM_ID.get(hash)
+    if (fairyId) {
+      fairyIds.push(fairyId)
+      continue
+    }
+    const bottleId = KNOWN_BOTTLE_BOOL_HASH_TO_ITEM_ID.get(hash)
+    if (bottleId) {
+      bottleIds.push(bottleId)
+      continue
+    }
+    const thoughtId = KNOWN_THOUGHT_BOOL_HASH_TO_ITEM_ID.get(hash)
+    if (thoughtId) {
+      thoughtIds.push(thoughtId)
+    }
+  }
+
+  if (couponCount >= GHOST_SHOP_COUPON_THRESHOLD) {
+    bottleIds.push(GHOST_SHOP_COUPON_BOTTLE_ITEM_ID)
+  }
+
+  return {
+    heartPieceIds: heartPieceIds.sort(),
+    beanIds: beanIds.sort(),
+    fairyIds: fairyIds.sort(),
+    bottleIds: bottleIds.sort(),
+    thoughtIds: thoughtIds.sort(),
+  }
 }
 
 /** Validates a GameDataMgr container StockNum entry (vtable gdmStockVt, tag 0x20) and returns its 0..100 count. */
@@ -2162,12 +2562,22 @@ export function deriveLastPickedItem(
   return source === 'memory' ? null : saveLastPickedItem
 }
 
+export type SaveBufCollectibles = {
+  heartPieceIds: string[]
+  beanIds: string[]
+  fairyIds: string[]
+  bottleIds: string[]
+  thoughtIds: string[]
+}
+
 type LiveMemoryTelemetry = {
   position: { x: number; y: number; z: number; yaw: number } | null
   scene: string | null
   ageHint: 'child' | 'adult' | null
   masterCollectedIds: string[] | null
   masterHeartContainerIds: string[] | null
+  masterHeartPieceIds: string[] | null
+  saveBufCollectibles: SaveBufCollectibles | null
   liveSavedHashes: Set<bigint>
   liveSkulltulaCount: number | null
   readFailed: boolean
@@ -2180,6 +2590,8 @@ function emptyLiveMemoryTelemetry(readFailed = false): LiveMemoryTelemetry {
     ageHint: null,
     masterCollectedIds: null,
     masterHeartContainerIds: null,
+    masterHeartPieceIds: null,
+    saveBufCollectibles: null,
     liveSavedHashes: new Set<bigint>(),
     liveSkulltulaCount: null,
     readFailed,
@@ -2301,38 +2713,167 @@ async function resolveGdmStockAddrFromContainer(
   vtables: DynamicVtables,
 ): Promise<number | null> {
   if (gdm === 0n || !lichiiRpc.isConnected()) return null
-  const hdr = await readMemoryBuffer(bigintToHex(gdm + 0x230n), 0x28, 400)
-  if (!hdr || hdr.length < 0x28) return null
-  const cnt = hdr.readUInt32LE(0x08)
-  const entriesPtr = hdr.readBigUInt64LE(0x10)
-  const hashTablePtr = hdr.readBigUInt64LE(0x18)
-  const cap = hdr.readUInt32LE(0x24)
-  if (
-    cnt === 0 ||
-    cnt >= 10000 ||
-    cap < cnt ||
-    cap > 32768 ||
-    entriesPtr <= 0x2000000000n ||
-    hashTablePtr <= 0x2000000000n
-  ) {
-    return null
-  }
+  const hdr = await readMemoryBuffer(bigintToHex(gdm + GDM_INT_CONTAINER_OFFSET), 0x28, 400)
+  const parsedHdr = parseGdmContainerHeader(hdr, 9999, 32768)
+  if (!parsedHdr) return null
 
-  const hashBuf = await readMemoryBuffer(bigintToHex(hashTablePtr), cap * 8, 800)
+  const hashBuf = await readMemoryBuffer(bigintToHex(parsedHdr.hashTablePtr), parsedHdr.cap * 8, 800)
   if (!hashBuf || hashBuf.length < 8) return null
-  for (let off = 0; off + 8 <= hashBuf.length; off += 8) {
-    if (hashBuf.readUInt32LE(off) !== GDM_STOCK_TOKEN_HASH) continue
-    const idx = hashBuf.readUInt32LE(off + 4)
-    if (idx >= cnt) continue
-    const entryAddr = bigintToHex(entriesPtr + BigInt(idx) * 0x28n)
-    const entryBuf = await readMemoryBuffer(entryAddr, 0x28, 400)
-    const val = parseGdmStockNumBuffer(entryBuf, vtables.gdmStockVt)
-    if (val !== null) {
-      cachedLiveStockAddr = entryAddr
-      return val
-    }
+  const hits = scanGdmContainerHashTableBuffer(
+    hashBuf,
+    parsedHdr.cnt,
+    new Set([GDM_STOCK_TOKEN_HASH]),
+    parsedHdr.entriesPtr,
+    GDM_INT_ENTRY_STRIDE,
+  )
+  const entryAddrBig = hits.get(GDM_STOCK_TOKEN_HASH)
+  if (!entryAddrBig) return null
+  const entryAddr = bigintToHex(entryAddrBig)
+  const entryBuf = await readMemoryBuffer(entryAddr, 0x28, 400)
+  const val = parseGdmStockNumBuffer(entryBuf, vtables.gdmStockVt)
+  if (val !== null) {
+    cachedLiveStockAddr = entryAddr
+    return val
   }
   return null
+}
+
+async function resolveGdmContainerEntryAddrs(
+  containerAddr: bigint,
+  targetHashes: ReadonlySet<number>,
+  stride: bigint,
+  maxCnt = 65536,
+  maxCap = 131072,
+): Promise<Map<number, bigint> | null> {
+  if (containerAddr === 0n || !lichiiRpc.isConnected()) return null
+  const hdrBuf = await readMemoryBuffer(bigintToHex(containerAddr), 0x28, 400)
+  const hdr = parseGdmContainerHeader(hdrBuf, maxCnt, maxCap)
+  if (!hdr) return null
+
+  const totalBytes = hdr.cap * 8
+  const found = new Map<number, bigint>()
+  for (let off = 0; off < totalBytes && found.size < targetHashes.size; off += MASTER_FLAG_READ_CHUNK) {
+    const readSize = Math.min(MASTER_FLAG_READ_CHUNK, totalBytes - off)
+    const chunk = await readMemoryBuffer(
+      bigintToHex(hdr.hashTablePtr + BigInt(off)),
+      readSize,
+      800,
+    )
+    if (!chunk || chunk.length < 8) return null
+    scanGdmContainerHashTableBuffer(chunk, hdr.cnt, targetHashes, hdr.entriesPtr, stride, found)
+  }
+
+  return found.size >= targetHashes.size ? found : null
+}
+
+function buildGdmBoolWindows(boolAddrs: Map<number, bigint>): GdmBoolWindowDescriptor[] {
+  const sortedEntries = [...boolAddrs.entries()].sort((a, b) =>
+    a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0,
+  )
+  const windows: GdmBoolWindowDescriptor[] = []
+  let idx = 0
+  while (idx < sortedEntries.length) {
+    const first = sortedEntries[idx]
+    if (!first) break
+    const windowStart = first[1]
+    let windowEnd = windowStart + GDM_BOOL_ENTRY_STRIDE
+    const entries: Array<{ hash: number; offset: number }> = [{ hash: first[0], offset: 0 }]
+    idx++
+
+    while (idx < sortedEntries.length) {
+      const next = sortedEntries[idx]
+      if (!next) break
+      const nextEnd = next[1] + GDM_BOOL_ENTRY_STRIDE
+      if (Number(nextEnd - windowStart) > MASTER_FLAG_READ_CHUNK) break
+      windowEnd = nextEnd
+      entries.push({ hash: next[0], offset: Number(next[1] - windowStart) })
+      idx++
+    }
+
+    windows.push({
+      startHex: bigintToHex(windowStart),
+      size: Number(windowEnd - windowStart),
+      entries,
+    })
+  }
+  return windows
+}
+
+async function resolveGdmLiveCollectibleAddrs(
+  mainBase: bigint,
+  vtables: DynamicVtables,
+): Promise<boolean> {
+  const gdm = await resolveGameDataMgr(mainBase, vtables)
+  if (gdm === 0n || !lichiiRpc.isConnected()) return false
+
+  const boolAddrs = await resolveGdmContainerEntryAddrs(
+    gdm + GDM_BOOL_CONTAINER_OFFSET,
+    ALL_SAVEBUF_SEC1_BOOL_HASHES,
+    GDM_BOOL_ENTRY_STRIDE,
+  )
+  if (!boolAddrs) return false
+
+  const intAddrs = await resolveGdmContainerEntryAddrs(
+    gdm + GDM_INT_CONTAINER_OFFSET,
+    new Set([GHOST_SHOP_COUPON_NUM_HASH]),
+    GDM_INT_ENTRY_STRIDE,
+    16384,
+    32768,
+  )
+  const couponAddr = intAddrs?.get(GHOST_SHOP_COUPON_NUM_HASH)
+  if (!couponAddr) return false
+
+  cachedGdmBoolEntryAddrs = boolAddrs
+  cachedGdmBoolWindows = buildGdmBoolWindows(boolAddrs)
+  cachedGdmCouponAddr = couponAddr
+  return true
+}
+
+async function readGdmCollectiblesFromCache(
+  vtables: DynamicVtables,
+): Promise<SaveBufCollectibles | null> {
+  if (!cachedGdmBoolWindows || cachedGdmCouponAddr === 0n) return null
+
+  const boolValues = new Map<number, boolean>()
+
+  for (const win of cachedGdmBoolWindows) {
+    const windowBuf = await readMemoryBuffer(win.startHex, win.size, 600)
+    if (!windowBuf || windowBuf.length < win.size) return null
+
+    for (const entry of win.entries) {
+      const val = parseGdmBoolEntryBuffer(windowBuf, vtables.gdmBoolVt, entry.offset)
+      if (val === null) return null
+      boolValues.set(entry.hash, val)
+    }
+  }
+
+  const couponBuf = await readMemoryBuffer(bigintToHex(cachedGdmCouponAddr), 0x28, 400)
+  const couponCount = parseGdmIntEntryBuffer(couponBuf, vtables.gdmStockVt)
+  if (couponCount === null) return null
+
+  return classifyGdmCollectibles(boolValues, couponCount)
+}
+
+async function readLiveGdmCollectibles(
+  mainBase: bigint,
+  vtables: DynamicVtables,
+): Promise<SaveBufCollectibles | null> {
+  if (!cachedGdmBoolWindows || cachedGdmCouponAddr === 0n) {
+    const resolved = await resolveGdmLiveCollectibleAddrs(mainBase, vtables)
+    if (!resolved) return null
+  }
+
+  let parsed = await readGdmCollectiblesFromCache(vtables)
+  if (parsed === null && lichiiRpc.isConnected()) {
+    cachedGdmBoolEntryAddrs = null
+    cachedGdmBoolWindows = null
+    cachedGdmCouponAddr = 0n
+    cachedGdmAddr = 0n
+    if (await resolveGdmLiveCollectibleAddrs(mainBase, vtables)) {
+      parsed = await readGdmCollectiblesFromCache(vtables)
+    }
+  }
+  return parsed
 }
 
 async function resolveSaveBufFallbackAddresses(gdm: bigint): Promise<void> {
@@ -2361,6 +2902,196 @@ async function resolveSaveBufFallbackAddresses(gdm: bigint): Promise<void> {
       if (cachedLiveCountAddr !== '0x0' && cachedLiveHashesAddr !== '0x0') return
     }
   }
+}
+
+/**
+ * Verifies cached u32 hashes at their relative SaveBuf Section 1 & Section 3 offsets and extracts
+ * collected Type 2 Heart Pieces, Beans, Great Fairies, and Bottles. Returns null if any hash mismatches.
+ */
+export function parseSaveBufCollectibleRange(
+  rangeBuf: Buffer,
+  minOff: number,
+  offsets: Map<number, number>,
+): SaveBufCollectibles | null {
+  if (offsets.size < EXPECTED_SAVEBUF_COLLECTIBLE_HASH_COUNT) return null
+  const heartPieceIds: string[] = []
+  const beanIds: string[] = []
+  const fairyIds: string[] = []
+  const bottleIds: string[] = []
+  const thoughtIds: string[] = []
+
+  for (const [hash, dirOff] of offsets) {
+    const rel = dirOff - minOff
+    if (rel < 0 || rel + 8 > rangeBuf.length) return null
+    if (rangeBuf.readUInt32LE(rel) !== hash) return null
+    const val = rangeBuf.readUInt32LE(rel + 4)
+    if (hash === GHOST_SHOP_COUPON_NUM_HASH) {
+      if (rangeBuf.readInt32LE(rel + 4) >= GHOST_SHOP_COUPON_THRESHOLD) {
+        bottleIds.push(GHOST_SHOP_COUPON_BOTTLE_ITEM_ID)
+      }
+      continue
+    }
+    if (val === 0) continue
+    const hpId = KNOWN_HEART_PIECE_BOOL_HASH_TO_ITEM_ID.get(hash)
+    if (hpId) {
+      heartPieceIds.push(hpId)
+      continue
+    }
+    const beanId = KNOWN_BEAN_BOOL_HASH_TO_ITEM_ID.get(hash)
+    if (beanId) {
+      beanIds.push(beanId)
+      continue
+    }
+    const fairyId = KNOWN_FAIRY_BOOL_HASH_TO_ITEM_ID.get(hash)
+    if (fairyId) {
+      fairyIds.push(fairyId)
+      continue
+    }
+    const bottleId = KNOWN_BOTTLE_BOOL_HASH_TO_ITEM_ID.get(hash)
+    if (bottleId) {
+      bottleIds.push(bottleId)
+      continue
+    }
+    const thoughtId = KNOWN_THOUGHT_BOOL_HASH_TO_ITEM_ID.get(hash)
+    if (thoughtId) {
+      thoughtIds.push(thoughtId)
+    }
+  }
+
+  return {
+    heartPieceIds: heartPieceIds.sort(),
+    beanIds: beanIds.sort(),
+    fairyIds: fairyIds.sort(),
+    bottleIds: bottleIds.sort(),
+    thoughtIds: thoughtIds.sort(),
+  }
+}
+
+/**
+ * Verifies cached u32 hashes at their relative SaveBuf Section 1 offsets and extracts
+ * collected Type 2 Heart Piece item IDs. Returns null if any hash mismatches.
+ */
+export function parseSaveBufHeartPieceBoolRange(
+  rangeBuf: Buffer,
+  minOff: number,
+  offsets: Map<number, number>,
+): string[] | null {
+  if (offsets.size < KNOWN_HEART_PIECE_BOOL_HASH_MAP.length) return null
+  const collected: string[] = []
+  for (const [hash, dirOff] of offsets) {
+    const rel = dirOff - minOff
+    if (rel < 0 || rel + 8 > rangeBuf.length) return null
+    if (rangeBuf.readUInt32LE(rel) !== hash) return null
+    if (rangeBuf.readUInt32LE(rel + 4) !== 0) {
+      const itemId = KNOWN_HEART_PIECE_BOOL_HASH_TO_ITEM_ID.get(hash)
+      if (itemId) collected.push(itemId)
+    }
+  }
+  return collected.sort()
+}
+
+async function resolveSaveBufCollectibleOffsets(
+  mainBase: bigint,
+  vtables: DynamicVtables,
+): Promise<boolean> {
+  const gdm = await resolveGameDataMgr(mainBase, vtables)
+  if (gdm === 0n || !lichiiRpc.isConnected()) return false
+  const saveBufPtr = await readU64At(bigintToHex(gdm + 0x1160n), 400)
+  if (saveBufPtr <= 0x2000000000n) return false
+  const hdr = await readMemoryBuffer(bigintToHex(saveBufPtr), 0x28, 400)
+  if (!hdr || hdr.length < 0x28) return false
+  const dataOff = hdr.readUInt32LE(8)
+  if (dataOff <= 0x28 || dataOff > 0x40000) return false
+
+  const offsets = new Map<number, number>()
+  let minOff = Number.MAX_SAFE_INTEGER
+  let maxEnd = 0
+  let sec = 1
+
+  for (let off = 0x28; off < dataOff && sec <= 3; off += MASTER_FLAG_READ_CHUNK) {
+    const size = Math.min(MASTER_FLAG_READ_CHUNK, dataOff - off)
+    const chunk = await readMemoryBuffer(bigintToHex(saveBufPtr + BigInt(off)), size, 500)
+    if (!chunk || chunk.length < 8) break
+    for (let pos = 0; pos + 8 <= chunk.length; pos += 8) {
+      const h = chunk.readUInt32LE(pos)
+      const v = chunk.readUInt32LE(pos + 4)
+      if (h === 0) {
+        sec = v + 1
+        if (sec > 3) break
+        continue
+      }
+      const isTarget =
+        (sec === 1 && ALL_SAVEBUF_SEC1_BOOL_HASHES.has(h)) ||
+        (sec === 3 && h === GHOST_SHOP_COUPON_NUM_HASH)
+      if (isTarget) {
+        const dirOff = off + pos
+        offsets.set(h, dirOff)
+        if (dirOff < minOff) minOff = dirOff
+        if (dirOff + 8 > maxEnd) maxEnd = dirOff + 8
+      }
+    }
+  }
+
+  if (offsets.size < EXPECTED_SAVEBUF_COLLECTIBLE_HASH_COUNT || maxEnd <= minOff) {
+    return false
+  }
+  cachedSaveBufPtr = saveBufPtr
+  cachedSaveBufCollectibleOffsets = offsets
+  cachedSaveBufCollectibleMinOff = minOff
+  cachedSaveBufCollectibleMaxEnd = maxEnd
+  return true
+}
+
+async function readSaveBufCollectibleRangeFromCache(): Promise<SaveBufCollectibles | null> {
+  if (cachedSaveBufPtr === 0n || !cachedSaveBufCollectibleOffsets) return null
+  const totalBytes = cachedSaveBufCollectibleMaxEnd - cachedSaveBufCollectibleMinOff
+  if (totalBytes <= 0 || totalBytes > 0x40000) return null
+
+  const chunks: Buffer[] = []
+  for (let rel = 0; rel < totalBytes; rel += MASTER_FLAG_READ_CHUNK) {
+    const readSize = Math.min(MASTER_FLAG_READ_CHUNK, totalBytes - rel)
+    const chunk = await readMemoryBuffer(
+      bigintToHex(cachedSaveBufPtr + BigInt(cachedSaveBufCollectibleMinOff + rel)),
+      readSize,
+      600,
+    )
+    if (!chunk || chunk.length < readSize) return null
+    chunks.push(chunk)
+  }
+
+  return parseSaveBufCollectibleRange(
+    Buffer.concat(chunks),
+    cachedSaveBufCollectibleMinOff,
+    cachedSaveBufCollectibleOffsets,
+  )
+}
+
+async function readLiveSaveBufCollectibles(
+  mainBase: bigint,
+  vtables: DynamicVtables,
+): Promise<SaveBufCollectibles | null> {
+  if (cachedSaveBufPtr === 0n || !cachedSaveBufCollectibleOffsets) {
+    const resolved = await resolveSaveBufCollectibleOffsets(mainBase, vtables)
+    if (!resolved) {
+      cachedSaveBufCollectibles = null
+      return null
+    }
+  }
+
+  let parsed = await readSaveBufCollectibleRangeFromCache()
+  if (parsed === null && lichiiRpc.isConnected()) {
+    // Re-scan SaveBuf Sec 1..3 once if saveBufPtr or cached u32 hashes changed
+    cachedSaveBufPtr = 0n
+    cachedSaveBufCollectibleOffsets = null
+    cachedSaveBufCollectibleMinOff = 0
+    cachedSaveBufCollectibleMaxEnd = 0
+    if (await resolveSaveBufCollectibleOffsets(mainBase, vtables)) {
+      parsed = await readSaveBufCollectibleRangeFromCache()
+    }
+  }
+
+  cachedSaveBufCollectibles = parsed
+  return parsed
 }
 
 async function readLiveSkulltulaCount(
@@ -2458,9 +3189,20 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
   }
   let vtables = deriveDynamicVtables(mainBase)
 
-  // 1. Read Sub[36] (0x40 bytes covers pObj + player pos/dir)
-  let subBuf = await readMemoryBuffer(cachedSub36Addr, 0x40)
+  // 1. Read Sub[36] (0x40 bytes covers pObj + player pos/dir) concurrently with cached Sub[7] + StockNum when warm
+  const canSpeculateWarmReads = cachedSub36Addr !== '0x0'
+  const [initialSubBuf, prefetchedPrimaryStrBuf, prefetchedStockBuf] = await Promise.all([
+    readMemoryBuffer(cachedSub36Addr, 0x40),
+    canSpeculateWarmReads && cachedSub7Addr > 0x2000000000n
+      ? readMemoryBuffer(bigintToHex(cachedSub7Addr + 0x34n), 0x80, 400)
+      : Promise.resolve(null),
+    canSpeculateWarmReads && cachedLiveStockAddr !== '0x0'
+      ? readMemoryBuffer(cachedLiveStockAddr, 0x28, 400)
+      : Promise.resolve(null),
+  ])
+  let subBuf = initialSubBuf
   let subValid = isValidSub36Buffer(subBuf, vtables.sub36Vt1, vtables.sub36Vt2)
+  const initialSubValid = subValid
   let readFailed = cachedSub36Addr !== '0x0' && subBuf === null
 
   if (!subValid) {
@@ -2529,6 +3271,7 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
 
   // Refresh scene name from Sub[7] + 0x34 (fallback pObj + 0x768) and age hint from Sub[23] + 0x80
   if (pObj > 0x2000000000n) {
+    let primaryStrBuf: Buffer | null = null
     if (pObj !== cachedParentObjAddr) {
       cachedParentObjAddr = pObj
       const subs = await resolveSubPointersFromPObj(pObj, vtables, false)
@@ -2536,12 +3279,16 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
         cachedSub7Addr = subs.sub7Ptr > 0x2000000000n ? subs.sub7Ptr : 0n
         cachedSub23Addr = subs.sub23Ptr > 0x2000000000n ? subs.sub23Ptr : 0n
       }
+      primaryStrBuf =
+        cachedSub7Addr > 0x2000000000n
+          ? await readMemoryBuffer(bigintToHex(cachedSub7Addr + 0x34n), 0x80, 400)
+          : null
+    } else if (cachedSub7Addr > 0x2000000000n) {
+      primaryStrBuf =
+        initialSubValid && prefetchedPrimaryStrBuf !== null
+          ? prefetchedPrimaryStrBuf
+          : await readMemoryBuffer(bigintToHex(cachedSub7Addr + 0x34n), 0x80, 400)
     }
-
-    const primaryStrBuf =
-      cachedSub7Addr > 0x2000000000n
-        ? await readMemoryBuffer(bigintToHex(cachedSub7Addr + 0x34n), 0x80, 400)
-        : null
     let bcettMatch =
       primaryStrBuf
         ?.toString('ascii')
@@ -2582,21 +3329,54 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
   }
 
   // 2. Read live runtime GameDataMgr StockNum (direct GDM + 0x230 hash table, or slid fallback)
-  const liveSkulltulaCount = await readLiveSkulltulaCount(mainBase, vtables, now)
+  const prefetchedStockVal =
+    initialSubValid && prefetchedStockBuf !== null
+      ? parseGdmStockNumBuffer(prefetchedStockBuf, vtables.gdmStockVt)
+      : null
+  const liveSkulltulaCount =
+    prefetchedStockVal !== null
+      ? prefetchedStockVal
+      : await readLiveSkulltulaCount(mainBase, vtables, now)
 
-  // 3. Refresh authoritative 100-Skulltula runtime flag table on pickup, scene change, or every 500ms
+  // 3. Refresh authoritative 100-Skulltula + Heart runtime flag tables on pickup, scene change, or every 500ms
+  // 3b. Refresh Type 2 Heart Piece, Bean, Great Fairy & Bottle flags from live GameDataMgr containers
+  // (gdm + 0x170 Bool, gdm + 0x230 Int), falling back to SaveBuf Sec 1 & Sec 3 if unavailable.
   let masterCollectedIds = cachedMasterCollectedIds
   let masterHeartContainerIds = cachedMasterHeartContainerIds
-  if (
-    lichiiRpc.isConnected() &&
-    (masterCollectedIds === null ||
-      liveSkulltulaCount !== prevMasterReadCount ||
-      cachedLiveScene !== prevScene ||
-      now - lastMasterReadTime > 500)
-  ) {
-    masterCollectedIds = await readMasterFlagCollectedIds(now, mainBase, vtables)
-    masterHeartContainerIds = cachedMasterHeartContainerIds
-    prevMasterReadCount = liveSkulltulaCount
+  let masterHeartPieceIds = cachedMasterHeartPieceIds
+  let saveBufCollectibles = cachedSaveBufCollectibles
+  const masterNeedsRefresh =
+    masterCollectedIds === null ||
+    liveSkulltulaCount !== prevMasterReadCount ||
+    cachedLiveScene !== prevScene ||
+    now - lastMasterReadTime > 500
+  const gdmNeedsRefresh =
+    saveBufCollectibles === null
+      ? now - lastSaveBufCollectibleReadTime > 500
+      : masterNeedsRefresh || now - lastSaveBufCollectibleReadTime > 500
+
+  if (lichiiRpc.isConnected() && (masterNeedsRefresh || gdmNeedsRefresh)) {
+    if (gdmNeedsRefresh) {
+      lastSaveBufCollectibleReadTime = now
+    }
+    const [fetchedMasterIds, liveGdmCollectibles] = await Promise.all([
+      masterNeedsRefresh ? readMasterFlagCollectedIds(now, mainBase, vtables) : Promise.resolve(undefined),
+      gdmNeedsRefresh ? readLiveGdmCollectibles(mainBase, vtables) : Promise.resolve(undefined),
+    ])
+    if (masterNeedsRefresh) {
+      masterCollectedIds = fetchedMasterIds ?? null
+      masterHeartContainerIds = cachedMasterHeartContainerIds
+      masterHeartPieceIds = cachedMasterHeartPieceIds
+      prevMasterReadCount = liveSkulltulaCount
+    }
+    if (gdmNeedsRefresh) {
+      if (liveGdmCollectibles !== null && liveGdmCollectibles !== undefined) {
+        cachedSaveBufCollectibles = liveGdmCollectibles
+        saveBufCollectibles = liveGdmCollectibles
+      } else {
+        saveBufCollectibles = await readLiveSaveBufCollectibles(mainBase, vtables)
+      }
+    }
   }
 
   // 4. Fallback to RAM SaveBuf 0xa3db7114 array only if master table was unavailable
@@ -2645,6 +3425,8 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
     ageHint: cachedLiveAgeHint,
     masterCollectedIds,
     masterHeartContainerIds,
+    masterHeartPieceIds,
+    saveBufCollectibles,
     liveSavedHashes: cachedLiveSavedHashes,
     liveSkulltulaCount,
     readFailed: false,
@@ -2677,16 +3459,26 @@ function clearPlayerAndGdmSessionCaches() {
   cachedLiveHashesAddr = '0x0'
   cachedMasterFlagTableAddr = '0x0'
   cachedMasterFlagTableCount = 0
+  cachedSaveBufPtr = 0n
+  cachedSaveBufCollectibleOffsets = null
+  cachedSaveBufCollectibleMinOff = 0
+  cachedSaveBufCollectibleMaxEnd = 0
+  cachedGdmBoolEntryAddrs = null
+  cachedGdmBoolWindows = null
+  cachedGdmCouponAddr = 0n
   cachedLiveScene = null
   cachedLiveAgeHint = null
   lastRescanTime = 0
   lastMasterReadTime = 0
+  lastSaveBufCollectibleReadTime = 0
   lastMasterRescanTime = 0
   lastGdmRescanTime = 0
   lastHashesReadTime = 0
   lastAgeReadTime = 0
   cachedMasterCollectedIds = null
   cachedMasterHeartContainerIds = null
+  cachedMasterHeartPieceIds = null
+  cachedSaveBufCollectibles = null
   prevMasterReadCount = null
   prevMasterCollectedSet = null
   stickyLastCollectedId = null
@@ -2846,12 +3638,43 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
   let authoritativeSkulltulas = false
   let collectedHeartContainerIds: string[] = []
   let authoritativeHeartContainers = false
+  let collectedHeartPieceIds: string[] = []
+  let authoritativeHeartPieces = false
+  let collectedBeanIds: string[] = []
+  let authoritativeBeans = false
+  let collectedFairyIds: string[] = []
+  let authoritativeFairies = false
+  let collectedBottleIds: string[] = []
+  let authoritativeBottles = false
+  let collectedThoughtIds: string[] = []
+  let authoritativeThoughts = false
 
   if (source === 'memory' && place && liveState.masterCollectedIds !== null) {
     collectedSkulltulaIds = liveState.masterCollectedIds
     authoritativeSkulltulas = true
     collectedHeartContainerIds = liveState.masterHeartContainerIds ?? []
     authoritativeHeartContainers = liveState.masterHeartContainerIds !== null
+
+    const saveBufHpIds = liveState.saveBufCollectibles?.heartPieceIds ?? null
+    const mergedHeartPieces = new Set<string>(liveState.masterHeartPieceIds ?? [])
+    if (saveBufHpIds) {
+      for (const id of saveBufHpIds) {
+        mergedHeartPieces.add(id)
+      }
+    }
+    collectedHeartPieceIds = Array.from(mergedHeartPieces).sort()
+    authoritativeHeartPieces = liveState.masterHeartPieceIds !== null && saveBufHpIds !== null
+
+    if (liveState.saveBufCollectibles) {
+      collectedBeanIds = liveState.saveBufCollectibles.beanIds
+      authoritativeBeans = true
+      collectedFairyIds = liveState.saveBufCollectibles.fairyIds
+      authoritativeFairies = true
+      collectedBottleIds = liveState.saveBufCollectibles.bottleIds
+      authoritativeBottles = true
+      collectedThoughtIds = liveState.saveBufCollectibles.thoughtIds
+      authoritativeThoughts = true
+    }
 
     const currentSet = new Set(collectedSkulltulaIds)
     if (prevMasterCollectedSet !== null) {
@@ -2880,12 +3703,44 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
         : source === 'save' && saveState?.savedHashes
           ? saveState.savedHashes
           : null
-    if (fallbackHashes) {
-      collectedSkulltulaIds = collectIdsFromHashMap(KNOWN_SKULLTULA_HASH_MAP, fallbackHashes)
-      collectedHeartContainerIds = collectIdsFromHashMap(
-        KNOWN_HEART_CONTAINER_HASH_MAP,
-        fallbackHashes,
+    const fallbackBoolHeartPieces =
+      source === 'memory'
+        ? liveState.saveBufCollectibles?.heartPieceIds ?? null
+        : source === 'save'
+          ? saveState?.savedHeartPieceBoolIds ?? null
+          : null
+    if (fallbackHashes || fallbackBoolHeartPieces) {
+      if (fallbackHashes) {
+        collectedSkulltulaIds = collectIdsFromHashMap(KNOWN_SKULLTULA_HASH_MAP, fallbackHashes)
+        collectedHeartContainerIds = collectIdsFromHashMap(
+          KNOWN_HEART_CONTAINER_HASH_MAP,
+          fallbackHashes,
+        )
+      }
+      const mergedFallbackHeartPieces = new Set<string>(
+        fallbackHashes ? collectIdsFromHashMap(KNOWN_HEART_PIECE_HASH_MAP, fallbackHashes) : [],
       )
+      if (fallbackBoolHeartPieces) {
+        for (const id of fallbackBoolHeartPieces) {
+          mergedFallbackHeartPieces.add(id)
+        }
+      }
+      collectedHeartPieceIds = Array.from(mergedFallbackHeartPieces).sort()
+    }
+    if (source === 'memory' && liveState.saveBufCollectibles) {
+      collectedBeanIds = liveState.saveBufCollectibles.beanIds
+      authoritativeBeans = true
+      collectedFairyIds = liveState.saveBufCollectibles.fairyIds
+      authoritativeFairies = true
+      collectedBottleIds = liveState.saveBufCollectibles.bottleIds
+      authoritativeBottles = true
+      collectedThoughtIds = liveState.saveBufCollectibles.thoughtIds
+      authoritativeThoughts = true
+    } else if (source === 'save' && saveState) {
+      collectedBeanIds = saveState.savedBeanIds
+      collectedFairyIds = saveState.savedFairyIds
+      collectedBottleIds = saveState.savedBottleIds
+      collectedThoughtIds = saveState.savedThoughtIds
     }
   }
 
@@ -2910,6 +3765,16 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
     authoritativeSkulltulas,
     collectedHeartContainerIds,
     authoritativeHeartContainers,
+    collectedHeartPieceIds,
+    authoritativeHeartPieces,
+    collectedBeanIds,
+    authoritativeBeans,
+    collectedFairyIds,
+    authoritativeFairies,
+    collectedBottleIds,
+    authoritativeBottles,
+    collectedThoughtIds,
+    authoritativeThoughts,
     lastCollectedSkulltulaId: stickyLastCollectedId,
     lastPickedItem,
     source,
@@ -2948,6 +3813,16 @@ function createOfflineFallbackState(): LichiiTelemetryState {
     authoritativeSkulltulas: false,
     collectedHeartContainerIds: [],
     authoritativeHeartContainers: false,
+    collectedHeartPieceIds: [],
+    authoritativeHeartPieces: false,
+    collectedBeanIds: [],
+    authoritativeBeans: false,
+    collectedFairyIds: [],
+    authoritativeFairies: false,
+    collectedBottleIds: [],
+    authoritativeBottles: false,
+    collectedThoughtIds: [],
+    authoritativeThoughts: false,
     lastCollectedSkulltulaId: null,
     lastPickedItem: null,
     source: 'none',
@@ -2971,6 +3846,92 @@ function serializeComparableTelemetry(state: LichiiTelemetryState): string {
   return JSON.stringify({ ...state, updatedAt: 0 })
 }
 
+interface SseClient {
+  write: (chunk: string) => boolean
+  close: () => void
+}
+
+const sseClients = new Set<SseClient>()
+let ssePollTimer: ReturnType<typeof setTimeout> | null = null
+let sseKeepaliveTimer: ReturnType<typeof setInterval> | null = null
+let sseUnsubscribeSync: (() => void) | null = null
+let sseLastComparable = ''
+let sseLastTelemetryFrame = ''
+let sseBroadcasterEpoch = 0
+
+function formatSseEvent(event: string, data: unknown): string {
+  return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
+}
+
+function broadcastSseFrame(frame: string): void {
+  for (const client of [...sseClients]) {
+    if (!client.write(frame)) {
+      client.close()
+    }
+  }
+}
+
+function stopSseBroadcasterIfIdle(): void {
+  if (sseClients.size > 0) return
+  sseBroadcasterEpoch++
+  if (ssePollTimer !== null) {
+    clearTimeout(ssePollTimer)
+    ssePollTimer = null
+  }
+  if (sseKeepaliveTimer !== null) {
+    clearInterval(sseKeepaliveTimer)
+    sseKeepaliveTimer = null
+  }
+  if (sseUnsubscribeSync !== null) {
+    sseUnsubscribeSync()
+    sseUnsubscribeSync = null
+  }
+  sseLastComparable = ''
+  sseLastTelemetryFrame = ''
+}
+
+function startSseBroadcaster(): void {
+  const epoch = sseBroadcasterEpoch
+  if (sseKeepaliveTimer === null) {
+    sseKeepaliveTimer = setInterval(() => {
+      if (sseClients.size === 0) {
+        stopSseBroadcasterIfIdle()
+        return
+      }
+      broadcastSseFrame(': keepalive\n\n')
+    }, 15000)
+    sseKeepaliveTimer.unref?.()
+  }
+
+  if (sseUnsubscribeSync === null) {
+    sseUnsubscribeSync = subscribeSyncUpdates((syncState) => {
+      broadcastSseFrame(formatSseEvent('sync', syncState))
+    })
+  }
+
+  const runTick = async () => {
+    if (sseClients.size === 0 || epoch !== sseBroadcasterEpoch) return
+    const state = await getSafeTelemetryState()
+    if (sseClients.size === 0 || epoch !== sseBroadcasterEpoch) return
+
+    const comparable = serializeComparableTelemetry(state)
+    if (comparable !== sseLastComparable) {
+      sseLastComparable = comparable
+      const frame = formatSseEvent('telemetry', state)
+      sseLastTelemetryFrame = frame
+      broadcastSseFrame(frame)
+    }
+
+    const delayMs = isLiveTelemetryState(state) ? 120 : 750
+    ssePollTimer = setTimeout(() => {
+      void runTick()
+    }, delayMs)
+    ssePollTimer.unref?.()
+  }
+
+  void runTick()
+}
+
 /** Handles `GET /api/lichii/stream` Server-Sent Events for live telemetry and sync state. */
 export function handleLichiiStreamRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
   res.writeHead(200, {
@@ -2982,80 +3943,46 @@ export function handleLichiiStreamRequest(req: http.IncomingMessage, res: http.S
   res.flushHeaders?.()
 
   let closed = false
-  let pollTimer: ReturnType<typeof setTimeout> | null = null
-  let keepaliveTimer: ReturnType<typeof setInterval> | null = null
-  let lastComparable = ''
-
-  const sendEvent = (event: string, data: unknown) => {
-    if (closed || res.writableEnded || res.destroyed) return
-    try {
-      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
-    } catch {
-      cleanup()
-    }
-  }
-
-  const unsubscribeSync = subscribeSyncUpdates((syncState) => {
-    sendEvent('sync', syncState)
-  })
 
   const cleanup = () => {
     if (closed) return
     closed = true
-    if (pollTimer !== null) {
-      clearTimeout(pollTimer)
-      pollTimer = null
-    }
-    if (keepaliveTimer !== null) {
-      clearInterval(keepaliveTimer)
-      keepaliveTimer = null
-    }
-    unsubscribeSync()
+    sseClients.delete(client)
     req.off('close', cleanup)
     res.off('close', cleanup)
+    stopSseBroadcasterIfIdle()
+  }
+
+  const client: SseClient = {
+    write: (chunk: string) => {
+      if (closed || res.writableEnded || res.destroyed) return false
+      try {
+        res.write(chunk)
+        return true
+      } catch {
+        return false
+      }
+    },
+    close: cleanup,
   }
 
   req.on('close', cleanup)
   res.on('close', cleanup)
-
-  keepaliveTimer = setInterval(() => {
-    if (closed || res.writableEnded || res.destroyed) {
-      cleanup()
-      return
-    }
-    try {
-      res.write(': keepalive\n\n')
-    } catch {
-      cleanup()
-    }
-  }, 15000)
-  keepaliveTimer.unref?.()
+  sseClients.add(client)
 
   // Push current sync state immediately without waiting for telemetry I/O.
-  sendEvent('sync', getSyncState())
-
-  const scheduleNext = (delayMs: number) => {
-    if (closed) return
-    pollTimer = setTimeout(() => {
-      void tick(false)
-    }, delayMs)
-    pollTimer.unref?.()
+  if (!client.write(formatSseEvent('sync', getSyncState()))) {
+    cleanup()
+    return
   }
 
-  const tick = async (isInitial: boolean) => {
-    const state = await getSafeTelemetryState()
-    if (closed) return
-
-    const comparable = serializeComparableTelemetry(state)
-    if (isInitial || comparable !== lastComparable) {
-      lastComparable = comparable
-      sendEvent('telemetry', state)
+  if (sseClients.size === 1) {
+    startSseBroadcaster()
+  } else if (sseLastTelemetryFrame) {
+    if (!client.write(sseLastTelemetryFrame)) {
+      cleanup()
     }
-
-    scheduleNext(isLiveTelemetryState(state) ? 120 : 750)
   }
-
-  void tick(true)
 }
 
 export function lichiiTelemetryPlugin(): Plugin {

@@ -66,17 +66,20 @@ export function computeGlobalProgress(
     }
   }
 
-  const categories: CategoryProgress[] = sourceDataset.categories.map((category) => {
+  const categories: CategoryProgress[] = []
+  for (const category of sourceDataset.categories) {
     const total = categoryTotals.get(category.key) ?? 0
+    if (total === 0) continue
+
     const done = categoryDone.get(category.key) ?? 0
-    return {
+    categories.push({
       key: category.key,
       name: category.name,
       done,
       total,
       percentage: toPercentage(done, total),
-    }
-  })
+    })
+  }
 
   const places: PlaceProgress[] = []
   for (const place of sourceDataset.places) {

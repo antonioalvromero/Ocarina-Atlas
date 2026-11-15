@@ -276,7 +276,7 @@ describe('LichiiStatusPanel SSR rendering', () => {
     expect(html).toContain('42/100')
     expect(html).toContain('Go to Link')
     expect(html).toContain('Follow Link: On')
-    expect(html).toContain('Auto-Skulltula: On')
+    expect(html).toContain('Auto Tracking: On')
     expect(html).toContain('(12.3, 45.7, -78.9)')
     expect(html).toContain('Collapse tracker panel')
   })

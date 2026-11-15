@@ -133,11 +133,32 @@ function getCacheControlForAsset(pathname: string): string {
   return 'public, max-age=3600'
 }
 
+function isIfNoneMatchSatisfied(
+  ifNoneMatch: string | string[] | undefined,
+  etag: string,
+): boolean {
+  if (!ifNoneMatch) return false
+  const raw = (Array.isArray(ifNoneMatch) ? ifNoneMatch.join(',') : ifNoneMatch).trim()
+  if (!raw) return false
+  if (raw === '*') return true
+
+  const targetOpaque = etag.startsWith('W/') ? etag.slice(2) : etag
+  for (const part of raw.split(',')) {
+    const token = part.trim()
+    if (!token) continue
+    if (token === '*') return true
+    const candidateOpaque = token.startsWith('W/') ? token.slice(2) : token
+    if (candidateOpaque === targetOpaque) return true
+  }
+  return false
+}
+
 async function tryServeStaticAsset(
   pathname: string,
   method: string,
   clientDir: string,
   res: http.ServerResponse,
+  ifNoneMatch?: string | string[],
 ): Promise<boolean> {
   if (pathname === '/' || (method !== 'GET' && method !== 'HEAD')) {
     return false
@@ -186,11 +207,23 @@ async function tryServeStaticAsset(
 
   const ext = path.extname(targetPath).toLowerCase()
   const contentType = MIME_TYPES[ext] ?? 'application/octet-stream'
+  const cacheControl = getCacheControlForAsset(pathname)
+  const etag = `W/"${stat.size}-${Math.trunc(stat.mtimeMs)}"`
+
+  if (isIfNoneMatchSatisfied(ifNoneMatch, etag)) {
+    res.writeHead(304, {
+      ETag: etag,
+      'Cache-Control': cacheControl,
+    })
+    res.end()
+    return true
+  }
 
   res.writeHead(200, {
     'Content-Type': contentType,
     'Content-Length': stat.size.toString(),
-    'Cache-Control': getCacheControlForAsset(pathname),
+    'Cache-Control': cacheControl,
+    ETag: etag,
   })
 
   if (method === 'HEAD') {
@@ -336,7 +369,15 @@ async function main(): Promise<void> {
       return
     }
 
-    if (await tryServeStaticAsset(requestUrl.pathname, method, clientDir, res)) {
+    if (
+      await tryServeStaticAsset(
+        requestUrl.pathname,
+        method,
+        clientDir,
+        res,
+        req.headers['if-none-match'],
+      )
+    ) {
       return
     }
 

@@ -1,0 +1,946 @@
+{
+  "places": {
+    "kokiri": {
+      "intro": "A Floresta Kokiri, a vila onde a aventura começa, tem três Skulltulas Douradas e a terra macia para um Feijão Mágico em seu mapa. Duas das Skulltulas aparecem como criança: a que fica atrás da Casa dos Irmãos Sabe-Tudo, apenas à noite, e a da terra macia perto da loja, a qualquer hora e com Insetos. Plante um feijão nesse mesmo ponto também, pois como adulto ele leva você a uma saliência com Rupees, e volte à noite com o Gancho para pegar a terceira Skulltula, no alto da Casa das Gêmeas."
+    },
+    "perdido": {
+      "intro": "Quase tudo no Bosque Perdido é coletado como criança: dois Pedaços de Coração com a ocarina, três Skulltulas Douradas e dois pontos para Feijões Mágicos. É o labirinto que liga a Floresta Kokiri à Campina Sagrada da Floresta, e os Pedaços ficam com os Skull Kids: a Canção de Saria para o que toca flauta, à esquerda da entrada, e o jogo da memória perto do alvo, à direita. Traga Insetos para os dois pontos de terra macia, o que fica perto da ponte para os Campos de Hyrule e o da clareira da árvore solitária, e plante um feijão em cada um: como adulto e à noite, o da clareira leva você até a saliência da terceira Skulltula."
+    },
+    "prado": {
+      "intro": "Uma única Skulltula Dourada, e como adulto, é tudo o que a Campina Sagrada da Floresta guarda, e o mapa marca onde ela aparece no labirinto que leva ao Templo da Floresta. Ela surge na parede direita na metade do labirinto, depois de desviar dos Moblins e antes da escadaria: derrube-a com o Gancho, o mesmo que você precisa para entrar no templo."
+    },
+    "llanura": {
+      "intro": "O mapa dos Campos de Hyrule marca dois Pedaços de Coração e duas Skulltulas Douradas. Dois deles ficam no subsolo, em grutas que abrem com uma Bomba ou com o Martelo Megaton. Na que fica a leste da ponte levadiça da Cidade do Castelo, junto ao fosso, um Deku Mercador vende um Pedaço por 100 Rupees se você for como criança e souber a senha, que o Pensamento de Fada na árvore ao lado conta a você como adulto; o outro está em um baú sob uma saliência rochosa no oeste, perto do Vale Gerudo, e você precisa abri-lo como criança. Das Skulltulas, a do pinheiro solitário no leste cai quando você rola contra o tronco, e a da gruta do círculo de pedras, perto do Rancho Lon Lon, exige o Bumerangue ou o Gancho."
+    },
+    "lonlon": {
+      "intro": "Como criança você consegue pegar quase tudo no Rancho Lon Lon: quatro Skulltulas Douradas, um Pedaço de Coração e uma Garrafa, cada um marcado no mapa. Duas das Skulltulas só aparecem à noite e exigem o Bumerangue, na janela da casa e dentro da torre de pedra nos fundos; a terceira, na árvore da entrada, cai a qualquer hora ao rolar contra o tronco, e a quarta aparece como adulto dentro de um caixote na gruta a sudeste do rancho, se como criança você tiver lido o Pensamento de Fada de lá e derrotado a Skulltula comum. O Pedaço de Coração fica nos fundos da torre de pedra, atrás de alguns caixotes, e a Garrafa é o prêmio do jogo dos Super Cuccos de Talon, embora antes você precise acordá-lo no Castelo de Hyrule com o Cucco do Ovo Estranho."
+    },
+    "ciudadela": {
+      "intro": "Três Pedaços de Coração, duas Garrafas e uma Skulltula Dourada: é isso o que a Cidade do Castelo de Hyrule guarda, com um mapa para criança e outro para adulto, porque a cidade muda. Quase tudo é para o Link criança: dois dos Pedaços vêm à noite, na Loja do Baú do Tesouro e ao devolver Richard, o cachorrinho perdido, à dona, e o terceiro é um prêmio no Boliche de Bombchus, que só abre depois que você derrota o Rei Dodongo. A Skulltula fica escondida dentro de um caixote na casa da guarda na entrada, e as Garrafas são a nova do remake, um presente do lojista ao lado do caminho para o Templo do Tempo, e a do Colecionador de Poes, como adulto, por cinco Grandes Poes."
+    },
+    "castillo": {
+      "intro": "Entre os dois mapas do Castelo de Hyrule, os jardins como criança e os arredores do Castelo de Ganon como adulto, há três Skulltulas Douradas e duas Grandes Fadas. Duas das Skulltulas aparecem como criança: a da árvore no jardim de sebes e a da gruta que a Canção das Tempestades abre perto da árvore junto ao fosso, junto com a Grande Fada do ataque giratório, atrás de uma pedra no fim do caminho sem saída a leste. Como adulto, resta a Skulltula no arco em ruínas, que você só vê se olhar para trás ao atravessá-lo, e a Grande Fada da Defesa Dupla, bloqueada por um pilar que as Manoplas Douradas levantam."
+    },
+    "kakariko": {
+      "intro": "A Vila Kakariko fica ao pé da Montanha da Morte, passando a ponte dos Campos de Hyrule, e é um dos lugares com mais coletáveis no mapa. Cinco de suas seis Skulltulas Douradas aparecem como criança e à noite, com a espada ou o Estilingue, e a sexta, no paredão rochoso bem ao lado do telhado da Casa de Impa, como adulto, à noite e com o Gancho. Os Pedaços de Coração se dividem entre as duas idades, a Garrafa vem da Moça dos Cuccos quando você devolve seus sete Cuccos, e a Casa das Skulltulas tem mais um Pedaço esperando você juntar 50 símbolos."
+    },
+    "cementerio": {
+      "intro": "O Cemitério de Kakariko tem um mapa para cada idade e, juntos, eles guardam quatro Pedaços de Coração, duas Skulltulas Douradas e um Feijão Mágico. Como criança e à noite, Dampé cava por 10 Rupees e de vez em quando desenterra um Pedaço, e a lápide perto da Tumba da Família Real esconde outro em sua cripta, que nessa idade só abre à noite. Como adulto vêm a corrida contra o fantasma de Dampé, que dá o Pedaço na segunda tentativa (a primeira dá o Gancho), e a saliência na parede esquerda, alcançada pelo feijão plantado como criança. As Skulltulas aparecem à noite no muro da entrada e, com Insetos, como criança e a qualquer hora, na terra macia ao lado do Túmulo de Dampé."
+    },
+    "sendero": {
+      "intro": "Ao longo da Trilha da Montanha da Morte, de Kakariko até a Cratera, o mapa marca quatro Skulltulas Douradas, um Pedaço de Coração, uma Grande Fada e um Feijão Mágico. Como criança, tire a pedra da Caverna dos Dodongos com uma Bomba ou Flor-Bomba e aproveite a terra macia que fica na frente dela: Insetos para uma Skulltula e um feijão que serve de atalho quando você for adulto. O Pedaço de Coração está na saliência acima da entrada da caverna, e a Grande Fada da magia e do Fogo de Din fica no cume, atrás da parede rachada ao lado de Kaepora Gaebora. Das outras três Skulltulas, a da parede rachada perto de Kakariko aparece em qualquer idade, e as duas para o Link adulto à noite ficam sob pedras que você precisa quebrar, uma delas apenas com o Martelo Megaton."
+    },
+    "goron": {
+      "intro": "A Cidade Goron, escavada na Montanha da Morte, tem apenas três coletáveis no mapa: duas Skulltulas Douradas e um Pedaço de Coração, divididos entre as duas idades. Como criança, a Skulltula no labirinto de pedras do andar superior é alcançada abrindo caminho com Bombas, e o Pedaço sai do grande pote giratório no centro: acenda as tochas ao redor dele para fazê-lo girar e jogue uma Bomba dentro dele da prancha do andar de cima. Como adulto, resta a outra Skulltula, sob uma saliência rochosa no teto, que só o Gancho alcança."
+    },
+    "crater": {
+      "intro": "O calor domina a Cratera da Montanha da Morte, onde o mapa marca três Pedaços de Coração, duas Skulltulas Douradas, uma Grande Fada e um Feijão Mágico. Você entra pelo cume da montanha ou pela Cidade Goron; como criança, o calor coloca um cronômetro em você, e como adulto, com a Túnica Goron, não há pressa. Como criança você pega a Skulltula no caixote da entrada do cume, o Pedaço que o Deku Mercador vende por 100 Rupees e a Skulltula na terra macia do Bolero do Fogo, alcançada tocando essa canção: plante o feijão lá também. Como adulto, essa planta deixa você na rocha em forma de cúpula com outro Pedaço; o terceiro, que também dá para pegar como criança, fica em um buraco na parede ao descer pelas redes da entrada, e a Grande Fada que dobra sua magia espera atrás de pedras que só o Martelo Megaton quebra."
+    },
+    "rio": {
+      "intro": "O Vendedor de Feijões fica na entrada do Rio Zora e, rio acima, o mapa marca quatro Pedaços de Coração e quatro Skulltulas Douradas. Como criança, passe pelas pedras da entrada com uma Bomba, compre todos os feijões que puder dele e plante um na terra macia ao lado dele. Todos os quatro Pedaços são para o Link criança: dois em plataformas alcançadas planando com um Cucco (ou com o Bumerangue, no caso do que fica junto à cachoeira) e dois dos sapos no toco, um por tocar suas canções e vencer o jogo deles e outro pela Canção das Tempestades. Das Skulltulas, duas são para o Link criança, a da terra macia do Vendedor de Feijões, com Insetos, e, à noite, a da parede junto à cachoeira, e duas para o Link adulto à noite, bem no alto das paredes e com o Gancho."
+    },
+    "dominio": {
+      "intro": "Um por idade: é assim que se dividem os dois coletáveis do Domínio dos Zora, um Pedaço de Coração como criança e uma Skulltula Dourada como adulto, cada um em seu ponto no mapa. Para o Pedaço, acenda todas as tochas do andar inferior com um Graveto Deku, começando pela do pé da escada, e o baú aparecerá atrás da cachoeira. Como adulto, com o domínio congelado, a Skulltula aparece à noite no alto da cachoeira congelada, e você a derruba com o Gancho ou uma flecha."
+    },
+    "fuente": {
+      "intro": "Atrás do trono do Rei Zora, a Fonte Zora guarda dois Pedaços de Coração, três Skulltulas Douradas e uma Grande Fada, com um mapa para cada idade. Como criança é o lago de Jabu-Jabu, e como adulto, um lago congelado a caminho da Caverna de Gelo. A Grande Fada, a do Vento de Farore, abre em qualquer idade, atrás da parede rachada no canto sudeste, e duas das Skulltulas aparecem como criança: a do pinheiro nesse mesmo canto e, à noite e com o Bumerangue, a da parede do arco submerso. Como adulto, um Pedaço espera no bloco de gelo mais distante e outro no fundo, com a Túnica Zora e as Botas de Ferro, e a terceira Skulltula aparece à noite do outro lado de uma caverna coberta por dois blocos com símbolos Zora, que as Manoplas de Prata levantam."
+    },
+    "lago": {
+      "intro": "O Lago Hylia é uma das áreas mais cheias do mapa: cinco Skulltulas Douradas, três Pedaços de Coração, uma Garrafa e um Feijão Mágico, nas duas idades. Como criança, a terra macia bem ao lado do laboratório dá uma Skulltula com Insetos e um feijão que leva você ao telhado como adulto, onde está um dos Pedaços; outro vem do dono do Lago de Pesca por um peixe com mais de 50 cm, e o terceiro do Cientista do Lago, se você mergulhar até o fundo do tanque dele com a Escama Dourada. A Garrafa com a Carta de Ruto fica no fundo do lago, perto do túnel para o Domínio dos Zora, e precisa da Escama de Prata. Das Skulltulas, três são para o Link criança e duas para o Link adulto: a do caixote no fundo do tanque, com as Botas de Ferro, e a da copa da grande árvore na ilha, à noite e com o Supergancho."
+    },
+    "valle": {
+      "intro": "Para chegar à Fortaleza Gerudo você precisa atravessar o Vale Gerudo, e seu mapa marca quatro Skulltulas Douradas, dois Pedaços de Coração e um Feijão Mágico. Um dos Pedaços fica atrás da grande cachoeira, aonde você chega nadando, e o outro, em um baú em uma saliência do cânion, é alcançado como criança planando com o Cucco perto da ponte. Na plataforma da vaca, ao pé da cachoeira, a terra macia dá uma Skulltula com Insetos e um feijão que também deixa você perto do Pedaço da cachoeira como adulto. As outras três Skulltulas aparecem à noite: a do jato d'água perto da passarela, como criança e com o Bumerangue, e as da tenda dos carpinteiros e do arco de pedra em frente a ela, como adulto e com o Gancho."
+    },
+    "fortaleza": {
+      "intro": "Tudo o que a Fortaleza Gerudo guarda é para o Link adulto: dois Pedaços de Coração e duas Skulltulas Douradas, que o mapa posiciona no campo de tiro com arco e nos telhados. Resgatar os quatro carpinteiros rende o Passe Gerudo, que abre o campo de tiro a cavalo: durante o dia, faça 1.000 pontos montado em Epona para ganhar um Pedaço, e volte à noite com o Gancho para pegar a Skulltula no alvo distante. A saída alta da cozinha leva aos telhados, onde fica a outra Skulltula à noite e, no telhado mais alto, o baú com o segundo Pedaço, que você alcança com o Supergancho da saliência rochosa acima dele."
+    },
+    "desierto": {
+      "intro": "O Deserto Assombrado guarda apenas uma Skulltula Dourada, como adulto, na câmara sob o monumento de pedra a caminho do Colosso do Deserto. Para atravessá-lo, passe pelo rio de areia com as Botas Flutuantes ou o Supergancho e siga as bandeiras; no monumento, entre pela abertura entre as colunas, desça a escada e derrube a Skulltula com a espada de cima do altar."
+    },
+    "coloso": {
+      "intro": "Com o Réquiem do Espírito você chega ao Colosso do Deserto como criança, e seu mapa marca três Skulltulas Douradas, um Pedaço de Coração, uma Grande Fada e um Feijão Mágico. Como adulto você chega atravessando o Deserto Assombrado. Vá como criança para soltar Insetos na terra macia da entrada do Templo do Espírito, o que rende uma Skulltula, e para plantar o feijão ali: como adulto, a planta carrega você por cima da grande rocha, onde outra Skulltula aparece à noite, até o arco de pedra com o Pedaço de Coração. A terceira Skulltula surge à noite bem no alto do paredão rochoso à direita do Templo do Espírito, com o Gancho, e a Grande Fada do Amor de Nayru, atrás da parede rachada ao norte do oásis, abre nas duas idades com uma Bomba ou Bombchu."
+    },
+    "deku": {
+      "intro": "O Interior da Árvore Deku é a primeira masmorra do jogo, acessada como criança logo ao sair da Floresta Kokiri com a espada e o escudo. O mapa cobre seus cinco andares, do topo até o segundo subsolo. Suas quatro Skulltulas Douradas caem com a espada ou com o Estilingue encontrado lá dentro e, no remake, todas as quatro podem ser coletadas já nessa primeira visita: a da sala dos fundos no subsolo não precisa mais de Bombas nem de Bumerangue, basta queimar a teia com um Graveto Deku. A Rainha Gohma, no segundo subsolo, deixa o Recipiente de Coração: atordoe o olho dela com o Estilingue e acerte-o com a espada."
+    },
+    "dodongos": {
+      "intro": "A Caverna dos Dodongos fica na Trilha da Montanha da Morte e abre como criança explodindo a pedra da entrada com uma Flor-Bomba e o Bracelete Goron. Seu mapa tem os dois andares da caverna. Das cinco Skulltulas Douradas, quatro caem na primeira visita, como criança; a da saliência do espantalho exige voltar como adulto com o Gancho e a Canção do Espantalho, ou com o Supergancho. O Rei Dodongo deixa o Recipiente de Coração: uma Bomba na boca e depois a espada."
+    },
+    "jabu": {
+      "intro": "Você entra na Barriga de Jabu-Jabu como criança pela Fonte Zora, soltando um peixe diante da boca de Jabu-Jabu, e lá dentro quase tudo gira em torno do Bumerangue que você pega logo no início. O mapa tem seus três andares, subsolo incluído. A primeira Skulltula Dourada cai com a espada na sala do interruptor da água; as outras três, com o Bumerangue, duas delas juntas no subsolo da grande sala com os buracos, mirando manualmente porque não dá para travar a mira. Barinade deixa o Recipiente de Coração, também com arremessos de Bumerangue."
+    },
+    "bosque": {
+      "intro": "O Templo da Floresta é a primeira masmorra de adulto: você entra pela Campina Sagrada da Floresta com o Gancho, e esse mesmo Gancho derruba suas cinco Skulltulas Douradas e puxa os símbolos até você. O mapa tem seus cinco andares. O melhor é pegá-las conforme avança, pois cada uma cai em uma sala do caminho: a entrada, o saguão, os dois pátios e a sala giratória no subsolo, logo antes do chefe. O Recipiente de Coração é deixado por Phantom Ganon, com o Arco ou o Gancho à mão."
+    },
+    "fuego": {
+      "intro": "Você chega ao Templo do Fogo como adulto pela Cratera da Montanha da Morte, vestindo a Túnica Goron para suportar o calor. Seu mapa tem cinco andares, do 1F ao 5F. Suas cinco Skulltulas Douradas pedem mais do que a espada: a Canção do Tempo, Bombas, o Gancho e, para duas delas, a Canção do Espantalho que você compõe como criança e como adulto no Lago Hylia. A que fica atrás da estátua no saguão e o Recipiente de Coração de Volvagia esperam pelo Martelo Megaton, então deixe ambos por último."
+    },
+    "agua": {
+      "intro": "O Templo da Água fica no fundo do Lago Hylia e é acessado como adulto com as Botas de Ferro e a Túnica Zora, mudando o nível da água com a Canção de Ninar de Zelda. Seu mapa tem os quatro andares, do B1 ao 3F. Das cinco Skulltulas Douradas, duas podem ser coletadas antes de derrotar Dark Link, a da grade no subsolo e a que fica atrás da parede rachada submersa; as outras três precisam do Supergancho que essa luta deixa, então o caminho mais fácil é pegá-lo primeiro e depois fazer uma varredura pelo pilar central, pelo rio com redemoinhos e pela cachoeira com as pedras. Morpha deixa o Recipiente de Coração no final."
+    },
+    "sombra": {
+      "intro": "O Templo das Sombras, sob o Cemitério de Kakariko, abre como adulto com o Noturno das Sombras e o Fogo de Din, e lá dentro as Lentes da Verdade e as Botas Flutuantes são essenciais desde o início. O mapa tem seus quatro andares de subsolo. Suas cinco Skulltulas Douradas aparecem na ordem do trajeto: na sala das foices invisíveis, na dos espinhos no teto, no fosso do corredor dos ventiladores, na saliência da sala do barco e dentro das caveiras gigantes; duas caem com o Gancho, a da sala do barco exige o Supergancho e a Canção do Espantalho, e a das caveiras, Bombas. O Recipiente de Coração é deixado por Bongo Bongo, com flechas ou o Gancho e as Lentes ativas."
+    },
+    "espiritu": {
+      "intro": "O Templo do Espírito, no Colosso do Deserto, é explorado duas vezes: primeiro como criança, passando pelo buraco pequeno depois de falar com Nabooru, e depois como adulto, empurrando o grande bloco no saguão com as Manoplas de Prata. Seu mapa tem quatro andares, do 1F ao 4F. Três de suas cinco Skulltulas Douradas já podem ser coletadas na parte de criança, duas com o Bumerangue ou o Estilingue e uma com a espada, e as outras duas, na parte de adulto, exigem a Canção do Tempo e o Supergancho com a Canção do Espantalho. Para o Recipiente de Coração de Twinrova você precisa do Escudo Espelho, que é obtido no próprio templo."
+    },
+    "pozo": {
+      "intro": "Você entra no Fundo do Poço como criança, depois de drenar o poço da Vila Kakariko tocando a Canção das Tempestades no Moinho. Lá dentro, o mapa de dois andares marca três Skulltulas Douradas, e todas exigem o Bumerangue e as Lentes da Verdade, que são obtidas no subsolo. Sem as Lentes não é possível ver as paredes falsas, os caminhos invisíveis nem os alçapões; as três Skulltulas esperam atrás de portas trancadas, duas na área central e uma na sala do Like Like."
+    },
+    "hielo": {
+      "intro": "Você entra na Caverna de Gelo como adulto pela Fonte Zora congelada, seguindo os blocos de gelo até a caverna nos fundos, e é lá que você consegue as Botas de Ferro. Seu mapa marca três Skulltulas Douradas, e todas as três caem com o Gancho. Uma fica na sala da lâmina giratória, entre as estalagmites; para as outras duas, colete os Rupees Prateados nessa sala para abrir a sala do Mapa da Masmorra, encha uma Garrafa com Fogo Azul lá e use-o para derreter as duas paredes de gelo vermelho na sala da lâmina: atrás delas ficam a sala da Bússola e a sala do bloco de gelo deslizante."
+    },
+    "gerudo": {
+      "intro": "O Campo de Treinamento Gerudo é a masmorra de provação da Fortaleza Gerudo, acessada como adulto com o Passe Gerudo. Ele não guarda Skulltulas Douradas nem Pedaços de Coração, portanto neste mapa não há coletáveis para marcar; sua recompensa são as Flechas de Gelo."
+    },
+    "ganon": {
+      "intro": "O Castelo de Ganon se ergue como adulto onde ficava o Castelo de Hyrule, e é a masmorra final do jogo. Ele não guarda Skulltulas Douradas nem Pedaços de Coração, portanto neste mapa não há coletáveis para marcar. O que há do lado de fora, pelo caminho da entrada, é a Grande Fada da Defesa Dupla e uma Skulltula Dourada em um arco em ruínas: essas estão no mapa do Castelo de Hyrule."
+    }
+  },
+  "items": {
+    "kokiri-gs-01": {
+      "name": "Atrás da Casa dos Irmãos Sabe-Tudo",
+      "desc": "A Casa dos Irmãos Sabe-Tudo, na colina em frente à Casa do Grande Mido e ao lado do Centro de Treinamento da Floresta, esconde esta Skulltula Dourada atrás de seu tronco. Ela só aparece à noite e apenas como criança.\n\nSuba a colina e dê a volta na casa até os fundos."
+    },
+    "kokiri-gs-02": {
+      "name": "Insetos na terra macia perto da loja",
+      "desc": "Logo atrás da Loja Kokiri há um ponto de terra macia que esconde uma Skulltula Dourada como criança, e tudo o que você precisa para fazê-la sair é uma garrafa de insetos.\n\nAssim que você **esvaziar a garrafa de insetos no ponto de terra**, a Skulltula salta do chão: derrote-a com a espada e pegue o Símbolo de Skulltula Dourada. Funciona a qualquer hora do dia."
+    },
+    "kokiri-gs-03": {
+      "name": "Atrás da Casa das Gêmeas",
+      "desc": "Esta Skulltula Dourada exige voltar à Floresta Kokiri como adulto, à noite, porque ela fica agarrada bem alto nos fundos da Casa das Gêmeas, a do telhado de duas pontas perto do caminho para a Campina da Grande Árvore Deku.\n\nSua espada não alcança tão alto, mas **o Gancho a derruba de baixo**, e um segundo disparo no símbolo traz ele até você."
+    },
+    "kokiri-bean-01": {
+      "name": "Terra macia atrás da loja",
+      "desc": "Um dos Feijões Mágicos que você compra do Vendedor de Feijões no Rio Zora vai aqui, na terra macia bem ao lado da Loja Kokiri, e o melhor é plantá-lo como criança para que já esteja pronto quando você voltar.\n\nComo adulto, a folha da planta **deixa você em uma pequena saliência com um anel de Rupees verdes** em volta de um vermelho. O mesmo ponto também guarda a Skulltula dos insetos, então como criança você resolve as duas coisas de uma vez.",
+      "hint": "Plante como criança e use como adulto."
+    },
+    "perdido-heart-01": {
+      "name": "Canção de Saria para o Skull Kid",
+      "desc": "Assim que você entra no Bosque Perdido vindo da Floresta Kokiri, o primeiro caminho à esquerda leva a um Skull Kid tocando flauta em um toco alto, que desaparece se você apenas se aproximar dele.\n\nEntão **suba no toco baixo na frente dele** e toque a Canção de Saria na sua Ocarina: o Skull Kid se tornará seu amigo e dará a você um Pedaço de Coração."
+    },
+    "perdido-heart-02": {
+      "name": "Jogo da memória com a Ocarina",
+      "desc": "A área do alvo do Estilingue, o primeiro caminho à direita ao entrar vindo da Floresta Kokiri, esconde um jogo da memória com dois Skull Kids. Desça as escadas à frente até a árvore do alvo e **passe à direita dela para subir no toco pequeno**.\n\nDepois você precisa repetir na sua Ocarina o que eles tocam, em três rodadas de cinco, seis e oito notas. Se errar uma nota, a rodada recomeça com outra melodia, e os prêmios vão subindo: Rupees nas duas primeiras e o Pedaço de Coração na terceira."
+    },
+    "perdido-gs-01": {
+      "name": "Insetos na terra macia perto da ponte",
+      "desc": "Passando pelo Skull Kid flautista, o primeiro caminho à esquerda ao entrar vindo da Floresta Kokiri, vire à esquerda novamente e você chegará à área com a ponte para os Campos de Hyrule. Você vai reconhecê-la pela Pedra da Fofoca e pelo Deku Mercador no fundo que vende a bolsa maior de Gravetos Deku.\n\nA terra macia fica bem perto da trilha ao chegar: **despeje uma garrafa de insetos nela** e, quando a Skulltula Dourada sair à superfície, acabe com ela com a espada e pegue o Símbolo de Skulltula Dourada."
+    },
+    "perdido-gs-02": {
+      "name": "Insetos na terra macia da clareira da árvore solitária",
+      "desc": "Para chegar a este ponto, siga a rota do Bosque Perdido direita, esquerda, direita, esquerda e então, em vez de seguir para a Campina Sagrada da Floresta, vire à esquerda mais uma vez. É a clareira com a árvore solitária, dois Dekus Mercadores e um buraco na grama.\n\nLá, **solte os insetos na terra macia à direita, perto de um dos Dekus**, e quando a Skulltula Dourada sair, derrote-a com a espada e pegue o Símbolo de Skulltula Dourada."
+    },
+    "perdido-gs-03": {
+      "name": "Saliência perto do Palco da Floresta",
+      "desc": "Alcançar a saliência alta onde esta Skulltula Dourada fica exige preparação como criança, pois o único caminho para cima é a planta na clareira da árvore solitária. Para chegar à clareira, vire direita, esquerda, direita, esquerda e esquerda no Bosque Perdido, depois plante o feijão na terra macia à direita, perto de um Deku Mercador.\n\nQuando voltar como adulto à noite, **pegue carona na planta até a saliência** e derrote a Skulltula com a espada."
+    },
+    "perdido-bean-01": {
+      "name": "Terra macia perto da ponte",
+      "desc": "Virar à esquerda duas vezes a partir da entrada do Bosque Perdido leva você à área com a ponte para os Campos de Hyrule, e a terra macia dali é um bom lugar para plantar um Feijão Mágico como criança.\n\nQuando voltar como adulto, **deixe a planta carregar você até a ponte** entre a Floresta Kokiri e os Campos de Hyrule e salte nela: é um atalho bem útil durante a sequência de trocas, quando o Cogumelo Estranho vence em três minutos.",
+      "hint": "Plante como criança e use como adulto."
+    },
+    "perdido-bean-02": {
+      "name": "Terra macia perto dos dois Dekus",
+      "desc": "Dois Dekus Mercadores e uma árvore solitária ficam na clareira do Bosque Perdido que você alcança virando direita, esquerda, direita, esquerda e esquerda a partir da entrada, e há um ponto de terra macia ali para plantar um Feijão Mágico como criança. Fica à direita, atrás de um dos Dekus, e insetos fazem sair uma Skulltula Dourada dele.\n\nComo adulto, **pegue carona na planta até a saliência alta da clareira**, que guarda outra Skulltula Dourada à noite.",
+      "hint": "Plante como criança e use como adulto."
+    },
+    "prado-gs-01": {
+      "name": "Parede direita antes da escada",
+      "desc": "O labirinto da Campina Sagrada da Floresta esconde esta Skulltula Dourada, embora ela só apareça como adulto. Abra caminho desviando dos Moblins e, ao chegar à metade do percurso, olhe para a parede à direita.\n\n**Acerte a Skulltula com o Gancho** e dispare novamente para puxar o Símbolo de Skulltula Dourada."
+    },
+    "llanura-heart-01": {
+      "name": "Deku Mercador perto do fosso",
+      "desc": "Saia da Cidade do Castelo de Hyrule pela ponte levadiça e siga o muro para leste ao longo da margem do fosso. Perto de uma árvore você verá um buraco que pode abrir com uma Bomba ou o Martelo Megaton: desça e fale com o Deku Mercador lá dentro.\n\nEle só vende para quem sabe a senha. Para descobri-la, vá até a árvore ao lado como Link adulto e leia o Pensamento de Fada. Depois volte como criança, fale com o Deku Mercador e **escolha \"Sell somethin', will ya?\"**: ele oferecerá o Pedaço de Coração por 100 Rupees.\n\nCompre como criança, pois como adulto ele já o vendeu para o Link do passado.",
+      "hint": "Custa 100 Rupees."
+    },
+    "llanura-heart-02": {
+      "name": "Paradoxo do baú do passado",
+      "desc": "Na extremidade oeste dos Campos de Hyrule, perto da entrada para o Vale Gerudo, o chão fica com terra avermelhada. Desça a ladeira até uma cavidade sob uma saliência rochosa e procure o baú no fundo.\n\nTem que ser como criança: como adulto o baú já está aberto e vazio, e um Pensamento de Fada explica que ele nunca esteve trancado. **Abra o baú como criança** e o Pedaço de Coração será seu.",
+      "hint": "Leia o Pensamento de Fada como adulto para saber por que está vazio."
+    },
+    "llanura-gs-01": {
+      "name": "Pinheiro solitário no leste",
+      "desc": "No leste dos Campos de Hyrule, entre o Rio Zora e a Floresta Kokiri, um pinheiro solitário fica no alto de uma colina ao lado de um riacho. Uma Skulltula Dourada se esconde nele.\n\n**Role contra o tronco** para derrubá-la no chão, acabe com ela com a espada e pegue o Símbolo de Skulltula Dourada.",
+      "hint": "Fica no alto de uma colina, ao lado de um riacho."
+    },
+    "llanura-gs-02": {
+      "name": "Gruta do círculo de pedras perto do rancho",
+      "desc": "No bosque a sudoeste do Rancho Lon Lon, perto da saída para o Lago Hylia, um círculo de pedras no chão cobre uma gruta. Abra-a com **uma Bomba ou um golpe do Martelo Megaton no círculo** e desça pelo buraco.\n\nAssim que entrar, uma Skulltula Grande cai do teto: derrote-a com a espada. A dourada está na parede; alcance-a com o Gancho ou o Bumerangue, que também trazem o Símbolo de Skulltula Dourada até você."
+    },
+    "lonlon-heart-01": {
+      "name": "Torre de pedra nos fundos",
+      "desc": "Nos fundos do Rancho Lon Lon, bem atrás do curral dos cavalos, há uma torre de pedra que serve de silo. Em um dos cantos dela, alguns caixotes cobrem uma abertura: **empurre os caixotes para o lado e engatinhe pela abertura** até o fim, onde o Pedaço de Coração aguarda."
+    },
+    "lonlon-gs-01": {
+      "name": "Árvore no caminho do curral",
+      "desc": "Assim que entrar no Rancho Lon Lon, no pátio lateral à esquerda, há uma árvore com uma Skulltula Dourada escondida nela: **role contra o tronco para derrubá-la no chão**, derrote-a e pegue o Símbolo de Skulltula Dourada."
+    },
+    "lonlon-gs-02": {
+      "name": "Caixote na gruta ao sul do rancho",
+      "desc": "Para que esta Skulltula Dourada apareça como adulto, o Link criança precisa ler o Pensamento de Fada na gruta subterrânea a sudeste do Rancho Lon Lon, perto do lago, e derrotar a Skulltula comum.\n\nFeito isso, volte como adulto. Nos fundos, encostado na parede, há um caixote de madeira. **Quebre-o rolando contra ele** e uma Skulltula Dourada sairá: derrote-a com a espada e pegue o Símbolo de Skulltula Dourada. Como curiosidade, o Pensamento de Fada terá mudado.",
+      "hint": "Mate a Skulltula no passado para encontrar a dourada no futuro."
+    },
+    "lonlon-gs-03": {
+      "name": "Janela da casa",
+      "desc": "Se você olhar para o alto da casa de Talon à noite, no Rancho Lon Lon ao lado do arco de entrada, verá uma Skulltula Dourada na janela do andar de cima, alta demais para a espada.\n\n**Jogue o Bumerangue nela de baixo**: ele a derrota e traz o Símbolo de Skulltula Dourada no mesmo arremesso. Durante o dia aquela parede fica vazia."
+    },
+    "lonlon-gs-04": {
+      "name": "Dentro da torre de pedra",
+      "desc": "A torre de pedra nos fundos do Rancho Lon Lon, atrás do curral, guarda uma Skulltula Dourada lá dentro à noite. Entre pela porta da torre e olhe para cima: ela fica no alto da parede, acima do maço de feno pendurado abaixo da janela.\n\nSó o Bumerangue alcança: **jogue-o do chão da torre** e ele derrota a Skulltula e traz o Símbolo de Skulltula Dourada no mesmo arremesso. O Estilingue a mata, mas o símbolo fica lá em cima."
+    },
+    "ciudadela-heart-01": {
+      "name": "Loja do Baú do Tesouro",
+      "desc": "A Loja do Baú do Tesouro fica à esquerda da praça da Cidade do Castelo de Hyrule ao entrar, por uma rua lateral. Ela só abre à noite e cobra 10 Rupees por partida. O dono dá a você uma chave: cada uma das cinco salas tem dois baús e apenas um guarda a chave para a próxima; escolha errado e o jogo acaba.\n\nEquipe as Lentes da Verdade na aba de Equipamento para ver o que há dentro de cada baú. **Passe pelas cinco salas e abra o baú grande na sala do prêmio** para pegar o Pedaço de Coração.",
+      "hint": "Recomendado: Lentes da Verdade."
+    },
+    "ciudadela-heart-02": {
+      "name": "O cachorrinho perdido",
+      "desc": "Richard é o cachorrinho branco que corre à noite por um dos becos dos fundos da Cidade do Castelo de Hyrule, onde um homem está inclinado para fora da janela de casa. Fale com Richard para que ele siga você.\n\nCom Richard nos seus calcanhares, vá até **a entrada da praça vindo dos Campos de Hyrule**. A dona dele dará a você o Pedaço de Coração.",
+      "hint": "Ela só dá o pedaço na primeira vez; depois disso, Rupees."
+    },
+    "ciudadela-heart-03": {
+      "name": "Boliche de Bombchus",
+      "desc": "O Boliche de Bombchus fica no lado oeste da praça do Mercado na Cidade do Castelo de Hyrule, e só abre depois que você derrota o Rei Dodongo.\n\nFale com a atendente: antes de pagar, ela diz qual prêmio está em jogo, e cada partida custa 10 Rupees. Você precisa vencer três níveis com 10 Bombchus, soltando-os atrás da linha para que atinjam o alvo no fundo, com obstáculos como um Cucco no caminho.\n\nO prêmio muda de uma partida para outra, então **continue jogando até ela anunciar o Pedaço de Coração** e vença essa partida.",
+      "hint": "10 Rupees por partida; o prêmio é anunciado antes de você pagar."
+    },
+    "ciudadela-gs-01": {
+      "name": "Casa da Guarda",
+      "desc": "Ao lado da ponte levadiça, na entrada da Cidade do Castelo de Hyrule, fica a casa da guarda, um prédio cheio de potes com uma Skulltula Dourada escondida dentro de um caixote de madeira.\n\nVá até a parede do fundo e **role contra o caixote mais à direita**, o que fica à direita do soldado quando você olha para ele."
+    },
+    "castillo-gs-01": {
+      "name": "Árvore no jardim de sebes",
+      "desc": "Você só pode explorar os jardins do Castelo de Hyrule como criança. Suba o caminho em direção ao castelo e, de um lado, entre no jardim de sebes e flores à sua frente. Atravesse-o para oeste até o canto mais distante, junto ao muro do castelo, onde há uma árvore solitária.\n\n**Role contra o tronco** para derrubar a Skulltula Dourada; derrote-a e pegue o símbolo."
+    },
+    "castillo-gs-02": {
+      "name": "Gruta da Canção das Tempestades",
+      "desc": "Para evitar o guarda no portão do Castelo de Hyrule, suba pelas vinhas e pule no fosso perto da ponte de entrada. Nade para leste por baixo da ponte e saia pelos degraus de pedra: bem ali, junto ao muro externo, há uma árvore com um círculo de terra na base.\n\n**Toque a Canção das Tempestades nesse círculo** para abrir um buraco. A gruta tem paredes rachadas que você pode explodir com Bombas: atrás de uma delas está a Skulltula Dourada. O Bumerangue a mata e traz o símbolo até você."
+    },
+    "castillo-fairy-01": {
+      "name": "Grande Fada: Ataque Giratório",
+      "desc": "Na extremidade leste dos jardins do Castelo de Hyrule, rente ao muro direito, há um caminho sem saída com uma pedra no fim. Para impedir que o guarda pare você, suba pelas vinhas no muro.\n\nNo fim do caminho, **exploda a pedra com uma Bomba e engatinhe pela fresta** até a Fonte da Grande Fada. Toque a Canção de Ninar de Zelda no emblema da Triforce e aceite a oferenda de 50 Rupees: a Grande Fada aprimorará seu Ataque Giratório com uma onda de choque mágica.",
+      "hint": "Ela pede uma oferenda de 50 Rupees e aprimora o Ataque Giratório com uma onda de choque."
+    },
+    "kakariko-heart-01": {
+      "name": "Telhado pequeno atrás da Casa de Impa",
+      "desc": "O pedaço fica bem à vista em um pequeno telhado de telhas vermelhas atrás da Casa de Impa, encostado na montanha. Do telhado azul da casa, **desça para o telhado pequeno atrás dela** e pegue-o. De lá você consegue descer para o estábulo da vaca.\n\nComo criança, fale com Kaepora Gaebora no topo da Montanha da Morte e a coruja deixará você no telhado de Impa. Como adulto você precisa do Gancho.",
+      "hint": "Como adulto, use o Gancho do telhado da Casa das Skulltulas."
+    },
+    "kakariko-heart-02": {
+      "name": "Moinho",
+      "desc": "Dentro do Moinho, nos fundos da vila, o pedaço espera lá no alto, em cima de um móvel na passarela superior.\n\nComo adulto você chega lá pelo Túmulo de Dampé, no Cemitério. Quando a corrida dele termina, a escada de saída está quebrada: **dispare o Gancho no alvo acima da porta** e siga pelo corredor. Você sai no alto do Moinho, perto da plataforma giratória; suba no móvel encostado na parede e pegue o pedaço.",
+      "hint": "Como adulto você entra pelo Túmulo de Dampé."
+    },
+    "kakariko-heart-03": {
+      "name": "O homem no telhado",
+      "desc": "O homem no telhado está sentado em cima da **Loja de Poções, ao lado da torre de vigia e em frente ao Moinho**, e tudo o que você precisa fazer é alcançá-lo e falar com ele para receber o Pedaço de Coração.\n\nComo adulto, o Gancho já basta: fique no corrimão em frente ao Moinho e puxe-se para o telhado.",
+      "hint": "Como adulto você precisa do Gancho."
+    },
+    "kakariko-gs-01": {
+      "name": "Casa em construção",
+      "desc": "Enquanto os carpinteiros constroem a casa em obras, como criança e à noite, a Skulltula Dourada fica pendurada na parede de tijolos da obra, acima do chão. **Suba a rampa de tábuas até a passarela do andaime** e você a terá bem à sua frente, na parede.\n\nSua espada basta para matá-la, então você não precisa de mais nada para pegar o símbolo."
+    },
+    "kakariko-gs-02": {
+      "name": "Árvore na entrada",
+      "desc": "O grande pinheiro perto da entrada vinda dos Campos de Hyrule, na parte baixa da vila, esconde à noite uma Skulltula Dourada que cai no chão como criança se você **rolar contra o tronco do pinheiro**. Assim que ela cair, acabe com ela e pegue o símbolo."
+    },
+    "kakariko-gs-03": {
+      "name": "Torre de vigia",
+      "desc": "Na metade da escada da torre de vigia, no centro da vila, uma Skulltula Dourada fica pendurada à noite para você atacar de baixo: **atire nela com o Estilingue ou mande um Bombchu escada acima**.\n\nQuando ela morrer, suba a escada: o símbolo fica nela, na metade do caminho, e você pode pegá-lo sem precisar ir até o topo.",
+      "hint": "Livre-se dela antes de subir a torre em direção ao homem no telhado."
+    },
+    "kakariko-gs-04": {
+      "name": "Casa perto do portão da montanha",
+      "desc": "Subindo para o portão da Montanha da Morte, na parte alta da vila, você verá uma casa bem ao lado dele, passando a torre de vigia. Como criança e à noite, **dê a volta nela pela trilha de grama nos fundos** e olhe suas paredes até achar a Skulltula Dourada. Ela fica no nível do chão, então você pode derrubá-la com a espada e pegar o símbolo sem precisar de nenhum item."
+    },
+    "kakariko-gs-05": {
+      "name": "Casa das Skulltulas",
+      "desc": "A Casa das Skulltulas, lar da família amaldiçoada, é a primeira à direita ao entrar vindo dos Campos de Hyrule, e tem teias de aranha sobre a porta. Como criança e à noite, a Skulltula Dourada aparece na **frente da casa, à esquerda dos degraus de entrada**, no nível do chão; durante o dia já dá para ver a teia dela ali.\n\nSe for dia, toque a Canção do Sol para trazer a noite. Sua espada dá conta dela num instante, e depois só falta pegar o símbolo."
+    },
+    "kakariko-gs-06": {
+      "name": "Acima da Casa de Impa",
+      "desc": "Você precisa voltar como adulto e à noite para pegar esta Skulltula Dourada, que fica no paredão rochoso bem ao lado do telhado azul da Casa de Impa, a casa grande na borda sul da vila. Você precisa do Gancho.\n\nContorne a casa por um lado até o paredão rochoso atrás dela, que tem vinhas, e **suba por elas até o telhado azul**. Lá de cima você verá a Skulltula na rocha, ao lado do telhado: derrube-a com o Gancho, que também traz o símbolo até você."
+    },
+    "cementerio-heart-01": {
+      "name": "Passeio de escavação com Dampé",
+      "desc": "Como criança e à noite, Dampé, o coveiro, oferece seu \"Passeio de Escavação de Tirar o Fôlego\" no Cemitério. Se chegar de dia, toque a Canção do Sol ali: cai a noite e Dampé sai na hora. Aceite e fique na praça central, porque se você se afastar o passeio termina.\n\nFique ao lado de um dos montes de terra e **peça para ele cavar: cada tentativa custa 10 Rupees**. Às vezes ele bate em algo duro e pede mais 5 para continuar, e pode sair tanto uma pedra quanto o pedaço, aleatoriamente. Continue tentando até aparecer. O local é totalmente aleatório.",
+      "hint": "10 Rupees por monte; às vezes ele pede mais 5 para continuar cavando."
+    },
+    "cementerio-heart-02": {
+      "name": "Corrida contra Dampé",
+      "desc": "O Túmulo de Dampé é a lápide com flores da qual sai fumaça, na área cercada à esquerda, subindo alguns degraus. Como adulto e à noite, **puxe-a para abrir o buraco e desça às catacumbas**. Lá embaixo, siga o fantasma dele até o fim sem perdê-lo de vista; a primeira corrida dá a você o Gancho.\n\nO Pedaço de Coração vem na segunda. Saia com o Gancho pelo alvo acima da escada quebrada (você sai no Moinho de Kakariko), volte ao Cemitério, desça pelo buraco novamente, que continua aberto, e chegue à linha de chegada em um minuto ou menos.",
+      "hint": "A primeira corrida dá o Gancho; o pedaço vem na segunda."
+    },
+    "cementerio-heart-03": {
+      "name": "Túmulo perto da Tumba da Família Real",
+      "desc": "Perto da Tumba da Família Real, na parte alta do Cemitério: fique de costas para a tumba, olhando para a saída, e entre as lápides à sua esquerda é **a primeira começando da esquerda**. Como adulto ela sempre abre; como criança, só à noite (durante o dia o garoto que vigia os túmulos impede você; a Canção do Sol poupa a espera).\n\nPuxe a lápide e desça pelo buraco: o baú com o Pedaço de Coração fica no fundo da cripta, sem inimigos guardando.",
+      "hint": "Como criança o túmulo só abre à noite."
+    },
+    "cementerio-heart-04": {
+      "name": "Saliência na parede",
+      "desc": "Bem alto na parede esquerda do Cemitério, acima do Túmulo de Dampé e da terra macia, há uma saliência com o Pedaço de Coração bem à vista em um pilar de pedra, e você não consegue alcançá-lo de baixo sem ajuda.\n\nSe plantar um Feijão Mágico nessa terra macia como criança, ao voltar como adulto **suba na folha e deixe que ela carregue você até a saliência**. Lá em cima, pegue o pedaço no pilar.",
+      "hint": "O pedaço fica bem à vista em um pilar na parede."
+    },
+    "cementerio-gs-01": {
+      "name": "Muro do Cemitério",
+      "desc": "À noite, no corredor estreito entre a Cabana de Dampé e o muro de pedra com a grade de ferro, perto da entrada do Cemitério, uma Skulltula Dourada sai bem no alto. Durante o dia você verá uma teia dourada nesse ponto marcando onde ela vai aparecer.\n\n**Derrote-a com o Gancho ou o Bumerangue e traga o símbolo de volta com ele.**"
+    },
+    "cementerio-gs-02": {
+      "name": "Insetos na terra macia",
+      "desc": "Com uma garrafa de Insetos e como criança, a qualquer hora do dia, vá até o ponto de terra macia no canto esquerdo do Cemitério, nos fundos, junto ao muro e perto do Túmulo de Dampé, e **solte-os nela para fazer sair uma Skulltula Dourada**. Mate-a assim que aparecer e pegue o símbolo.",
+      "hint": "É o mesmo ponto onde você planta o Feijão Mágico."
+    },
+    "cementerio-bean-01": {
+      "name": "Terra macia do Cemitério",
+      "desc": "Abaixo da saliência alta na parede esquerda do Cemitério, ao lado do Túmulo de Dampé, fica a terra macia onde recomendamos **plantar um Feijão Mágico como criança**. Quando voltar como adulto, a folha leva você até a saliência que guarda o Pedaço de Coração.",
+      "hint": "Plante como criança e use como adulto."
+    },
+    "sendero-heart-01": {
+      "name": "Saliência acima da Caverna dos Dodongos",
+      "desc": "Acima da entrada da Caverna dos Dodongos fica a saliência com este Pedaço de Coração, bem à vista em um nicho na rocha. Você precisa plantar um Feijão Mágico na terra macia como criança.\n\nComo adulto, pegue carona na planta do feijão e salte quando ela passar pela saliência para pegar o Pedaço de Coração."
+    },
+    "sendero-gs-01": {
+      "name": "Insetos na terra macia perto da caverna",
+      "desc": "A terra macia para esta Skulltula Dourada fica em frente à Caverna dos Dodongos.\n\nCom a entrada desobstruída, **solte os insetos da garrafa na terra macia** e, assim que a Skulltula Dourada sair, derrote-a com a espada e pegue o símbolo.",
+      "hint": "Você pode plantar um Feijão Mágico no mesmo ponto."
+    },
+    "sendero-gs-02": {
+      "name": "Parede rachada perto de Kakariko",
+      "desc": "Saindo da Vila Kakariko em direção à montanha, antes de chegar à Caverna dos Dodongos, há uma parede de rochas rachadas no lado direito da trilha que destoa do resto: dá para ouvir a Skulltula atrás dela.\n\n**Abra a parede com uma Bomba ou, como adulto, com o Martelo Megaton**, entre no nicho e derrote a Skulltula Dourada, que fica na parede do fundo na altura da espada."
+    },
+    "sendero-gs-03": {
+      "name": "Acima da Caverna dos Dodongos",
+      "desc": "A saliência com corrimão de onde, como criança, você joga a Flor-Bomba sobre a Caverna dos Dodongos, perto do desvio para a Cidade Goron, tem algumas pedras encostadas na parede. Esta Skulltula Dourada aparece sob elas quando você volta como adulto, à noite.\n\n**Quebre as pedras com o Martelo Megaton ou uma Bomba**, as únicas coisas que conseguem destruí-las, depois derrote a Skulltula e pegue o símbolo dela."
+    },
+    "sendero-gs-04": {
+      "name": "Caminho das pedras que caem",
+      "desc": "Passando a Caverna dos Dodongos, a trilha sobe até o trecho onde chovem pedras vulcânicas e termina na parede de rede que leva ao cume. Esta Skulltula Dourada aparece ao pé dessa parede, como adulto e à noite.\n\nDe frente para a parede, à direita ao subir, perto do arco de pedra, há um monte de pedras que Bombas não quebram: **bata nele com o Martelo Megaton** e, com as pedras em pedaços, acabe com a Skulltula e pegue o símbolo."
+    },
+    "sendero-bean-01": {
+      "name": "Terra macia na Caverna dos Dodongos",
+      "desc": "Antes de plantar um Feijão Mágico aqui, como criança você precisa remover a pedra que bloqueia a Caverna dos Dodongos, usando a Flor-Bomba acima e o Bracelete Goron. Depois plante-o na terra macia em frente à entrada.\n\nComo adulto, a planta passa sobre a saliência do Pedaço de Coração e leva você até o trecho das pedras que caem: **um atalho que pula a pedra que bloqueia a trilha**.",
+      "hint": "Plante como criança e use como adulto."
+    },
+    "sendero-fairy-01": {
+      "name": "Grande Fada: magia",
+      "desc": "Bem no alto, no cume da Montanha da Morte, Kaepora Gaebora espera pousado perto da entrada da Cratera. **A parede de rochas rachadas à esquerda dele pode ser derrubada com uma Bomba** ou, como adulto, com o Martelo Megaton, e a fonte fica atrás dela.\n\nLá dentro, toque a Canção de Ninar de Zelda no emblema da Triforce. A Grande Fada pedirá uma oferenda de 25 Rupees: aceite, e ela dará a você a Barra de Magia e o Fogo de Din. Se subir como criança, leve o Escudo Hylian para o trecho das pedras que caem.",
+      "hint": "Ela pede uma oferenda de 25 Rupees. Recompensa: Barra de Magia e Fogo de Din."
+    },
+    "goron-heart-01": {
+      "name": "Pote giratório",
+      "desc": "O grande pote com rostos no meio do andar inferior da Cidade Goron só começa a girar quando, como criança, **você acende as tochas ao redor dele**. O Fogo de Din funciona, ou um Graveto Deku aceso, por exemplo na sala de Darunia, que abre quando você toca a Canção de Ninar de Zelda na porta. Elas continuam acesas mesmo se você voltar depois.\n\nEm seguida, suba para o andar de cima, caminhe pela prancha de madeira que se projeta sobre o pote e jogue uma Bomba dentro dele pelo topo, ou arremesse uma Flor-Bomba nele com o Bracelete Goron. Ele jogará o pedaço no chão junto com 10 Rupees.",
+      "hint": "Se parar em outro rosto, dá outros prêmios: tente de novo até conseguir."
+    },
+    "goron-gs-01": {
+      "name": "Labirinto de pedras",
+      "desc": "A sala do labirinto de pedras fica no andar superior da Cidade Goron, o da entrada pela Trilha da Montanha da Morte, e como criança você a atravessa abrindo caminho pelos blocos com Bombas.\n\nNo fundo, ao lado de dois baús, há um caixote de madeira com a Skulltula Dourada dentro: **role contra o caixote para quebrá-lo**, derrote a Skulltula com a espada e pegue o símbolo."
+    },
+    "goron-gs-02": {
+      "name": "Saliência rochosa no teto",
+      "desc": "Como adulto, na Cidade Goron, um andar acima do nível mais baixo, dê a volta na plataforma no sentido anti-horário. Antes de entrar no túnel, olhe para cima: a Skulltula Dourada fica na parte inferior da saliência rochosa no teto.\n\n**Derrube-a com o Gancho**, que já traz o símbolo até você."
+    },
+    "crater-heart-01": {
+      "name": "Buraco na parede da Cratera",
+      "desc": "Entrando na Cratera pelo cume da Montanha da Morte, a saliência da entrada dá para um grande paredão que desce em direção à plataforma do Bolero do Fogo. Algumas redes de escalada pendem da borda dessa saliência: **desça por elas** e, um pouco mais abaixo, você encontrará o pedaço em um buraco na parede, entre duas redes.\n\nComo criança, o calor queimará você depressa. Como adulto, com a Túnica Goron não há pressa.",
+      "hint": "Como criança há um limite de tempo pelo calor: seja rápido."
+    },
+    "crater-heart-02": {
+      "name": "Rocha em cúpula na Cratera",
+      "desc": "Como criança, **toque o Bolero do Fogo na ocarina** e, já na Cratera, plante um feijão na terra macia ao lado da plataforma.\n\nVolte como adulto vestindo a Túnica Goron, **pegue carona na folha e salte quando ela passar por cima de uma das rochas altas**: o pedaço espera lá em cima.",
+      "hint": "Você precisa aprender o Bolero do Fogo."
+    },
+    "crater-gs-01": {
+      "name": "Caixote na entrada do cume",
+      "desc": "Se você entrar na Cratera como criança pelo cume da Montanha da Morte, em vez de ir pela Cidade Goron, a poucos passos da entrada, à esquerda, verá dois caixotes de madeira encostados na parede de pedra, ao lado de um pote. A Skulltula Dourada está dentro do que fica ao lado do pote.\n\n**Quebre os caixotes rolando contra eles**, derrote a Skulltula e pegue o símbolo.",
+      "hint": "Use o Amor de Nayru se não aguentar o calor."
+    },
+    "crater-gs-02": {
+      "name": "Insetos na terra macia perto da plataforma do Bolero",
+      "desc": "Esta Skulltula Dourada obriga você a viajar no tempo, porque ela só sai como criança e o Bolero do Fogo é aprendido como adulto. Como criança, tocar essa canção é o único jeito de chegar à terra macia dela, a poucos passos da plataforma do Bolero.\n\nVocê aparece na plataforma: **solte os insetos na terra macia ao lado dela**, derrote a Skulltula e pegue o símbolo sem enrolar, pois o calor vai drenando seus corações.",
+      "hint": "Como criança o calor drena seus corações aos poucos: não enrole."
+    },
+    "crater-bean-01": {
+      "name": "Terra macia na Cratera",
+      "desc": "Ao lado da plataforma do Bolero do Fogo, na área central da Cratera, há um ponto de terra macia que como criança você só alcança tocando essa canção. **Plante o Feijão Mágico e saia imediatamente**, com outra canção de teletransporte por exemplo, porque o calor coloca você sob contagem regressiva.\n\nQuando voltar como adulto, a planta passa por cima da rocha em cúpula de um Pedaço de Coração e depois pela parede escalável do outro. Ela também leva você até a área da entrada do cume.",
+      "hint": "Plante como criança e use como adulto."
+    },
+    "crater-fairy-01": {
+      "name": "Grande Fada: magia dupla",
+      "desc": "Da sala de Darunia na Cidade Goron, como adulto você desce para a parte baixa da Cratera. Se acabou de derrotar Volvagia, o teletransporte azul deixa você na plataforma central: atravesse a ponte de correntes para oeste e continue por essa margem. Dois montes de pedras bloqueiam uma passagem na parede: **derrube-os com o Martelo Megaton**.\n\nNa fonte, pise no emblema e toque a Canção de Ninar de Zelda. A Grande Fada da Sabedoria pedirá uma oferenda de 200 Rupees para a fonte: aceite, e ela dobrará sua Barra de Magia.",
+      "hint": "Ela pede uma oferenda de 200 Rupees. Recompensa: dobra sua Barra de Magia."
+    },
+    "rio-heart-01": {
+      "name": "Pilar no meio do rio",
+      "desc": "O pedaço fica em uma plataforma alta cercada por água, no meio do Rio Zora, e como criança você chega lá planando com um Cucco a partir da área arborizada ao lado dela. Você sobe até essa área por vinhas, sem Cucco nos braços, mas lá em cima, entre as samambaias à esquerda, um buraco leva a uma gruta com um baú e um Cucco. **Saia da gruta pela flor com o Cucco nos braços, corra até a borda e pule para planar até a plataforma.**\n\nComo adulto você chega lá pegando carona na planta do feijão ou com as Botas Flutuantes.",
+      "hint": "Como adulto, com o feijão plantado ou as Botas Flutuantes."
+    },
+    "rio-heart-02": {
+      "name": "Saliência perto da cachoeira",
+      "desc": "No fim do Rio Zora, ao lado da cachoeira que esconde a entrada para o Domínio dos Zora, há uma plataforma isolada com o pedaço.\n\nPegue o Cucco no começo do rio, ao lado do Vendedor de Feijões, e carregue-o rio acima com você. Chegando perto da cachoeira, suba até o ponto mais alto, **pule com ele e plane até a plataforma**.",
+      "hint": "Como adulto você só consegue alcançar com as Botas Flutuantes."
+    },
+    "rio-heart-03": {
+      "name": "Jogo dos sapos",
+      "desc": "Os sapos deste pedaço, o Fabuloso Quinteto de Sapos Tenores, ficam sobre tocos no laguinho de uma gruta escavada na rocha, na metade do Rio Zora. Vá como criança, fale com eles e eles pedirão para você tocar algo na ocarina. Eles dão Rupees por cada canção nova:\n- Canção de Ninar de Zelda\n- Canção de Epona\n- Canção de Saria\n- Canção do Sol\n- Canção do Tempo\n\nDepois que tocar todas, eles propõem o jogo deles: um inseto aparece acima de um sapo e **você toca rapidamente a nota dele para que ele pule e o coma**. Acerte a sequência inteira e o pedaço é seu; se errar, pode tentar de novo.",
+      "hint": "Decore qual nota cada sapo toca."
+    },
+    "rio-heart-04": {
+      "name": "Os sapos na chuva",
+      "desc": "Na metade do Rio Zora, você encontrará um toco com cinco sapos em uma caverna. Você precisa tocar a **Canção das Tempestades** na ocarina. Depois de tocá-la, os sapos recompensarão você com um Pedaço de Coração."
+    },
+    "rio-gs-01": {
+      "name": "Insetos na terra macia perto do Vendedor de Feijões",
+      "desc": "Ao lado do Vendedor de Feijões, no início do Rio Zora, há um ponto de terra macia escondendo uma Skulltula Dourada, e você precisa de uma garrafa de insetos para fazê-la sair.\n\n**Esvazie a garrafa de insetos na terra macia**: a Skulltula sairá do chão. Derrote-a com a espada e pegue o símbolo."
+    },
+    "rio-gs-02": {
+      "name": "Parede junto à cachoeira",
+      "desc": "No fim do Rio Zora, junto à cachoeira, esta Skulltula Dourada só sai à noite, como criança.\n\nDa saliência gramada ao lado da cachoeira, desça pela rocha até a margem abaixo, perto da água.\n\nA Skulltula fica na parede da rocha baixa nessa margem. Aproxime-se e ataque com a espada."
+    },
+    "rio-gs-03": {
+      "name": "Acima das grutas elevadas",
+      "desc": "Bem alto no paredão rochoso acima do platô com as grutas, no meio do Rio Zora, uma Skulltula Dourada aparece à noite, e o Gancho só a alcança se você subir no próprio platô.\n\nComo adulto, suba pela parede de vinhas entre as rochas, perto da água. Lá em cima, vá até a borda e **dispare o Gancho no alto da parede** para derrotá-la e trazer o símbolo de volta.",
+      "hint": "Do caminho abaixo você precisaria do Supergancho."
+    },
+    "rio-gs-04": {
+      "name": "Acima da ponte",
+      "desc": "Acima da última ponte do Rio Zora, na caverna que leva à cachoeira do Domínio dos Zora, há um paredão rochoso muito alto onde uma Skulltula Dourada se instala à noite.\n\n**Acerte-a com o Gancho de cima da própria ponte** e pegue o símbolo."
+    },
+    "rio-bean-01": {
+      "name": "Terra macia perto do Vendedor de Feijões",
+      "desc": "Logo ao entrar no Rio Zora, duas pedras rachadas bloqueiam o caminho; exploda-as com uma Bomba.\n\nLogo atrás delas, sentado ao lado de uma cerca, está o Vendedor de Feijões, e como criança vale a pena comprar alguns dele: o primeiro custa 10 Rupees e cada um depois sobe 10. **Plante um na terra macia ao lado dele**, usando-o do seu inventário.",
+      "hint": "Plante como criança e use como adulto."
+    },
+    "dominio-gs-01": {
+      "name": "Cachoeira congelada",
+      "desc": "Como adulto, com o Domínio dos Zora congelado, a Skulltula Dourada sai à noite no alto da cachoeira congelada, onde ficava o jogo de mergulho quando você era criança. Você chega lá pelo corredor no andar do Rei Zora, que dá para uma galeria alta.\n\nOlhe pela borda e para a esquerda: ela fica em uma coluna coberta de plantas congeladas, encostada na parede. **Alcance-a com o Gancho ou derrube-a com uma flecha** para pegar o símbolo."
+    },
+    "fuente-heart-01": {
+      "name": "Bloco de gelo mais distante",
+      "desc": "O pedaço fica em cima do bloco de gelo mais distante na Fonte Zora congelada, longe do caminho para a Caverna de Gelo. Como adulto, você entra na fonte pela passagem atrás do trono congelado do Rei Zora.\n\n**Salte de bloco em bloco até o último**: são blocos de gelo escorregadios, então calcule cada salto com cuidado. Se cair na água, nade de volta ao início e suba novamente."
+    },
+    "fuente-heart-02": {
+      "name": "Fundo da fonte",
+      "desc": "Este Pedaço de Coração espera no fundo da Fonte Zora, entre um monte de Rupees Verdes. Como adulto você precisa de duas coisas: a Túnica Zora, que o Rei Zora dá quando você o liberta, para respirar debaixo d'água, e as Botas de Ferro, para afundar.\n\nCom a Túnica Zora vestida, entre na água, **calce as Botas de Ferro e afunde até o chão**, pegue o pedaço e tire as botas para boiar de volta."
+    },
+    "fuente-gs-01": {
+      "name": "Parede acima do arco submerso",
+      "desc": "Assim que entrar na Fonte Zora vindo do Domínio dos Zora, siga a margem até um arco de pedra em ruínas, meio submerso na água e encostado no paredão rochoso com vinhas. Suba até o topo do arco: à noite, uma Skulltula Dourada aparece nessa parede, e como criança você consegue alcançá-la com o Bumerangue.",
+      "hint": "Você consegue o Bumerangue dentro da Barriga de Jabu-Jabu."
+    },
+    "fuente-gs-02": {
+      "name": "Pinheiro no canto sudeste",
+      "desc": "No canto sudeste da Fonte Zora, o que tem os pinheiros ao pé do penhasco, ao lado da parede que esconde a Fonte da Grande Fada, há uma árvore que esconde uma Skulltula Dourada como criança, a qualquer hora do dia.\n\nNão precisa nadar: da tigela de oferendas em frente ao Lorde Jabu-Jabu, desça à direita e siga a trilha de terra pela margem. **Role contra o pinheiro** para derrubar a Skulltula, derrote-a com a espada e pegue o símbolo."
+    },
+    "fuente-gs-03": {
+      "name": "Caverna atrás dos blocos com símbolos Zora",
+      "desc": "Como adulto, vá até a extremidade sudeste da Fonte Zora, onde dois blocos de pedra pretos com símbolos Zora cobrem a entrada de uma caverna. **Levante-os com as Manoplas de Prata** e entre.\n\nLá dentro, Skulltulas invisíveis pendem do teto; desvie delas, ou veja-as com as Lentes da Verdade. Nos fundos, suba pelas vinhas e saia em uma saliência ao ar livre.\n\nA Skulltula Dourada só **sai à noite**. Ela aparece acima da boca de uma caverna na saliência, e você pode derrubá-la com o Gancho e pegar o símbolo.",
+      "hint": "Lá dentro, quatro Skulltulas invisíveis pendem do teto."
+    },
+    "fuente-fairy-01": {
+      "name": "Grande Fada: Vento de Farore",
+      "desc": "Da tigela de oferendas em frente ao Lorde Jabu-Jabu, siga a margem em ruínas à direita a pé até o canto sudeste, o das árvores ao pé do penhasco. Ali, a Fonte da Grande Fada se esconde atrás de um trecho rachado do paredão rochoso.\n\n**Coloque uma Bomba ou um Bombchu junto à parede rachada** para abrir caminho. Lá dentro, toque a Canção de Ninar de Zelda pisando no emblema da Triforce no chão. Antes de dar o Vento de Farore, a Grande Fada pede uma oferenda de 100 Rupees, que são jogados na fonte, então leve-os com você.",
+      "hint": "Ela pede uma oferenda de 100 Rupees: leve-os com você."
+    },
+    "lago-heart-01": {
+      "name": "Mergulho no laboratório",
+      "desc": "Dentro do Laboratório do Lago, o prédio na margem, há um tanque fundo, e o Pedaço de Coração é a recompensa por mergulhar e tocar o fundo dele, o que só é possível com a Escama Dourada, prêmio do Lago de Pesca.\n\nNão importa se você vai como criança ou como adulto: pule na água, **mergulhe até tocar o fundo do tanque** e, ao sair, o cientista dará o pedaço a você.",
+      "hint": "A Escama Dourada é o prêmio da pesca como adulto."
+    },
+    "lago-heart-02": {
+      "name": "Telhado do laboratório",
+      "desc": "Como criança, plante um Feijão Mágico na terra macia ao lado do Laboratório do Lago no Lago Hylia e volte como adulto. Pegue carona na folha: ela dá a volta sobre o lago e deixa você na varanda de madeira da torre do laboratório.\n\n**Suba a escada até o mirante no topo**, onde está o Pedaço de Coração.",
+      "hint": "Cuidado com os corvos no telhado: eles podem derrubar você."
+    },
+    "lago-heart-03": {
+      "name": "Pesca como criança",
+      "desc": "O Lago de Pesca fica em uma pequena ilha no Lago Hylia, e o dono empresta a vara por 10 Rupees. Quando pescar um peixe, guarde-o e, ao terminar, fale com o dono e diga que vai parar: ele medirá sua maior captura e, **se tiver mais de 50 cm, como criança ele dará o Pedaço de Coração**.\n\nOs **maiores peixes** costumam ficar **no centro do lago**.",
+      "hint": "Cada tentativa custa 10 Rupees; o prêmio é para um peixe com mais de 50 cm."
+    },
+    "lago-gs-01": {
+      "name": "Insetos na terra macia perto do laboratório",
+      "desc": "Encostado na parede do Laboratório do Lago, perto de alguns barris e sacos, há um ponto de terra macia. Como criança, a qualquer hora do dia, a Skulltula Dourada sai assim que você **abre uma garrafa de Insetos sobre o ponto de terra**: os insetos entram no buraco e ela sobe do chão. Sua espada basta para derrotá-la e ficar com o símbolo."
+    },
+    "lago-gs-02": {
+      "name": "Parede do laboratório",
+      "desc": "Uma ponte sai de trás do Laboratório do Lago. Como criança, à noite, assim que pisar nela, olhe para a direita: na torre redonda do prédio, ao lado de um cano, está esta Skulltula Dourada, alta demais para a espada.\n\n**Da própria ponte, jogue o Bumerangue nela**: ele a derruba e traz o símbolo até você."
+    },
+    "lago-gs-03": {
+      "name": "Caverna na margem oeste",
+      "desc": "Como criança, siga a margem oeste do Lago Hylia para o sul até o fim, onde um nicho na rocha guarda alguns potes, um barril e um Pensamento de Fada na parede. De lá, entre na água e nade até a margem ao lado: na parede de pedra você verá uma abertura baixa com verga de pedra.\n\n**Engatinhe por essa abertura** e chegará a uma caverna pequena e escura. A Skulltula Dourada fica na parede oposta; derrote-a com a espada e pegue o símbolo.",
+      "hint": "Engatinhe pelo buraco para encontrar a Skulltula Dourada."
+    },
+    "lago-gs-04": {
+      "name": "Caixote no fundo do tanque do laboratório",
+      "desc": "O tanque do Laboratório do Lago esconde um caixote de madeira no fundo com uma Skulltula Dourada dentro. Para alcançá-lo como adulto, calce as Botas de Ferro e caia na água.\n\nLá embaixo, **role contra o caixote para quebrá-lo**, acabe com a Skulltula e pegue o símbolo com o Gancho."
+    },
+    "lago-gs-05": {
+      "name": "Árvore na ilha grande",
+      "desc": "Na maior ilha do lago, a da plataforma da Serenata da Água, há uma árvore enorme com a copa oca. Como adulto, **mire o Supergancho no topo da árvore para se puxar** até a copa; o Gancho comum não alcança.\n\nA Skulltula Dourada só sai à noite, dentro da copa: se for dia, toque a Canção do Sol ali mesmo e ela aparecerá. Derrote-a com a espada e pegue o símbolo."
+    },
+    "lago-bean-01": {
+      "name": "Terra macia perto do laboratório",
+      "desc": "Como criança, plante um Feijão Mágico no ponto de terra macia encostado na parede do Laboratório do Lago, o mesmo da Skulltula dos Insetos. Quando voltar como adulto, uma planta em forma de anel de folhas coloridas terá brotado.\n\n**Suba nas folhas e elas voarão com você** ao redor do lago até o telhado do laboratório.",
+      "hint": "Plante como criança e use como adulto."
+    },
+    "valle-heart-01": {
+      "name": "Atrás da cachoeira",
+      "desc": "Atrás da grande cachoeira do Vale Gerudo, na margem do rio no fundo do cânion, há uma pequena câmara escavada na rocha, acima da água. Para chegar lá, desça até o cantinho da vaca ao pé da cachoeira, planando com o Cucco ou pulando no rio e nadando até a margem.\n\nDe lá, siga a margem em direção à cachoeira, passe pela Pedra da Fofoca e salte pelas pedras molhadas atrás da queda d'água. Depois **suba os degraus escavados na rocha** até a câmara, onde o Pedaço de Coração espera.",
+      "hint": "Se a correnteza levar você, vai parar no Lago Hylia."
+    },
+    "valle-heart-02": {
+      "name": "Baú na saliência do cânion",
+      "desc": "No Vale Gerudo, passando a ponte, do lado da tenda dos carpinteiros, vá até a borda do cânion perto dos montes de pedras escuras junto ao arco de pedra. Abaixo, a meio caminho do rio, há uma saliência estreita com um baú.\n\nSe estiver como criança, **use o Cucco para planar** até o baú.\n\nSe estiver como adulto, **caia da borda sobre a saliência** e abra o baú.\n\nPara voltar, siga a saliência e pule no rio: a correnteza leva você ao Lago Hylia.",
+      "hint": "O baú fica na parede do penhasco."
+    },
+    "valle-gs-01": {
+      "name": "Jato d'água perto da passarela",
+      "desc": "Ao entrar no Vale Gerudo vindo dos Campos de Hyrule, a primeira coisa que você encontra é uma pequena passarela de madeira sobre um lago. À noite, a Skulltula Dourada fica sob as tábuas, na parede de tijolos ao lado do jato d'água que cai no lago.\n\nCaia na água por um lado da passarela, suba na margem de pedra abaixo e **jogue o Bumerangue nela** para derrubá-la e trazer o símbolo de volta. Depois suba de volta para a passarela."
+    },
+    "valle-gs-02": {
+      "name": "Insetos na terra macia perto da vaca",
+      "desc": "Ao pé da grande cachoeira, no trecho superior do rio, há um canto com uma vaca, uma Gerudo e um ponto de terra macia. Como criança, você chega lá planando com o Cucco da borda do penhasco, à esquerda da ponte grande (pode parar em uma saliência e pular de novo), ou pulando no rio e nadando até a margem.\n\nLá, **solte os Insetos da garrafa na terra macia** e derrote a Skulltula Dourada que sair para pegar o símbolo."
+    },
+    "valle-gs-03": {
+      "name": "Atrás da tenda",
+      "desc": "Passando a ponte, do lado do vale voltado para a Fortaleza Gerudo, fica a tenda dos carpinteiros. Para atravessar como adulto, pular a ponte quebrada com Epona basta; o Supergancho ou a ponte consertada, se você resgatou os carpinteiros, também funcionam.\n\nÀ noite, dê a volta na tenda até as ruínas atrás dela. A Skulltula Dourada sobe na parede de pedra talhada, na metade da altura: **derrube-a com o Gancho, que já traz o símbolo até você**."
+    },
+    "valle-gs-04": {
+      "name": "Arco de pedra em frente à tenda",
+      "desc": "No caminho da tenda dos carpinteiros até a Fortaleza Gerudo, há um grande arco natural de rocha avermelhada, com dois montes de pedras escuras aos pés. À noite, uma Skulltula Dourada sobe pela face interna do arco.\n\nFique entre os montes de pedras, olhe para o alto do arco até avistá-la e **dispare o Gancho nela para derrubá-la**: ao matá-la, o próprio Gancho traz o símbolo até você."
+    },
+    "valle-bean-01": {
+      "name": "Terra macia no cânion Gerudo",
+      "desc": "Esta terra macia divide o lugar com a vaca e a Gerudo, ao pé da grande cachoeira, e também é o ponto da Skulltula Dourada dos Insetos. Como criança, plane com o Cucco da ponte grande ou nade pelo rio e plante o Feijão Mágico.\n\nComo adulto, a folha desce e sobe as cachoeiras, passando por dois Rupees Vermelhos, e **na metade da subida da grande cachoeira, pule através da água** para o nicho do Pedaço de Coração.",
+      "hint": "Plante como criança e use como adulto."
+    },
+    "fortaleza-heart-01": {
+      "name": "Arco e flecha a cavalo - 1.000 pontos",
+      "desc": "O Passe Gerudo que você ganha por resgatar os quatro carpinteiros abre o campo de tiro com arco a cavalo. Vá durante o dia, porque à noite a responsável não deixa você jogar, e leve Epona. Cada tentativa custa 30 Rupees.\n\nEpona corre o percurso sozinha e você tem 20 flechas para os alvos e os potes; cada pote ou centro do alvo vale 100 pontos. **Alcance 1.000 pontos para ganhar o Pedaço de Coração**; com 1.400, você também leva para casa a Maior Aljava.",
+      "hint": "Cada partida custa 30 Rupees; com 1.400 pontos, a Maior Aljava."
+    },
+    "fortaleza-gs-01": {
+      "name": "Alvo do campo de tiro",
+      "desc": "Com o Passe Gerudo você pode entrar no campo de tiro com arco a cavalo, e à noite há uma Skulltula Dourada no grande alvo redondo em um poste no fim do percurso. Cavalge ou caminhe por todo o percurso, com Epona ou a pé, até a área circular no extremo.\n\n**Dispare o Gancho nela assim que tiver linha de tiro livre** para matar a Skulltula e trazer o símbolo de volta; se não conseguir vê-la de frente, dê a volta no alvo."
+    },
+    "fortaleza-gs-02": {
+      "name": "Telhado superior",
+      "desc": "À noite, a Skulltula Dourada aparece nos telhados laterais da Fortaleza Gerudo, a poucos passos do baú do Pedaço de Coração: ela fica na parede de tijolos do bloco que se ergue ao lado da rocha do penhasco.\n\nPara subir lá, como adulto, entre pela porta do corredor da cozinha, atravesse-o sem ser visto e use a saída alta no fundo, que dá nos telhados. Fique diante dessa parede e **dispare o Gancho nela**, ou pule atacando com a espada, para pegar o símbolo."
+    },
+    "desierto-gs-01": {
+      "name": "Dentro do monumento",
+      "desc": "Para chegar ao monumento de pedra no Deserto Assombrado, atravesse o rio de areia como adulto, seguindo as bandeiras. No monumento, entre pela abertura entre as colunas e desça a escada até a sala abaixo.\n\nA Skulltula Dourada fica na parede do fundo, acima do altar: **suba no altar e derrube-a com a espada**. Se acender as tochas com Flechas de Fogo ou Fogo de Din, aparece um baú com uma Semente de Deku Mercador."
+    },
+    "coloso-heart-01": {
+      "name": "Arco de pedra perto do templo",
+      "desc": "Perto da entrada do Templo do Espírito há um arco de pedra que só a planta mágica alcança, então o trabalho começa como criança. Viaje ao Colosso do Deserto com o Réquiem do Espírito e plante um Feijão Mágico na terra macia à esquerda da entrada do templo.\n\nO passeio da folha, como adulto, passa por cima de duas plataformas de rocha e termina acima do arco: **quando estiver sobre ele, salte e pegue o Pedaço de Coração**."
+    },
+    "coloso-gs-01": {
+      "name": "Insetos na terra macia perto do templo",
+      "desc": "Como criança, toque o Réquiem do Espírito para viajar ao Colosso do Deserto e caminhe da plataforma de chegada até os degraus do Templo do Espírito: o ponto de terra macia fica logo à esquerda da entrada, encostado no paredão rochoso.\n\nNesse ponto, que também é onde você planta o Feijão Mágico, **solte os Insetos de uma garrafa** e a Skulltula Dourada sairá na hora: derrote-a com a espada e pegue o símbolo."
+    },
+    "coloso-gs-02": {
+      "name": "Topo da rocha grande",
+      "desc": "Uma grande rocha se ergue perto da Fonte da Grande Fada, e seu topo, com uma cavidade em forma de cratera, é a segunda plataforma sobre a qual passa a planta do Feijão Mágico da terra macia do Templo do Espírito. Como adulto, pegue carona na folha e, quando ela chegar a essa rocha, **salte para o topo e caia na cavidade**.\n\nA Skulltula Dourada só sai ali à noite: se for dia, toque a Canção do Sol e ela aparecerá. Mate-a com a espada e pegue o Símbolo de Skulltula Dourada."
+    },
+    "coloso-gs-03": {
+      "name": "Paredão rochoso ao lado do templo",
+      "desc": "À noite, esta Skulltula Dourada do Colosso do Deserto aparece bem alto no paredão rochoso à direita do Templo do Espírito.\n\nEncontre a Skulltula e **acerte-a com o Gancho** para matá-la e puxar o Símbolo de Skulltula Dourada."
+    },
+    "coloso-bean-01": {
+      "name": "Terra macia perto do templo",
+      "desc": "Você precisa vir aqui como criança com o Réquiem do Espírito para plantar o Feijão Mágico: a terra macia fica à esquerda da entrada do Templo do Espírito, e soltar Insetos nela também faz sair uma Skulltula Dourada.\n\nComo adulto, a planta **carrega você por cima de duas plataformas rochosas até o arco de pedra** com o Pedaço de Coração, e a segunda plataforma guarda a outra Skulltula Dourada, que só sai à noite.",
+      "hint": "Plante como criança, use como adulto."
+    },
+    "coloso-fairy-01": {
+      "name": "Grande Fada: Amor de Nayru",
+      "desc": "Ao norte do oásis, do outro lado do lago se você olhar do Templo do Espírito, uma parede de rocha rachada entre as palmeiras esconde a Fonte da Grande Fada. Você pode abri-la da mesma forma como criança, chegando com o Réquiem do Espírito, ou como adulto, atravessando o Deserto Assombrado.\n\n**Exploda a rocha rachada com uma Bomba, um Bombchu ou o Martelo Megaton**, entre, pise no emblema da Triforce e toque a Canção de Ninar de Zelda. A Grande Fada pedirá uma oferenda de 300 Rupees para a fonte: aceite, e ela dará o Amor de Nayru.",
+      "hint": "Ela pede uma oferenda de 300 Rupees."
+    },
+    "deku-gs-01": {
+      "name": "Sala da Bússola",
+      "desc": "A sala da Bússola, no andar superior da Árvore Deku, guarda esta Skulltula Dourada em um canto escondido. Pise no interruptor para erguer as plataformas e, em vez de ir direto para a Bússola, pule no nicho lateral à esquerda.\n\n**Na parede do fundo, atrás do baú pequeno**, ela está ao alcance fácil: mate-a com a espada e pegue o Símbolo de Skulltula Dourada."
+    },
+    "deku-gs-02": {
+      "name": "Vinhas do subsolo",
+      "desc": "Quando você pular na grande teia no meio da sala principal, vai rompê-la e cair na água do subsolo. Na piscina redonda à direita, esta Skulltula Dourada espera na parede de vinhas que sobe de volta para a sala principal.\n\nVocê precisa atacá-la à distância, então **derrube-a com o Estilingue ou o Bumerangue** de dentro da água, depois suba pelas vinhas até o Símbolo de Skulltula Dourada.",
+      "hint": "Você consegue o Estilingue nesta mesma masmorra."
+    },
+    "deku-gs-03": {
+      "name": "Grade do subsolo",
+      "desc": "No primeiro andar do subsolo da Árvore Deku há um canal de água que termina em um portão com grades, e esta Skulltula Dourada fica agarrada nele.\n\nSuba na plataforma redonda na água, de frente para o portão, **derrube-a com o Estilingue** e pegue o Símbolo de Skulltula Dourada."
+    },
+    "deku-gs-04": {
+      "name": "Sala dos fundos",
+      "desc": "No primeiro andar do subsolo da Árvore Deku, depois da sala das Larvas de Gohma, acenda um Graveto Deku na tocha e **queime a teia na parede do fundo**. Atrás dela há um túnel que termina em uma parede de vinhas.\n\nCuidado com a Skulltula Grande que a guarda: espere ela se virar e acerte suas costas. Depois **derrube a Skulltula Dourada com o Estilingue** e suba pelas vinhas até o Símbolo de Skulltula Dourada.",
+      "hint": "Você consegue pegá-la já na primeira visita."
+    },
+    "deku-heart-01": {
+      "name": "Recipiente de Coração - Gohma",
+      "desc": "Depois de derrotar os três Deku Scrubs na ordem 2, 3, 1, você pode entrar na sala da Rainha Gohma no segundo subsolo, e assim que entrar olhe para o teto, pois o chefe cai de lá.\n\n**Quando o olho dela ficar vermelho, atire nele com o Estilingue** ou jogue uma Noz Deku para atordoá-la, depois acerte o olho com a espada ou um Graveto Deku. Se ela subir no teto para botar ovos, quebre-os antes que as larvas nasçam. Quando ela cair, deixa o Recipiente de Coração.",
+      "hint": "Um disparo de Estilingue no olho também a derruba do teto."
+    },
+    "dodongos-gs-01": {
+      "name": "Atrás da parede dos Bebês Dodongos",
+      "desc": "Depois de lidar com o Beamos, exploda a parede rachada no lado direito do salão principal com uma Flor-Bomba e você entrará no corredor dos Bebês Dodongos, com outra parede rachada à direita logo no início.\n\nAbra-a com uma Bomba ou **atraia um Bebê Dodongo e mate-o bem encostado na parede**, pois a explosão dele também a quebra.\n\nLá dentro há alguns Keese e a Skulltula Dourada.",
+      "hint": "Divide o corredor com a da saliência do Espantalho."
+    },
+    "dodongos-gs-02": {
+      "name": "Vinhas da grande escadaria",
+      "desc": "A grande escadaria na ala esquerda, na sala cheia de Flores-Bombas, só desce quando você coloca a Flor-Bomba solta na lacuna da fileira para que todas explodam em cadeia, então comece por aí.\n\nSuba a escadaria, suba a escada de mão e siga a passarela até a porta nos fundos. Antes de chegar a ela há **uma parede de grade escalável com uma Skulltula comum e a dourada**: elimine ambas com o Estilingue (como adulto, com o Arco das Fadas ou o Gancho) e suba para pegar o Símbolo de Skulltula Dourada."
+    },
+    "dodongos-gs-03": {
+      "name": "Pilar cercado por Dodongos",
+      "desc": "No primeiro andar, ao sair da sala do baú da Bolsa de Bombas, exploda a parede rachada com uma Bomba e siga até a saliência que dá para a sala central. Há outra parede rachada ali perto do crânio gigante: **abra-a com uma Bomba e entre nessa caverna cheia de Dodongos**.\n\nA Skulltula Dourada fica em um pilar de pedra no meio da sala, cercada por Dodongos. Desvie deles ou elimine-os, e derrube a Skulltula com a espada para pegar o Símbolo de Skulltula Dourada.",
+      "hint": "Sua espada basta: você consegue pegá-la na primeira visita."
+    },
+    "dodongos-gs-04": {
+      "name": "Sala do Armos depois da boca",
+      "desc": "Da ponte no segundo andar, jogue uma Bomba em cada olho do crânio gigante no salão principal para que ele abra a boca e entre por ela. Passe pela sala dos Fire Keese e suba até o corredor dos blocos.\n\nEmpurre os blocos para subir nas vigas de madeira e caia na área cercada nos fundos. Ali, **abra a parede rachada com Bombas** e siga pelo túnel. Um Armos aguarda, despertando quando você se aproxima, e a Skulltula Dourada está na parede atrás dele."
+    },
+    "dodongos-gs-05": {
+      "name": "Saliência do Espantalho",
+      "desc": "Como adulto, já tendo aprendido a Canção do Espantalho, volte ao corredor dos Bebês Dodongos, o mesmo da Skulltula atrás da parede. Fique perto do início do corredor, de frente para uma saliência alta na parede.\n\nAli, **toque a Canção do Espantalho para que Pierre apareça na saliência**: puxe-se até ele com o Gancho, suba, mate a Skulltula Dourada com a espada e pegue o Símbolo de Skulltula Dourada.",
+      "hint": "Com o Supergancho você não precisa do Espantalho."
+    },
+    "dodongos-heart-01": {
+      "name": "Recipiente de Coração - Rei Dodongo",
+      "desc": "Você não precisa da Chave do Chefe para entrar no covil do Rei Dodongo: depois da caverna do Armos, volte à sala dos blocos e empurre um sobre o grande interruptor no chão para abrir a porta gradeada. Na sala seguinte, quebre os potes, que contêm Bombas, e **exploda o trecho rachado do chão para cair**.\n\nToda vez que ele abrir a boca para inspirar, jogue uma Bomba lá dentro e, quando ficar atordoado, ataque sem parar com a espada. Se ele se enrolar e rolar, saia da frente ou defenda com o escudo, e pegue o Recipiente de Coração antes de entrar no teletransporte azul.",
+      "hint": "Se acabarem as Bombas, as Flores-Bombas da sala dão conta."
+    },
+    "jabu-gs-01": {
+      "name": "Sala do interruptor da água",
+      "desc": "Caia no mesmo buraco que Ruto e siga pelas salas do subsolo até a que tem o tanque e o interruptor da água. A Skulltula Dourada fica na parede, em um nicho no alto das vinhas, acima de uma saliência com três potes.\n\n**Deixe Ruto sentada no interruptor para que a água suba**. Nade até as vinhas, suba para a saliência e mate a Skulltula com a espada para pegar o Símbolo de Skulltula Dourada.",
+      "hint": "Ruto precisa ficar no interruptor para a água subir."
+    },
+    "jabu-gs-02": {
+      "name": "Subsolo da sala grande, a de baixo",
+      "desc": "Com o Bumerangue em mãos, volte à grande sala com os buracos onde você encontrou Ruto. Depois de derrotar o tentáculo verde, o pilar que cobria o buraco dele, no fundo à direita, se afasta: **caia por esse buraco**, jogando Ruto lá embaixo antes se estiver carregando ela.\n\nÁguas-vivas flutuam lá embaixo, e há duas Skulltulas Douradas em duas paredes adjacentes; esta é a de baixo. Como não dá para travar a mira nelas, mire o Bumerangue manualmente: ele a derruba e traz o Símbolo de Skulltula Dourada na volta.",
+      "hint": "Você a pega junto com a parceira de cima."
+    },
+    "jabu-gs-03": {
+      "name": "Subsolo da sala grande, a de cima",
+      "desc": "Abaixo da grande sala com os buracos, no subsolo em que você cai pelo buraco que o tentáculo verde cobria, há duas Skulltulas Douradas em paredes adjacentes, ao norte e a noroeste. Recomendamos pegar as duas de uma vez, já que ambas precisam do Bumerangue.\n\nA que você procura aqui é a de cima, então **mire o Bumerangue nela manualmente**, pois também não dá para travar a mira nela, e quando ela cair jogue de novo para trazer de volta o Símbolo de Skulltula Dourada."
+    },
+    "jabu-gs-04": {
+      "name": "Vinhas antes do chefe",
+      "desc": "Você chega à sala antes de Barinade a partir da segunda sala da masmorra, a do fosso que derruba você ao pular nele, levando um caixote até o interruptor que abre a porta.\n\nPrimeiro limpe as águas-vivas elétricas com o Bumerangue e procure a **coluna de vinhas que sobe em direção ao interruptor de cristal**: a Skulltula Dourada está nela. Mate-a com o Bumerangue e suba para pegar o Símbolo de Skulltula Dourada."
+    },
+    "jabu-heart-01": {
+      "name": "Recipiente de Coração - Barinade",
+      "desc": "A porta de Barinade, no fundo da sala das vinhas, é trancada por um interruptor protegido por um cristal: suba na parede, trave a mira no interruptor e **jogue o Bumerangue de modo que ele faça a curva por trás dele**.\n\nLá dentro, use o Bumerangue para cortar os três tentáculos que o prendem ao teto, desviando dos choques elétricos, e acabe com as águas-vivas que ele solta. Depois atordoe-o com o Bumerangue e acerte-o com a espada, repita com a segunda onda de águas-vivas e não entre no teletransporte azul sem pegar o Recipiente de Coração antes."
+    },
+    "bosque-gs-01": {
+      "name": "Vinhas da entrada",
+      "desc": "A primeira sala do templo fica a céu aberto, com duas árvores e um par de Wolfos que vêm para cima de você, e a Skulltula Dourada espera lá no alto, perto do baú da Chave Pequena.\n\nElimine os Wolfos, **suba pelas vinhas à direita até o topo da árvore** e, do galho, mate-a com o Gancho (o Arco das Fadas ou uma Bomba também funcionam); o próprio Gancho traz o Símbolo de Skulltula Dourada até você."
+    },
+    "bosque-gs-02": {
+      "name": "Salão central",
+      "desc": "Depois da cena das Irmãs Poe você chega ao salão central, a grande sala com as quatro tochas e o elevador. Esta Skulltula Dourada espera à direita da escada perto da porta oposta.\n\n**Suba essa escada e vire à direita** para vê-la no alto da parede, mate-a com o Gancho e dispare de novo para trazer de volta o Símbolo de Skulltula Dourada.",
+      "hint": "Olhe com atenção atrás das paredes."
+    },
+    "bosque-gs-03": {
+      "name": "Varanda acima da porta de vitral",
+      "desc": "Do patamar junto à porta de vitral, na área onde sai o canal de água, no Templo da Floresta, você precisa tocar a Canção do Espantalho: Pierre aparece na pequena varanda acima da porta. **Puxe-se até ele com o Gancho**, mate a Skulltula Dourada no chão da varanda e pegue o Símbolo de Skulltula Dourada.",
+      "hint": "Pierre só aparece se você tocar a Canção do Espantalho."
+    },
+    "bosque-gs-04": {
+      "name": "Saliência do pátio oeste",
+      "desc": "Depois de endireitar o corredor retorcido e pegar a Chave do Chefe, caia pelo buraco no chão dessa sala até a sala da água abaixo, suba as escadas dela e saia na passarela de pedra bem acima do pátio oeste.\n\nNo fim da passarela, logo antes da porta, **desça para a plataforma de pedra com musgo à esquerda**. Olhe para cima: a Skulltula Dourada está na parede, pronta para o Gancho, que também traz o Símbolo de Skulltula Dourada até você. Com o Supergancho dá para alcançá-la do chão do pátio.",
+      "hint": "Olhe para o alto da parede de pedra."
+    },
+    "bosque-gs-05": {
+      "name": "Sala giratória no subsolo",
+      "desc": "Com as quatro Irmãs Poe derrotadas, o elevador no salão central leva você ao subsolo, uma sala de paredes giratórias que conduz à porta do chefe.\n\nNão é preciso mover as paredes para esta Skulltula Dourada: **siga o corredor circular assim que sair do elevador e entre no nicho aberto com os potes**. Uma Skulltula Grande cai do teto; acabe com ela e olhe bem no alto da parede, onde a dourada espera. Derrube-a com o Gancho, que também traz o Símbolo de Skulltula Dourada até você."
+    },
+    "bosque-heart-01": {
+      "name": "Recipiente de Coração - Phantom Ganon",
+      "desc": "A Chave do Chefe abre a porta no fundo da sala giratória no subsolo; suba a escada e você chegará à sala dos quadros. Phantom Ganon cavalga para dentro de um quadro e vários cavaleiros saem: o verdadeiro faz som de cascos e abre um portal roxo ao chegar à moldura.\n\nQuando o verdadeiro sair, **atire nele com uma flecha ou acerte-o com o Gancho**; três flechas derrubam ele do cavalo. Depois rebata as bolas de energia dele de volta com a espada ou uma Garrafa vazia até uma acertar e ele cair; ataque-o e repita até acabar com ele."
+    },
+    "fuego-gs-01": {
+      "name": "Sala do Bloco do Tempo",
+      "desc": "No alto da escada no salão principal, a porta à direita abre com uma Chave Pequena e leva à grande sala de lava. No lado esquerdo há um Bloco do Tempo no alto de uma parede: fique na plataforma bem em frente a ele, **pise na laje gravada no chão e toque a Canção do Tempo**. O bloco descerá e você poderá subir nele até a porta acima.\n\nLá dentro, defenda-se dos azulejos que voam na sua direção e acabe com o Like Like: se ele agarrar você, rouba seu Escudo Hylian (você o recupera ao derrotá-lo). Depois derrube a Skulltula Dourada da parede.",
+      "hint": "Ao entrar na grande sala de lava, fique de olho à sua esquerda."
+    },
+    "fuego-gs-02": {
+      "name": "Parede no labirinto de pedras",
+      "desc": "Esta Skulltula Dourada se esconde atrás de um trecho de parede no labirinto de pedras rolantes. Você chega lá subindo pela grade de metal; de lá, mantenha-se junto à parede externa, desviando das pedras rolantes, até chegar a um trecho rachado de rocha no fim de uma passagem, bem perto da cela de um Goron.\n\nEsse trecho é bem visível, então não precisa ficar tateando: **coloque uma Bomba ou um Bombchu contra ele** e, no túnel que abre atrás dele, derrube a Skulltula Dourada. Aproveite para libertar o Goron na cela ao lado."
+    },
+    "fuego-gs-03": {
+      "name": "Grade atrás do Espantalho",
+      "desc": "Ao sair da sala com a parede de fogo que persegue você, a porta no topo leva de volta ao labirinto de pedras, desta vez por cima. Fique na plataforma bem em frente à porta e **toque a Canção do Espantalho para que Pierre apareça na plataforma alta**.\n\nPuxe-se até ele com o Gancho e, de lá, atire no alvo ao lado, em uma plataforma que sobe sozinha como um elevador. Passe pela porta e suba as grades: assim que chegar ao topo, a Skulltula Dourada espera na parede e você a derruba com o Gancho.",
+      "hint": "A Canção do Espantalho é composta como criança e como adulto no Lago Hylia."
+    },
+    "fuego-gs-04": {
+      "name": "Sala octogonal no topo",
+      "desc": "Suba até o topo da grade que você alcança com o espantalho, a da outra Skulltula Dourada desta área, e passe pela porta no alto. Ela dá em uma grande sala octogonal cheia de lava, com uma plataforma de três baús cercada por fogo.\n\nBasta olhar para a direita ao entrar para encontrá-la: **ela fica na parede, a poucos passos da porta**, junto à lava. Mate-a com o Gancho e pegue o símbolo.",
+      "hint": "Ao lado da que fica na grade."
+    },
+    "fuego-gs-05": {
+      "name": "Atrás da estátua do saguão de entrada",
+      "desc": "Deixe esta por último, depois de pegar o Martelo Megaton e a última Chave Pequena, a do Goron na sala do Bloco do Tempo depois do martelo. Esse Goron conta que há uma porta secreta atrás da estátua de pedra de três blocos na entrada: no lado direito do saguão de entrada, **quebre a estátua com o martelo** e abra a porta com a chave.\n\nNa primeira sala, mate os Torch Slugs para abrir a próxima. Na segunda, defenda-se dos azulejos voadores, derrote o Like Like e quebre o monte de pedras que esconde a Skulltula Dourada com o martelo.",
+      "hint": "Quebre a estátua no saguão de entrada e o monte de pedras com o martelo."
+    },
+    "fuego-heart-01": {
+      "name": "Recipiente de Coração - Volvagia",
+      "desc": "Volvagia coloca a cabeça para fora dos buracos na plataforma: assim que fizer isso, **bata nela com o Martelo Megaton e termine com a espada ou o próprio martelo** enquanto estiver atordoada. Quando levantar voo, desvie das chamas e das pedras que caem observando as sombras delas.\n\nAo derrotá-la, o Recipiente de Coração aparece ao lado do teletransporte azul.",
+      "hint": "Você só consegue feri-la quando ela coloca a cabeça para fora da lava."
+    },
+    "agua-gs-01": {
+      "name": "Ao lado da grade do subsolo",
+      "desc": "Com a água do templo no nível mais baixo, use uma Chave Pequena para abrir a porta na base do pilar central. Lá dentro, toque a Canção de Ninar de Zelda diante do símbolo da Triforce para subir a água, calce as Botas de Ferro e afunde pelo buraco no chão até a sala do subsolo.\n\n**Acerte o interruptor de cristal no alto da parede com o Gancho**: vários inimigos aparecem. Mate-os, tire as botas para boiar até a saliência do baú e puxe a Skulltula Dourada na parede, ao lado da grade, com o Gancho."
+    },
+    "agua-gs-02": {
+      "name": "Rio com redemoinhos",
+      "desc": "Depois da luta contra Dark Link, suba a escada atrás do baú do Supergancho e, na sala seguinte, desça pelo poço gradeado. Siga o túnel inundado até sair em um rio subterrâneo com redemoinhos, e mantenha distância deles, porque eles sugam você.\n\nNa área dos redemoinhos, **calce as Botas de Ferro e caminhe pelo fundo**, desviando das correntezas. A Skulltula Dourada fica acima da água, bem no alto da parede de rocha: mire para cima com o Supergancho, que a mata e traz o símbolo até você.",
+      "hint": "Fique atento à Skulltula acima da água."
+    },
+    "agua-gs-03": {
+      "name": "Dentro do pilar central",
+      "desc": "Com a Canção de Ninar de Zelda, abaixe a água do templo para o nível mínimo ou médio e passe pela porta na base do pilar central. Lá dentro, no térreo, use o Supergancho no alvo na parede para alcançar uma saliência a meia altura.\n\nDe lá, **olhe bem para o alto da parede**: é lá que está a Skulltula Dourada, e o mesmo Supergancho a mata e traz o símbolo até você. Não é preciso subir a água do pilar antes, mas você pode escalar conforme precisar."
+    },
+    "agua-gs-04": {
+      "name": "Cachoeira das pedras rolantes",
+      "desc": "No subsolo norte, alcançado com o Supergancho, atravesse a sala dos Tektites e a sala do quebra-cabeça de blocos e, na próxima, pise no interruptor e salte pelos gêiseres até a outra porta. Atrás dela há um canal onde pedras rolam de uma cachoeira, bem ao lado da sala da Chave do Chefe.\n\nProteja-se das pedras no corredor lateral, onde um Shell Blade espera, e de lá **olhe em direção à cachoeira, para oeste**: a Skulltula Dourada fica nessa parede. O Supergancho a alcança sem chegar perto e traz o símbolo até você."
+    },
+    "agua-gs-05": {
+      "name": "Atrás da parede rachada submersa",
+      "desc": "Esta Skulltula Dourada fica em uma sala no lado leste do primeiro andar. Com a água no nível médio, depois de tocar a Canção de Ninar de Zelda diante da Triforce no pilar central, calce as Botas de Ferro e siga pelo corredor leste inundado até uma parede rachada submersa: **quebre-a com Bombas ou o Martelo Megaton**.\n\nAtrás dela há uma sala com inimigos. A Skulltula fica em um mosaico na parede, ao lado da escada e na altura da espada: derrube-a com um golpe de espada e pegue o símbolo.",
+      "hint": "Você precisa de Bombas e da água no nível médio."
+    },
+    "agua-heart-01": {
+      "name": "Recipiente de Coração - Morpha",
+      "desc": "Com a Chave do Chefe e a água no nível mais alto, suba para o terceiro andar (3F) e use o Supergancho no alvo da coluna dourada no lado norte. Suba a escada e siga pela rampa alagada, desviando das armadilhas de espinhos que deslizam para baixo.\n\nPise nas plataformas no centro para fazer Morpha aparecer e **volte imediatamente para a borda externa da sala, longe da água**, porque seus tentáculos agarram você. Puxe o núcleo dele com o Supergancho, acerte-o com a espada e, após a luta, pegue o Recipiente de Coração antes de entrar no teletransporte azul."
+    },
+    "sombra-gs-01": {
+      "name": "Sala das foices invisíveis",
+      "desc": "Na sala do grande abismo, depois de atravessar com as Botas Flutuantes até a plataforma do Stalfos e derrotá-lo, vire à esquerda e ative as Lentes da Verdade: um caminho de plataformas invisíveis até uma porta aparece.\n\nDo outro lado fica a sala redonda dos potes, com foices que você só vê com as Lentes. Desvie delas, abata os Fire Keese com o arco e acabe com o Like Like com a espada: **limpar a sala abre a porta para uma salinha com a Skulltula Dourada na parede**, ao alcance da espada.",
+      "hint": "O nicho que abre também guarda dois baús, um deles invisível."
+    },
+    "sombra-gs-02": {
+      "name": "Parede do corredor das celas",
+      "desc": "Na sala com espinhos caindo do teto, as Lentes da Verdade revelam um bloco escondido na parede: arraste-o para baixo dos espinhos como um guarda-chuva e suba nele para alcançar a parte superior. **A Skulltula Dourada fica no alto da parede do corredor das celas**, e da passarela o Gancho a alcança.",
+      "hint": "Suba no bloco para alcançá-la da passarela."
+    },
+    "sombra-gs-03": {
+      "name": "Fosso no corredor dos ventiladores",
+      "desc": "Passando a sala do pote de caveira gigante, onde uma bomba jogada na caveira solta uma Chave Pequena, siga para a próxima sala: use as Lentes da Verdade para achar o alvo no teto, puxe-se com o Gancho para o nível superior e abra a porta trancada ali.\n\nAtrás dela fica o corredor dos ventiladores. Calce as Botas de Ferro para que o vento não leve você e siga até o fosso com as grades: **a Skulltula Dourada fica na parede do fosso**. Incline-se na borda e alcance-a com o Gancho, que traz o símbolo até você.",
+      "hint": "Com as Botas de Ferro, o vento não consegue arrastar você."
+    },
+    "sombra-gs-04": {
+      "name": "Saliência alta na sala do barco",
+      "desc": "Assim que entrar na sala do barco, puxe o bloco à esquerda e empurre-o pelo sulco no chão até a passarela de madeira, depois suba nele. A Skulltula Dourada fica na parede de uma saliência gradeada ao lado.\n\nVocê precisa **tocar a Canção do Espantalho na passarela e usar o Supergancho em Pierre**: ele deixa você na saliência, ao lado da Skulltula, e você a derruba com a espada.",
+      "hint": "Você precisará saber a Canção do Espantalho para subir lá."
+    },
+    "sombra-gs-05": {
+      "name": "Dentro das caveiras gigantes",
+      "desc": "Quando o barco afundar, queime a teia sobre a porta com uma Flecha de Fogo e atravesse a sala do Floormaster com as Lentes da Verdade até a porta com o olho Sheikah.\n\nLá dentro ficam as caveiras gigantes. Suba a escada até a varanda e **jogue bombas dentro das caveiras**: quando a segunda explodir, o Símbolo de Skulltula Dourada cai.",
+      "hint": "A porta na margem está coberta por uma teia: queime-a com uma Flecha de Fogo."
+    },
+    "sombra-heart-01": {
+      "name": "Recipiente de Coração - Bongo Bongo",
+      "desc": "Na luta, calce as Botas Flutuantes para não quicar no tambor e **atordoe as mãos de Bongo Bongo com flechas ou o Gancho**. Depois, com as Lentes ativas, atire no olho dele e acerte-o com a espada.\n\nQuando terminar, ele deixa o Recipiente de Coração."
+    },
+    "espiritu-gs-01": {
+      "name": "Grade de metal na sala dos Keese",
+      "desc": "Como criança, você entra falando com Nabooru e passando pelo buraco pequeno no saguão de entrada.\n\nMais adiante, você chega à sala com os Keese e o Wallmaster. Colete os Rupees Prateados para que a grade abaixe e vire uma ponte: do outro lado, **a Skulltula Dourada fica na tela de arame da parede direita**. O Bumerangue a mata e traz o símbolo até você.",
+      "hint": "Com os cinco Rupees Prateados, a grade abaixa e vira uma ponte."
+    },
+    "espiritu-gs-02": {
+      "name": "Chão da sala da grande estátua",
+      "desc": "Ao chegar à sala da grande estátua, desça a escada lateral para o andar inferior e dê a volta por trás da estátua.\n\nNa passagem estreita entre a lateral dela e a parede, no lado leste, **a Skulltula Dourada fica na parede, no nível do chão**. Um golpe de espada basta para derrotá-la e pegar o símbolo."
+    },
+    "espiritu-gs-03": {
+      "name": "Acima da porta da escadaria",
+      "desc": "Na parte de criança do templo, a sala dos blocos é resolvida movendo o bloco com o rosto do sol para o feixe de luz: aparece um baú com uma Chave Pequena, a da porta acorrentada no topo da próxima escadaria. Ao passar pela porta para essa escadaria, você já consegue ouvir a Skulltula.\n\nNão suba sem olhar para trás: vire-se e você a verá **acima da porta pela qual acabou de passar**. Como criança, o Bumerangue a mata e traz o símbolo, e como adulto o Gancho faz o mesmo.",
+      "hint": "Antes da luta contra o Iron Knuckle."
+    },
+    "espiritu-gs-04": {
+      "name": "Atrás do Bloco do Tempo na sala das pedras rolantes",
+      "desc": "A parte de adulto do templo começa empurrando o grande bloco no saguão de entrada com as Manoplas de Prata. Na sala redonda seguinte, mate o Beamos (um Bombchu basta) e acerte o interruptor de cristal no teto com o Gancho para abrir as portas.\n\nA porta à direita leva à sala das pedras rolantes. Desvie delas até chegar aos dois Blocos do Tempo nos nichos da parede: o primeiro não esconde nada, mas **toque a Canção do Tempo ao lado do segundo** e, quando ele se mover para o lado, revelará a Skulltula Dourada no fundo do nicho. Mate-a com a espada e pegue o símbolo.",
+      "hint": "O bloco só se move um espaço, ele não desaparece."
+    },
+    "espiritu-gs-05": {
+      "name": "Saliência noroeste da sala da estátua",
+      "desc": "A Skulltula Dourada fica na saliência alta a noroeste da sala da grande estátua da deusa, no canto onde aparece um espantalho.\n\nComo adulto, use o Supergancho no alvo no pulso da estátua para subir na palma dela. De lá, **toque a Canção do Espantalho**: o espantalho aparece no alto da saliência e você pode usar o Supergancho nele. Lá em cima, a Skulltula fica no chão ao lado dele; mate-a com a espada e pegue o símbolo.",
+      "hint": "Toque a Canção do Espantalho da palma da estátua."
+    },
+    "espiritu-heart-01": {
+      "name": "Recipiente de Coração - Twinrova",
+      "desc": "Contra Twinrova, primeiro reflita o fogo de Koume de volta para Kotake e o gelo de Kotake para Koume.\n\nQuando elas se fundirem, **absorva três disparos do mesmo elemento em sequência e dispare-os contra Twinrova**; quando ela cair, acerte-a com a espada. O Recipiente de Coração aparece no centro da plataforma.",
+      "hint": "A Chave do Chefe exige a Canção de Ninar de Zelda, o arco e o Gancho."
+    },
+    "pozo-gs-01": {
+      "name": "Sala à esquerda da área central",
+      "desc": "Você precisa das Lentes da Verdade, encontradas no subsolo, e de uma Chave Pequena. Com as Lentes ligadas, baús ocultos aparecem em nichos nas paredes do poço, e um deles guarda uma chave.\n\nVocê entra na área central pela parede falsa em frente à entrada e precisa contornar o X no chão, que é um buraco. **Abra a porta trancada à esquerda**, mate a Deku Baba no meio da sala e procure a Skulltula Dourada no alto da parede, acima de um nicho com velas: o Bumerangue a derruba e volta com o símbolo.",
+      "hint": "Há mais duas chaves em nichos ocultos no corredor de entrada."
+    },
+    "pozo-gs-02": {
+      "name": "Canto alto da sala do fosso",
+      "desc": "A porta trancada à direita da área central, onde você entra pela parede falsa em frente à entrada, leva a uma sala com Keese e um grande fosso. Você precisa de uma Chave Pequena, como a do caixão na sala do Gibdo, e das Lentes da Verdade.\n\nMate os Keese e **coloque as Lentes para ver a Skulltula Dourada em um canto alto, ao lado de uma tocha**. Use o Bumerangue para pegá-la.",
+      "hint": "Você precisa de uma chave e das Lentes da Verdade."
+    },
+    "pozo-gs-03": {
+      "name": "Sala do Like Like",
+      "desc": "Siga o corredor externo que contorna o centro do poço até o canto nordeste, onde há uma porta com uma placa avisando: \"Olhe onde pisa!\" Dê ouvidos, porque logo abaixo há uma armadilha que derruba você até o fundo se não desviar.\n\nA próxima sala tem buracos ocultos no chão, então **coloque as Lentes da Verdade e atravesse olhando onde pisa**.\n\nElimine os Fire Keese com o Bumerangue e exploda o Beamos com uma bomba. A porta do outro lado leva à sala do Like Like: depois de derrotá-lo, a Skulltula Dourada fica na parede do fundo, entre duas tochas, ao alcance do Bumerangue, que também traz o símbolo até você.",
+      "hint": "Olhe onde pisa!"
+    },
+    "hielo-gs-01": {
+      "name": "Sala da lâmina giratória",
+      "desc": "Mate os Freezards na primeira sala para abrir a grade e siga para a grande sala redonda com a lâmina de gelo giratória.\n\n**Encontre o canto com as estalagmites de gelo, o mesmo do Rupee Prateado oculto**: a Skulltula Dourada fica no alto da parede, entre as placas de gelo e acima de uma estalagmite. Mate-a com o Gancho.",
+      "hint": "Os Rupees Prateados abrem a sala do Fogo Azul."
+    },
+    "hielo-gs-02": {
+      "name": "Sala da Bússola",
+      "desc": "Colete os Rupees Prateados na sala da lâmina giratória para abrir caminho até a sala do mapa e encher uma garrafa com Fogo Azul lá. Volte à sala da lâmina e derreta com ele uma das duas paredes de gelo vermelho, a que leva a um corredor com armadilhas de espinhos.\n\nNo fim fica a sala da Bússola, cheia de estalagmites. Mate os Ice Keese e **olhe bem no alto da parede do fundo, ao lado de um bloco de gelo vermelho**: é lá que está a Skulltula Dourada. Use o Gancho para pegá-la."
+    },
+    "hielo-gs-03": {
+      "name": "Sala do bloco de gelo",
+      "desc": "Na sala onde você precisa empurrar um bloco de gelo, mate os Ice Keese e vire-se de volta para a entrada: **a Skulltula Dourada fica no alto da parede, à esquerda da porta ao entrar**. É mais fácil avistá-la dos pilares de pedra; derrube-a com o Gancho do chão e pegue o símbolo."
+    },
+    "castillo-fairy-02": {
+      "name": "Grande Fada: Defesa Dupla",
+      "desc": "Você chega aos arredores do Castelo de Ganon vindo da Cidade do Castelo de Hyrule em ruínas, e o caminho sem saída à direita termina onde ficava a fonte do Ataque Giratório quando você era criança. Agora um pilar de pedra preta com gravações douradas bloqueia a entrada: **levante-o com as Manoplas Douradas**, obtidas na Provação das Sombras do castelo.\n\nLá dentro, toque a Canção de Ninar de Zelda no emblema da Triforce e jogue os 500 Rupees que ela pede como oferenda na fonte. A Grande Fada da Coragem dobra sua defesa: seus corações ganham uma borda dourada e você sofre metade do dano.",
+      "hint": "Ela pede uma oferenda de 500 Rupees; o pilar na entrada é removido com as Manoplas Douradas."
+    },
+    "kakariko-bottle-01": {
+      "name": "Os sete Cuccos perdidos",
+      "desc": "A Moça dos Cuccos, perto do cercado, deixou sete deles escaparem; se você os trouxer de volta como criança, ela dá a você uma Garrafa Vazia: **pegue cada Cucco e jogue-o dentro do cercado**. Se falar com ela, ela diz quantos faltam e dá dicas; os que estão no cercado continuam lá mesmo se você entrar nas casas.\n\nUm fica bem ao lado dela, outro perto da entrada, outro perto do portão da Montanha da Morte e outro atrás da cerca da Casa das Skulltulas. O quinto está em um caixote que você quebra rolando contra ele; os dois últimos ficam na área cercada atrás da Loja de Poções, alcançada planando."
+    },
+    "lonlon-bottle-01": {
+      "name": "Os Super Cuccos de Talon",
+      "desc": "Antes de tudo, você precisa acordar Talon, que está dormindo no Castelo de Hyrule, com o Cucco que nasce do Ovo Estranho, para que ele volte ao Rancho Lon Lon. No rancho, entre na casa dele durante o dia: à noite, Talon está dormindo.\n\nPor 10 Rupees ele desafia você a **encontrar os três Super Cuccos dele entre todos os Cuccos da sala** em 30 segundos: pegue os Cuccos e ele dirá quando você acertar um. Se conseguir, na primeira vez ele dá uma garrafa de Leite Lon Lon.",
+      "hint": "Uma partida custa 10 Rupees."
+    },
+    "lago-bottle-01": {
+      "name": "Carta de Ruto",
+      "desc": "No fundo do Lago Hylia, perto da saída do túnel subaquático que vem do Domínio dos Zora, há uma garrafa com uma carta da Princesa Ruto. Como criança você só consegue ir tão fundo com a Escama de Prata, prêmio do jogo de mergulho no Domínio dos Zora.\n\nAo lado dos pilares de pedra que saem da água, **mergulhe até o fundo e pegue a garrafa**.",
+      "hint": "Você também pode chegar ao lago mergulhando pelo Domínio dos Zora."
+    },
+    "ciudadela-bottle-01": {
+      "name": "O Colecionador de Poes",
+      "desc": "Como adulto, a antiga casa da guarda na entrada da Cidade do Castelo de Hyrule é a loja do Colecionador de Poes. Por cada Grande Poe ele paga 30 Rupees e soma 100 pontos, e ao atingir 500 pontos, com o quinto, ele dá a você uma Garrafa Vazia. Se continuar até 1.000, ele dá um Rupee Enorme, o dourado, que vale 200 Rupees.\n\nGrandes Poes aparecem pelos Campos de Hyrule quando você cavalga Epona e salta por uma das cercas assombradas: **abata-os com flechas de cima do cavalo e capture cada alma em uma Garrafa Vazia**.",
+      "hint": "Ele paga 30 Rupees por cada Grande Poe; a garrafa vem aos 500 pontos."
+    },
+    "ciudadela-bottle-02": {
+      "name": "O inseto do vendedor de poções",
+      "desc": "Na Cidade do Castelo de Hyrule, entre na Loja de Poções, no prédio ao lado do caminho que sobe para o Templo do Tempo. O lojista deixou um inseto escapar: diga que vai ajudar e ele dará uma Garrafa Vazia para você capturá-lo.\n\nEquipe a garrafa e **pegue o inseto enquanto ele corre pelo chão da loja**. Como agradecimento, ele a enche com uma Poção Vermelha, e a garrafa fica com você."
+    },
+    "dominio-heart-01": {
+      "name": "Baú das tochas",
+      "desc": "Atrás da cachoeira no andar inferior do Domínio dos Zora, um baú com o pedaço aparece quando, como criança, você acende todas as tochas ao mesmo tempo: acenda um Graveto Deku em uma das tochas na câmara do Rei Zora.\n\nDesça e **acenda primeiro a do pé da escada**, que não se apaga, depois as quatro de curta duração, usando cada tocha para reacender o graveto. Elas ficam em frente à Loja Zora, no lago com o círculo de pedras e duas atrás da cachoeira, alcançadas rente à parede.",
+      "hint": "O Fogo de Din ajuda com as de trás da cachoeira."
+    },
+    "fortaleza-heart-02": {
+      "name": "Baú do telhado",
+      "desc": "O baú fica no telhado mais alto da Fortaleza Gerudo, encostado no paredão rochoso, do outro lado de um vão. Dos corredores internos, uma escada **ao lado da sua cela** leva você a uma saliência rochosa acima dos telhados; siga-a até a borda de onde dá para ver o baú.\n\nDe lá, **mire o Supergancho no baú** para alcançar o tesouro.",
+      "hint": "Use o Supergancho para alcançar o baú."
+    },
+    "kakariko-heart-04": {
+      "name": "Recompensa por 50 Skulltulas",
+      "desc": "Com 50 Símbolos de Skulltula Dourada, volte à Casa das Skulltulas e **fale com o homem rico amaldiçoado** para receber o Pedaço de Coração.",
+      "hint": "Você precisa de 50 Símbolos de Skulltula Dourada."
+    },
+    "castillo-gs-03": {
+      "name": "Arco em ruínas",
+      "desc": "Como adulto, o caminho da direita nos arredores do Castelo de Ganon, o que leva à Fonte da Grande Fada, passa sob um arco de pedra em ruínas que costumava ser a entrada do Castelo de Hyrule.\n\n**Passe pelo arco e vire-se**: a Skulltula Dourada fica bem no alto da face traseira dele, fora do alcance da espada. Derrube-a com o Gancho."
+    },
+    "cementerio-thought-01": {
+      "name": "Pedestal quebrado na Tumba da Família Real",
+      "desc": "No Cemitério, entre na Tumba da Família Real tocando a Canção de Ninar de Zelda na Triforce e siga até a última sala, a do monumento de pedra que ensina a Canção do Sol.\n\nAli, acima do líquido verde, há um pedestal quebrado com o pensamento de uma fada que não consegue lembrar a melodia gravada no monumento e quer ouvi-la de novo para não esquecê-la. **Toque a Canção do Sol ao lado da marca.**",
+      "hint": "Toque a Canção do Sol ao lado da marca."
+    },
+    "coloso-thought-01": {
+      "name": "Escadaria do Templo do Espírito",
+      "desc": "No Colosso do Deserto, na saliência onde você pega as Manoplas de Prata, entre os dois suportes de tocha, o pensamento fica na mureta da borda. A fada diz que a vista é de tirar o fôlego, mas ela não suporta um ar tão seco e gostaria que caísse uma boa chuva. Tocar a Canção das Tempestades aqui restaura sua magia e sua vida.",
+      "hint": "Toque a Canção das Tempestades diante da marca."
+    },
+    "hielo-thought-01": {
+      "name": "Túnel de gelo ao lado da sala da Bússola",
+      "desc": "Na Caverna de Gelo, depois de pegar a Bússola, encha uma garrafa com o Fogo Azul daquela área e derreta o bloco de gelo vermelho ao lado dela. Siga o túnel congelado atrás dele, o que leva ao corredor das armadilhas de espinhos e à sala do bloco de gelo: você verá este Pensamento de Fada na parede. As asas da fada estão cobertas de geada e ela daria tudo para passar um tempinho ao sol. **Toque a Canção do Sol ao lado da marca.**",
+      "hint": "Toque a Canção do Sol ao lado da marca."
+    },
+    "lago-thought-01": {
+      "name": "Nicho dos potes na margem oeste",
+      "desc": "No Lago Hylia, siga a margem oeste para o sul quase até o fim: este pensamento fica em um nicho no paredão rochoso, com potes, sacos e barris. A fada diz que o segredo dela para brincar de esconde-esconde é um lugar que as outras fadas não conseguem jogar nem quebrar. **Quebre os potes no nicho**: uma fada sai de um deles, e há alguns Rupees também.",
+      "hint": "Quebre os potes no nicho: uma fada está escondida em um."
+    },
+    "llanura-thought-01": {
+      "name": "Ruínas perto da ponte levadiça",
+      "desc": "Saia da Cidade do Castelo de Hyrule pela ponte levadiça e siga para leste até a colina com vista para o rio: entre as ruínas de um muro de pedra coberto de musgo está o primeiro Pensamento de Fada, e Navi aproveita para explicar o que eles são. A fada diz que quando algo cai em cima de alguém de uma árvore, não é acidente: é ela, escondendo coisas nos galhos. **Role contra os troncos das árvores** para sacudir o que quer que guardem; o pinheiro ao lado derruba um Rupee Azul.",
+      "hint": "Role contra as árvores: às vezes algo cai dos galhos."
+    },
+    "llanura-thought-02": {
+      "name": "Caverna do baú perto do Vale Gerudo",
+      "desc": "No oeste dos Campos de Hyrule, no trecho árido que leva ao Vale Gerudo, há uma caverna rasa no paredão rochoso norte com um baú dentro. A fada que deixou o pensamento aqui diz ao garoto de chapéu pontudo que o tesouro é para ele e que ela não o trancou. Como adulto você chegou tarde demais: o baú está aberto e vazio. **Volte como criança e abra o baú**, que então guarda um Pedaço de Coração.",
+      "hint": "Volte como criança e abra o baú na caverna."
+    },
+    "llanura-thought-03": {
+      "name": "Gruta da Pedra da Fofoca ao sul do rancho",
+      "desc": "A sudeste do Rancho Lon Lon, perto de um pequeno lago, um círculo de arbustos cobre uma gruta que abre com um golpe do Martelo Megaton no centro. Lá dentro há uma Skulltula pendurada na parede acima de um caixote de madeira e uma Pedra da Fofoca, e o pensamento fica na parede de pedra. A fada encontrou um inseto dourado brilhante aqui, mas a praga na parede saltou sobre ela antes que pudesse pegá-lo. **Acabe com a Skulltula da parede como criança e, como adulto, role contra o caixote de madeira abaixo dela para quebrá-lo**: dentro está o inseto dourado, uma Skulltula Dourada.",
+      "hint": "Quebre o caixote de madeira sob a Skulltula Grande."
+    },
+    "llanura-thought-04": {
+      "name": "Árvore perto do buraco do Deku Mercador",
+      "desc": "Saia da Cidade do Castelo de Hyrule pela ponte levadiça e siga para leste pela faixa de grama entre o muro e o rio: este pensamento fica em uma árvore bem encostada no muro e, a poucos passos dali, há um buraco com um Deku Mercador que só vende para quem sabe a senha. A fada diz que finalmente descobriu, e que não era \"Not bad at all...\" nem \"I'll make the dishbursement.\" Como adulto ele não tem mais nada, então **vá como criança e diga a ele \"Sell somethin', will ya?\"**: ele venderá a você um Pedaço de Coração por 100 Rupees.",
+      "hint": "Diga \"Sell somethin', will ya?\" ao Deku Mercador no buraco ao lado."
+    },
+    "llanura-thought-05": {
+      "name": "Ruínas perto da cerca do rancho",
+      "desc": "Nos Campos de Hyrule, contorne o Rancho Lon Lon por fora até o canto sudoeste: bem encostadas na cerca de madeira estão as ruínas de um muro de tijolos coberto de hera, e o pensamento fica na parte de baixo, na face do muro. A fada diz que adora a vista do campo dali, de noite e de dia, e que gostaria de alternar entre um e outro sem precisar esperar. **Toque a Canção do Sol** e ela restaurará sua vida e sua magia.",
+      "hint": "Toque a Canção do Sol para alternar entre dia e noite."
+    },
+    "llanura-thought-06": {
+      "name": "Nicho rochoso no noroeste dos Campos de Hyrule",
+      "desc": "No extremo noroeste dos Campos de Hyrule, junto ao rio, há um nicho na rocha com barris, sacos e uma mesa, e este pensamento fica na parede da entrada dele. A fada diz que os Peahats a assustam porque são enormes, criam raízes e agem como se fossem donos do campo, mas que, como qualquer planta, não suportam fogo. **Queime os Peahats com o Fogo de Din**."
+    },
+    "lonlon-thought-01": {
+      "name": "Muro do jardim do rancho",
+      "desc": "No Rancho Lon Lon, dê a volta por trás da casa e do estábulo até o jardim: o pensamento fica no muro de tijolos coberto de hera, entre alguns caixotes, barris e uma carroça de madeira. A fada diz que a musiquinha que aquele garoto toca é muito bonita e deixa as vacas enlouquecidas. É a Canção de Epona, mas tocá-la ao lado da marca não faz nada: **toque-a para uma vaca** e ela dará Leite Lon Lon.",
+      "hint": "Toque a Canção de Epona para uma vaca."
+    },
+    "pozo-thought-01": {
+      "name": "Caixão na sala do Gibdo",
+      "desc": "No Fundo do Poço, desça ao B1 e entre na sala do Gibdo, a dos caixões envoltos em teias, que você limpa queimando-as com um Graveto Deku aceso nas tochas. Este Pensamento de Fada fica na lateral de um dos caixões em pé: a fada sente falta da canção daquele homem sobre \"girar e girar\" e queria que alguém por ali a conhecesse. **Toque a Canção das Tempestades ao lado do caixão** para restaurar magia e vida.",
+      "hint": "Toque a Canção das Tempestades ao lado do caixão."
+    },
+    "sendero-thought-01": {
+      "name": "Círculo de folhas perto da Cidade Goron",
+      "desc": "Subindo a Trilha da Montanha da Morte, a poucos passos da entrada da Cidade Goron, há uma saliência rochosa à direita com um buraco no chão onde há uma planta, e na parede ao lado, este pensamento. A fada diz que em dias calmos as folhas no chão dançam devagar em círculos, mas em dias de tempestade giram a toda velocidade e parecem prestes a sair voando. **Toque a Canção das Tempestades no círculo** para entrar no buraco.",
+      "hint": "Toque a Canção das Tempestades no círculo de folhas."
+    },
+    "sombra-thought-01": {
+      "name": "Parede da sala dos espinhos no teto",
+      "desc": "No B3 do Templo das Sombras fica a sala onde o bloco oculto protege você dos espinhos que caem do teto. Passando a cela com o baú do Rupee Vermelho, ao lado de um buraco na parede, você verá este Pensamento de Fada. A fada diz que adora lugares onde o vento sopra forte e **que este lugar bem que precisava de uma boa rajada de vento**."
+    },
+    "crater-heart-03": {
+      "name": "Deku Mercador na Cratera",
+      "desc": "Na Cratera, como criança, siga para oeste da entrada do cume da Montanha da Morte, em direção a onde o mapa marca a Fonte da Grande Fada. Ao lado de uma rede de escalada na parede, um Deku Mercador salta do chão e tentará atacar você.\n\nAproxime-se desviando dos disparos dele e acerte-o. Quando ele se render, fale com ele: **ele vende a você o Pedaço de Coração por 100 Rupees**.",
+      "hint": "Como criança, ele vende por 100 Rupees depois que você o acerta."
+    },
+    "cementerio-thought-02": {
+      "name": "Ruínas na entrada da Tumba da Família Real",
+      "desc": "No Cemitério, vá até a laje com a Triforce que abre a Tumba da Família Real: este pensamento fica entre as pedras quebradas da entrada.\n\nA fada conta como foi parar no fundo de um túmulo, como um monstro horripilante avançou sobre ela e como parou de persegui-la quando ela cantou uma canção que o ofuscou, mas não lembra o nome. **É a Canção do Sol: toque-a para paralisar os ReDeads.**",
+      "hint": "A Canção do Sol paralisa ReDeads."
+    },
+    "llanura-thought-07": {
+      "name": "Ruínas perto da saída para o Lago Hylia",
+      "desc": "Na ponta sul dos Campos de Hyrule, perto do caminho que desce para o Lago Hylia, há algumas ruínas de pedra entre as árvores: o pensamento fica na face de um dos pilares.\n\nA fada implora que ninguém nunca balance um graveto contra uma borboleta, e menos ainda sem se mover. **Acerte uma borboleta com um Graveto Deku sem sair do lugar: ela se transforma em uma Fada.**",
+      "hint": "Acerte uma borboleta com um Graveto Deku: ela se transforma em uma Fada."
+    },
+    "llanura-thought-08": {
+      "name": "Nicho rochoso perto da entrada do Rio Zora",
+      "desc": "Na borda leste dos Campos de Hyrule, um pouco ao sul da entrada do Rio Zora, há um nicho na rocha com barris, uma mesa, um banco e restos de uma fogueira: o pensamento fica na parede rochosa.\n\nA fada adora dispor Rupees em formas bonitas. Ela os esconde em fossos e buracos, e debaixo d'água também, e não se importa se alguém os pegar. **Procure Rupees dispostos em formas em fossos, buracos e debaixo d'água.**",
+      "hint": "Procure Rupees dispostos em formas em fossos, buracos e debaixo d'água."
+    },
+    "llanura-thought-09": {
+      "name": "Pedras perto do fosso a oeste da ponte levadiça",
+      "desc": "Saia da Cidade do Castelo de Hyrule pela ponte levadiça e siga para oeste pela margem do fosso: em frente à parede por onde a água jorra há algumas pedras grandes, e este pensamento fica ao lado delas.\n\nA fada diz que ninguém nunca vai suspeitar que ela escondeu toda a fortuna dela dentro de um caixote de madeira.",
+      "hint": "A fada diz que escondeu toda a fortuna dela dentro de um caixote de madeira."
+    },
+    "llanura-thought-10": {
+      "name": "Carroça perto da horta próximo a Kakariko",
+      "desc": "No nordeste dos Campos de Hyrule, não muito longe da subida para a Vila Kakariko, há uma carroça de madeira encostada em um muro baixo de pedra: o pensamento fica nas tábuas dela.\n\nA fada diz que o lugar parece solitário, como se não houvesse nada além de mato, mas que se você olhar de perto verá bichinhos correndo às escondidas. **Desça até a horta: há Insetos correndo entre as plantas.**",
+      "hint": "Há Insetos correndo entre as plantas na horta ao lado."
+    }
+  }
+}

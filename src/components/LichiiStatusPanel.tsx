@@ -8,7 +8,10 @@ import {
   type FocusEvent as ReactFocusEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { formatFloorLabel } from '../lib/data'
+import { dataset, formatFloorLabel } from '../lib/data'
+import { DEFAULT_LOCALE, translate, translatePlace, useI18n, type Locale } from '../lib/i18n'
+
+const itemsById = new Map(dataset.items.map((item) => [item.id, item]))
 import type { LichiiTelemetryState } from '../lib/lichii-types'
 import { isLiveMemoryState, type SkulltulaToast } from '../lib/useLichiiTracker'
 
@@ -48,34 +51,48 @@ function getEmulatorDisplayName(emulator?: LichiiTelemetryState['emulator']): st
   return 'Lichii'
 }
 
-function getBaseConnectionMeta(state: LichiiTelemetryState): Pick<ConnectionView, 'label' | 'note'> {
+function formatLocalizedFloorLabel(mapId: string, locale: Locale): string {
+  if (mapId === 'nino') return translate(locale, 'floor.child')
+  if (mapId === 'adulto') return translate(locale, 'floor.adult')
+  if (mapId === 'principal') return translate(locale, 'floor.main')
+  return formatFloorLabel(mapId)
+}
+
+function getBaseConnectionMeta(
+  state: LichiiTelemetryState,
+  locale: Locale = DEFAULT_LOCALE,
+): Pick<ConnectionView, 'label' | 'note'> {
   const emulatorName = getEmulatorDisplayName(state.emulator)
   if (isLiveMemoryState(state)) {
     return {
-      label: `${emulatorName} · Live`,
+      label: `${emulatorName} · ${translate(locale, 'tracker.live')}`,
       note: null,
     }
   }
   if (state.connected) {
     return {
-      label: `${emulatorName} · Waiting for game`,
-      note: state.source === 'save' ? 'RPC connected; showing save data until in-game' : null,
+      label: `${emulatorName} · ${translate(locale, 'tracker.waitingForGame')}`,
+      note: state.source === 'save' ? translate(locale, 'tracker.waitingNote') : null,
     }
   }
   if (state.source === 'save') {
     return {
-      label: `${emulatorName} · Save only`,
-      note: `Offline (${emulatorName} RPC :6545 closed)`,
+      label: `${emulatorName} · ${translate(locale, 'tracker.saveOnly')}`,
+      note: translate(locale, 'tracker.offlineNote', { emulator: emulatorName }),
     }
   }
   return {
-    label: `${emulatorName} · Disconnected`,
+    label: `${emulatorName} · ${translate(locale, 'tracker.disconnected')}`,
     note: null,
   }
 }
 
-export function getConnectionView(state: LichiiTelemetryState, error?: string | null): ConnectionView {
-  const base = getBaseConnectionMeta(state)
+export function getConnectionView(
+  state: LichiiTelemetryState,
+  error?: string | null,
+  locale: Locale = DEFAULT_LOCALE,
+): ConnectionView {
+  const base = getBaseConnectionMeta(state, locale)
 
   if (error) {
     return {
@@ -194,20 +211,28 @@ export function buildOrbAriaLabel(
   state: LichiiTelemetryState,
   connection: ConnectionView,
   error?: string | null,
+  locale: Locale = DEFAULT_LOCALE,
 ): string {
-  const parts = [`${getEmulatorDisplayName(state.emulator)} emulator tracker: ${connection.label}`]
+  const parts = [
+    `${translate(locale, 'tracker.emulatorTracker', { emulator: getEmulatorDisplayName(state.emulator) })}: ${connection.label}`,
+  ]
   if (error) {
-    parts.push(`Error: ${error}`)
+    parts.push(translate(locale, 'tracker.errorPrefix', { error }))
   }
   if (state.skulltulaCount !== null) {
-    parts.push(`${state.skulltulaCount} of 100 Gold Skulltulas`)
+    parts.push(translate(locale, 'tracker.ariaSkulltulas', { count: state.skulltulaCount }))
   } else {
-    parts.push('Gold Skulltula count unavailable')
+    parts.push(translate(locale, 'tracker.ariaSkulltulasUnavailable'))
   }
-  const location = state.placeName ?? state.scene
+  const location = state.placeId
+    ? translatePlace(locale, state.placeId, state.placeName ?? state.scene ?? undefined)
+    : (state.placeName ?? state.scene)
   if (location) {
-    const floor = state.mapId && state.mapId !== 'principal' ? ` (${formatFloorLabel(state.mapId)})` : ''
-    parts.push(`Location: ${location}${floor}`)
+    const floor =
+      state.mapId && state.mapId !== 'principal'
+        ? ` (${formatLocalizedFloorLabel(state.mapId, locale)})`
+        : ''
+    parts.push(translate(locale, 'tracker.ariaLocation', { location: `${location}${floor}` }))
   }
   return parts.join('. ')
 }
@@ -259,14 +284,15 @@ export function LichiiStatusPanel({
   const orbPointerTypeRef = useRef<string | null>(null)
   const suppressFocusReopenRef = useRef(false)
 
+  const { locale, t, tPlace, tItemName } = useI18n()
   const [panelState, dispatch] = useReducer(reducePanelInteraction, INITIAL_PANEL_INTERACTION)
 
   const isOpen = isPanelOpen(panelState)
   const isLiveMemory = isLiveMemoryState(state)
-  const connection = getConnectionView(state, error)
+  const connection = getConnectionView(state, error, locale)
   const hasLocation = Boolean(state.placeName || state.scene)
   const countDisplay = formatOrbSkulltulaCount(state.skulltulaCount)
-  const orbAriaLabel = buildOrbAriaLabel(state, connection, error)
+  const orbAriaLabel = buildOrbAriaLabel(state, connection, error, locale)
 
   const clearCloseTimer = useCallback(() => {
     if (closeTimerRef.current !== null) {
@@ -475,7 +501,7 @@ export function LichiiStatusPanel({
           ref={panelRef}
           id={panelId}
           role="region"
-          aria-label={`${getEmulatorDisplayName(state.emulator)} emulator tracker`}
+          aria-label={t('tracker.emulatorTracker', { emulator: getEmulatorDisplayName(state.emulator) })}
           aria-hidden={!isOpen}
           inert={!isOpen}
           className={`max-w-full origin-bottom-left pb-2 transition-[opacity,transform,visibility] duration-200 ease-out motion-reduce:transition-none ${
@@ -503,15 +529,25 @@ export function LichiiStatusPanel({
                 {hasLocation && (
                   <div className="flex items-center gap-1.5 border-l border-ink-600 pl-3 text-parchment-50">
                     <Compass size={13} className="shrink-0 text-parchment-400" />
-                    <span className="font-medium">{state.placeName ?? state.scene}</span>
+                    <span className="font-medium">
+                      {state.placeId
+                        ? tPlace(state.placeId, state.placeName ?? state.scene ?? undefined)
+                        : (state.placeName ?? state.scene)}
+                    </span>
                     {state.mapId && state.mapId !== 'principal' && (
                       <span className="rounded bg-ink-800 px-1.5 py-0.5 text-[11px] font-semibold text-parchment-200">
-                        {formatFloorLabel(state.mapId)}
+                        {formatLocalizedFloorLabel(state.mapId, locale)}
                       </span>
                     )}
                     {state.age && (
                       <span className="text-[11px] text-parchment-400 capitalize">
-                        ({state.age})
+                        (
+                        {state.age === 'child'
+                          ? t('panel.ageChild').toLowerCase()
+                          : state.age === 'adult'
+                            ? t('panel.ageAdult').toLowerCase()
+                            : state.age}
+                        )
                       </span>
                     )}
                   </div>
@@ -520,7 +556,7 @@ export function LichiiStatusPanel({
                 {/* In-game Gold Skulltula counter */}
                 {state.skulltulaCount !== null && (
                   <div
-                    title="Gold Skulltulas collected in this save"
+                    title={t('tracker.skulltulasTitle')}
                     className="flex items-center gap-1 border-l border-ink-600 pl-3 font-medium text-parchment-50 tabular-nums"
                   >
                     <Skull size={13} className="shrink-0 text-[#e6b450]" />
@@ -531,7 +567,7 @@ export function LichiiStatusPanel({
 
               <button
                 type="button"
-                aria-label="Collapse tracker panel"
+                aria-label={t('tracker.collapsePanel')}
                 onClick={(event) => collapsePanel(event.detail === 0)}
                 className="-mt-1 -mr-1.5 inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-parchment-400 transition-colors hover:bg-ink-700 hover:text-parchment-50 motion-reduce:transition-none"
               >
@@ -542,7 +578,7 @@ export function LichiiStatusPanel({
             {(connection.note || error) && (
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-parchment-400">
                 {connection.note && <span>{connection.note}</span>}
-                {error && <span className="text-ember">Error: {error}</span>}
+                {error && <span className="text-ember">{t('tracker.errorPrefix', { error })}</span>}
                 {error && onRetry && (
                   <button
                     type="button"
@@ -550,7 +586,7 @@ export function LichiiStatusPanel({
                     className="inline-flex cursor-pointer items-center gap-1 rounded border border-ink-600 bg-ink-800 px-1.5 py-0.5 text-[11px] font-medium text-parchment-200 transition-colors hover:bg-ink-700 hover:text-parchment-50 motion-reduce:transition-none"
                   >
                     <RefreshCw size={11} />
-                    Retry
+                    {t('common.retry')}
                   </button>
                 )}
               </div>
@@ -569,7 +605,7 @@ export function LichiiStatusPanel({
                   }`}
                 >
                   <Crosshair size={12} />
-                  Go to Link
+                  {t('tracker.goToLink')}
                 </button>
               )}
 
@@ -583,21 +619,24 @@ export function LichiiStatusPanel({
                     : 'border-ink-600 bg-ink-800 text-parchment-400 hover:text-parchment-50'
                 }`}
               >
-                Follow Link: {followPlayer ? 'On' : 'Off'}
+                {t('tracker.followLink', { state: followPlayer ? t('common.on') : t('common.off') })}
               </button>
 
               <button
                 type="button"
                 aria-pressed={autoMarkSkulltulas}
                 onClick={onToggleAutoMark}
+                title={t('tracker.autoTrackingTitle')}
                 className={`inline-flex cursor-pointer items-center gap-1 rounded border px-2 py-1 text-[11px] font-medium transition-colors motion-reduce:transition-none ${
                   autoMarkSkulltulas
                     ? 'border-[#e6b450]/70 bg-[#e6b450]/20 text-parchment-50'
                     : 'border-ink-600 bg-ink-800 text-parchment-400 hover:text-parchment-50'
                 }`}
               >
-                <Skull size={11} className={autoMarkSkulltulas ? 'text-[#e6b450]' : ''} />
-                Auto-Skulltula: {autoMarkSkulltulas ? 'On' : 'Off'}
+                <Sparkles size={11} className={autoMarkSkulltulas ? 'text-[#e6b450]' : ''} />
+                {t('tracker.autoTracking', {
+                  state: autoMarkSkulltulas ? t('common.on') : t('common.off'),
+                })}
               </button>
 
               {state.position && (
@@ -616,42 +655,47 @@ export function LichiiStatusPanel({
           aria-live="polite"
           className="pointer-events-none absolute top-3 right-3 z-40 flex max-w-sm flex-col gap-2"
         >
-          {toasts.map((toast) => (
-            <div
-              key={toast.id}
-              className="pointer-events-auto flex items-start gap-2.5 rounded-lg border border-[#e6b450]/80 bg-ink-900/95 px-3.5 py-2.5 text-parchment-50 shadow-xl backdrop-blur-sm"
-            >
-              <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-[#e6b450]/20 text-[#e6b450]">
-                <Sparkles size={14} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-[#e6b450]">
-                  Gold Skulltula collected!
-                  {toast.skulltulaCount !== null && (
-                    <span className="ml-1 font-normal text-parchment-200">
-                      (#{toast.skulltulaCount})
-                    </span>
-                  )}
-                </p>
+          {toasts.map((toast) => {
+            const item = itemsById.get(toast.itemId)
+            const displayItemName = tItemName(toast.itemId, toast.itemName)
+            const displayPlaceName = item ? tPlace(item.place, toast.placeName) : toast.placeName
+            return (
+              <div
+                key={toast.id}
+                className="pointer-events-auto flex items-start gap-2.5 rounded-lg border border-[#e6b450]/80 bg-ink-900/95 px-3.5 py-2.5 text-parchment-50 shadow-xl backdrop-blur-sm"
+              >
+                <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-[#e6b450]/20 text-[#e6b450]">
+                  <Sparkles size={14} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-[#e6b450]">
+                    {t('tracker.skulltulaCollected')}
+                    {toast.skulltulaCount !== null && (
+                      <span className="ml-1 font-normal text-parchment-200">
+                        (#{toast.skulltulaCount})
+                      </span>
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => onSelectItem?.(toast.itemId)}
+                    className="mt-0.5 block cursor-pointer truncate text-left text-xs font-medium text-parchment-50 underline-offset-2 hover:underline"
+                  >
+                    {displayItemName}
+                  </button>
+                  <p className="text-[11px] text-parchment-400">{displayPlaceName}</p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => onSelectItem?.(toast.itemId)}
-                  className="mt-0.5 block cursor-pointer truncate text-left text-xs font-medium text-parchment-50 underline-offset-2 hover:underline"
+                  aria-label={t('tracker.dismissNotification')}
+                  onClick={() => onDismissToast(toast.id)}
+                  className="cursor-pointer rounded p-0.5 text-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
                 >
-                  {toast.itemName}
+                  <X size={14} />
                 </button>
-                <p className="text-[11px] text-parchment-400">{toast.placeName}</p>
               </div>
-              <button
-                type="button"
-                aria-label="Dismiss notification"
-                onClick={() => onDismissToast(toast.id)}
-                className="cursor-pointer rounded p-0.5 text-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </>

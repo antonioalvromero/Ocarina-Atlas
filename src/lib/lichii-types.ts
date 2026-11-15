@@ -30,6 +30,26 @@ export type LichiiTelemetryState = {
   collectedHeartContainerIds?: string[]
   /** True when collectedHeartContainerIds reflects the complete active save/live flag state in RAM */
   authoritativeHeartContainers?: boolean
+  /** List of oot.json Piece of Heart item IDs confirmed collected (e.g. ["kakariko-heart-01"]) */
+  collectedHeartPieceIds?: string[]
+  /** True when collectedHeartPieceIds reflects the complete active save/live flag state in RAM */
+  authoritativeHeartPieces?: boolean
+  /** List of oot.json Magic Bean spot item IDs confirmed planted (e.g. ["kokiri-bean-01"]) */
+  collectedBeanIds?: string[]
+  /** True when collectedBeanIds reflects the complete active save/live flag state in RAM */
+  authoritativeBeans?: boolean
+  /** List of oot.json Great Fairy item IDs confirmed visited (e.g. ["castillo-fairy-01"]) */
+  collectedFairyIds?: string[]
+  /** True when collectedFairyIds reflects the complete active save/live flag state in RAM */
+  authoritativeFairies?: boolean
+  /** List of oot.json Bottle item IDs confirmed collected (e.g. ["kakariko-bottle-01"]) */
+  collectedBottleIds?: string[]
+  /** True when collectedBottleIds reflects the complete active save/live flag state in RAM */
+  authoritativeBottles?: boolean
+  /** List of oot.json Fairy Thought item IDs confirmed read (e.g. ["cementerio-thought-01"]) */
+  collectedThoughtIds?: string[]
+  /** True when collectedThoughtIds reflects the complete active save/live flag state in RAM */
+  authoritativeThoughts?: boolean
   /** Most recently collected Gold Skulltula item ID if just picked up */
   lastCollectedSkulltulaId: string | null
   lastPickedItem: string | null

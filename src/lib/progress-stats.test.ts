@@ -160,7 +160,6 @@ describe('computeGlobalProgress', () => {
     expect(summary.places.map((p) => p.id)).toEqual(['dungeon-1'])
     expect(summary.categories).toEqual([
       { key: 'gs', name: 'Gold Skulltulas', done: 1, total: 1, percentage: 100 },
-      { key: 'hc', name: 'Heart Containers', done: 0, total: 0, percentage: 0 },
     ])
 
     const emptySummary = computeGlobalProgress(['item-1'], { ...customDataset, items: [] })

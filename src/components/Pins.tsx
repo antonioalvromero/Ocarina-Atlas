@@ -1,7 +1,8 @@
 import { Check, MapPin } from 'lucide-react'
-import type { CSSProperties } from 'react'
+import { memo, type CSSProperties } from 'react'
 import { pinPosition } from '../lib/coords'
 import { categoryName } from '../lib/data'
+import { useI18n } from '../lib/i18n'
 import type { Merge } from '../lib/merge'
 import { OTHER_PIN, pinTypeLabel } from '../lib/pinTypes'
 import type { CustomPin } from '../lib/storage'
@@ -46,13 +47,14 @@ export function CustomMarker({
   selected: boolean
   onSelect: () => void
 }) {
+  const { t } = useI18n()
   // A typed pin with its default name says the same as its icon.
   const labelled = selected || pin.type === OTHER_PIN || pin.name !== pinTypeLabel(pin.type)
   return (
     <div data-pin className={`absolute size-0 hover:z-30 ${selected ? 'z-30' : 'z-20'}`} style={pinPosition(pin)}>
       <button
         type="button"
-        aria-label={`${pin.name}, your pin${pin.done ? ', completed' : ''}`}
+        aria-label={`${pin.name}, ${t('panel.yourPin')}${pin.done ? `, ${t('panel.completed')}` : ''}`}
         aria-pressed={selected}
         onClick={onSelect}
         className="group absolute bottom-0 left-0 flex w-max -translate-x-3.5 translate-y-0.5 cursor-pointer items-end gap-0.5 rounded"
@@ -100,7 +102,7 @@ export function MergeTrail({ merge }: { merge: Merge }) {
   )
 }
 
-export function OfficialMarker({
+export const OfficialMarker = memo(function OfficialMarker({
   item,
   at,
   done,
@@ -116,8 +118,10 @@ export function OfficialMarker({
   merge: Merge | null
   onSelect: () => void
 }) {
+  const { t, tCategory, tItemName } = useI18n()
   const { icon: Icon, color } = categoryStyle(item.cat)
   const target = merge?.item.id === item.id ? merge : null
+  const itemName = tItemName(item.id, item.name)
   return (
     <div data-pin className={`absolute size-0 hover:z-30 ${selected ? 'z-30' : 'z-10'}`} style={pinPosition(at)}>
       {target && (
@@ -125,8 +129,8 @@ export function OfficialMarker({
       )}
       <button
         type="button"
-        title={item.name}
-        aria-label={`${item.name}, ${categoryName(item.cat)}${done ? ', completed' : ''}`}
+        title={itemName}
+        aria-label={`${itemName}, ${tCategory(item.cat, categoryName(item.cat))}${done ? `, ${t('panel.completed')}` : ''}`}
         aria-pressed={selected}
         onClick={onSelect}
         style={{ borderColor: color, color }}
@@ -139,4 +143,4 @@ export function OfficialMarker({
       </button>
     </div>
   )
-}
+})

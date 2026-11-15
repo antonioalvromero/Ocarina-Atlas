@@ -1,6 +1,7 @@
-import { useEffect, useId, useState } from 'react'
+import { memo, useCallback, useEffect, useId, useState } from 'react'
 import { pinPosition } from '../lib/coords'
 import type { Fraction } from '../lib/types'
+import { useLichiiPosition } from '../lib/useLichiiTracker'
 
 export type PlayerPinProps = {
   at: Fraction
@@ -12,7 +13,7 @@ export type PlayerPinProps = {
   onClick?: () => void
 }
 
-export function PlayerPin({
+export const PlayerPin = memo(function PlayerPin({
   at,
   yaw,
   label = 'Link',
@@ -146,4 +147,46 @@ export function PlayerPin({
       </div>
     </div>
   )
+})
+
+export type LivePlayerPinProps = {
+  mode: 'world' | 'place'
+  fallbackAt?: Fraction | null
+  label?: string | null
+  sublabel?: string | null
+  live?: boolean
+  onClick?: (at: Fraction) => void
 }
+
+/**
+ * Subscribes directly to the 120 ms position stream so parent map views
+ * only re-render on non-position metadata changes.
+ */
+export const LivePlayerPin = memo(function LivePlayerPin({
+  mode,
+  fallbackAt = null,
+  label = 'Link',
+  sublabel,
+  live = true,
+  onClick,
+}: LivePlayerPinProps) {
+  const { position, mapFraction, worldMapFraction } = useLichiiPosition()
+  const at = mode === 'world' ? (worldMapFraction ?? fallbackAt) : mapFraction
+  const handleClick = useCallback(() => {
+    if (at && onClick) onClick(at)
+  }, [at, onClick])
+
+  if (!at) return null
+
+  return (
+    <PlayerPin
+      at={at}
+      yaw={position?.yaw}
+      label={label}
+      sublabel={sublabel}
+      position3d={position}
+      live={live}
+      onClick={onClick ? handleClick : undefined}
+    />
+  )
+})

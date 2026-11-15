@@ -517,6 +517,12 @@ namespace OcarinaAtlasLauncher
 
     internal static class Theme
     {
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        private const int DwmwaUseImmersiveDarkMode = 20;
+        private const int DwmwaUseImmersiveDarkModeBefore20H1 = 19;
+
         public static readonly Color Ink950 = Color.FromArgb(0x13, 0x10, 0x0C);
         public static readonly Color Ink900 = Color.FromArgb(0x1B, 0x17, 0x12);
         public static readonly Color Ink800 = Color.FromArgb(0x25, 0x20, 0x19);
@@ -525,11 +531,45 @@ namespace OcarinaAtlasLauncher
 
         public static readonly Color Parchment50 = Color.FromArgb(0xF8, 0xF1, 0xE0);
         public static readonly Color Parchment200 = Color.FromArgb(0xE6, 0xD8, 0xB8);
+        public static readonly Color Parchment300 = Color.FromArgb(0xD5, 0xC3, 0x9C);
         public static readonly Color Parchment400 = Color.FromArgb(0xC4, 0xAD, 0x7F);
         public static readonly Color Parchment600 = Color.FromArgb(0x93, 0x80, 0x5C);
 
         public static readonly Color Ember = Color.FromArgb(0xD9, 0x73, 0x4A);
         public static readonly Color Moss = Color.FromArgb(0x86, 0xB6, 0x7E);
+        public static readonly Color Gold = Color.FromArgb(0xE0, 0xB3, 0x54);
+
+        public static void EnableDarkTitleBar(Form form)
+        {
+            if (form == null || form.IsDisposed) return;
+
+            MethodInvoker apply = delegate
+            {
+                if (form.IsDisposed || !form.IsHandleCreated) return;
+                try
+                {
+                    int useImmersiveDarkMode = 1;
+                    int hr = DwmSetWindowAttribute(form.Handle, DwmwaUseImmersiveDarkMode, ref useImmersiveDarkMode, sizeof(int));
+                    if (hr != 0)
+                    {
+                        DwmSetWindowAttribute(form.Handle, DwmwaUseImmersiveDarkModeBefore20H1, ref useImmersiveDarkMode, sizeof(int));
+                    }
+                }
+                catch
+                {
+                    // Ignore on Windows versions that do not support DwmSetWindowAttribute dark mode.
+                }
+            };
+
+            if (form.IsHandleCreated)
+            {
+                apply();
+            }
+            else
+            {
+                form.HandleCreated += delegate { apply(); };
+            }
+        }
     }
 
     /// <summary>
@@ -1878,7 +1918,7 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class BorderedPanel : Panel
     {
-        public Color BorderColor = Theme.Ink600;
+        public Color BorderColor = Theme.Ink700;
         public Color FillColor = Theme.Ink900;
         public int CornerRadius = 8;
 
@@ -2440,7 +2480,7 @@ namespace OcarinaAtlasLauncher
     {
         private readonly MainForm _ownerForm;
         private readonly UpdateInfo _info;
-        private readonly TextBox _notesBox;
+        private readonly RichTextBox _notesBox;
         private readonly Label _statusLabel;
         private readonly ProgressBar _progressBar;
         private readonly Button _updateNowButton;
@@ -2464,6 +2504,7 @@ namespace OcarinaAtlasLauncher
             ShowInTaskbar = false;
             ClientSize = new Size(520, 412);
             if (appIcon != null) Icon = appIcon;
+            Theme.EnableDarkTitleBar(this);
 
             Label headerLabel = new Label();
             headerLabel.Text = "Update Available: " + info.DisplayTag;
@@ -2493,19 +2534,28 @@ namespace OcarinaAtlasLauncher
             notesTitle.Location = new Point(20, 72);
             Controls.Add(notesTitle);
 
-            _notesBox = new TextBox();
-            _notesBox.Multiline = true;
+            BorderedPanel notesContainer = new BorderedPanel();
+            notesContainer.Location = new Point(20, 94);
+            notesContainer.Size = new Size(480, 212);
+            notesContainer.FillColor = Theme.Ink900;
+            notesContainer.BorderColor = Theme.Ink700;
+            notesContainer.CornerRadius = 8;
+            notesContainer.Padding = new Padding(8, 6, 8, 6);
+            Controls.Add(notesContainer);
+
+            _notesBox = new RichTextBox();
             _notesBox.ReadOnly = true;
-            _notesBox.ScrollBars = ScrollBars.Vertical;
+            _notesBox.ScrollBars = RichTextBoxScrollBars.Vertical;
             _notesBox.WordWrap = true;
-            _notesBox.BorderStyle = BorderStyle.FixedSingle;
+            _notesBox.DetectUrls = true;
+            _notesBox.BorderStyle = BorderStyle.None;
+            _notesBox.Dock = DockStyle.Fill;
             _notesBox.BackColor = Theme.Ink900;
             _notesBox.ForeColor = Theme.Parchment200;
             _notesBox.Font = new Font("Segoe UI", 9f, FontStyle.Regular);
-            _notesBox.Location = new Point(20, 94);
-            _notesBox.Size = new Size(480, 212);
-            _notesBox.Text = info.ReleaseNotes;
-            Controls.Add(_notesBox);
+            _notesBox.LinkClicked += OnNotesLinkClicked;
+            RenderMarkdownToRichTextBox(_notesBox, info.ReleaseNotes);
+            notesContainer.Controls.Add(_notesBox);
 
             _statusLabel = new Label();
             _statusLabel.Text = string.Empty;
@@ -2534,6 +2584,8 @@ namespace OcarinaAtlasLauncher
             Controls.Add(_updateNowButton);
 
             _skipButton = CreateDialogButton("Skip Version", 296, 364, 108, 32, false);
+            _skipButton.ForeColor = Theme.Gold;
+            _skipButton.FlatAppearance.BorderColor = Theme.Gold;
             _skipButton.Click += OnSkipVersionClick;
             Controls.Add(_skipButton);
 
@@ -2545,6 +2597,7 @@ namespace OcarinaAtlasLauncher
             Shown += delegate
             {
                 _notesBox.Select(0, 0);
+                _notesBox.ScrollToCaret();
                 _updateNowButton.Focus();
             };
 
@@ -2565,7 +2618,7 @@ namespace OcarinaAtlasLauncher
             btn.Size = new Size(width, height);
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 1;
-            btn.FlatAppearance.BorderColor = Theme.Ink600;
+            btn.FlatAppearance.BorderColor = Theme.Ink700;
             btn.FlatAppearance.MouseOverBackColor = Theme.Ink700;
             btn.BackColor = Theme.Ink800;
             btn.ForeColor = Theme.Parchment200;
@@ -2573,6 +2626,468 @@ namespace OcarinaAtlasLauncher
             btn.Cursor = Cursors.Hand;
             btn.UseVisualStyleBackColor = false;
             return btn;
+        }
+
+        private void OnNotesLinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            if (e == null || string.IsNullOrEmpty(e.LinkText)) return;
+            Uri uri;
+            if (!Uri.TryCreate(e.LinkText, UriKind.Absolute, out uri)) return;
+            if (!string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo(uri.AbsoluteUri);
+                psi.UseShellExecute = true;
+                Process.Start(psi);
+            }
+            catch
+            {
+                // Non-fatal if no browser handler is registered.
+            }
+        }
+
+        private static void RenderMarkdownToRichTextBox(RichTextBox box, string markdown)
+        {
+            if (box == null) return;
+            box.Clear();
+            if (string.IsNullOrEmpty(markdown)) return;
+
+            string normalized = markdown.Replace("\r\n", "\n").Replace('\r', '\n');
+            string[] lines = normalized.Split('\n');
+
+            Dictionary<string, Font> fonts = new Dictionary<string, Font>(StringComparer.Ordinal);
+            try
+            {
+                Font bodyFont = GetCachedFont(fonts, "Segoe UI", 9f, FontStyle.Regular);
+                Font bodyBoldFont = GetCachedFont(fonts, "Segoe UI", 9f, FontStyle.Bold);
+                Font codeFont = GetCachedFont(fonts, "Consolas", 8.75f, FontStyle.Regular);
+
+                bool inCodeBlock = false;
+                bool hasOutput = false;
+
+                for (int lineIndex = 0; lineIndex < lines.Length; lineIndex++)
+                {
+                    string line = lines[lineIndex];
+                    string trimmed = line.Trim();
+
+                    if (trimmed.StartsWith("```", StringComparison.Ordinal))
+                    {
+                        inCodeBlock = !inCodeBlock;
+                        continue;
+                    }
+
+                    if (hasOutput)
+                    {
+                        AppendStyledText(box, "\n", bodyFont, Theme.Parchment200);
+                    }
+
+                    if (inCodeBlock)
+                    {
+                        SetParagraphIndent(box, 12, 0);
+                        AppendStyledText(box, line, codeFont, Theme.Parchment300);
+                        hasOutput = true;
+                        continue;
+                    }
+
+                    if (trimmed.Length == 0)
+                    {
+                        SetParagraphIndent(box, 0, 0);
+                        hasOutput = true;
+                        continue;
+                    }
+
+                    if (IsHorizontalRule(trimmed))
+                    {
+                        SetParagraphIndent(box, 0, 0);
+                        AppendStyledText(box, new string('\u2500', 38), bodyFont, Theme.Ink600);
+                        hasOutput = true;
+                        continue;
+                    }
+
+                    int headingLevel;
+                    string headingText;
+                    if (TryParseHeading(trimmed, out headingLevel, out headingText))
+                    {
+                        float headingSize = headingLevel == 1 ? 12.5f : (headingLevel == 2 ? 11f : (headingLevel == 3 ? 10f : 9.5f));
+                        Color headingColor = headingLevel <= 2 ? Theme.Gold : Theme.Parchment50;
+                        SetParagraphIndent(box, 0, 0);
+                        AppendInlineMarkdown(box, fonts, headingText, "Segoe UI", headingSize, FontStyle.Bold, headingColor);
+                        hasOutput = true;
+                        continue;
+                    }
+
+                    if (trimmed.StartsWith(">", StringComparison.Ordinal))
+                    {
+                        string quoteText = StripBlockquotePrefix(trimmed);
+                        SetParagraphIndent(box, 12, 12);
+                        AppendStyledText(box, "\u2502 ", bodyFont, Theme.Parchment600);
+                        AppendInlineMarkdown(box, fonts, quoteText, "Segoe UI", 9f, FontStyle.Italic, Theme.Parchment400);
+                        hasOutput = true;
+                        continue;
+                    }
+
+                    int indentLevel;
+                    string listItemText;
+                    if (TryParseBulletListItem(line, out indentLevel, out listItemText))
+                    {
+                        SetParagraphIndent(box, 8 + indentLevel * 14, 14);
+                        AppendStyledText(box, "  \u2022  ", bodyFont, Theme.Gold);
+                        AppendInlineMarkdown(box, fonts, listItemText, "Segoe UI", 9f, FontStyle.Regular, Theme.Parchment200);
+                        hasOutput = true;
+                        continue;
+                    }
+
+                    string numberPrefix;
+                    if (TryParseNumberedListItem(line, out indentLevel, out numberPrefix, out listItemText))
+                    {
+                        SetParagraphIndent(box, 8 + indentLevel * 14, 18);
+                        AppendStyledText(box, "  " + numberPrefix + ". ", bodyBoldFont, Theme.Gold);
+                        AppendInlineMarkdown(box, fonts, listItemText, "Segoe UI", 9f, FontStyle.Regular, Theme.Parchment200);
+                        hasOutput = true;
+                        continue;
+                    }
+
+                    SetParagraphIndent(box, 0, 0);
+                    AppendInlineMarkdown(box, fonts, line, "Segoe UI", 9f, FontStyle.Regular, Theme.Parchment200);
+                    hasOutput = true;
+                }
+
+                box.SelectionStart = 0;
+                box.SelectionLength = 0;
+            }
+            finally
+            {
+                foreach (Font f in fonts.Values)
+                {
+                    f.Dispose();
+                }
+            }
+        }
+
+        private static Font GetCachedFont(Dictionary<string, Font> fonts, string family, float size, FontStyle style)
+        {
+            string key = family + "|" + size.ToString("0.00", CultureInfo.InvariantCulture) + "|" + ((int)style).ToString(CultureInfo.InvariantCulture);
+            Font cached;
+            if (fonts.TryGetValue(key, out cached))
+            {
+                return cached;
+            }
+
+            Font created = new Font(family, size, style);
+            fonts[key] = created;
+            return created;
+        }
+
+        private static void SetParagraphIndent(RichTextBox box, int indent, int hangingIndent)
+        {
+            box.SelectionStart = box.TextLength;
+            box.SelectionLength = 0;
+            box.SelectionIndent = indent;
+            box.SelectionHangingIndent = hangingIndent;
+        }
+
+        private static void AppendStyledText(RichTextBox box, string text, Font font, Color color)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            box.SelectionStart = box.TextLength;
+            box.SelectionLength = 0;
+            box.SelectionFont = font;
+            box.SelectionColor = color;
+            box.AppendText(text);
+        }
+
+        private static bool IsHorizontalRule(string trimmed)
+        {
+            if (trimmed.Length < 3) return false;
+            char marker = '\0';
+            int count = 0;
+            for (int i = 0; i < trimmed.Length; i++)
+            {
+                char c = trimmed[i];
+                if (c == ' ' || c == '\t') continue;
+                if (c != '-' && c != '*' && c != '_') return false;
+                if (marker == '\0')
+                {
+                    marker = c;
+                }
+                else if (c != marker)
+                {
+                    return false;
+                }
+                count++;
+            }
+            return count >= 3;
+        }
+
+        private static bool TryParseHeading(string trimmed, out int level, out string text)
+        {
+            level = 0;
+            text = string.Empty;
+            int hashes = 0;
+            while (hashes < trimmed.Length && hashes < 4 && trimmed[hashes] == '#')
+            {
+                hashes++;
+            }
+            if (hashes == 0 || hashes >= trimmed.Length) return false;
+            if (trimmed[hashes] != ' ' && trimmed[hashes] != '\t') return false;
+
+            level = hashes;
+            text = trimmed.Substring(hashes).Trim();
+            while (text.EndsWith("#", StringComparison.Ordinal))
+            {
+                int lastSpace = text.LastIndexOf(' ');
+                if (lastSpace < 0) break;
+                string trailing = text.Substring(lastSpace + 1);
+                bool allHashes = trailing.Length > 0;
+                for (int i = 0; i < trailing.Length; i++)
+                {
+                    if (trailing[i] != '#')
+                    {
+                        allHashes = false;
+                        break;
+                    }
+                }
+                if (!allHashes) break;
+                text = text.Substring(0, lastSpace).TrimEnd();
+            }
+            return true;
+        }
+
+        private static string StripBlockquotePrefix(string trimmed)
+        {
+            string rest = trimmed;
+            while (rest.StartsWith(">", StringComparison.Ordinal))
+            {
+                rest = rest.Substring(1);
+                if (rest.StartsWith(" ", StringComparison.Ordinal))
+                {
+                    rest = rest.Substring(1);
+                }
+                rest = rest.TrimStart();
+            }
+            return rest;
+        }
+
+        private static bool TryParseBulletListItem(string line, out int indentLevel, out string itemText)
+        {
+            indentLevel = 0;
+            itemText = string.Empty;
+            int idx = 0;
+            while (idx < line.Length && line[idx] == ' ')
+            {
+                idx++;
+            }
+            if (idx + 1 >= line.Length) return false;
+            if ((line[idx] == '-' || line[idx] == '*') && (line[idx + 1] == ' ' || line[idx + 1] == '\t'))
+            {
+                indentLevel = Math.Min(3, idx / 2);
+                itemText = line.Substring(idx + 2).TrimStart();
+                return true;
+            }
+            return false;
+        }
+
+        private static bool TryParseNumberedListItem(string line, out int indentLevel, out string numberPrefix, out string itemText)
+        {
+            indentLevel = 0;
+            numberPrefix = string.Empty;
+            itemText = string.Empty;
+            int idx = 0;
+            while (idx < line.Length && line[idx] == ' ')
+            {
+                idx++;
+            }
+            int numStart = idx;
+            while (idx < line.Length && char.IsDigit(line[idx]))
+            {
+                idx++;
+            }
+            if (idx == numStart || idx + 1 >= line.Length) return false;
+            if (line[idx] == '.' && (line[idx + 1] == ' ' || line[idx + 1] == '\t'))
+            {
+                indentLevel = Math.Min(3, numStart / 2);
+                numberPrefix = line.Substring(numStart, idx - numStart);
+                itemText = line.Substring(idx + 2).TrimStart();
+                return true;
+            }
+            return false;
+        }
+
+        private static void AppendInlineMarkdown(
+            RichTextBox box,
+            Dictionary<string, Font> fonts,
+            string text,
+            string baseFamily,
+            float baseSize,
+            FontStyle baseStyle,
+            Color baseColor)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+
+            Font baseFont = GetCachedFont(fonts, baseFamily, baseSize, baseStyle);
+            StringBuilder plain = new StringBuilder();
+            int i = 0;
+
+            while (i < text.Length)
+            {
+                char ch = text[i];
+
+                if (ch == '\\' && i + 1 < text.Length)
+                {
+                    char next = text[i + 1];
+                    if (next == '\\' || next == '*' || next == '`' || next == '[' || next == ']' || next == '_')
+                    {
+                        plain.Append(next);
+                        i += 2;
+                        continue;
+                    }
+                }
+
+                if (ch == '`')
+                {
+                    int close = text.IndexOf('`', i + 1);
+                    if (close > i + 1)
+                    {
+                        FlushPlainText(box, plain, baseFont, baseColor);
+                        string code = text.Substring(i + 1, close - i - 1);
+                        Font inlineCodeFont = GetCachedFont(fonts, "Consolas", Math.Max(8f, baseSize - 0.25f), FontStyle.Regular);
+                        AppendStyledText(box, code, inlineCodeFont, Theme.Moss);
+                        i = close + 1;
+                        continue;
+                    }
+                }
+
+                if (ch == '*' && i + 1 < text.Length && text[i + 1] == '*')
+                {
+                    int close = text.IndexOf("**", i + 2, StringComparison.Ordinal);
+                    if (close > i + 2)
+                    {
+                        FlushPlainText(box, plain, baseFont, baseColor);
+                        string inner = text.Substring(i + 2, close - i - 2);
+                        AppendInlineMarkdown(box, fonts, inner, baseFamily, baseSize, baseStyle | FontStyle.Bold, baseColor);
+                        i = close + 2;
+                        continue;
+                    }
+                }
+
+                if (ch == '*' && i + 1 < text.Length && !char.IsWhiteSpace(text[i + 1]))
+                {
+                    int close = FindClosingSingleAsterisk(text, i + 1);
+                    if (close > i + 1)
+                    {
+                        FlushPlainText(box, plain, baseFont, baseColor);
+                        string inner = text.Substring(i + 1, close - i - 1);
+                        AppendInlineMarkdown(box, fonts, inner, baseFamily, baseSize, baseStyle | FontStyle.Italic, baseColor);
+                        i = close + 1;
+                        continue;
+                    }
+                }
+
+                if (ch == '[')
+                {
+                    int labelEnd;
+                    int urlEnd;
+                    string label;
+                    string url;
+                    if (TryParseMarkdownLink(text, i, out labelEnd, out urlEnd, out label, out url))
+                    {
+                        FlushPlainText(box, plain, baseFont, baseColor);
+                        bool isHttp = url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                                      url.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+                        if (isHttp && !string.Equals(label, url, StringComparison.OrdinalIgnoreCase))
+                        {
+                            AppendStyledText(box, label, GetCachedFont(fonts, baseFamily, baseSize, baseStyle), Theme.Parchment50);
+                            AppendStyledText(box, " (", baseFont, Theme.Parchment400);
+                            AppendStyledText(box, url, baseFont, Theme.Moss);
+                            AppendStyledText(box, ")", baseFont, Theme.Parchment400);
+                        }
+                        else if (isHttp)
+                        {
+                            AppendStyledText(box, url, baseFont, Theme.Moss);
+                        }
+                        else
+                        {
+                            AppendStyledText(box, label, baseFont, Theme.Parchment50);
+                        }
+                        i = urlEnd + 1;
+                        continue;
+                    }
+                }
+
+                plain.Append(ch);
+                i++;
+            }
+
+            FlushPlainText(box, plain, baseFont, baseColor);
+        }
+
+        private static void FlushPlainText(RichTextBox box, StringBuilder plain, Font font, Color color)
+        {
+            if (plain.Length == 0) return;
+            AppendStyledText(box, plain.ToString(), font, color);
+            plain.Length = 0;
+        }
+
+        private static int FindClosingSingleAsterisk(string text, int start)
+        {
+            for (int i = start; i < text.Length; i++)
+            {
+                if (text[i] != '*') continue;
+                bool isDouble = (i + 1 < text.Length && text[i + 1] == '*') || (i > 0 && text[i - 1] == '*');
+                if (isDouble) continue;
+                if (!char.IsWhiteSpace(text[i - 1]))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private static bool TryParseMarkdownLink(
+            string text,
+            int openBracketIndex,
+            out int closeBracketIndex,
+            out int closeParenIndex,
+            out string label,
+            out string url)
+        {
+            closeBracketIndex = -1;
+            closeParenIndex = -1;
+            label = string.Empty;
+            url = string.Empty;
+
+            int i = openBracketIndex + 1;
+            while (i < text.Length)
+            {
+                if (text[i] == '\\' && i + 1 < text.Length)
+                {
+                    i += 2;
+                    continue;
+                }
+                if (text[i] == ']')
+                {
+                    closeBracketIndex = i;
+                    break;
+                }
+                if (text[i] == '\n') return false;
+                i++;
+            }
+
+            if (closeBracketIndex <= openBracketIndex) return false;
+            if (closeBracketIndex + 1 >= text.Length || text[closeBracketIndex + 1] != '(') return false;
+
+            int parenEnd = text.IndexOf(')', closeBracketIndex + 2);
+            if (parenEnd <= closeBracketIndex + 2) return false;
+
+            closeParenIndex = parenEnd;
+            label = text.Substring(openBracketIndex + 1, closeBracketIndex - openBracketIndex - 1);
+            url = text.Substring(closeBracketIndex + 2, parenEnd - closeBracketIndex - 2).Trim();
+            return true;
         }
 
         private void OnSkipVersionClick(object sender, EventArgs e)
@@ -2755,10 +3270,10 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "1.2.1";
+        public const string AppVersion = "2.0.0";
 
-        private const int CollapsedClientHeight = 478;
-        private const int ExpandedClientHeight = 700;
+        private const int CollapsedClientHeight = 392;
+        private const int ExpandedClientHeight = 640;
 
         private readonly LaunchOptions _options;
         private readonly object _procLock = new object();
@@ -2780,58 +3295,72 @@ namespace OcarinaAtlasLauncher
         private int _firewallCheckedPort = -1;
         private bool _firewallAllowed = false;
         private int _copyFeedbackTicks = 0;
+        private int _copyLogFeedbackTicks = 0;
+        private int _syncFeedbackTicks = 0;
+        private int _lanFeedbackTicks = 0;
+        private bool _lichiiConfigured = false;
         private string _selectedLanUrl = string.Empty;
-        private string _renderedQrUrl = string.Empty;
         private UpdateInfo _pendingUpdateInfo;
         private UpdateDialog _activeUpdateDialog;
+        private bool _updateCheckInFlight = false;
         private List<LanEndpoint> _lanEndpoints = new List<LanEndpoint>();
         private ToolTip _toolTip;
 
         // Layout containers
+        private BorderedPanel _serverStatusPill;
+        private BorderedPanel _emulatorStatusPill;
+        private BorderedPanel _updatePill;
         private BorderedPanel _heroCard;
-        private BorderedPanel _heroStatusPill;
-        private BorderedPanel _step1Card;
-        private BorderedPanel _configuredPill;
+        private BorderedPanel _syncStripPanel;
         private BorderedPanel _step2Card;
         private BorderedPanel _advancedDrawerPanel;
-        private Panel _logContainer;
+        private Panel _settingsTabPanel;
+        private Panel _logsTabPanel;
+        private BorderedPanel _logContainer;
 
-        // Hero controls
+        // Header controls
         private Label _versionLabel;
-        private LinkLabel _updateLinkLabel;
+        private Label _updatePillLabel;
         private StatusDot _serverDot;
         private Label _serverStatusLabel;
+        private StatusDot _heroLichiiDot;
+        private Label _heroLichiiLabel;
+
+        // Primary Control + Sync Card controls
         private Label _heroSummaryLabel;
         private LinkLabel _serverUrlLink;
         private Button _startStopButton;
         private Button _openBrowserButton;
-        private StatusDot _heroLichiiDot;
-        private Label _heroLichiiLabel;
-
-        // Step 1 controls (Lichii Live Sync)
-        private Label _lichiiStepDetailLabel;
         private Button _enableRpcButton;
+        private Label _lichiiStepDetailLabel;
 
-        // Step 2 controls (LAN / Second Screen)
+        // Second Screen / LAN Card controls
         private Button _firewallButton;
         private ComboBox _lanComboBox;
         private LinkLabel _lanUrlLink;
         private Label _lanStatusLabel;
         private Button _refreshLanButton;
         private Button _copyLanUrlButton;
+        private Button _qrButton;
         private Label _lanHintLabel;
-        private PictureBox _qrPictureBox;
 
-        // Advanced drawer controls
+        // Drawer controls
         private Button _advancedToggleButton;
+        private Button _settingsTabButton;
+        private Button _logsTabButton;
+        private Label _settingsLockHintLabel;
+        private BorderedPanel _modeBadgePanel;
         private Label _modeBadgeLabel;
+        private Button _copyLogButton;
+        private Button _clearLogButton;
         private NumericUpDown _portInput;
         private TextBox _lichiiHostInput;
         private NumericUpDown _lichiiPortInput;
         private CheckBox _allowLanCheckBox;
         private CheckBox _autoOpenCheckBox;
         private CheckBox _trayMinimizeCheckBox;
-        private Button _clearLogButton;
+        private Label _updateStatusLabel;
+        private LinkLabel _checkUpdatesLink;
         private TextBox _logTextBox;
 
         private NotifyIcon _trayIcon;
@@ -2839,6 +3368,7 @@ namespace OcarinaAtlasLauncher
         private ToolStripMenuItem _trayOpenBrowserItem;
 
         private bool _advancedExpanded = false;
+        private int _activeDrawerTab = 0; // 0 = Settings, 1 = Logs
         private bool _trayHintShown = false;
 
         public MainForm(LaunchOptions options)
@@ -2855,14 +3385,15 @@ namespace OcarinaAtlasLauncher
             _appIcon = LoadAppIcon();
             this.Icon = _appIcon;
 
-            Text = "Ocarina Atlas — Ocarina of Time Map Tracker";
+            Text = "Ocarina Atlas \u2014 Ocarina of Time Map Tracker";
             BackColor = Theme.Ink950;
             ForeColor = Theme.Parchment200;
             Font = new Font("Segoe UI", 9f, FontStyle.Regular);
-            ClientSize = new Size(560, CollapsedClientHeight);
-            MinimumSize = new Size(550, 450);
+            ClientSize = new Size(540, CollapsedClientHeight);
+            MinimumSize = new Size(540, CollapsedClientHeight);
             StartPosition = FormStartPosition.CenterScreen;
             AutoScaleMode = AutoScaleMode.Font;
+            Theme.EnableDarkTitleBar(this);
 
             BuildLayout();
             BuildTrayIcon();
@@ -2887,75 +3418,116 @@ namespace OcarinaAtlasLauncher
         {
             _toolTip = new ToolTip();
 
-            // 1. Hero Card
-            _heroCard = new BorderedPanel();
-            _heroCard.Location = new Point(16, 14);
-            _heroCard.Size = new Size(528, 148);
-            _heroCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            Controls.Add(_heroCard);
-
+            // 0. Borderless Header Bar (54px on Ink950)
             Label titleLabel = new Label();
             titleLabel.Text = "Ocarina Atlas";
             titleLabel.Font = new Font("Georgia", 15f, FontStyle.Bold);
             titleLabel.ForeColor = Theme.Parchment50;
             titleLabel.AutoSize = true;
-            titleLabel.Location = new Point(16, 12);
-            _heroCard.Controls.Add(titleLabel);
+            titleLabel.Location = new Point(18, 13);
+            Controls.Add(titleLabel);
 
             _versionLabel = new Label();
             _versionLabel.Text = "v" + AppVersion;
-            _versionLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
+            _versionLabel.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
             _versionLabel.ForeColor = Theme.Parchment600;
             _versionLabel.AutoSize = true;
-            _versionLabel.Location = new Point(titleLabel.Right + 6, 20);
-            _heroCard.Controls.Add(_versionLabel);
+            _versionLabel.Location = new Point(titleLabel.Right + 8, 21);
+            Controls.Add(_versionLabel);
 
-            _updateLinkLabel = new LinkLabel();
-            _updateLinkLabel.Text = string.Empty;
-            _updateLinkLabel.LinkColor = Theme.Ember;
-            _updateLinkLabel.ActiveLinkColor = Theme.Parchment50;
-            _updateLinkLabel.VisitedLinkColor = Theme.Ember;
-            _updateLinkLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
-            _updateLinkLabel.AutoSize = true;
-            _updateLinkLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _updateLinkLabel.Visible = false;
-            _updateLinkLabel.Location = new Point(250, 19);
-            _updateLinkLabel.LinkClicked += OnUpdateLinkClicked;
-            _heroCard.Controls.Add(_updateLinkLabel);
+            _updatePill = new BorderedPanel();
+            _updatePill.Location = new Point(_versionLabel.Right + 10, 16);
+            _updatePill.Size = new Size(64, 22);
+            _updatePill.FillColor = Color.FromArgb(0x28, 0x20, 0x12);
+            _updatePill.BorderColor = Theme.Gold;
+            _updatePill.CornerRadius = 11;
+            _updatePill.Cursor = Cursors.Hand;
+            _updatePill.Visible = false;
+            _updatePill.Click += OnUpdatePillClick;
+            Controls.Add(_updatePill);
 
-            _heroStatusPill = new BorderedPanel();
-            _heroStatusPill.Location = new Point(406, 14);
-            _heroStatusPill.Size = new Size(106, 24);
-            _heroStatusPill.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _heroStatusPill.FillColor = Theme.Ink800;
-            _heroStatusPill.BorderColor = Theme.Ink600;
-            _heroStatusPill.CornerRadius = 11;
-            _heroCard.Controls.Add(_heroStatusPill);
+            _updatePillLabel = new Label();
+            _updatePillLabel.Text = "Update";
+            _updatePillLabel.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
+            _updatePillLabel.ForeColor = Theme.Gold;
+            _updatePillLabel.BackColor = Color.FromArgb(0x28, 0x20, 0x12);
+            _updatePillLabel.Dock = DockStyle.Fill;
+            _updatePillLabel.TextAlign = ContentAlignment.MiddleCenter;
+            _updatePillLabel.Cursor = Cursors.Hand;
+            _updatePillLabel.Click += OnUpdatePillClick;
+            _updatePill.Controls.Add(_updatePillLabel);
+
+            _serverStatusPill = new BorderedPanel();
+            _serverStatusPill.Location = new Point(312, 16);
+            _serverStatusPill.Size = new Size(98, 24);
+            _serverStatusPill.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _serverStatusPill.FillColor = Theme.Ink900;
+            _serverStatusPill.BorderColor = Theme.Ink700;
+            _serverStatusPill.CornerRadius = 11;
+            Controls.Add(_serverStatusPill);
 
             _serverDot = new StatusDot();
-            _serverDot.Location = new Point(10, 6);
-            _serverDot.BackColor = Theme.Ink800;
+            _serverDot.Location = new Point(8, 6);
+            _serverDot.BackColor = Theme.Ink900;
             _serverDot.DotColor = Theme.Parchment600;
-            _heroStatusPill.Controls.Add(_serverDot);
+            _serverStatusPill.Controls.Add(_serverDot);
 
             _serverStatusLabel = new Label();
             _serverStatusLabel.Text = "Stopped";
-            _serverStatusLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _serverStatusLabel.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
             _serverStatusLabel.ForeColor = Theme.Parchment400;
-            _serverStatusLabel.BackColor = Theme.Ink800;
+            _serverStatusLabel.BackColor = Theme.Ink900;
             _serverStatusLabel.AutoSize = false;
             _serverStatusLabel.TextAlign = ContentAlignment.MiddleLeft;
-            _serverStatusLabel.Location = new Point(26, 2);
-            _serverStatusLabel.Size = new Size(74, 20);
-            _heroStatusPill.Controls.Add(_serverStatusLabel);
+            _serverStatusLabel.Location = new Point(23, 2);
+            _serverStatusLabel.Size = new Size(70, 20);
+            _serverStatusPill.Controls.Add(_serverStatusLabel);
+
+            _emulatorStatusPill = new BorderedPanel();
+            _emulatorStatusPill.Location = new Point(418, 16);
+            _emulatorStatusPill.Size = new Size(104, 24);
+            _emulatorStatusPill.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _emulatorStatusPill.FillColor = Theme.Ink900;
+            _emulatorStatusPill.BorderColor = Theme.Ink700;
+            _emulatorStatusPill.CornerRadius = 11;
+            Controls.Add(_emulatorStatusPill);
+
+            _heroLichiiDot = new StatusDot();
+            _heroLichiiDot.Location = new Point(8, 6);
+            _heroLichiiDot.BackColor = Theme.Ink900;
+            _heroLichiiDot.DotColor = Theme.Parchment600;
+            _emulatorStatusPill.Controls.Add(_heroLichiiDot);
+
+            _heroLichiiLabel = new Label();
+            _heroLichiiLabel.Text = "No Emu";
+            _heroLichiiLabel.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
+            _heroLichiiLabel.ForeColor = Theme.Parchment400;
+            _heroLichiiLabel.BackColor = Theme.Ink900;
+            _heroLichiiLabel.AutoSize = false;
+            _heroLichiiLabel.TextAlign = ContentAlignment.MiddleLeft;
+            _heroLichiiLabel.Location = new Point(23, 2);
+            _heroLichiiLabel.Size = new Size(76, 20);
+            _emulatorStatusPill.Controls.Add(_heroLichiiLabel);
+            _toolTip.SetToolTip(_emulatorStatusPill, "Emulator: Not detected");
+            _toolTip.SetToolTip(_heroLichiiLabel, "Emulator: Not detected");
+
+            // 1. Primary Control + Sync Card (Ink900)
+            _heroCard = new BorderedPanel();
+            _heroCard.Location = new Point(18, 56);
+            _heroCard.Size = new Size(504, 152);
+            _heroCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _heroCard.FillColor = Theme.Ink900;
+            _heroCard.BorderColor = Theme.Ink700;
+            _heroCard.CornerRadius = 10;
+            Controls.Add(_heroCard);
 
             _heroSummaryLabel = new Label();
             _heroSummaryLabel.Text = "Click Start Map to open the interactive Hyrule map in your browser.";
-            _heroSummaryLabel.Font = new Font("Segoe UI", 9f, FontStyle.Regular);
+            _heroSummaryLabel.Font = new Font("Segoe UI", 9.25f, FontStyle.Regular);
             _heroSummaryLabel.ForeColor = Theme.Parchment200;
             _heroSummaryLabel.AutoSize = false;
-            _heroSummaryLabel.Location = new Point(16, 46);
-            _heroSummaryLabel.Size = new Size(496, 22);
+            _heroSummaryLabel.Location = new Point(18, 14);
+            _heroSummaryLabel.Size = new Size(468, 20);
             _heroSummaryLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _heroCard.Controls.Add(_heroSummaryLabel);
 
@@ -2964,14 +3536,14 @@ namespace OcarinaAtlasLauncher
             _serverUrlLink.LinkColor = Theme.Moss;
             _serverUrlLink.ActiveLinkColor = Theme.Parchment50;
             _serverUrlLink.VisitedLinkColor = Theme.Moss;
-            _serverUrlLink.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            _serverUrlLink.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
             _serverUrlLink.AutoSize = true;
             _serverUrlLink.Visible = false;
-            _serverUrlLink.Location = new Point(16, 70);
+            _serverUrlLink.Location = new Point(18, 36);
             _serverUrlLink.LinkClicked += OnServerUrlLinkClicked;
             _heroCard.Controls.Add(_serverUrlLink);
 
-            _startStopButton = CreateButton("Start Map", 16, 98, 152, 36, true);
+            _startStopButton = CreateButton("Start Map", 18, 62, 134, 36, true);
             _startStopButton.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
             _startStopButton.BackColor = Theme.Moss;
             _startStopButton.ForeColor = Theme.Ink950;
@@ -2979,101 +3551,69 @@ namespace OcarinaAtlasLauncher
             _startStopButton.Click += OnStartStopClick;
             _heroCard.Controls.Add(_startStopButton);
 
-            _openBrowserButton = CreateButton("Open in Browser", 178, 98, 150, 36, false);
+            _openBrowserButton = CreateButton("Open Map", 160, 62, 124, 36, true);
             _openBrowserButton.Click += OnOpenBrowserClick;
             _heroCard.Controls.Add(_openBrowserButton);
 
-            _heroLichiiDot = new StatusDot();
-            _heroLichiiDot.Location = new Point(348, 110);
-            _heroLichiiDot.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _heroLichiiDot.BackColor = Theme.Ink900;
-            _heroLichiiDot.DotColor = Theme.Parchment600;
-            _heroCard.Controls.Add(_heroLichiiDot);
-
-            _heroLichiiLabel = new Label();
-            _heroLichiiLabel.Text = "Emulator: Not detected";
-            _heroLichiiLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
-            _heroLichiiLabel.ForeColor = Theme.Parchment400;
-            _heroLichiiLabel.AutoSize = false;
-            _heroLichiiLabel.TextAlign = ContentAlignment.MiddleLeft;
-            _heroLichiiLabel.Location = new Point(365, 106);
-            _heroLichiiLabel.Size = new Size(148, 20);
-            _heroLichiiLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _heroCard.Controls.Add(_heroLichiiLabel);
-
-            // 2. Step 1 Card: Emulator Live Sync (Lichii / Fritchii)
-            _step1Card = new BorderedPanel();
-            _step1Card.Location = new Point(16, 172);
-            _step1Card.Size = new Size(528, 86);
-            _step1Card.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            Controls.Add(_step1Card);
-
-            Label step1Title = new Label();
-            step1Title.Text = "Step 1 \u00B7 Emulator Live Sync";
-            step1Title.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-            step1Title.ForeColor = Theme.Parchment50;
-            step1Title.AutoSize = true;
-            step1Title.Location = new Point(16, 12);
-            _step1Card.Controls.Add(step1Title);
-
-            _configuredPill = new BorderedPanel();
-            _configuredPill.Location = new Point(414, 14);
-            _configuredPill.Size = new Size(98, 24);
-            _configuredPill.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _configuredPill.FillColor = Theme.Ink800;
-            _configuredPill.BorderColor = Theme.Moss;
-            _configuredPill.CornerRadius = 11;
-            _configuredPill.Visible = false;
-            _step1Card.Controls.Add(_configuredPill);
-
-            Label configuredLabel = new Label();
-            configuredLabel.Text = "Configured";
-            configuredLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
-            configuredLabel.ForeColor = Theme.Moss;
-            configuredLabel.BackColor = Theme.Ink800;
-            configuredLabel.Dock = DockStyle.Fill;
-            configuredLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _configuredPill.Controls.Add(configuredLabel);
-
-            _enableRpcButton = CreateButton("1-Click Setup Sync", 360, 12, 152, 30, true);
+            _enableRpcButton = CreateButton("1-Click Setup Sync", 342, 65, 144, 30, true);
             _enableRpcButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _enableRpcButton.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
-            _enableRpcButton.ForeColor = Theme.Parchment50;
-            _enableRpcButton.FlatAppearance.BorderColor = Theme.Parchment400;
+            _enableRpcButton.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _enableRpcButton.ForeColor = Theme.Gold;
+            _enableRpcButton.FlatAppearance.BorderColor = Theme.Gold;
             _enableRpcButton.Click += OnEnableRpcClick;
-            _step1Card.Controls.Add(_enableRpcButton);
+            _heroCard.Controls.Add(_enableRpcButton);
+
+            _syncStripPanel = new BorderedPanel();
+            _syncStripPanel.Location = new Point(14, 108);
+            _syncStripPanel.Size = new Size(476, 32);
+            _syncStripPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _syncStripPanel.FillColor = Theme.Ink800;
+            _syncStripPanel.BorderColor = Theme.Ink700;
+            _syncStripPanel.CornerRadius = 6;
+            _heroCard.Controls.Add(_syncStripPanel);
 
             _lichiiStepDetailLabel = new Label();
             _lichiiStepDetailLabel.Text = "Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.";
             _lichiiStepDetailLabel.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
             _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
-            _lichiiStepDetailLabel.AutoSize = false;
-            _lichiiStepDetailLabel.Location = new Point(16, 38);
-            _lichiiStepDetailLabel.Size = new Size(336, 36);
-            _lichiiStepDetailLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            _step1Card.Controls.Add(_lichiiStepDetailLabel);
+            _lichiiStepDetailLabel.BackColor = Theme.Ink800;
+            _lichiiStepDetailLabel.Dock = DockStyle.Fill;
+            _lichiiStepDetailLabel.Padding = new Padding(10, 0, 10, 0);
+            _lichiiStepDetailLabel.TextAlign = ContentAlignment.MiddleLeft;
+            _lichiiStepDetailLabel.AutoEllipsis = true;
+            _syncStripPanel.Controls.Add(_lichiiStepDetailLabel);
 
-            // 3. Step 2 Card: Play on Another Device (LAN)
+            // 2. Compact Second Screen / LAN Card (Ink900)
             _step2Card = new BorderedPanel();
-            _step2Card.Location = new Point(16, 268);
-            _step2Card.Size = new Size(528, 156);
+            _step2Card.Location = new Point(18, 220);
+            _step2Card.Size = new Size(504, 114);
             _step2Card.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _step2Card.FillColor = Theme.Ink900;
+            _step2Card.BorderColor = Theme.Ink700;
+            _step2Card.CornerRadius = 10;
             Controls.Add(_step2Card);
 
             Label step2Title = new Label();
-            step2Title.Text = "Step 2 \u00B7 Play on Another Device (Optional)";
+            step2Title.Text = "Second Screen (LAN)";
             step2Title.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
             step2Title.ForeColor = Theme.Parchment50;
             step2Title.AutoSize = true;
-            step2Title.Location = new Point(16, 12);
+            step2Title.Location = new Point(18, 16);
             _step2Card.Controls.Add(step2Title);
 
-            _firewallButton = CreateButton("Allow LAN Access", 372, 10, 140, 26, false);
+            _firewallButton = CreateButton("Allow LAN Access", 292, 13, 126, 26, true);
             _firewallButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _firewallButton.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
             _firewallButton.Click += OnAllowFirewallClick;
             _step2Card.Controls.Add(_firewallButton);
             _toolTip.SetToolTip(_firewallButton, "Adds a Windows Firewall rule on Private networks so your tablet or phone can connect.");
+
+            _refreshLanButton = CreateButton("Refresh", 424, 13, 64, 26, false);
+            _refreshLanButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _refreshLanButton.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+            _refreshLanButton.Click += OnRefreshLanClick;
+            _step2Card.Controls.Add(_refreshLanButton);
+            _toolTip.SetToolTip(_refreshLanButton, "Re-scan active Wi-Fi and Ethernet network adapters.");
 
             _lanComboBox = new ComboBox();
             _lanComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -3081,8 +3621,8 @@ namespace OcarinaAtlasLauncher
             _lanComboBox.BackColor = Theme.Ink800;
             _lanComboBox.ForeColor = Theme.Parchment50;
             _lanComboBox.Font = new Font("Segoe UI", 8.75f, FontStyle.Regular);
-            _lanComboBox.Location = new Point(16, 44);
-            _lanComboBox.Size = new Size(374, 24);
+            _lanComboBox.Location = new Point(18, 49);
+            _lanComboBox.Size = new Size(296, 24);
             _lanComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _lanComboBox.Visible = false;
             _lanComboBox.SelectedIndexChanged += OnLanComboSelectedIndexChanged;
@@ -3094,8 +3634,11 @@ namespace OcarinaAtlasLauncher
             _lanUrlLink.ActiveLinkColor = Theme.Parchment50;
             _lanUrlLink.VisitedLinkColor = Theme.Moss;
             _lanUrlLink.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
-            _lanUrlLink.AutoSize = true;
-            _lanUrlLink.Location = new Point(16, 47);
+            _lanUrlLink.AutoSize = false;
+            _lanUrlLink.AutoEllipsis = true;
+            _lanUrlLink.Location = new Point(18, 52);
+            _lanUrlLink.Size = new Size(296, 20);
+            _lanUrlLink.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _lanUrlLink.Visible = false;
             _lanUrlLink.LinkClicked += OnLanUrlLinkClicked;
             _step2Card.Controls.Add(_lanUrlLink);
@@ -3105,123 +3648,199 @@ namespace OcarinaAtlasLauncher
             _lanStatusLabel.Font = new Font("Segoe UI", 8.75f, FontStyle.Regular);
             _lanStatusLabel.ForeColor = Theme.Parchment200;
             _lanStatusLabel.AutoSize = false;
-            _lanStatusLabel.Location = new Point(16, 47);
-            _lanStatusLabel.Size = new Size(374, 22);
+            _lanStatusLabel.AutoEllipsis = true;
+            _lanStatusLabel.Location = new Point(18, 52);
+            _lanStatusLabel.Size = new Size(296, 20);
             _lanStatusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _step2Card.Controls.Add(_lanStatusLabel);
 
-            _refreshLanButton = CreateButton("Refresh", 16, 74, 78, 26, false);
-            _refreshLanButton.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-            _refreshLanButton.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
-            _refreshLanButton.Click += OnRefreshLanClick;
-            _step2Card.Controls.Add(_refreshLanButton);
-            _toolTip.SetToolTip(_refreshLanButton, "Re-scan active Wi-Fi and Ethernet network adapters.");
-
-            _copyLanUrlButton = CreateButton("Copy URL", 102, 74, 96, 26, false);
-            _copyLanUrlButton.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            _copyLanUrlButton = CreateButton("Copy URL", 322, 48, 82, 28, true);
+            _copyLanUrlButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _copyLanUrlButton.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
             _copyLanUrlButton.Click += OnCopyLanUrlClick;
             _step2Card.Controls.Add(_copyLanUrlButton);
             _toolTip.SetToolTip(_copyLanUrlButton, "Copy the selected LAN address to open on your tablet, iPad, or phone.");
+
+            _qrButton = CreateButton("QR Code", 410, 48, 78, 28, true);
+            _qrButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _qrButton.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
+            _qrButton.ForeColor = Theme.Gold;
+            _qrButton.FlatAppearance.BorderColor = Theme.Gold;
+            _qrButton.Click += OnQrButtonClick;
+            _step2Card.Controls.Add(_qrButton);
+            _toolTip.SetToolTip(_qrButton, "Show a large QR code to scan with your phone or tablet camera.");
 
             _lanHintLabel = new Label();
             _lanHintLabel.Text = "Open this address or scan the QR code on your tablet, iPad, or phone.";
             _lanHintLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
             _lanHintLabel.ForeColor = Theme.Parchment400;
             _lanHintLabel.AutoSize = false;
-            _lanHintLabel.Location = new Point(16, 108);
-            _lanHintLabel.Size = new Size(374, 30);
+            _lanHintLabel.AutoEllipsis = true;
+            _lanHintLabel.Location = new Point(18, 82);
+            _lanHintLabel.Size = new Size(468, 20);
             _lanHintLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _step2Card.Controls.Add(_lanHintLabel);
 
-            _qrPictureBox = new PictureBox();
-            _qrPictureBox.Location = new Point(400, 40);
-            _qrPictureBox.Size = new Size(112, 112);
-            _qrPictureBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _qrPictureBox.BackColor = Color.White;
-            _qrPictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-            _qrPictureBox.Cursor = Cursors.Hand;
-            _qrPictureBox.Visible = false;
-            _qrPictureBox.Click += OnQrPictureBoxClick;
-            _step2Card.Controls.Add(_qrPictureBox);
-            _toolTip.SetToolTip(_qrPictureBox, "Click to enlarge QR — scan with your phone or tablet camera to open Ocarina Atlas on the same Wi-Fi.");
-
-            // 4. Collapsible Advanced Settings & Logs Drawer
-            _advancedToggleButton = CreateButton("\u25B8 Advanced Settings & Logs", 16, 434, 528, 30, false);
+            // 3. Collapsible Drawer Toggle + Tabbed Drawer (Settings | Logs)
+            _advancedToggleButton = CreateButton("\u25B8 Settings & Logs", 18, 346, 504, 30, true);
             _advancedToggleButton.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _advancedToggleButton.TextAlign = ContentAlignment.MiddleLeft;
-            _advancedToggleButton.Padding = new Padding(8, 0, 0, 0);
+            _advancedToggleButton.Padding = new Padding(10, 0, 0, 0);
             _advancedToggleButton.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
             _advancedToggleButton.ForeColor = Theme.Parchment400;
             _advancedToggleButton.Click += OnAdvancedToggleClick;
             Controls.Add(_advancedToggleButton);
 
             _advancedDrawerPanel = new BorderedPanel();
-            _advancedDrawerPanel.Location = new Point(16, 470);
-            _advancedDrawerPanel.Size = new Size(528, 216);
+            _advancedDrawerPanel.Location = new Point(18, 384);
+            _advancedDrawerPanel.Size = new Size(504, 242);
             _advancedDrawerPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            _advancedDrawerPanel.FillColor = Theme.Ink900;
+            _advancedDrawerPanel.BorderColor = Theme.Ink700;
+            _advancedDrawerPanel.CornerRadius = 10;
             _advancedDrawerPanel.Visible = false;
             Controls.Add(_advancedDrawerPanel);
 
+            BorderedPanel tabBarPanel = new BorderedPanel();
+            tabBarPanel.Location = new Point(14, 12);
+            tabBarPanel.Size = new Size(176, 28);
+            tabBarPanel.FillColor = Theme.Ink950;
+            tabBarPanel.BorderColor = Theme.Ink700;
+            tabBarPanel.CornerRadius = 6;
+            _advancedDrawerPanel.Controls.Add(tabBarPanel);
+
+            _settingsTabButton = new Button();
+            _settingsTabButton.Text = "Settings";
+            _settingsTabButton.Location = new Point(2, 2);
+            _settingsTabButton.Size = new Size(86, 24);
+            _settingsTabButton.FlatStyle = FlatStyle.Flat;
+            _settingsTabButton.FlatAppearance.BorderSize = 0;
+            _settingsTabButton.Cursor = Cursors.Hand;
+            _settingsTabButton.UseVisualStyleBackColor = false;
+            _settingsTabButton.Click += delegate { SelectDrawerTab(0); };
+            tabBarPanel.Controls.Add(_settingsTabButton);
+
+            _logsTabButton = new Button();
+            _logsTabButton.Text = "Logs";
+            _logsTabButton.Location = new Point(88, 2);
+            _logsTabButton.Size = new Size(86, 24);
+            _logsTabButton.FlatStyle = FlatStyle.Flat;
+            _logsTabButton.FlatAppearance.BorderSize = 0;
+            _logsTabButton.Cursor = Cursors.Hand;
+            _logsTabButton.UseVisualStyleBackColor = false;
+            _logsTabButton.Click += delegate { SelectDrawerTab(1); };
+            tabBarPanel.Controls.Add(_logsTabButton);
+
+            _settingsLockHintLabel = new Label();
+            _settingsLockHintLabel.Text = "Stop server to edit port or host settings";
+            _settingsLockHintLabel.Font = new Font("Segoe UI", 8f, FontStyle.Italic);
+            _settingsLockHintLabel.ForeColor = Theme.Parchment600;
+            _settingsLockHintLabel.AutoSize = false;
+            _settingsLockHintLabel.TextAlign = ContentAlignment.MiddleRight;
+            _settingsLockHintLabel.Location = new Point(200, 16);
+            _settingsLockHintLabel.Size = new Size(288, 20);
+            _settingsLockHintLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _settingsLockHintLabel.Visible = false;
+            _advancedDrawerPanel.Controls.Add(_settingsLockHintLabel);
+
+            _modeBadgePanel = new BorderedPanel();
+            _modeBadgePanel.Location = new Point(254, 13);
+            _modeBadgePanel.Size = new Size(96, 24);
+            _modeBadgePanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _modeBadgePanel.FillColor = Theme.Ink800;
+            _modeBadgePanel.BorderColor = Theme.Ink700;
+            _modeBadgePanel.CornerRadius = 6;
+            _modeBadgePanel.Visible = false;
+            _advancedDrawerPanel.Controls.Add(_modeBadgePanel);
+
+            _modeBadgeLabel = new Label();
+            _modeBadgeLabel.Dock = DockStyle.Fill;
+            _modeBadgeLabel.TextAlign = ContentAlignment.MiddleCenter;
+            _modeBadgeLabel.Font = new Font("Segoe UI", 7.5f, FontStyle.Bold);
+            _modeBadgeLabel.BackColor = Theme.Ink800;
+            _modeBadgeLabel.ForeColor = Theme.Parchment400;
+            _modeBadgePanel.Controls.Add(_modeBadgeLabel);
+
+            _copyLogButton = CreateButton("Copy", 356, 13, 62, 24, false);
+            _copyLogButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _copyLogButton.Font = new Font("Segoe UI", 7.75f, FontStyle.Regular);
+            _copyLogButton.Visible = false;
+            _copyLogButton.Click += OnCopyLogClick;
+            _advancedDrawerPanel.Controls.Add(_copyLogButton);
+
+            _clearLogButton = CreateButton("Clear", 424, 13, 64, 24, false);
+            _clearLogButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _clearLogButton.Font = new Font("Segoe UI", 7.75f, FontStyle.Regular);
+            _clearLogButton.Visible = false;
+            _clearLogButton.Click += OnClearLogClick;
+            _advancedDrawerPanel.Controls.Add(_clearLogButton);
+
+            // Settings Tab Panel (2-column grid)
+            _settingsTabPanel = new Panel();
+            _settingsTabPanel.Location = new Point(14, 48);
+            _settingsTabPanel.Size = new Size(476, 182);
+            _settingsTabPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            _settingsTabPanel.BackColor = Theme.Ink900;
+            _advancedDrawerPanel.Controls.Add(_settingsTabPanel);
+
             Label portLabel = new Label();
-            portLabel.Text = "Map Port:";
+            portLabel.Text = "Map Port";
+            portLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
             portLabel.ForeColor = Theme.Parchment400;
             portLabel.AutoSize = true;
-            portLabel.Location = new Point(14, 15);
-            _advancedDrawerPanel.Controls.Add(portLabel);
+            portLabel.Location = new Point(0, 4);
+            _settingsTabPanel.Controls.Add(portLabel);
 
             _portInput = new NumericUpDown();
             _portInput.Minimum = 1;
             _portInput.Maximum = 65535;
             _portInput.Value = 3000;
-            _portInput.Location = new Point(76, 12);
-            _portInput.Size = new Size(64, 23);
             _portInput.BackColor = Theme.Ink800;
             _portInput.ForeColor = Theme.Parchment50;
-            _portInput.BorderStyle = BorderStyle.FixedSingle;
+            _portInput.BorderStyle = BorderStyle.None;
             _portInput.ValueChanged += OnPortInputChanged;
-            _advancedDrawerPanel.Controls.Add(_portInput);
+            _settingsTabPanel.Controls.Add(WrapInputInBorderedPanel(_portInput, 0, 24, 110, 28));
 
             Label lHostLabel = new Label();
-            lHostLabel.Text = "RPC Host:";
+            lHostLabel.Text = "Emulator RPC Host";
+            lHostLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
             lHostLabel.ForeColor = Theme.Parchment400;
             lHostLabel.AutoSize = true;
-            lHostLabel.Location = new Point(152, 15);
-            _advancedDrawerPanel.Controls.Add(lHostLabel);
+            lHostLabel.Location = new Point(244, 4);
+            _settingsTabPanel.Controls.Add(lHostLabel);
 
             _lichiiHostInput = new TextBox();
             _lichiiHostInput.Text = "127.0.0.1";
-            _lichiiHostInput.Location = new Point(220, 12);
-            _lichiiHostInput.Size = new Size(104, 23);
             _lichiiHostInput.BackColor = Theme.Ink800;
             _lichiiHostInput.ForeColor = Theme.Parchment50;
-            _lichiiHostInput.BorderStyle = BorderStyle.FixedSingle;
-            _advancedDrawerPanel.Controls.Add(_lichiiHostInput);
+            _lichiiHostInput.BorderStyle = BorderStyle.None;
+            _lichiiHostInput.TextChanged += OnLichiiHostChanged;
+            BorderedPanel hostWrap = WrapInputInBorderedPanel(_lichiiHostInput, 244, 24, 232, 28);
+            hostWrap.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _settingsTabPanel.Controls.Add(hostWrap);
 
             Label lPortLabel = new Label();
-            lPortLabel.Text = "RPC Port:";
+            lPortLabel.Text = "Emulator RPC Port";
+            lPortLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
             lPortLabel.ForeColor = Theme.Parchment400;
             lPortLabel.AutoSize = true;
-            lPortLabel.Location = new Point(334, 15);
-            _advancedDrawerPanel.Controls.Add(lPortLabel);
+            lPortLabel.Location = new Point(0, 64);
+            _settingsTabPanel.Controls.Add(lPortLabel);
 
             _lichiiPortInput = new NumericUpDown();
             _lichiiPortInput.Minimum = 1;
             _lichiiPortInput.Maximum = 65535;
             _lichiiPortInput.Value = 6545;
-            _lichiiPortInput.Location = new Point(394, 12);
-            _lichiiPortInput.Size = new Size(64, 23);
             _lichiiPortInput.BackColor = Theme.Ink800;
             _lichiiPortInput.ForeColor = Theme.Parchment50;
-            _lichiiPortInput.BorderStyle = BorderStyle.FixedSingle;
+            _lichiiPortInput.BorderStyle = BorderStyle.None;
             _lichiiPortInput.ValueChanged += OnLichiiPortChanged;
-            _advancedDrawerPanel.Controls.Add(_lichiiPortInput);
+            _settingsTabPanel.Controls.Add(WrapInputInBorderedPanel(_lichiiPortInput, 0, 84, 110, 28));
 
-            Button resetLichiiBtn = CreateButton("Reset", 464, 11, 50, 25, false);
-            resetLichiiBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Button resetLichiiBtn = CreateButton("Reset", 118, 84, 68, 28, false);
             resetLichiiBtn.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
             resetLichiiBtn.Click += OnResetLichiiDefaultsClick;
-            _advancedDrawerPanel.Controls.Add(resetLichiiBtn);
+            _settingsTabPanel.Controls.Add(resetLichiiBtn);
 
             _allowLanCheckBox = new CheckBox();
             _allowLanCheckBox.Text = "Allow LAN access";
@@ -3229,9 +3848,9 @@ namespace OcarinaAtlasLauncher
             _allowLanCheckBox.Checked = true;
             _allowLanCheckBox.ForeColor = Theme.Parchment200;
             _allowLanCheckBox.BackColor = Theme.Ink900;
-            _allowLanCheckBox.Location = new Point(14, 44);
+            _allowLanCheckBox.Location = new Point(244, 66);
             _allowLanCheckBox.CheckedChanged += OnAllowLanCheckedChanged;
-            _advancedDrawerPanel.Controls.Add(_allowLanCheckBox);
+            _settingsTabPanel.Controls.Add(_allowLanCheckBox);
 
             _autoOpenCheckBox = new CheckBox();
             _autoOpenCheckBox.Text = "Auto-open browser";
@@ -3239,8 +3858,8 @@ namespace OcarinaAtlasLauncher
             _autoOpenCheckBox.Checked = true;
             _autoOpenCheckBox.ForeColor = Theme.Parchment200;
             _autoOpenCheckBox.BackColor = Theme.Ink900;
-            _autoOpenCheckBox.Location = new Point(164, 44);
-            _advancedDrawerPanel.Controls.Add(_autoOpenCheckBox);
+            _autoOpenCheckBox.Location = new Point(244, 90);
+            _settingsTabPanel.Controls.Add(_autoOpenCheckBox);
 
             _trayMinimizeCheckBox = new CheckBox();
             _trayMinimizeCheckBox.Text = "Minimize to tray";
@@ -3248,42 +3867,47 @@ namespace OcarinaAtlasLauncher
             _trayMinimizeCheckBox.Checked = false;
             _trayMinimizeCheckBox.ForeColor = Theme.Parchment200;
             _trayMinimizeCheckBox.BackColor = Theme.Ink900;
-            _trayMinimizeCheckBox.Location = new Point(322, 44);
-            _advancedDrawerPanel.Controls.Add(_trayMinimizeCheckBox);
+            _trayMinimizeCheckBox.Location = new Point(244, 114);
+            _settingsTabPanel.Controls.Add(_trayMinimizeCheckBox);
 
-            Label logTitle = new Label();
-            logTitle.Text = "Activity Log";
-            logTitle.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
-            logTitle.ForeColor = Theme.Parchment400;
-            logTitle.AutoSize = true;
-            logTitle.Location = new Point(14, 75);
-            _advancedDrawerPanel.Controls.Add(logTitle);
+            _updateStatusLabel = new Label();
+            _updateStatusLabel.Text = "Version " + AppVersion;
+            _updateStatusLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
+            _updateStatusLabel.ForeColor = Theme.Parchment600;
+            _updateStatusLabel.AutoSize = false;
+            _updateStatusLabel.Location = new Point(0, 150);
+            _updateStatusLabel.Size = new Size(340, 20);
+            _updateStatusLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            _settingsTabPanel.Controls.Add(_updateStatusLabel);
 
-            _modeBadgeLabel = new Label();
-            _modeBadgeLabel.AutoSize = false;
-            _modeBadgeLabel.Size = new Size(92, 20);
-            _modeBadgeLabel.Location = new Point(352, 72);
-            _modeBadgeLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _modeBadgeLabel.TextAlign = ContentAlignment.MiddleCenter;
-            _modeBadgeLabel.Font = new Font("Segoe UI", 7.5f, FontStyle.Bold);
-            _modeBadgeLabel.BackColor = Theme.Ink800;
-            _modeBadgeLabel.ForeColor = Theme.Parchment400;
-            _modeBadgeLabel.BorderStyle = BorderStyle.FixedSingle;
-            _advancedDrawerPanel.Controls.Add(_modeBadgeLabel);
+            _checkUpdatesLink = new LinkLabel();
+            _checkUpdatesLink.Text = "Check for Updates";
+            _checkUpdatesLink.LinkColor = Theme.Gold;
+            _checkUpdatesLink.ActiveLinkColor = Theme.Parchment50;
+            _checkUpdatesLink.VisitedLinkColor = Theme.Gold;
+            _checkUpdatesLink.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _checkUpdatesLink.AutoSize = true;
+            _checkUpdatesLink.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            _checkUpdatesLink.Location = new Point(368, 150);
+            _checkUpdatesLink.LinkClicked += OnCheckUpdatesClick;
+            _settingsTabPanel.Controls.Add(_checkUpdatesLink);
 
-            _clearLogButton = CreateButton("Clear", 452, 71, 62, 22, false);
-            _clearLogButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            _clearLogButton.Font = new Font("Segoe UI", 7.75f, FontStyle.Regular);
-            _clearLogButton.Click += OnClearLogClick;
-            _advancedDrawerPanel.Controls.Add(_clearLogButton);
+            // Logs Tab Panel
+            _logsTabPanel = new Panel();
+            _logsTabPanel.Location = new Point(14, 48);
+            _logsTabPanel.Size = new Size(476, 182);
+            _logsTabPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            _logsTabPanel.BackColor = Theme.Ink900;
+            _logsTabPanel.Visible = false;
+            _advancedDrawerPanel.Controls.Add(_logsTabPanel);
 
-            _logContainer = new Panel();
-            _logContainer.Location = new Point(14, 98);
-            _logContainer.Size = new Size(500, 112);
-            _logContainer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            _logContainer.BackColor = Theme.Ink600;
-            _logContainer.Padding = new Padding(1);
-            _advancedDrawerPanel.Controls.Add(_logContainer);
+            _logContainer = new BorderedPanel();
+            _logContainer.Dock = DockStyle.Fill;
+            _logContainer.FillColor = Theme.Ink950;
+            _logContainer.BorderColor = Theme.Ink700;
+            _logContainer.CornerRadius = 6;
+            _logContainer.Padding = new Padding(8, 6, 8, 6);
+            _logsTabPanel.Controls.Add(_logContainer);
 
             _logTextBox = new TextBox();
             _logTextBox.Multiline = true;
@@ -3295,6 +3919,44 @@ namespace OcarinaAtlasLauncher
             _logTextBox.ForeColor = Theme.Parchment200;
             _logTextBox.Font = new Font("Consolas", 8.25f, FontStyle.Regular);
             _logContainer.Controls.Add(_logTextBox);
+
+            SelectDrawerTab(0);
+        }
+
+        private static BorderedPanel WrapInputInBorderedPanel(Control input, int x, int y, int width, int height)
+        {
+            BorderedPanel container = new BorderedPanel();
+            container.Location = new Point(x, y);
+            container.Size = new Size(width, height);
+            container.FillColor = Theme.Ink800;
+            container.BorderColor = Theme.Ink700;
+            container.CornerRadius = 6;
+            container.Padding = new Padding(8, 5, 8, 4);
+            input.Dock = DockStyle.Fill;
+            container.Controls.Add(input);
+            return container;
+        }
+
+        private void SelectDrawerTab(int tabIndex)
+        {
+            _activeDrawerTab = tabIndex == 1 ? 1 : 0;
+            bool isSettings = _activeDrawerTab == 0;
+
+            _settingsTabPanel.Visible = isSettings;
+            _logsTabPanel.Visible = !isSettings;
+
+            _settingsTabButton.BackColor = isSettings ? Theme.Ink800 : Theme.Ink950;
+            _settingsTabButton.ForeColor = isSettings ? Theme.Gold : Theme.Parchment600;
+            _settingsTabButton.Font = new Font("Segoe UI", 8.25f, isSettings ? FontStyle.Bold : FontStyle.Regular);
+
+            _logsTabButton.BackColor = !isSettings ? Theme.Ink800 : Theme.Ink950;
+            _logsTabButton.ForeColor = !isSettings ? Theme.Gold : Theme.Parchment600;
+            _logsTabButton.Font = new Font("Segoe UI", 8.25f, !isSettings ? FontStyle.Bold : FontStyle.Regular);
+
+            _settingsLockHintLabel.Visible = isSettings && _lifecycle != ServerLifecycle.Stopped;
+            _modeBadgePanel.Visible = !isSettings;
+            _copyLogButton.Visible = !isSettings;
+            _clearLogButton.Visible = !isSettings;
         }
 
         private Button CreateButton(string text, int x, int y, int width, int height, bool bold)
@@ -3305,7 +3967,7 @@ namespace OcarinaAtlasLauncher
             btn.Size = new Size(width, height);
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 1;
-            btn.FlatAppearance.BorderColor = Theme.Ink600;
+            btn.FlatAppearance.BorderColor = Theme.Ink700;
             btn.FlatAppearance.MouseOverBackColor = Theme.Ink700;
             btn.BackColor = Theme.Ink800;
             btn.ForeColor = Theme.Parchment200;
@@ -3370,8 +4032,8 @@ namespace OcarinaAtlasLauncher
         private void ReflowLayout()
         {
             _advancedToggleButton.Text = _advancedExpanded
-                ? "\u25BE Advanced Settings & Logs"
-                : "\u25B8 Advanced Settings & Logs";
+                ? "\u25BE Settings & Logs"
+                : "\u25B8 Settings & Logs";
 
             int nonClientW = Size.Width - ClientSize.Width;
             int nonClientH = Size.Height - ClientSize.Height;
@@ -3379,18 +4041,18 @@ namespace OcarinaAtlasLauncher
             if (_advancedExpanded)
             {
                 _advancedDrawerPanel.Visible = true;
-                MinimumSize = new Size(550 + nonClientW, 636 + nonClientH);
+                MinimumSize = new Size(540 + nonClientW, 590 + nonClientH);
                 if (ClientSize.Height < ExpandedClientHeight)
                 {
                     ClientSize = new Size(ClientSize.Width, ExpandedClientHeight);
                 }
-                int drawerHeight = Math.Max(160, ClientSize.Height - _advancedDrawerPanel.Top - 14);
+                int drawerHeight = Math.Max(180, ClientSize.Height - _advancedDrawerPanel.Top - 14);
                 _advancedDrawerPanel.Height = drawerHeight;
             }
             else
             {
                 _advancedDrawerPanel.Visible = false;
-                MinimumSize = new Size(550 + nonClientW, CollapsedClientHeight + nonClientH);
+                MinimumSize = new Size(540 + nonClientW, CollapsedClientHeight + nonClientH);
                 ClientSize = new Size(ClientSize.Width, CollapsedClientHeight);
             }
         }
@@ -3401,7 +4063,7 @@ namespace OcarinaAtlasLauncher
             RefreshLanDisplays();
             TriggerFirewallStatusCheck();
             TriggerPollNow();
-            StartUpdateCheck();
+            StartUpdateCheck(false);
 
             if (_options.AutoStart)
             {
@@ -3467,8 +4129,10 @@ namespace OcarinaAtlasLauncher
             LichiiConfigStatus status = LichiiConfigManager.Inspect();
             if (!string.IsNullOrEmpty(status.ErrorMessage))
             {
-                _configuredPill.Visible = false;
-                _enableRpcButton.Visible = true;
+                _lichiiConfigured = false;
+                UpdateLichiiPortLabels();
+                _enableRpcButton.ForeColor = Theme.Gold;
+                _enableRpcButton.FlatAppearance.BorderColor = Theme.Gold;
                 _lichiiStepDetailLabel.Text = "Could not read emulator config: " + status.ErrorMessage;
                 _lichiiStepDetailLabel.ForeColor = Theme.Ember;
                 return;
@@ -3476,30 +4140,55 @@ namespace OcarinaAtlasLauncher
 
             if (status.IsEnabled)
             {
-                _configuredPill.Visible = true;
-                _enableRpcButton.Visible = false;
-                _lichiiStepDetailLabel.Text = "Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.";
-                _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
+                _lichiiConfigured = true;
+                UpdateLichiiPortLabels();
+                _enableRpcButton.ForeColor = Theme.Moss;
+                _enableRpcButton.FlatAppearance.BorderColor = Theme.Moss;
+                if (_syncFeedbackTicks == 0)
+                {
+                    _lichiiStepDetailLabel.Text = "Live sync configured. Start Lichii or Fritchii and load Ocarina of Time.";
+                    _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
+                }
                 string pathsSummary = status.TargetPaths != null && status.TargetPaths.Count > 0
                     ? string.Join("\n", status.TargetPaths.ToArray())
                     : status.FilePath;
-                _toolTip.SetToolTip(_configuredPill, "Configured: EDEN_NX2_DEBUG_SERVER=" + status.ConfiguredTarget + "\n" + pathsSummary);
+                _toolTip.SetToolTip(_enableRpcButton, "Configured: EDEN_NX2_DEBUG_SERVER=" + status.ConfiguredTarget + "\nClick to re-apply config.\n" + pathsSummary);
             }
             else
             {
-                _configuredPill.Visible = false;
-                _enableRpcButton.Visible = true;
-                _lichiiStepDetailLabel.Text = "Click to enable live tracking in Lichii / Fritchii so the map follows Link automatically.";
-                _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
+                _lichiiConfigured = false;
+                UpdateLichiiPortLabels();
+                _enableRpcButton.ForeColor = Theme.Gold;
+                _enableRpcButton.FlatAppearance.BorderColor = Theme.Gold;
+                if (_syncFeedbackTicks == 0)
+                {
+                    _lichiiStepDetailLabel.Text = "Click 1-Click Setup Sync to enable live tracking in Lichii / Fritchii.";
+                    _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
+                }
+                _toolTip.SetToolTip(_enableRpcButton, "Writes EDEN_NX2_DEBUG_SERVER to nx2_switches.txt for Lichii and Fritchii.");
             }
         }
 
         private void UpdateLichiiPortLabels()
         {
             int lPort = (int)_lichiiPortInput.Value;
-            _enableRpcButton.Text = lPort == 6545
-                ? "1-Click Setup Sync"
-                : string.Format(CultureInfo.InvariantCulture, "Setup Sync (:{0})", lPort);
+            if (_lichiiConfigured)
+            {
+                _enableRpcButton.Text = lPort == 6545
+                    ? "Configured \u21BB"
+                    : string.Format(CultureInfo.InvariantCulture, "Configured (:{0}) \u21BB", lPort);
+            }
+            else
+            {
+                _enableRpcButton.Text = lPort == 6545
+                    ? "1-Click Setup Sync"
+                    : string.Format(CultureInfo.InvariantCulture, "Setup Sync (:{0})", lPort);
+            }
+        }
+
+        private void OnLichiiHostChanged(object sender, EventArgs e)
+        {
+            TriggerPollNow();
         }
 
         private void OnLichiiPortChanged(object sender, EventArgs e)
@@ -3522,6 +4211,21 @@ namespace OcarinaAtlasLauncher
             ReflowLayout();
         }
 
+        private void OnCopyLogClick(object sender, EventArgs e)
+        {
+            if (_logTextBox == null || _logTextBox.IsDisposed || string.IsNullOrEmpty(_logTextBox.Text)) return;
+            try
+            {
+                Clipboard.SetText(_logTextBox.Text);
+                _copyLogButton.Text = "Copied!";
+                _copyLogFeedbackTicks = 2;
+            }
+            catch (Exception ex)
+            {
+                AppendLog("Could not copy logs to clipboard: " + ex.Message);
+            }
+        }
+
         private void OnClearLogClick(object sender, EventArgs e)
         {
             _logTextBox.Clear();
@@ -3536,35 +4240,25 @@ namespace OcarinaAtlasLauncher
             try
             {
                 LichiiConfigStatus updated = LichiiConfigManager.EnableDebugServer(host, port);
-                RefreshLichiiConfigStatus();
                 string updatedPaths = updated.TargetPaths != null && updated.TargetPaths.Count > 0
-                    ? string.Join("\n", updated.TargetPaths.ToArray())
+                    ? string.Join(", ", updated.TargetPaths.ToArray())
                     : updated.FilePath;
                 AppendLog(string.Format(
                     CultureInfo.InvariantCulture,
                     "Updated {0} with EDEN_NX2_DEBUG_SERVER={1}:{2}.",
-                    updatedPaths.Replace("\n", ", "),
+                    updatedPaths,
                     host,
                     port));
 
                 string runningEmulator = LichiiConfigManager.DetectRunningEmulator();
-                string message = runningEmulator != null
-                    ? string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Emulator live sync is now configured in:\n{0}\n\n{1} appears to be running right now. Please restart {1} for live sync to take effect.",
-                        updatedPaths,
-                        runningEmulator)
-                    : string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Emulator live sync is now configured in:\n{0}\n\nStart Lichii or Fritchii and load Ocarina of Time to activate live tracking.",
-                        updatedPaths);
+                _syncFeedbackTicks = 5;
+                _lichiiStepDetailLabel.Text = runningEmulator != null
+                    ? string.Format(CultureInfo.InvariantCulture, "Live sync configured ({0}:{1}) \u2014 restart {2} to apply.", host, port, runningEmulator)
+                    : string.Format(CultureInfo.InvariantCulture, "Live sync configured ({0}:{1}). Load Ocarina of Time in Lichii/Fritchii.", host, port);
+                _lichiiStepDetailLabel.ForeColor = Theme.Moss;
 
-                MessageBox.Show(
-                    this,
-                    message,
-                    "Emulator Live Sync Configured",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                RefreshLichiiConfigStatus();
+                TriggerPollNow();
             }
             catch (Exception ex)
             {
@@ -3652,7 +4346,6 @@ namespace OcarinaAtlasLauncher
             if (selected != null)
             {
                 _selectedLanUrl = selected.Url;
-                UpdateQrPreview();
             }
         }
 
@@ -3736,7 +4429,7 @@ namespace OcarinaAtlasLauncher
 
         private void UpdateLanRowUi()
         {
-            if (_lanStatusLabel == null || _lanUrlLink == null || _copyLanUrlButton == null || _lanComboBox == null) return;
+            if (_lanStatusLabel == null || _lanUrlLink == null || _copyLanUrlButton == null || _lanComboBox == null || _qrButton == null) return;
 
             bool isRunning = _lifecycle == ServerLifecycle.Running;
             string bindHost = GetEffectiveBindHost();
@@ -3749,8 +4442,14 @@ namespace OcarinaAtlasLauncher
                 _lanStatusLabel.ForeColor = Theme.Parchment600;
                 _lanStatusLabel.Visible = true;
                 _copyLanUrlButton.Enabled = false;
-                _lanHintLabel.Text = "Enable \"Allow LAN access\" in Advanced Settings to connect a tablet or phone.";
-                UpdateQrPreview();
+                _qrButton.Enabled = false;
+                _qrButton.ForeColor = Theme.Parchment600;
+                _qrButton.FlatAppearance.BorderColor = Theme.Ink700;
+                if (_lanFeedbackTicks == 0)
+                {
+                    _lanHintLabel.Text = "Enable \"Allow LAN access\" in Settings to connect a tablet or phone.";
+                    _lanHintLabel.ForeColor = Theme.Parchment400;
+                }
                 return;
             }
 
@@ -3762,19 +4461,32 @@ namespace OcarinaAtlasLauncher
                 _lanStatusLabel.ForeColor = Theme.Ember;
                 _lanStatusLabel.Visible = true;
                 _copyLanUrlButton.Enabled = false;
-                _lanHintLabel.Text = "Connect your PC to Wi-Fi or Ethernet, then click Refresh.";
-                UpdateQrPreview();
+                _qrButton.Enabled = false;
+                _qrButton.ForeColor = Theme.Parchment600;
+                _qrButton.FlatAppearance.BorderColor = Theme.Ink700;
+                if (_lanFeedbackTicks == 0)
+                {
+                    _lanHintLabel.Text = "Connect your PC to Wi-Fi or Ethernet, then click Refresh.";
+                    _lanHintLabel.ForeColor = Theme.Parchment400;
+                }
                 return;
             }
 
             _copyLanUrlButton.Enabled = true;
+            _qrButton.Enabled = true;
+            _qrButton.ForeColor = Theme.Gold;
+            _qrButton.FlatAppearance.BorderColor = Theme.Gold;
 
             if (_lanEndpoints.Count > 1)
             {
                 _lanUrlLink.Visible = false;
                 _lanStatusLabel.Visible = false;
                 _lanComboBox.Visible = true;
-                _lanHintLabel.Text = "Multiple network adapters found \u2014 pick the one your tablet or phone uses.";
+                if (_lanFeedbackTicks == 0)
+                {
+                    _lanHintLabel.Text = "Multiple network adapters found \u2014 pick the one your tablet or phone uses.";
+                    _lanHintLabel.ForeColor = Theme.Parchment400;
+                }
             }
             else
             {
@@ -3800,47 +4512,15 @@ namespace OcarinaAtlasLauncher
                     _lanStatusLabel.Visible = true;
                 }
 
-                _lanHintLabel.Text = "Open this address or scan the QR code on your tablet, iPad, or phone.";
+                if (_lanFeedbackTicks == 0)
+                {
+                    _lanHintLabel.Text = "Open this address or click QR Code to connect your tablet, iPad, or phone.";
+                    _lanHintLabel.ForeColor = Theme.Parchment400;
+                }
             }
-
-            UpdateQrPreview();
         }
 
-        private void UpdateQrPreview()
-        {
-            if (_qrPictureBox == null || _qrPictureBox.IsDisposed) return;
-
-            if (string.IsNullOrEmpty(_selectedLanUrl))
-            {
-                _renderedQrUrl = string.Empty;
-                _qrPictureBox.Visible = false;
-                Image oldEmpty = _qrPictureBox.Image;
-                _qrPictureBox.Image = null;
-                if (oldEmpty != null) oldEmpty.Dispose();
-                return;
-            }
-
-            if (string.Equals(_renderedQrUrl, _selectedLanUrl, StringComparison.Ordinal) && _qrPictureBox.Image != null)
-            {
-                _qrPictureBox.Visible = true;
-                return;
-            }
-
-            Bitmap bmp = QrCodeEncoder.RenderBitmap(_selectedLanUrl, _qrPictureBox.Width);
-            if (bmp == null)
-            {
-                _qrPictureBox.Visible = false;
-                return;
-            }
-
-            _renderedQrUrl = _selectedLanUrl;
-            Image oldImg = _qrPictureBox.Image;
-            _qrPictureBox.Image = bmp;
-            _qrPictureBox.Visible = true;
-            if (oldImg != null) oldImg.Dispose();
-        }
-
-        private void OnQrPictureBoxClick(object sender, EventArgs e)
+        private void OnQrButtonClick(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(_selectedLanUrl)) return;
 
@@ -3861,6 +4541,7 @@ namespace OcarinaAtlasLauncher
                 modal.ShowInTaskbar = false;
                 modal.ClientSize = new Size(328, 376);
                 if (_appIcon != null) modal.Icon = _appIcon;
+                Theme.EnableDarkTitleBar(modal);
 
                 PictureBox largeBox = new PictureBox();
                 largeBox.Location = new Point(24, 16);
@@ -3954,7 +4635,7 @@ namespace OcarinaAtlasLauncher
                 _firewallButton.Enabled = false;
                 _firewallButton.Text = "Localhost Only";
                 _firewallButton.ForeColor = Theme.Parchment600;
-                _firewallButton.FlatAppearance.BorderColor = Theme.Ink600;
+                _firewallButton.FlatAppearance.BorderColor = Theme.Ink700;
                 return;
             }
 
@@ -3969,7 +4650,7 @@ namespace OcarinaAtlasLauncher
             {
                 _firewallButton.Text = "Allow LAN Access";
                 _firewallButton.ForeColor = Theme.Parchment200;
-                _firewallButton.FlatAppearance.BorderColor = Theme.Ink600;
+                _firewallButton.FlatAppearance.BorderColor = Theme.Ink700;
             }
         }
 
@@ -3978,15 +4659,16 @@ namespace OcarinaAtlasLauncher
             int port = GetEffectivePort();
             if (_firewallCheckedPort == port && _firewallAllowed)
             {
-                MessageBox.Show(
-                    this,
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Windows Defender Firewall rule \"{0}\" is already present for Private networks.",
-                        LanNetworkHelper.GetFirewallRuleName(port)),
-                    "LAN Firewall Ready",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                _lanFeedbackTicks = 4;
+                _lanHintLabel.Text = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Windows Firewall rule \"{0}\" is already active (Private networks).",
+                    LanNetworkHelper.GetFirewallRuleName(port));
+                _lanHintLabel.ForeColor = Theme.Moss;
+                AppendLog(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Windows Firewall rule \"{0}\" is already present for Private networks.",
+                    LanNetworkHelper.GetFirewallRuleName(port)));
                 return;
             }
 
@@ -4006,15 +4688,12 @@ namespace OcarinaAtlasLauncher
                     "Added Windows Firewall Private LAN rule \"{0}\" for TCP port {1}.",
                     LanNetworkHelper.GetFirewallRuleName(port),
                     port));
-                MessageBox.Show(
-                    this,
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Windows Firewall now allows incoming LAN connections on TCP port {0} (Private networks).\n\nTip: If an iPad/tablet still cannot connect, verify your Windows Wi-Fi/Ethernet network profile is set to Private in Windows Settings.",
-                        port),
-                    "LAN Firewall Configured",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                _lanFeedbackTicks = 5;
+                _lanHintLabel.Text = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Firewall rule added for TCP port {0} (Private networks).",
+                    port);
+                _lanHintLabel.ForeColor = Theme.Moss;
             }
             else if (canceled)
             {
@@ -4392,13 +5071,6 @@ namespace OcarinaAtlasLauncher
                 _toolTip.Dispose();
                 _toolTip = null;
             }
-
-            if (_qrPictureBox != null && _qrPictureBox.Image != null)
-            {
-                Image img = _qrPictureBox.Image;
-                _qrPictureBox.Image = null;
-                img.Dispose();
-            }
         }
 
         private void UpdateControlStates()
@@ -4411,6 +5083,10 @@ namespace OcarinaAtlasLauncher
             _allowLanCheckBox.Enabled = isStopped;
             _lichiiHostInput.Enabled = isStopped;
             _lichiiPortInput.Enabled = isStopped;
+            if (_settingsLockHintLabel != null)
+            {
+                _settingsLockHintLabel.Visible = _activeDrawerTab == 0 && !isStopped;
+            }
 
             if (isStopped)
             {
@@ -4425,15 +5101,15 @@ namespace OcarinaAtlasLauncher
                     _serverDot.DotColor = Theme.Ember;
                     _serverStatusLabel.Text = "Error";
                     _serverStatusLabel.ForeColor = Theme.Ember;
-                    _heroStatusPill.BorderColor = Theme.Ember;
-                    _heroSummaryLabel.Text = "Could not start the map server. Check Advanced Settings & Logs for details.";
+                    _serverStatusPill.BorderColor = Theme.Ember;
+                    _heroSummaryLabel.Text = "Could not start the map server. Check Settings & Logs for details.";
                 }
                 else
                 {
                     _serverDot.DotColor = Theme.Parchment600;
                     _serverStatusLabel.Text = "Stopped";
                     _serverStatusLabel.ForeColor = Theme.Parchment400;
-                    _heroStatusPill.BorderColor = Theme.Ink600;
+                    _serverStatusPill.BorderColor = Theme.Ink700;
                     _heroSummaryLabel.Text = "Click Start Map to open the interactive Hyrule map in your browser.";
                 }
                 _serverUrlLink.Visible = false;
@@ -4449,7 +5125,7 @@ namespace OcarinaAtlasLauncher
                 _serverDot.DotColor = Theme.Ember;
                 _serverStatusLabel.Text = "Starting...";
                 _serverStatusLabel.ForeColor = Theme.Ember;
-                _heroStatusPill.BorderColor = Theme.Ember;
+                _serverStatusPill.BorderColor = Theme.Ember;
                 _heroSummaryLabel.Text = "Starting the local map server...";
                 _serverUrlLink.Visible = false;
             }
@@ -4464,7 +5140,7 @@ namespace OcarinaAtlasLauncher
                 _serverDot.DotColor = Theme.Moss;
                 _serverStatusLabel.Text = "Running";
                 _serverStatusLabel.ForeColor = Theme.Moss;
-                _heroStatusPill.BorderColor = Theme.Moss;
+                _serverStatusPill.BorderColor = Theme.Moss;
                 _heroSummaryLabel.Text = "Map is live and ready in your browser.";
                 _serverUrlLink.Text = GetServerUrl();
                 _serverUrlLink.Visible = true;
@@ -4473,20 +5149,31 @@ namespace OcarinaAtlasLauncher
             {
                 _startStopButton.Text = "Stopping...";
                 _startStopButton.Enabled = false;
-                _startStopButton.BackColor = Theme.Ink700;
+                _startStopButton.BackColor = Theme.Ink800;
                 _startStopButton.ForeColor = Theme.Parchment400;
-                _startStopButton.FlatAppearance.BorderColor = Theme.Ink600;
+                _startStopButton.FlatAppearance.BorderColor = Theme.Ink700;
 
                 _serverDot.DotColor = Theme.Ember;
                 _serverStatusLabel.Text = "Stopping...";
                 _serverStatusLabel.ForeColor = Theme.Ember;
-                _heroStatusPill.BorderColor = Theme.Ember;
+                _serverStatusPill.BorderColor = Theme.Ember;
                 _heroSummaryLabel.Text = "Shutting down the map server...";
                 _serverUrlLink.Visible = false;
             }
 
-            _heroStatusPill.Invalidate();
+            _serverStatusPill.Invalidate();
             _openBrowserButton.Enabled = isRunning;
+            if (isRunning)
+            {
+                _openBrowserButton.ForeColor = Theme.Gold;
+                _openBrowserButton.FlatAppearance.BorderColor = Theme.Gold;
+            }
+            else
+            {
+                _openBrowserButton.ForeColor = Theme.Parchment600;
+                _openBrowserButton.FlatAppearance.BorderColor = Theme.Ink700;
+            }
+
             UpdateLanRowUi();
             UpdateFirewallButtonState();
             if (_trayOpenBrowserItem != null) _trayOpenBrowserItem.Enabled = isRunning;
@@ -4512,6 +5199,22 @@ namespace OcarinaAtlasLauncher
                 {
                     _copyLanUrlButton.Text = "Copy URL";
                 }
+            }
+            if (_copyLogFeedbackTicks > 0)
+            {
+                _copyLogFeedbackTicks--;
+                if (_copyLogFeedbackTicks == 0 && _copyLogButton != null)
+                {
+                    _copyLogButton.Text = "Copy";
+                }
+            }
+            if (_syncFeedbackTicks > 0)
+            {
+                _syncFeedbackTicks--;
+            }
+            if (_lanFeedbackTicks > 0)
+            {
+                _lanFeedbackTicks--;
             }
             RefreshLanDisplays();
             TriggerPollNow();
@@ -4614,9 +5317,14 @@ namespace OcarinaAtlasLauncher
             if (snap.ServerHttpOk && snap.Connected && snap.EmulatorRunning &&
                 string.Equals(snap.Source, "memory", StringComparison.OrdinalIgnoreCase))
             {
+                _syncFeedbackTicks = 0;
                 _heroLichiiDot.DotColor = Theme.Moss;
-                _heroLichiiLabel.Text = emuName + ": Live Sync";
+                _heroLichiiLabel.Text = "Live Sync";
                 _heroLichiiLabel.ForeColor = Theme.Moss;
+                _emulatorStatusPill.BorderColor = Theme.Moss;
+                string fullEmuTip = emuName + ": Live Sync";
+                _toolTip.SetToolTip(_emulatorStatusPill, fullEmuTip);
+                _toolTip.SetToolTip(_heroLichiiLabel, fullEmuTip);
 
                 List<string> parts = new List<string>();
                 string place = !string.IsNullOrEmpty(snap.PlaceName) ? snap.PlaceName : snap.Scene;
@@ -4635,75 +5343,97 @@ namespace OcarinaAtlasLauncher
                 }
                 if (snap.SkulltulaCount.HasValue)
                 {
-                    parts.Add(string.Format(CultureInfo.InvariantCulture, "{0}/100 Gold Skulltulas", snap.SkulltulaCount.Value));
+                    parts.Add(string.Format(CultureInfo.InvariantCulture, "{0}/100 GS", snap.SkulltulaCount.Value));
                 }
 
                 _lichiiStepDetailLabel.Text = parts.Count > 0
-                    ? "Live: " + string.Join("  \u00B7  ", parts.ToArray())
+                    ? string.Join("  \u00B7  ", parts.ToArray())
                     : "Streaming live player coordinates from " + emuName + ".";
                 _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
             }
             else if ((snap.ServerHttpOk && snap.Connected) || snap.RpcPortOpen)
             {
                 _heroLichiiDot.DotColor = Theme.Ember;
-                _heroLichiiLabel.Text = emuName + ": Waiting for game";
+                _heroLichiiLabel.Text = "Waiting";
                 _heroLichiiLabel.ForeColor = Theme.Ember;
+                _emulatorStatusPill.BorderColor = Theme.Ember;
+                string fullEmuTip = emuName + ": Waiting for game";
+                _toolTip.SetToolTip(_emulatorStatusPill, fullEmuTip);
+                _toolTip.SetToolTip(_heroLichiiLabel, fullEmuTip);
 
-                if (snap.ServerHttpOk && string.Equals(snap.Source, "save", StringComparison.OrdinalIgnoreCase) && snap.SkulltulaCount.HasValue)
+                if (_syncFeedbackTicks == 0)
                 {
-                    _lichiiStepDetailLabel.Text = string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Save loaded ({0}/100 Gold Skulltulas). Start Ocarina of Time in {1} for live sync.",
-                        snap.SkulltulaCount.Value,
-                        emuName);
+                    if (snap.ServerHttpOk && string.Equals(snap.Source, "save", StringComparison.OrdinalIgnoreCase) && snap.SkulltulaCount.HasValue)
+                    {
+                        _lichiiStepDetailLabel.Text = string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Save loaded ({0}/100 GS) \u2014 start Ocarina of Time in {1} for live sync.",
+                            snap.SkulltulaCount.Value,
+                            emuName);
+                    }
+                    else
+                    {
+                        _lichiiStepDetailLabel.Text = emuName + " is ready. Load your Ocarina of Time save to start live sync.";
+                    }
+                    _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
                 }
-                else
-                {
-                    _lichiiStepDetailLabel.Text = emuName + " is ready. Load your Ocarina of Time save to start live sync.";
-                }
-                _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
             }
             else if (!string.IsNullOrEmpty(snap.RunningEmulator))
             {
                 _heroLichiiDot.DotColor = Theme.Ember;
-                _heroLichiiLabel.Text = snap.RunningEmulator + ": RPC closed";
+                _heroLichiiLabel.Text = "RPC Closed";
                 _heroLichiiLabel.ForeColor = Theme.Ember;
+                _emulatorStatusPill.BorderColor = Theme.Ember;
+                string fullEmuTip = snap.RunningEmulator + ": RPC closed";
+                _toolTip.SetToolTip(_emulatorStatusPill, fullEmuTip);
+                _toolTip.SetToolTip(_heroLichiiLabel, fullEmuTip);
 
-                if (_configuredPill.Visible)
+                if (_syncFeedbackTicks == 0)
                 {
-                    _lichiiStepDetailLabel.Text = "Restart " + snap.RunningEmulator + " so its debug server starts on the configured port.";
+                    if (_lichiiConfigured)
+                    {
+                        _lichiiStepDetailLabel.Text = "Restart " + snap.RunningEmulator + " so its debug server starts on the configured port.";
+                    }
+                    else
+                    {
+                        _lichiiStepDetailLabel.Text = "Click 1-Click Setup Sync, then restart " + snap.RunningEmulator + " to enable live tracking.";
+                    }
+                    _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
                 }
-                else
-                {
-                    _lichiiStepDetailLabel.Text = "Click 1-Click Setup Sync, then restart " + snap.RunningEmulator + " to enable live tracking.";
-                }
-                _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
             }
             else
             {
                 _heroLichiiDot.DotColor = Theme.Parchment600;
-                _heroLichiiLabel.Text = "Emulator: Not detected";
+                _heroLichiiLabel.Text = "No Emu";
                 _heroLichiiLabel.ForeColor = Theme.Parchment400;
+                _emulatorStatusPill.BorderColor = Theme.Ink700;
+                _toolTip.SetToolTip(_emulatorStatusPill, "Emulator: Not detected");
+                _toolTip.SetToolTip(_heroLichiiLabel, "Emulator: Not detected");
 
-                if (snap.ServerHttpOk && string.Equals(snap.Source, "save", StringComparison.OrdinalIgnoreCase) && snap.SkulltulaCount.HasValue)
+                if (_syncFeedbackTicks == 0)
                 {
-                    _lichiiStepDetailLabel.Text = string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Save data found ({0}/100 Gold Skulltulas). Open Lichii or Fritchii for live player tracking.",
-                        snap.SkulltulaCount.Value);
-                    _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
-                }
-                else if (_configuredPill.Visible)
-                {
-                    _lichiiStepDetailLabel.Text = "Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.";
-                    _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
-                }
-                else
-                {
-                    _lichiiStepDetailLabel.Text = "Click 1-Click Setup Sync so the map can follow Link automatically.";
-                    _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
+                    if (snap.ServerHttpOk && string.Equals(snap.Source, "save", StringComparison.OrdinalIgnoreCase) && snap.SkulltulaCount.HasValue)
+                    {
+                        _lichiiStepDetailLabel.Text = string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Save data found ({0}/100 GS) \u2014 open Lichii or Fritchii for live tracking.",
+                            snap.SkulltulaCount.Value);
+                        _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
+                    }
+                    else if (_lichiiConfigured)
+                    {
+                        _lichiiStepDetailLabel.Text = "Live sync configured. Start Lichii or Fritchii and load Ocarina of Time.";
+                        _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
+                    }
+                    else
+                    {
+                        _lichiiStepDetailLabel.Text = "Click 1-Click Setup Sync so the map can follow Link automatically.";
+                        _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
+                    }
                 }
             }
+
+            _emulatorStatusPill.Invalidate();
         }
 
         private static string FormatCompactFloor(string mapId)
@@ -4799,8 +5529,18 @@ namespace OcarinaAtlasLauncher
             }
         }
 
-        private void StartUpdateCheck()
+        private void StartUpdateCheck(bool userInitiated)
         {
+            if (_updateCheckInFlight) return;
+            _updateCheckInFlight = true;
+
+            if (userInitiated && _updateStatusLabel != null && _checkUpdatesLink != null)
+            {
+                _checkUpdatesLink.Enabled = false;
+                _updateStatusLabel.Text = "Checking for updates...";
+                _updateStatusLabel.ForeColor = Theme.Parchment400;
+            }
+
             string feedUrl = UpdateManager.ResolveFeedUrl(_options.UpdateFeedUrl);
             Thread t = new Thread(delegate()
             {
@@ -4817,10 +5557,16 @@ namespace OcarinaAtlasLauncher
                     string body;
                     using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
                     {
-                        if (resp.StatusCode != HttpStatusCode.OK) return;
+                        if (resp.StatusCode != HttpStatusCode.OK)
+                        {
+                            throw new InvalidOperationException("HTTP " + (int)resp.StatusCode);
+                        }
                         using (Stream stream = resp.GetResponseStream())
                         {
-                            if (stream == null) return;
+                            if (stream == null)
+                            {
+                                throw new InvalidOperationException("Empty response stream.");
+                            }
                             using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
                             {
                                 body = reader.ReadToEnd();
@@ -4831,19 +5577,40 @@ namespace OcarinaAtlasLauncher
                     UpdateInfo info = UpdateManager.ParseReleaseJson(body, AppVersion);
                     if (info == null)
                     {
+                        BeginInvokeSafe(delegate()
+                        {
+                            _updateCheckInFlight = false;
+                            if (_checkUpdatesLink != null) _checkUpdatesLink.Enabled = true;
+                            if (userInitiated && _updateStatusLabel != null)
+                            {
+                                _updateStatusLabel.Text = "You are on the latest version (v" + AppVersion + ").";
+                                _updateStatusLabel.ForeColor = Theme.Moss;
+                                AppendLog("Checked for updates: already on latest version v" + AppVersion + ".");
+                            }
+                        });
                         return;
                     }
 
                     string skippedVersion = UpdateManager.ReadSkippedVersion();
-                    bool shouldAutoOpen = !string.Equals(info.DisplayTag, skippedVersion, StringComparison.OrdinalIgnoreCase);
+                    bool shouldAutoOpen = userInitiated || !string.Equals(info.DisplayTag, skippedVersion, StringComparison.OrdinalIgnoreCase);
 
                     BeginInvokeSafe(delegate()
                     {
-                        if (_updateLinkLabel == null || _updateLinkLabel.IsDisposed || _heroStatusPill == null) return;
+                        _updateCheckInFlight = false;
+                        if (_checkUpdatesLink != null) _checkUpdatesLink.Enabled = true;
+                        if (_updatePill == null || _updatePill.IsDisposed) return;
+
                         _pendingUpdateInfo = info;
-                        _updateLinkLabel.Text = "Update available: " + info.DisplayTag;
-                        _updateLinkLabel.Visible = true;
-                        _updateLinkLabel.Left = Math.Max(_versionLabel.Right + 10, _heroStatusPill.Left - _updateLinkLabel.Width - 10);
+                        _updatePill.Visible = true;
+                        string updateTip = "Update available: " + info.DisplayTag + " (click to view)";
+                        _toolTip.SetToolTip(_updatePill, updateTip);
+                        if (_updatePillLabel != null) _toolTip.SetToolTip(_updatePillLabel, updateTip);
+
+                        if (_updateStatusLabel != null)
+                        {
+                            _updateStatusLabel.Text = "Update available: " + info.DisplayTag;
+                            _updateStatusLabel.ForeColor = Theme.Gold;
+                        }
 
                         if (shouldAutoOpen)
                         {
@@ -4851,9 +5618,19 @@ namespace OcarinaAtlasLauncher
                         }
                     });
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Fail silently when offline, firewalled, or rate-limited.
+                    BeginInvokeSafe(delegate()
+                    {
+                        _updateCheckInFlight = false;
+                        if (_checkUpdatesLink != null) _checkUpdatesLink.Enabled = true;
+                        if (userInitiated && _updateStatusLabel != null)
+                        {
+                            _updateStatusLabel.Text = "Could not check for updates.";
+                            _updateStatusLabel.ForeColor = Theme.Ember;
+                            AppendLog("Manual update check failed: " + ex.Message);
+                        }
+                    });
                 }
             });
             t.IsBackground = true;
@@ -4882,12 +5659,17 @@ namespace OcarinaAtlasLauncher
             }
         }
 
-        private void OnUpdateLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void OnUpdatePillClick(object sender, EventArgs e)
         {
             if (_pendingUpdateInfo != null)
             {
                 ShowUpdateDialog();
             }
+        }
+
+        private void OnCheckUpdatesClick(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            StartUpdateCheck(true);
         }
 
         private void BeginInvokeSafe(MethodInvoker action)

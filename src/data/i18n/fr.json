@@ -1,0 +1,946 @@
+{
+  "places": {
+    "kokiri": {
+      "intro": "La Forêt Kokiri, le village où commence l'aventure, renferme trois Skulltulas d'Or et un carré de terre meuble pour un Haricot Magique sur sa carte. Deux des Skulltulas apparaissent lorsque vous êtes enfant : celle derrière la Maison des Frères Je-Sais-Tout, uniquement la nuit, et celle dans la terre meuble près du magasin, à toute heure et avec des Insectes. Plantez également un haricot dans ce même carré, car à l'âge adulte il vous hissera jusqu'à une corniche avec des Rubis, et revenez de nuit avec le Grappin pour la troisième Skulltula, au sommet de la Maison des Jumeaux."
+    },
+    "perdido": {
+      "intro": "Presque tout dans les Bois Perdus se récupère enfant : deux Quarts de Cœur avec l'ocarina, trois Skulltulas d'Or et deux carrés de terre pour Haricots Magiques. C'est le labyrinthe qui relie la Forêt Kokiri au Bosquet Sacré, et les Quarts de Cœur s'obtiennent auprès des Skull Kids : le Chant de Saria pour celui à la flûte, à gauche de l'entrée, et le jeu de mémoire près de la cible, à droite. Apportez des Insectes pour les deux carrés de terre meuble, celui près du pont vers la Plaine d'Hyrule et celui dans la clairière à l'arbre solitaire, et plantez-y un haricot : à l'âge adulte et de nuit, celui de la clairière vous mène à la corniche de la troisième Skulltula."
+    },
+    "prado": {
+      "intro": "Une seule Skulltula d'Or, à l'âge adulte, voilà tout ce que renferme le Bosquet Sacré, et la carte indique où elle apparaît dans le labyrinthe menant au Temple de la Forêt. Elle se montre sur le mur de droite à mi-parcours du labyrinthe, après avoir esquivé les Moblins et avant l'escalier : décrochez-la avec le Grappin, le même dont vous avez besoin pour entrer dans le temple."
+    },
+    "llanura": {
+      "intro": "La carte de la Plaine d'Hyrule indique deux Quarts de Cœur et deux Skulltulas d'Or. Deux d'entre eux sont sous terre, dans des grottes qui s'ouvrent avec une Bombe ou la Masse des Titans. Dans celle à l'est du pont-levis du Bourg d'Hyrule, près des douves, une Peste Mojo marchande vous vend un Quart de Cœur pour 100 Rubis si vous y allez enfant et connaissez le mot de passe, que vous révèle à l'âge adulte la Pensée de Fée sur l'arbre juste à côté ; l'autre se trouve dans un coffre sous un surplomb rocheux à l'ouest, près de la Vallée Gerudo, et doit être ouvert enfant. Quant aux Skulltulas, celle du pin solitaire à l'est tombe en faisant une roulade contre le tronc, et celle de la grotte du cercle de pierres, près du Ranch Lon Lon, nécessite le Boomerang ou le Grappin."
+    },
+    "lonlon": {
+      "intro": "Enfant, vous pouvez presque tout obtenir au Ranch Lon Lon : quatre Skulltulas d'Or, un Quart de Cœur et un Flacon, chacun indiqué sur sa carte. Deux des Skulltulas n'apparaissent que de nuit et demandent le Boomerang, à la fenêtre de la maison et à l'intérieur de la tour de pierre au fond ; la troisième, dans l'arbre à l'entrée, tombe à toute heure en percutant le tronc d'une roulade, et la quatrième apparaît à l'âge adulte dans une caisse de la grotte au sud-est du ranch, si enfant vous y avez lu la Pensée de Fée et vaincu la Skulltula ordinaire. Le Quart de Cœur se trouve au fond de la tour de pierre, derrière des caisses, et le Flacon est la récompense du jeu des Super Cocottes de Talon, mais vous devez d'abord le réveiller au Château d'Hyrule avec la Cocotte issue de l'Œuf Bizarre."
+    },
+    "ciudadela": {
+      "intro": "Trois Quarts de Cœur, deux Flacons et une Skulltula d'Or : voilà ce que renferme le Bourg d'Hyrule, avec une carte enfant et une carte adulte, car la ville change. Presque tout est destiné à Link enfant : deux des Quarts de Cœur s'obtiennent de nuit, à la Chasse au Trésor et en ramenant Richard, le petit chien perdu, à sa maîtresse, et le troisième est un prix du Bowling Teigneux, qui n'ouvre qu'après avoir vaincu le Roi Dodongo. La Skulltula est cachée dans une caisse de la maison de garde à l'entrée, et les Flacons sont le nouveau flacon du remake, offert par le commerçant au bord de la route vers le Temple du Temps, ainsi que celui du Collectionneur d'Âmes, à l'âge adulte, contre cinq Grandes Âmes."
+    },
+    "castillo": {
+      "intro": "Entre les deux cartes du Château d'Hyrule — ses abords enfant et l'extérieur du Château de Ganon adulte — on compte trois Skulltulas d'Or et deux Grandes Fées. Deux des Skulltulas apparaissent enfant : celle dans l'arbre du jardin de haies et celle dans la grotte ouverte par le Chant des Tempêtes près de l'arbre au bord des douves, tout comme la Grande Fée de l'attaque circulaire, derrière un rocher au bout du cul-de-sac à l'est. À l'âge adulte, il reste la Skulltula sur l'arche en ruine, visible uniquement si vous vous retournez en la traversant, et la Grande Fée de la Double Défense, dissimulée derrière un pilier que soulèvent les Gantelets d'Or."
+    },
+    "kakariko": {
+      "intro": "Le Village Cocorico s'étend au pied du Mont du Péril, passé le pont depuis la Plaine d'Hyrule, et c'est l'un des lieux les plus riches en objets sur la carte. Cinq de ses six Skulltulas d'Or apparaissent enfant et de nuit, avec l'épée ou le Lance-Pierre, et la sixième, sur la paroi rocheuse juste à côté du toit de la maison d'Impa, à l'âge adulte, de nuit et avec le Grappin. Les Quarts de Cœur se partagent entre les deux âges, le Flacon est remis par la Dame aux Cocottes lorsque vous lui ramenez ses sept Cocottes, et la Maison des Skulltulas vous réserve un autre Quart de Cœur une fois 50 emblèmes réunis."
+    },
+    "cementerio": {
+      "intro": "Le Cimetière de Cocorico possède une carte pour chaque âge, renfermant à elles deux quatre Quarts de Cœur, deux Skulltulas d'Or et un Haricot Magique. Enfant et de nuit, Igor creuse pour 10 Rubis et finit par déterrer un Quart de Cœur, et la tombe près du Tombeau de la Famille Royale en cache un autre dans son caveau, qui à cet âge n'ouvre que la nuit. À l'âge adulte viennent la course contre le fantôme d'Igor, qui donne le Quart de Cœur à la deuxième tentative (la première offre le Grappin), et la corniche sur le mur de gauche, accessible grâce au haricot planté enfant. Les Skulltulas apparaissent de nuit sur le mur à l'entrée et, avec des Insectes, enfant et à toute heure, dans la terre meuble près de la Tombe d'Igor."
+    },
+    "sendero": {
+      "intro": "Le long du Chemin du Péril, de Cocorico jusqu'au Cratère, la carte indique quatre Skulltulas d'Or, un Quart de Cœur, une Grande Fée et un Haricot Magique. Enfant, dégagez le rocher de la Caverne Dodongo avec une Bombe ou le Chou-Péteur et profitez de la terre meuble devant l'entrée : des Insectes pour une Skulltula et un haricot qui sert de raccourci à l'âge adulte. Le Quart de Cœur est sur la corniche au-dessus de l'entrée de la caverne, et la Grande Fée de la magie et du Feu de Din attend au sommet, derrière le mur fissuré près de Kaepora Gaebora. Parmi les trois autres Skulltulas, celle du mur fissuré côté Cocorico apparaît aux deux âges, et les deux pour Link adulte de nuit se trouvent sous des rochers à briser, dont l'un uniquement avec la Masse des Titans."
+    },
+    "goron": {
+      "intro": "Le Village Goron, creusé dans le Mont du Péril, ne compte que trois objets sur sa carte : deux Skulltulas d'Or et un Quart de Cœur, répartis entre les deux âges. Enfant, la Skulltula du labyrinthe de rochers à l'étage supérieur s'atteint en frayant un passage aux Bombes, et le Quart de Cœur sort du grand vase tournant au centre : allumez ses torches pour le faire tourner et lancez une Bombe dedans depuis la passerelle de l'étage au-dessus. À l'âge adulte, il ne reste que l'autre Skulltula, sous une corniche rocheuse au plafond, que seul le Grappin peut atteindre."
+    },
+    "crater": {
+      "intro": "La chaleur règne sur le Cratère du Péril, où la carte marque trois Quarts de Cœur, deux Skulltulas d'Or, une Grande Fée et un Haricot Magique. On y entre depuis le sommet de la montagne ou depuis le Village Goron ; enfant, la chaleur impose un compte à rebours, tandis qu'à l'âge adulte, avec la Tunique Goron, rien ne presse. Enfant, vous obtenez la Skulltula dans la caisse à l'entrée du sommet, le Quart de Cœur vendu 100 Rubis par la Peste Mojo marchande et la Skulltula dans la terre meuble du Boléro du Feu, accessible en jouant ce chant : plantez-y aussi le haricot. À l'âge adulte, cette plante vous dépose sur le rocher en dôme avec un autre Quart de Cœur ; le troisième, également accessible enfant, se trouve dans une alcôve du mur en descendant les filets depuis l'entrée, et la Grande Fée qui double votre magie attend derrière des rochers que seule la Masse des Titans peut briser."
+    },
+    "rio": {
+      "intro": "Le vendeur de haricots se tient à l'entrée de la Rivière Zora, et en amont la carte indique quatre Quarts de Cœur et quatre Skulltulas d'Or. Enfant, franchissez les rochers de l'entrée avec une Bombe, achetez-lui tous les haricots possibles et plantez-en un dans la terre meuble juste à côté de lui. Les quatre Quarts de Cœur sont pour Link enfant : deux sur des plateformes atteintes en planant avec une Cocotte (ou avec le Boomerang pour celui près de la cascade) et deux offerts par les grenouilles sur la souche, l'un en leur jouant leurs chants et en réussissant leur jeu, l'autre avec le Chant des Tempêtes. Côté Skulltulas, deux sont pour Link enfant — celle de la terre meuble du vendeur, avec des Insectes, et, de nuit, celle sur le mur près de la cascade — et deux pour Link adulte de nuit, en hauteur sur les parois et avec le Grappin."
+    },
+    "dominio": {
+      "intro": "Un par âge : voilà comment se répartissent les deux objets du Domaine Zora, un Quart de Cœur enfant et une Skulltula d'Or adulte, chacun à son endroit sur la carte. Pour le Quart de Cœur, allumez toutes les torches de l'étage inférieur avec un Bâton Mojo, en commençant par celle au pied de l'escalier, et son coffre apparaîtra derrière la cascade. À l'âge adulte, le domaine étant pris par les glaces, la Skulltula apparaît de nuit tout en haut de la cascade gelée, et vous la décrochez au Grappin ou à l'arc."
+    },
+    "fuente": {
+      "intro": "Derrière le trône du Roi Zora, la Fontaine Zora renferme deux Quarts de Cœur, trois Skulltulas d'Or et une Grande Fée, avec une carte pour chaque âge. Enfant, c'est le bassin de Jabu-Jabu, et adulte, un lac gelé sur la route de la Caverne Polaire. La Grande Fée, celle du Vent de Farore, s'ouvre aux deux âges, derrière le mur fissuré dans le coin sud-est, et deux des Skulltulas apparaissent enfant : celle dans le pin de ce même coin et, de nuit avec le Boomerang, celle sur la paroi de l'arche immergée. À l'âge adulte, un Quart de Cœur attend sur le bloc de glace le plus éloigné et un autre au fond de l'eau, avec la Tunique Zora et les Bottes de Plomb, tandis que la troisième Skulltula apparaît de nuit au fond d'une grotte bloquée par deux blocs aux marques Zora, que soulèvent les Gantelets d'Argent."
+    },
+    "lago": {
+      "intro": "Le Lac Hylia est l'une des zones les plus garnies de la carte : cinq Skulltulas d'Or, trois Quarts de Cœur, un Flacon et un Haricot Magique, répartis sur les deux âges. Enfant, la terre meuble juste à côté du laboratoire donne une Skulltula avec des Insectes et un haricot qui vous hisse sur le toit à l'âge adulte, où se trouve l'un des Quarts de Cœur ; un autre est remis par le gérant du Bassin de Pêche pour un poisson de plus de 50 cm, et le troisième par le Scientifique du Lac, si vous plongez au fond de son bassin avec l'Écaille d'Or. Le Flacon contenant la Lettre de Ruto repose au fond du lac, près du tunnel vers le Domaine Zora, et requiert l'Écaille d'Argent. Sur les cinq Skulltulas, trois sont pour Link enfant et deux pour Link adulte : celle dans la caisse au fond du bassin, avec les Bottes de Plomb, et celle dans la cime du grand arbre sur l'île, de nuit et avec le Super Grappin."
+    },
+    "valle": {
+      "intro": "Pour rejoindre la Forteresse Gerudo, il faut traverser la Vallée Gerudo, et sa carte indique quatre Skulltulas d'Or, deux Quarts de Cœur et un Haricot Magique. L'un des Quarts de Cœur se cache derrière la grande cascade, accessible à la nage, et l'autre, dans un coffre sur une corniche du canyon, s'atteint enfant en planant avec la Cocotte près du pont. Sur la plateforme de la vache, au pied de la cascade, la terre meuble donne une Skulltula avec des Insectes ainsi qu'un haricot qui vous rapproche aussi du Quart de Cœur de la cascade à l'âge adulte. Les trois autres Skulltulas apparaissent de nuit : celle près de la source d'eau près de la passerelle, enfant et avec le Boomerang, et celles sur la tente des charpentiers et sur l'arche rocheuse en face, adulte et avec le Grappin."
+    },
+    "fortaleza": {
+      "intro": "Tout ce que renferme la Forteresse Gerudo est destiné à Link adulte : deux Quarts de Cœur et deux Skulltulas d'Or, que la carte place au champ de tir à l'arc et sur les toits. Sauver les quatre charpentiers vous rapporte la Carte Gerudo, qui ouvre le champ de tir à cheval : de jour, atteignez 1 000 points sur Epona pour gagner un Quart de Cœur, et revenez de nuit avec le Grappin pour la Skulltula sur la cible lointaine. La sortie en hauteur de la cuisine mène aux toits, où se trouvent l'autre Skulltula de nuit et, sur le toit le plus élevé, le coffre du second Quart de Cœur, accessible au Super Grappin depuis la corniche rocheuse au-dessus."
+    },
+    "desierto": {
+      "intro": "Le Désert Hanté ne renferme qu'une seule Skulltula d'Or, à l'âge adulte, dans la salle sous le monument de pierre sur le chemin du Colosse du Désert. Pour le traverser, franchissez la rivière de sable avec les Bottes des Airs ou le Super Grappin et suivez les drapeaux ; au monument, entrez par l'ouverture entre les colonnes, descendez l'échelle et éliminez la Skulltula à l'épée depuis l'autel."
+    },
+    "coloso": {
+      "intro": "Avec le Requiem des Esprits, vous atteignez le Colosse du Désert enfant, et sa carte indique trois Skulltulas d'Or, un Quart de Cœur, une Grande Fée et un Haricot Magique. À l'âge adulte, vous y arrivez en traversant le Désert Hanté. Venez enfant pour déposer des Insectes dans la terre meuble à l'entrée du Temple de l'Esprit, ce qui donne une Skulltula, et pour y planter le haricot : à l'âge adulte, sa plante vous transporte au-dessus du grand rocher, où une autre Skulltula apparaît de nuit, jusqu'à l'arche de pierre portant le Quart de Cœur. La troisième Skulltula se montre de nuit en hauteur sur la paroi rocheuse à droite du Temple de l'Esprit, avec le Grappin, et la Grande Fée de l'Amour de Nayru, derrière le mur fissuré au nord de l'oasis, s'ouvre aux deux âges avec une Bombe ou un Bombchu."
+    },
+    "deku": {
+      "intro": "L'Arbre Mojo est le premier donjon du jeu, dans lequel on entre enfant dès la sortie de la Forêt Kokiri avec l'épée et le bouclier. La carte couvre ses cinq étages, du sommet jusqu'au deuxième sous-sol. Ses quatre Skulltulas d'Or tombent sous l'épée ou le Lance-Pierre trouvé à l'intérieur, et dans le remake toutes quatre peuvent être récupérées dès cette première visite : celle de la salle du fond au sous-sol ne nécessite plus ni Bombes ni Boomerang, il suffit de brûler la toile avec un Bâton Mojo. La Reine Gohma, au deuxième sous-sol, laisse tomber le Réceptacle de Cœur : étourdissez son œil avec le Lance-Pierre et frappez-la à l'épée."
+    },
+    "dodongos": {
+      "intro": "La Caverne Dodongo se situe sur le Chemin du Péril et s'ouvre enfant en faisant sauter le rocher de l'entrée avec un Chou-Péteur et le Bracelet Goron. Sa carte présente les deux étages de la caverne. Sur ses cinq Skulltulas d'Or, quatre tombent dès la première visite, enfant ; celle sur la corniche de l'épouvantail demande de revenir à l'âge adulte avec le Grappin et le Chant de l'Épouvantail, ou avec le Super Grappin. Le Roi Dodongo laisse tomber le Réceptacle de Cœur : une Bombe dans la gueule puis l'épée."
+    },
+    "jabu": {
+      "intro": "Vous entrez dans le Ventre de Jabu-Jabu enfant depuis la Fontaine Zora, en déposant un poisson devant la bouche de Jabu-Jabu, et à l'intérieur presque tout tourne autour du Boomerang obtenu très tôt. La carte comporte ses trois étages, sous-sol inclus. La première Skulltula d'Or tombe à l'épée dans la salle de l'interrupteur d'eau ; les trois autres au Boomerang, dont deux ensemble au sous-sol de la grande salle aux trous, en visant manuellement car elles ne peuvent pas être ciblées. Barinade laisse tomber le Réceptacle de Cœur, également à coups de Boomerang."
+    },
+    "bosque": {
+      "intro": "Le Temple de la Forêt est le premier donjon adulte : vous y entrez depuis le Bosquet Sacré avec le Grappin, et ce même Grappin décroche ses cinq Skulltulas d'Or et ramène les emblèmes vers vous. La carte couvre ses cinq étages. Le mieux est de les prendre au fur et à mesure, car chacune se trouve dans une salle sur le chemin : l'entrée, le hall, les deux cours intérieures et la salle tournante au sous-sol, juste avant le boss. Le Réceptacle de Cœur est lâché par Ganon Spectral, à l'Arc ou au Grappin."
+    },
+    "fuego": {
+      "intro": "Vous atteignez le Temple du Feu à l'âge adulte depuis le Cratère du Péril, en portant la Tunique Goron pour résister à la chaleur. Sa carte compte cinq étages, du 1F au 5F. Ses cinq Skulltulas d'Or demandent plus que l'épée : le Chant du Temps, des Bombes, le Grappin et, pour deux d'entre elles, le Chant de l'Épouvantail que vous composez enfant puis adulte au Lac Hylia. Celle derrière la statue dans le hall et le Réceptacle de Cœur de Volcania attendent tous deux la Masse des Titans, gardez-les donc pour la fin."
+    },
+    "agua": {
+      "intro": "Le Temple de l'Eau repose au fond du Lac Hylia et se visite à l'âge adulte avec les Bottes de Plomb et la Tunique Zora, en modifiant le niveau de l'eau avec la Berceuse de Zelda. Sa carte couvre les quatre étages, de B1 à 3F. Sur ses cinq Skulltulas d'Or, deux peuvent être récupérées avant de vaincre Dark Link — celle près de la grille au sous-sol et celle derrière le mur fissuré sous l'eau — tandis que les trois autres nécessitent le Super Grappin laissé par ce combat ; le plus simple est donc de le récupérer d'abord puis de faire le tour du pilier central, de la rivière aux tourbillons et de la cascade aux rochers. Morpha laisse tomber le Réceptacle de Cœur à la fin."
+    },
+    "sombra": {
+      "intro": "Le Temple de l'Ombre, sous le Cimetière de Cocorico, s'ouvre à l'âge adulte avec le Nocturne de l'Ombre et le Feu de Din, et à l'intérieur le Monocle de Vérité et les Bottes des Airs sont indispensables dès le départ. La carte comporte ses quatre étages en sous-sol. Ses cinq Skulltulas d'Or se présentent dans l'ordre du parcours : dans la salle aux faux invisibles, dans celle aux pointes au plafond, dans la fosse du couloir aux ventilateurs, sur la corniche de la salle du bateau et à l'intérieur des crânes géants ; deux tombent au Grappin, celle de la salle du bateau demande le Super Grappin et le Chant de l'Épouvantail, et celle des crânes, des Bombes. Le Réceptacle de Cœur est lâché par Bongo Bongo, avec les flèches ou le Grappin et le Monocle activé."
+    },
+    "espiritu": {
+      "intro": "Le Temple de l'Esprit, au Colosse du Désert, s'explore en deux temps : d'abord enfant, en vous glissant par le petit passage après avoir parlé à Nabooru, puis adulte, en poussant le grand bloc dans le hall avec les Gantelets d'Argent. Sa carte comporte quatre étages, du 1F au 4F. Trois de ses cinq Skulltulas d'Or peuvent déjà être récoltées dans la partie enfant, deux au Boomerang ou au Lance-Pierre et une à l'épée, et les deux autres, dans la partie adulte, requièrent le Chant du Temps ainsi que le Super Grappin avec le Chant de l'Épouvantail. Pour le Réceptacle de Cœur de Twinrova, il vous faut le Bouclier Miroir, obtenu dans le temple même."
+    },
+    "pozo": {
+      "intro": "Vous entrez dans le Puits enfant, après avoir vidé le puits du Village Cocorico en jouant le Chant des Tempêtes dans le Moulin. À l'intérieur, sa carte sur deux étages indique trois Skulltulas d'Or, et toutes nécessitent le Boomerang et le Monocle de Vérité, qui s'obtient au sous-sol. Sans le Monocle, impossible de voir les faux murs, les chemins invisibles ou les trappes ; les trois Skulltulas attendent derrière des portes verrouillées, deux dans la zone centrale et une dans la salle du Like Like."
+    },
+    "hielo": {
+      "intro": "Vous entrez dans la Caverne Polaire à l'âge adulte depuis la Fontaine Zora gelée, en suivant les blocs de glace jusqu'à la grotte du fond, et c'est là que vous obtenez les Bottes de Plomb. Sa carte indique trois Skulltulas d'Or, qui tombent toutes trois au Grappin. L'une se trouve dans la salle de la lame tournante, parmi les stalagmites ; pour les deux autres, ramassez les Rubis d'Argent dans cette salle pour ouvrir la salle de la Carte du donjon, remplissez-y un Flacon de Flamme Bleue et utilisez-la pour faire fondre les deux murs de glace rouge dans la salle de la lame : derrière se trouvent la salle de la Boussole et celle du bloc de glace coulissant."
+    },
+    "gerudo": {
+      "intro": "Le Gymnase Gerudo est le donjon d'épreuves de la Forteresse Gerudo, accessible à l'âge adulte avec la Carte Gerudo. Il ne contient ni Skulltulas d'Or ni Quarts de Cœur, et n'a donc aucun objet à cocher sur cette carte ; sa récompense est les Flèches de Glace."
+    },
+    "ganon": {
+      "intro": "Le Château de Ganon s'élève à l'âge adulte là où se dressait le Château d'Hyrule, et c'est le donjon final du jeu. Il ne contient ni Skulltulas d'Or ni Quarts de Cœur, et n'a donc aucun objet à cocher sur cette carte. Ce que l'on trouve à l'extérieur, près du chemin d'entrée, ce sont la Grande Fée de la Double Défense et une Skulltula d'Or sur une arche en ruine : elles figurent sur la carte du Château d'Hyrule."
+    }
+  },
+  "items": {
+    "kokiri-gs-01": {
+      "name": "Derrière la Maison des Frères Je-Sais-Tout",
+      "desc": "La Maison des Frères Je-Sais-Tout, sur la colline en face de la Maison du Grand Mido et à côté du Centre d'Entraînement de la Forêt, cache cette Skulltula d'Or à l'arrière de son tronc. Elle ne sort que la nuit, et uniquement enfant.\n\nMontez sur la colline et contournez la maison par-derrière."
+    },
+    "kokiri-gs-02": {
+      "name": "Insectes dans la terre meuble près du magasin",
+      "desc": "Juste derrière le Magasin Kokiri se trouve un carré de terre meuble qui abrite une Skulltula d'Or enfant, et il suffit d'un flacon d'insectes pour la faire sortir.\n\nDès que vous **versez le flacon d'insectes sur le carré de terre**, la Skulltula jaillit du sol : éliminez-la à l'épée et ramassez l'Emblème de Skulltula d'Or. Cela fonctionne à toute heure de la journée."
+    },
+    "kokiri-gs-03": {
+      "name": "À l'arrière de la Maison des Jumeaux",
+      "desc": "Cette Skulltula d'Or demande de revenir dans la Forêt Kokiri à l'âge adulte, de nuit, car elle s'accroche en hauteur à l'arrière de la Maison des Jumeaux, celle au toit à deux pignons près du chemin vers la Clairière du Vénérable Arbre Mojo.\n\nVotre épée n'atteint pas cette hauteur, mais **le Grappin l'élimine depuis le sol**, et un second tir sur l'emblème le ramène jusqu'à vous."
+    },
+    "kokiri-bean-01": {
+      "name": "Terre meuble derrière le magasin",
+      "desc": "L'un des Haricots Magiques achetés au vendeur de haricots de la Rivière Zora va ici, dans la terre meuble juste à côté du Magasin Kokiri, et il vaut mieux le planter enfant pour qu'il soit prêt à votre retour.\n\nÀ l'âge adulte, la feuille de la plante **vous dépose sur une petite corniche avec un anneau de Rubis verts** autour d'un Rubis rouge. Ce même carré abrite aussi la Skulltula aux insectes : enfant, vous pouvez donc faire d'une pierre deux coups.",
+      "hint": "Plantez-le enfant et utilisez-le adulte."
+    },
+    "perdido-heart-01": {
+      "name": "Chant de Saria pour le Skull Kid",
+      "desc": "Dès que vous entrez dans les Bois Perdus depuis la Forêt Kokiri, le premier chemin à gauche mène à un Skull Kid jouant de la flûte sur une haute souche, qui disparaît si vous vous approchez simplement de lui.\n\nMontez donc **sur la souche basse devant lui** et jouez le Chant de Saria à l'Ocarina : le Skull Kid deviendra votre ami et vous offrira un Quart de Cœur."
+    },
+    "perdido-heart-02": {
+      "name": "Jeu de mémoire à l'Ocarina",
+      "desc": "La zone de la cible du Lance-Pierre, premier chemin à droite en entrant depuis la Forêt Kokiri, cache un jeu de mémoire avec deux Skull Kids. Descendez les marches devant vous jusqu'à l'arbre à cible et **passez à sa droite pour monter sur la petite souche**.\n\nVous devez ensuite répéter à l'Ocarina ce qu'ils jouent, en trois manches de cinq, six puis huit notes. Si vous manquez une note, la manche recommence avec une autre mélodie, et les récompenses augmentent : des Rubis pour les deux premières manches, et le Quart de Cœur à la troisième."
+    },
+    "perdido-gs-01": {
+      "name": "Insectes dans la terre meuble près du pont",
+      "desc": "Après le Skull Kid joueur de flûte (premier chemin à gauche depuis la Forêt Kokiri), tournez encore à gauche pour atteindre la zone du pont vers la Plaine d'Hyrule. Vous la reconnaîtrez à la Pierre à Potins et à la Peste Mojo marchande au fond qui vend le plus grand sac de Bâtons Mojo.\n\nLa terre meuble se trouve juste au bord du chemin en arrivant : **versez-y un flacon d'insectes** et, lorsque la Skulltula d'Or sort, achevez-la à l'épée et ramassez l'Emblème de Skulltula d'Or."
+    },
+    "perdido-gs-02": {
+      "name": "Insectes dans la terre meuble de la clairière à l'arbre solitaire",
+      "desc": "Pour atteindre ce carré, suivez l'itinéraire droite, gauche, droite, gauche dans les Bois Perdus puis, au lieu de partir vers le Bosquet Sacré, tournez une fois de plus à gauche. C'est la clairière avec l'arbre solitaire, deux Pestes Mojo marchandes et un trou dans l'herbe.\n\nUne fois sur place, **déposez les insectes sur la terre meuble à droite, près de l'une des Pestes Mojo**, et quand la Skulltula d'Or apparaît, éliminez-la à l'épée et ramassez l'Emblème de Skulltula d'Or."
+    },
+    "perdido-gs-03": {
+      "name": "Corniche près de la Scène Sylvestre",
+      "desc": "Atteindre la haute corniche où se tient cette Skulltula d'Or demande un peu de préparation enfant, car le seul moyen d'y monter est la plante de la clairière à l'arbre solitaire. Pour y accéder, tournez droite, gauche, droite, gauche puis gauche dans les Bois Perdus, et plantez le haricot dans la terre meuble à droite, près d'une Peste Mojo marchande.\n\nDe retour à l'âge adulte et de nuit, **montez sur la plante jusqu'à la corniche** et éliminez la Skulltula à l'épée."
+    },
+    "perdido-bean-01": {
+      "name": "Terre meuble près du pont",
+      "desc": "En tournant deux fois à gauche depuis l'entrée des Bois Perdus, vous arrivez à la zone du pont vers la Plaine d'Hyrule, dont la terre meuble est idéale pour planter un Haricot Magique enfant.\n\nÀ votre retour adulte, **laissez la plante vous porter jusqu'au pont** entre la Forêt Kokiri et la Plaine d'Hyrule et sautez dessus : c'est un raccourci très pratique durant la quête d'échanges, lorsque le Champignon Suspect expire au bout de trois minutes.",
+      "hint": "Plantez-le enfant et utilisez-le adulte."
+    },
+    "perdido-bean-02": {
+      "name": "Terre meuble près des deux Pestes Mojo",
+      "desc": "Deux Pestes Mojo marchandes et un arbre solitaire se trouvent dans la clairière des Bois Perdus accessible en tournant droite, gauche, droite, gauche puis gauche depuis l'entrée, avec un carré de terre meuble pour planter un Haricot Magique enfant. Il est à droite, derrière l'une des Pestes Mojo, et des insectes en feront aussi sortir une Skulltula d'Or.\n\nÀ l'âge adulte, **montez sur la plante jusqu'à la haute corniche de la clairière**, qui abrite une autre Skulltula d'Or de nuit.",
+      "hint": "Plantez-le enfant et utilisez-le adulte."
+    },
+    "prado-gs-01": {
+      "name": "Mur de droite avant l'escalier",
+      "desc": "Le labyrinthe du Bosquet Sacré cache cette Skulltula d'Or, qui n'apparaît toutefois qu'à l'âge adulte. Frayez-vous un chemin en esquivant les Moblins et, à mi-parcours, regardez le mur sur la droite.\n\n**Touchez la Skulltula avec le Grappin** et tirez à nouveau pour attirer l'Emblème de Skulltula d'Or."
+    },
+    "llanura-heart-01": {
+      "name": "Peste Mojo marchande près des douves",
+      "desc": "Sortez du Bourg d'Hyrule par le pont-levis et longez le mur vers l'est au bord des douves. Près d'un arbre, vous verrez un trou à ouvrir avec une Bombe ou la Masse des Titans : laissez-vous tomber dedans et parlez à la Peste Mojo marchande à l'intérieur.\n\nElle ne vend qu'à ceux qui connaissent le mot de passe. Pour l'apprendre, allez près de l'arbre voisin avec Link adulte et lisez la Pensée de Fée. Revenez ensuite enfant, parlez à la Peste Mojo et **choisissez « Vends-moi quelque chose ! »** : elle vous proposera le Quart de Cœur pour 100 Rubis.\n\nAchetez-le enfant, car à l'âge adulte elle l'a déjà vendu au Link du passé.",
+      "hint": "Il coûte 100 Rubis."
+    },
+    "llanura-heart-02": {
+      "name": "Paradoxe du coffre du passé",
+      "desc": "À l'extrémité ouest de la Plaine d'Hyrule, près de l'entrée de la Vallée Gerudo, le sol devient rougeâtre. Descendez la pente dans un renfoncement sous un surplomb rocheux et cherchez le coffre au fond.\n\nIl faut venir enfant : à l'âge adulte, le coffre est déjà ouvert et vide, et une Pensée de Fée explique qu'il n'a jamais été verrouillé. **Ouvrez le coffre enfant** et le Quart de Cœur est à vous.",
+      "hint": "Lisez la Pensée de Fée adulte pour savoir pourquoi il est vide."
+    },
+    "llanura-gs-01": {
+      "name": "Pin solitaire à l'est",
+      "desc": "À l'est de la Plaine d'Hyrule, entre la Rivière Zora et la Forêt Kokiri, un pin solitaire se dresse au sommet d'une butte près d'un ruisseau. Une Skulltula d'Or s'y cache.\n\n**Faites une roulade contre le tronc** pour la faire tomber au sol, achevez-la à l'épée et ramassez l'Emblème de Skulltula d'Or.",
+      "hint": "Il se trouve au sommet d'une butte, près d'un ruisseau."
+    },
+    "llanura-gs-02": {
+      "name": "Grotte du cercle de pierres près du ranch",
+      "desc": "Dans le bosquet au sud-ouest du Ranch Lon Lon, près de la sortie vers le Lac Hylia, un cercle de pierres au sol recouvre une grotte. Ouvrez-la avec **une Bombe ou un coup de Masse des Titans sur le cercle** et descendez dans le trou.\n\nDès votre entrée, une Grande Skulltula tombe du plafond : éliminez-la à l'épée. La Skulltula d'Or est sur le mur ; atteignez-la avec le Grappin ou le Boomerang, qui ramènent aussi l'Emblème de Skulltula d'Or jusqu'à vous."
+    },
+    "lonlon-heart-01": {
+      "name": "Tour de pierre au fond",
+      "desc": "Au fond du Ranch Lon Lon, juste derrière l'enclos des chevaux, se dresse une tour de pierre faisant office de silo. Dans l'un de ses coins, des caisses masquent une ouverture : **poussez les caisses et rampez dans l'ouverture** jusqu'au bout, où vous attend le Quart de Cœur."
+    },
+    "lonlon-gs-01": {
+      "name": "Arbre sur le chemin de l'enclos",
+      "desc": "Dès votre entrée au Ranch Lon Lon, dans la cour latérale sur la gauche, un arbre abrite une Skulltula d'Or : **faites une roulade contre le tronc pour la faire tomber**, éliminez-la et ramassez l'Emblème de Skulltula d'Or."
+    },
+    "lonlon-gs-02": {
+      "name": "Caisse dans la grotte au sud du ranch",
+      "desc": "Pour que cette Skulltula d'Or apparaisse à l'âge adulte, Link enfant doit lire la Pensée de Fée dans la grotte souterraine au sud-est du Ranch Lon Lon, près de l'étang, et vaincre la Skulltula ordinaire.\n\nUne fois cela fait, revenez adulte. Au fond, contre le mur, se trouve une caisse en bois. **Brisez-la en faisant une roulade dedans** pour en faire sortir une Skulltula d'Or : éliminez-la à l'épée et ramassez l'Emblème de Skulltula d'Or. Pour l'anecdote, la Pensée de Fée aura changé.",
+      "hint": "Tuez la Skulltula dans le passé pour trouver la dorée dans le futur."
+    },
+    "lonlon-gs-03": {
+      "name": "Fenêtre de la maison",
+      "desc": "Si vous levez les yeux vers la maison de Talon la nuit, au Ranch Lon Lon près de l'arche d'entrée, vous verrez une Skulltula d'Or à la fenêtre de l'étage, trop haute pour votre épée.\n\n**Lancez-lui le Boomerang depuis le bas** : il l'élimine et vous rapporte l'Emblème de Skulltula d'Or du même coup. De jour, ce mur est vide."
+    },
+    "lonlon-gs-04": {
+      "name": "À l'intérieur de la tour de pierre",
+      "desc": "La tour de pierre au fond du Ranch Lon Lon, derrière l'enclos, renferme une Skulltula d'Or à l'intérieur la nuit. Entrez par la porte de la tour et levez les yeux : elle est haut sur le mur, au-dessus de la botte de foin suspendue sous la fenêtre.\n\nSeul le Boomerang peut l'atteindre : **lancez-le depuis le sol de la tour** pour éliminer la Skulltula et récupérer l'Emblème de Skulltula d'Or en un seul lancer. Le Lance-Pierre la tue, mais l'emblème reste bloqué là-haut."
+    },
+    "ciudadela-heart-01": {
+      "name": "Chasse au Trésor",
+      "desc": "La Chasse au Trésor se trouve à gauche de la place du Bourg d'Hyrule en entrant, dans une rue latérale. Elle n'ouvre que la nuit et coûte 10 Rubis la partie. Le gérant vous remet une clé : chacune des cinq salles contient deux coffres et un seul renferme la clé de la suivante ; choisissez le mauvais et la partie s'arrête.\n\nÉquipez le Monocle de Vérité depuis l'onglet Équipement pour voir le contenu de chaque coffre. **Terminez les cinq salles et ouvrez le grand coffre de la salle des prix** pour obtenir le Quart de Cœur.",
+      "hint": "Recommandé : Monocle de Vérité."
+    },
+    "ciudadela-heart-02": {
+      "name": "Le petit chien perdu",
+      "desc": "Richard est le petit chien blanc qui court la nuit dans l'une des ruelles du Bourg d'Hyrule, là où un homme est penché à la fenêtre de sa maison. Parlez à Richard pour qu'il vous suive.\n\nAvec Richard sur vos talons, rendez-vous à **l'entrée de la place en venant de la Plaine d'Hyrule**. Sa maîtresse vous offrira le Quart de Cœur.",
+      "hint": "Elle ne donne le quart de cœur que la première fois ; ensuite, des Rubis."
+    },
+    "ciudadela-heart-03": {
+      "name": "Bowling Teigneux",
+      "desc": "Le Bowling Teigneux se trouve du côté ouest de la place du Marché du Bourg d'Hyrule, et n'ouvre qu'après avoir vaincu le Roi Dodongo.\n\nParlez à l'hôtesse : avant de payer, elle vous annonce le prix en jeu, et chaque partie coûte 10 Rubis. Vous devez réussir trois paliers avec 10 Bombchus, en les lâchant derrière la ligne pour atteindre la cible au fond, malgré des obstacles comme une Cocotte.\n\nLa récompense change d'une partie à l'autre : **continuez de jouer jusqu'à ce qu'elle annonce le Quart de Cœur** et remportez cette partie.",
+      "hint": "10 Rubis la partie ; le prix est annoncé avant de payer."
+    },
+    "ciudadela-gs-01": {
+      "name": "Poste de garde",
+      "desc": "Près du pont-levis, à l'entrée du Bourg d'Hyrule, se trouve le poste de garde, un bâtiment rempli de pots avec une Skulltula d'Or cachée dans une caisse en bois.\n\nAllez jusqu'au mur du fond et **faites une roulade dans la caisse la plus à droite**, celle à droite du soldat lorsque vous lui faites face."
+    },
+    "castillo-gs-01": {
+      "name": "Arbre dans le jardin de haies",
+      "desc": "Vous ne pouvez explorer les abords du Château d'Hyrule qu'enfant. Montez le chemin vers le château et, sur le côté, entrez dans le jardin de haies et de fleurs devant vous. Traversez-le vers l'ouest jusqu'au coin le plus éloigné, près du mur du château, où se dresse un arbre solitaire.\n\n**Faites une roulade contre le tronc** pour faire tomber la Skulltula d'Or ; éliminez-la et ramassez l'emblème."
+    },
+    "castillo-gs-02": {
+      "name": "Grotte du Chant des Tempêtes",
+      "desc": "Pour éviter le garde à la porte du Château d'Hyrule, escaladez les plantes grimpantes et laissez-vous tomber dans les douves près du pont d'entrée. Nagez vers l'est sous le pont et sortez par les marches en pierre : juste là, près du mur extérieur, se trouve un arbre avec un cercle de terre à sa base.\n\n**Jouez le Chant des Tempêtes sur ce cercle** pour ouvrir un trou. La grotte comporte des murs fissurés à faire sauter aux Bombes : derrière l'un d'eux se cache la Skulltula d'Or. Le Boomerang l'élimine et vous rapporte l'emblème."
+    },
+    "castillo-fairy-01": {
+      "name": "Grande Fée : Attaque circulaire",
+      "desc": "À l'extrémité est des abords du Château d'Hyrule, en longeant le mur de droite, se trouve un cul-de-sac bloqué par un rocher au bout. Pour éviter que le garde ne vous arrête, escaladez les plantes grimpantes sur le mur.\n\nAu bout du chemin, **faites exploser le rocher avec une Bombe et rampez par l'ouverture** jusqu'à la Fontaine de la Grande Fée. Jouez la Berceuse de Zelda sur l'emblème de la Triforce et acceptez l'offrande de 50 Rubis : la Grande Fée renforcera votre Attaque circulaire avec une onde de choc magique.",
+      "hint": "Elle demande une offrande de 50 Rubis et renforce l'Attaque circulaire d'une onde de choc."
+    },
+    "kakariko-heart-01": {
+      "name": "Petit toit derrière la maison d'Impa",
+      "desc": "Ce quart de cœur repose bien en vue sur un petit toit de tuiles rouges derrière la maison d'Impa, adossé à la montagne. Depuis le toit bleu de la maison, **laissez-vous tomber sur le petit toit juste derrière** et ramassez-le. De là, vous pouvez descendre vers l'étable de la vache.\n\nEnfant, parlez à Kaepora Gaebora au sommet du Mont du Péril et le hibou vous déposera sur le toit d'Impa. À l'âge adulte, il vous faut le Grappin.",
+      "hint": "Adulte, utilisez le Grappin depuis le toit de la Maison des Skulltulas."
+    },
+    "kakariko-heart-02": {
+      "name": "Moulin",
+      "desc": "À l'intérieur du Moulin, au fond du village, le quart de cœur attend en hauteur, sur un meuble de la passerelle supérieure.\n\nAdulte, vous y accédez par la Tombe d'Igor, au Cimetière. Une fois sa course terminée, l'escalier de sortie est brisé : **tirez au Grappin sur la cible au-dessus de la porte** et suivez le couloir. Vous débouchez en haut du Moulin, près de la plateforme tournante ; montez sur le meuble contre le mur et prenez le quart de cœur.",
+      "hint": "Adulte, on y entre par la Tombe d'Igor."
+    },
+    "kakariko-heart-03": {
+      "name": "L'homme sur le toit",
+      "desc": "L'homme sur le toit est assis au sommet de **l'Apothicairerie, à côté de la tour de guet et en face du Moulin**, et il vous suffit de le rejoindre et de lui parler pour obtenir le Quart de Cœur.\n\nAdulte, le Grappin suffit : placez-vous sur la rambarde en face du Moulin et accrochez-vous au toit.",
+      "hint": "Adulte, il vous faut le Grappin."
+    },
+    "kakariko-gs-01": {
+      "name": "Maison en construction",
+      "desc": "Pendant que les charpentiers bâtissent la maison en construction, enfant et de nuit, la Skulltula d'Or est accrochée au mur de briques du chantier, au-dessus du sol. **Montez la rampe en planches jusqu'à l'échafaudage** et vous l'aurez juste devant vous, sur le mur.\n\nVotre épée suffit pour l'abattre, vous n'avez besoin de rien d'autre pour récupérer l'emblème."
+    },
+    "kakariko-gs-02": {
+      "name": "Arbre à l'entrée",
+      "desc": "Le grand pin près de l'entrée depuis la Plaine d'Hyrule, dans la partie basse du village, abrite la nuit une Skulltula d'Or qui tombe au sol enfant si vous **faites une roulade contre le tronc du pin**. Une fois à terre, achevez-la et ramassez l'emblème."
+    },
+    "kakariko-gs-03": {
+      "name": "Tour de guet",
+      "desc": "À mi-hauteur de l'échelle de la tour de guet, au centre du village, une Skulltula d'Or apparaît la nuit ; vous l'attaquez depuis le bas : **tirez-lui dessus au Lance-Pierre ou envoyez un Bombchu grimper à l'échelle**.\n\nUne fois morte, montez à l'échelle : l'emblème reste accroché à mi-chemin, et vous pouvez le prendre sans grimper tout en haut.",
+      "hint": "Débarrassez-vous-en avant de monter à la tour vers l'homme sur le toit."
+    },
+    "kakariko-gs-04": {
+      "name": "Maison près de la porte de la montagne",
+      "desc": "En montant vers la porte du Mont du Péril, dans la partie haute du village, vous verrez une maison juste à côté, après la tour de guet. Enfant et de nuit, **contournez-la par le sentier herbeux à l'arrière** et inspectez ses murs jusqu'à trouver la Skulltula d'Or. Elle est à hauteur d'homme, vous pouvez donc l'abattre à l'épée et prendre l'emblème sans aucun objet."
+    },
+    "kakariko-gs-05": {
+      "name": "Maison des Skulltulas",
+      "desc": "La Maison des Skulltulas, demeure de la famille maudite, est la première à droite en entrant depuis la Plaine d'Hyrule, avec des toiles d'araignée au-dessus de la porte. Enfant et de nuit, la Skulltula d'Or apparaît sur **la façade de la maison, à gauche des marches d'entrée**, au ras du sol ; de jour, on aperçoit déjà sa toile à cet endroit.\n\nS'il fait jour, jouez le Chant du Soleil pour faire venir la nuit. Votre épée en vient à bout en un instant, et il ne vous reste plus qu'à ramasser l'emblème."
+    },
+    "kakariko-gs-06": {
+      "name": "Au-dessus de la maison d'Impa",
+      "desc": "Vous devez revenir adulte et de nuit pour cette Skulltula d'Or, qui se trouve sur la paroi rocheuse juste à côté du toit bleu de la maison d'Impa, la grande maison au sud du village. Il vous faut le Grappin.\n\nContournez la maison par un côté jusqu'à la paroi rocheuse derrière, couverte de lierre, et **escaladez-le jusqu'au toit bleu**. De là-haut, vous verrez la Skulltula sur le rocher, près du toit : éliminez-la au Grappin, qui vous ramène aussi l'emblème."
+    },
+    "cementerio-heart-01": {
+      "name": "Excursion de fouille avec Igor",
+      "desc": "Enfant et de nuit, Igor, le fossoyeur, propose son « Excursion de fouille palpitante » au Cimetière. Si vous arrivez de jour, jouez le Chant du Soleil sur place : la nuit tombe et Igor sort aussitôt. Acceptez et restez sur la place centrale, car si vous vous éloignez, l'excursion prend fin.\n\nPlacez-vous près d'un monticule de terre et **demandez-lui de creuser : chaque essai coûte 10 Rubis**. Parfois, il touche quelque chose de dur et demande 5 Rubis de plus pour continuer, et il peut en sortir un caillou ou le quart de cœur, au hasard. Persévérez jusqu'à ce qu'il apparaisse. L'emplacement est totalement aléatoire.",
+      "hint": "10 Rubis par monticule ; parfois il demande 5 de plus pour continuer à creuser."
+    },
+    "cementerio-heart-02": {
+      "name": "Course contre Igor",
+      "desc": "La Tombe d'Igor est la pierre tombale fleurie d'où s'échappe de la fumée, dans l'enclos sur la gauche en haut de quelques marches. Adulte et de nuit, **tirez dessus pour ouvrir le trou et descendez dans les catacombes**. En bas, suivez son fantôme jusqu'au bout sans le perdre de vue ; la première course vous rapporte le Grappin.\n\nLe Quart de Cœur s'obtient à la seconde. Sortez au Grappin par la cible au-dessus de l'escalier brisé (vous ressortirez dans le Moulin de Cocorico), retournez au Cimetière, redescendez dans le trou qui reste ouvert et atteignez l'arrivée en une minute ou moins.",
+      "hint": "La première course vous donne le Grappin ; le quart de cœur vient à la deuxième."
+    },
+    "cementerio-heart-03": {
+      "name": "Tombe près du Tombeau de la Famille Royale",
+      "desc": "Près du Tombeau de la Famille Royale, dans la partie haute du Cimetière : placez-vous dos au tombeau, face à la sortie, et parmi les pierres tombales sur votre gauche c'est **la première en partant de la gauche**. Adulte, elle s'ouvre toujours ; enfant, uniquement la nuit (de jour, le garçon qui surveille les tombes vous en empêche ; le Chant du Soleil vous évite d'attendre).\n\nTirez la pierre tombale et descendez dans le trou : le coffre contenant le Quart de Cœur est au fond de la crypte, sans aucun ennemi pour le garder.",
+      "hint": "Enfant, la tombe ne s'ouvre que la nuit."
+    },
+    "cementerio-heart-04": {
+      "name": "Corniche sur le mur",
+      "desc": "En hauteur sur le mur de gauche du Cimetière, au-dessus de la Tombe d'Igor et de la terre meuble, se trouve une corniche avec le Quart de Cœur bien en vue sur un pilier de pierre, impossible à atteindre d'en bas sans aide.\n\nSi vous plantez un Haricot Magique dans cette terre meuble enfant, à votre retour adulte **montez sur la feuille et laissez-la vous porter jusqu'à la corniche**. Une fois là-haut, prenez le quart de cœur sur le pilier.",
+      "hint": "Le quart de cœur est bien en vue sur un pilier contre le mur."
+    },
+    "cementerio-gs-01": {
+      "name": "Mur du cimetière",
+      "desc": "La nuit, dans l'étroit passage entre la Cabane d'Igor et le mur de pierre à grille en fer, près de l'entrée du Cimetière, une Skulltula d'Or sort en hauteur. De jour, vous verrez une toile dorée à cet endroit indiquant où elle apparaîtra.\n\n**Éliminez-la au Grappin ou au Boomerang et ramenez l'emblème avec.**"
+    },
+    "cementerio-gs-02": {
+      "name": "Insectes dans la terre meuble",
+      "desc": "Avec un flacon d'Insectes et en tant qu'enfant, à toute heure de la journée, allez au carré de terre meuble dans le coin gauche du Cimetière, au fond, près du mur et de la Tombe d'Igor, et **relâchez-les dessus pour faire sortir une Skulltula d'Or**. Tuez-la dès qu'elle jaillit et ramassez l'emblème.",
+      "hint": "C'est le même carré où l'on plante le Haricot Magique."
+    },
+    "cementerio-bean-01": {
+      "name": "Terre meuble du cimetière",
+      "desc": "Sous la haute corniche du mur gauche du Cimetière, à côté de la Tombe d'Igor, se trouve la terre meuble où nous vous conseillons de **planter un Haricot Magique enfant**. À votre retour adulte, la feuille vous portera jusqu'à la corniche qui abrite le Quart de Cœur.",
+      "hint": "Plantez-le enfant et utilisez-le adulte."
+    },
+    "sendero-heart-01": {
+      "name": "Corniche au-dessus de la Caverne Dodongo",
+      "desc": "Au-dessus de l'entrée de la Caverne Dodongo se trouve la corniche abritant ce Quart de Cœur, bien en vue dans un recoin du rocher. Vous devez planter un Haricot Magique dans la terre meuble enfant.\n\nAdulte, montez sur la plante du haricot et sautez lorsqu'elle passe près de la corniche pour saisir le Quart de Cœur."
+    },
+    "sendero-gs-01": {
+      "name": "Insectes dans la terre meuble près de la caverne",
+      "desc": "La terre meuble pour cette Skulltula d'Or se trouve devant la Caverne Dodongo.\n\nUne fois l'entrée dégagée, **versez les insectes du flacon sur la terre meuble** et, dès que la Skulltula d'Or sort, éliminez-la à l'épée et ramassez l'emblème.",
+      "hint": "Vous pouvez planter un Haricot Magique dans ce même carré."
+    },
+    "sendero-gs-02": {
+      "name": "Mur fissuré près de Cocorico",
+      "desc": "En quittant le Village Cocorico vers la montagne, avant d'atteindre la Caverne Dodongo, un mur de rochers fissurés sur le côté droit du chemin détonne avec le reste : on entend la Skulltula derrière.\n\n**Ouvrez le mur avec une Bombe ou, à l'âge adulte, avec la Masse des Titans**, entrez dans l'alcôve et éliminez la Skulltula d'Or, posée sur le mur du fond à hauteur d'épée."
+    },
+    "sendero-gs-03": {
+      "name": "Au-dessus de la Caverne Dodongo",
+      "desc": "La corniche à rambarde d'où vous lancez, enfant, le Chou-Péteur sur la Caverne Dodongo, près de l'embranchement vers le Village Goron, comporte quelques rochers contre la paroi. Cette Skulltula d'Or apparaît dessous à votre retour adulte, de nuit.\n\n**Brisez les rochers avec la Masse des Titans ou une Bombe**, les seuls moyens de les détruire, puis éliminez la Skulltula et ramassez son emblème."
+    },
+    "sendero-gs-04": {
+      "name": "Sentier des chutes de pierres",
+      "desc": "Passé la Caverne Dodongo, le chemin grimpe vers la portion où pleuvent des rochers volcaniques et se termine au mur de filets menant au sommet. Cette Skulltula d'Or apparaît au pied de ce mur, adulte et de nuit.\n\nFace au mur, sur la droite en montant, près de l'arche de pierre, se trouve un tas de rochers que les Bombes ne peuvent briser : **frappez-le avec la Masse des Titans** et, une fois les rochers en morceaux, achevez la Skulltula et ramassez l'emblème."
+    },
+    "sendero-bean-01": {
+      "name": "Terre meuble à la Caverne Dodongo",
+      "desc": "Avant de planter un Haricot Magique ici, vous devez enfant dégager le rocher qui bloque la Caverne Dodongo, à l'aide du Chou-Péteur au-dessus et du Bracelet Goron. Plantez-le ensuite dans la terre meuble devant l'entrée.\n\nAdulte, la plante passe au-dessus de la corniche du Quart de Cœur et vous hisse jusqu'à la zone des chutes de pierres : **un raccourci qui évite le rocher bloquant le chemin**.",
+      "hint": "Plantez-le enfant et utilisez-le adulte."
+    },
+    "sendero-fairy-01": {
+      "name": "Grande Fée : magie",
+      "desc": "Tout en haut, au sommet du Mont du Péril, Kaepora Gaebora attend perché près de l'entrée du Cratère. **Le mur de rochers fissurés à sa gauche peut être démoli avec une Bombe** ou, adulte, avec la Masse des Titans, et la fontaine se trouve derrière.\n\nÀ l'intérieur, jouez la Berceuse de Zelda sur l'emblème de la Triforce. La Grande Fée vous demandera une offrande de 25 Rubis : acceptez, et elle vous remettra la Jauge de Magie ainsi que le Feu de Din. Si vous montez enfant, emportez le Bouclier Hylien pour la zone des chutes de pierres.",
+      "hint": "Elle demande une offrande de 25 Rubis. Récompense : Jauge de Magie et Feu de Din."
+    },
+    "goron-heart-01": {
+      "name": "Vase tournant",
+      "desc": "Le grand vase aux visages au milieu de l'étage inférieur du Village Goron ne se met à tourner que lorsque, enfant, **vous allumez les torches qui l'entourent**. Le Feu de Din fonctionne, ou un Bâton Mojo enflammé, par exemple dans la salle de Darunia, qui s'ouvre en jouant la Berceuse de Zelda devant sa porte. Elles restent allumées même si vous revenez plus tard.\n\nMontez ensuite à l'étage au-dessus, avancez sur la planche en bois qui surplombe le vase et lâchez une Bombe dedans, ou lancez-y un Chou-Péteur avec le Bracelet Goron. Il laissera tomber le quart de cœur au sol ainsi que 10 Rubis.",
+      "hint": "S'il s'arrête sur un autre visage, il donne d'autres prix : réessayez jusqu'à l'obtenir."
+    },
+    "goron-gs-01": {
+      "name": "Labyrinthe de rochers",
+      "desc": "La salle du labyrinthe de rochers se trouve à l'étage supérieur du Village Goron, celui de l'entrée depuis le Chemin du Péril, et enfant vous la traversez en frayant un passage à coups de Bombes.\n\nTout au fond, à côté de deux coffres, une caisse en bois renferme la Skulltula d'Or : **faites une roulade dans la caisse pour la briser**, éliminez la Skulltula à l'épée et ramassez l'emblème."
+    },
+    "goron-gs-02": {
+      "name": "Surplomb rocheux au plafond",
+      "desc": "Adulte, dans le Village Goron, un étage au-dessus du niveau le plus bas, faites le tour de la plateforme dans le sens inverse des aiguilles d'une montre. Avant d'entrer dans le tunnel, levez les yeux : la Skulltula d'Or est sous le surplomb rocheux au plafond.\n\n**Décrochez-la au Grappin**, qui vous ramènera l'emblème par la même occasion."
+    },
+    "crater-heart-01": {
+      "name": "Trou dans la paroi du Cratère",
+      "desc": "En entrant dans le Cratère depuis le sommet du Mont du Péril, la corniche d'entrée domine une grande paroi qui descend vers la plateforme du Boléro du Feu. Des filets d'escalade pendent du bord de cette corniche : **descendez-les** et, un peu plus bas, vous trouverez le quart de cœur dans un trou du mur, entre deux filets.\n\nEnfant, la chaleur vous consumera vite. Adulte, avec la Tunique Goron, rien ne presse.",
+      "hint": "Enfant, un compte à rebours de chaleur s'enclenche : faites vite."
+    },
+    "crater-heart-02": {
+      "name": "Rocher en dôme dans le Cratère",
+      "desc": "Enfant, **jouez le Boléro du Feu à l'ocarina** et, une fois dans le Cratère, plantez un haricot dans la terre meuble à côté de la plateforme.\n\nRevenez adulte en portant la Tunique Goron, **montez sur la feuille et sautez lorsqu'elle passe au-dessus de l'un des hauts rochers** : le quart de cœur vous attend au sommet.",
+      "hint": "Vous devez connaître le Boléro du Feu."
+    },
+    "crater-gs-01": {
+      "name": "Caisse à l'entrée du sommet",
+      "desc": "Si vous entrez dans le Cratère enfant depuis le sommet du Mont du Péril, plutôt que depuis le Village Goron, à quelques pas de l'entrée sur la gauche, vous verrez deux caisses en bois contre la paroi rocheuse, à côté d'un pot. La Skulltula d'Or est dans celle à côté du pot.\n\n**Brisez les caisses en faisant une roulade dedans**, éliminez la Skulltula et ramassez l'emblème.",
+      "hint": "Utilisez l'Amour de Nayru si vous ne supportez pas la chaleur."
+    },
+    "crater-gs-02": {
+      "name": "Insectes dans la terre meuble près de la plateforme du Boléro",
+      "desc": "Cette Skulltula d'Or vous oblige à voyager dans le temps, car elle ne sort qu'enfant et le Boléro du Feu s'apprend adulte. Enfant, jouer ce chant est le seul moyen d'atteindre sa terre meuble, à quelques pas de la plateforme du Boléro.\n\nVous apparaissez sur la plateforme : **relâchez les insectes sur la terre meuble juste à côté**, éliminez la Skulltula et ramassez l'emblème sans traîner, car la chaleur continue de drainer vos cœurs.",
+      "hint": "Enfant, la chaleur draine vos cœurs petit à petit : ne traînez pas."
+    },
+    "crater-bean-01": {
+      "name": "Terre meuble dans le Cratère",
+      "desc": "À côté de la plateforme du Boléro du Feu, au centre du Cratère, se trouve un carré de terre meuble qu'enfant vous ne pouvez atteindre qu'en jouant ce chant. **Plantez le Haricot Magique et repartez aussitôt**, avec un autre chant de téléportation par exemple, car la chaleur vous impose un compte à rebours.\n\nÀ votre retour adulte, la plante passe au-dessus du rocher en dôme d'un Quart de Cœur, puis près de la paroi escaladable de l'autre. Elle vous monte également jusqu'à la zone d'entrée du sommet.",
+      "hint": "Plantez-le enfant et utilisez-le adulte."
+    },
+    "crater-fairy-01": {
+      "name": "Grande Fée : double magie",
+      "desc": "Depuis la salle de Darunia au Village Goron, adulte, vous descendez vers la partie inférieure du Cratère. Si vous venez de vaincre Volcania, le téléporteur bleu vous dépose sur la plateforme centrale : traversez le pont de chaînes vers l'ouest et longez cette rive. Deux tas de rochers bloquent un passage dans la paroi : **détruisez-les avec la Masse des Titans**.\n\nDans la fontaine, placez-vous sur l'emblème et jouez la Berceuse de Zelda. La Grande Fée de la Sagesse vous demandera une offrande de 200 Rubis pour la fontaine : acceptez, et elle doublera votre Jauge de Magie.",
+      "hint": "Elle demande une offrande de 200 Rubis. Récompense : double votre Jauge de Magie."
+    },
+    "rio-heart-01": {
+      "name": "Pilier au milieu de la rivière",
+      "desc": "Le quart de cœur se trouve sur une haute plateforme entourée d'eau, au milieu de la Rivière Zora, et enfant vous l'atteignez en planant avec une Cocotte depuis la zone boisée voisine. Vous montez dans cette zone par des plantes grimpantes, sans Cocotte dans les bras, mais là-haut, parmi les fougères à gauche, un trou mène à une grotte contenant un coffre et une Cocotte. **Sortez de la grotte par la fleur avec la Cocotte dans les bras, courez jusqu'au bord et sautez pour planer vers la plateforme.**\n\nAdulte, vous y arrivez grâce à la plante du haricot ou avec les Bottes des Airs.",
+      "hint": "Adulte, avec le haricot planté ou les Bottes des Airs."
+    },
+    "rio-heart-02": {
+      "name": "Corniche près de la cascade",
+      "desc": "Au bout de la Rivière Zora, à côté de la cascade qui dissimule l'entrée du Domaine Zora, une plateforme isolée porte le quart de cœur.\n\nAttrapez la Cocotte au début de la rivière, près du vendeur de haricots, et remontez le cours d'eau avec elle. Arrivé près de la cascade, grimpez au point le plus haut, **sautez avec elle et planez jusqu'à la plateforme**.",
+      "hint": "Adulte, vous ne pouvez l'atteindre qu'avec les Bottes des Airs."
+    },
+    "rio-heart-03": {
+      "name": "Jeu des grenouilles",
+      "desc": "Les grenouilles de ce quart de cœur, les Cinq Grenouilles Ténors, sont posées sur des souches dans l'étang d'une grotte creusée dans la roche, à mi-chemin de la Rivière Zora. Allez-y enfant, parlez-leur et elles vous demanderont de leur jouer quelque chose à l'ocarina. Elles vous offrent des Rubis pour chaque nouveau chant :\n- Berceuse de Zelda\n- Chant d'Epona\n- Chant de Saria\n- Chant du Soleil\n- Chant du Temps\n\nUne fois tous joués, elles lancent leur jeu : un insecte apparaît au-dessus d'une grenouille et **vous jouez vite sa note pour qu'elle saute le manger**. Réussissez toute la séquence et le quart de cœur est à vous ; si vous ratez, vous pouvez recommencer.",
+      "hint": "Mémorisez quelle note joue chaque grenouille."
+    },
+    "rio-heart-04": {
+      "name": "Les grenouilles sous la pluie",
+      "desc": "À mi-chemin le long de la Rivière Zora, vous trouverez une souche avec cinq grenouilles dans une grotte. Vous devez jouer le **Chant des Tempêtes** à l'ocarina. Une fois joué, les grenouilles vous récompenseront d'un Quart de Cœur."
+    },
+    "rio-gs-01": {
+      "name": "Insectes dans la terre meuble près du vendeur de haricots",
+      "desc": "À côté du vendeur de haricots, au début de la Rivière Zora, un carré de terre meuble cache une Skulltula d'Or, et il vous faut un flacon d'insectes pour la faire sortir.\n\n**Videz le flacon d'insectes sur la terre meuble** : la Skulltula sortira de terre. Éliminez-la à l'épée et ramassez l'emblème."
+    },
+    "rio-gs-02": {
+      "name": "Paroi près de la cascade",
+      "desc": "Au bout de la Rivière Zora, près de la cascade, cette Skulltula d'Or ne sort que la nuit, enfant.\n\nDepuis la corniche herbeuse à côté de la cascade, descendez la paroi rocheuse jusqu'à la rive en contrebas, au bord de l'eau.\n\nLa Skulltula est sur la paroi du rocher bas de cette rive. Approchez-vous et attaquez à l'épée."
+    },
+    "rio-gs-03": {
+      "name": "Au-dessus des grottes en hauteur",
+      "desc": "Tout en haut de la paroi rocheuse au-dessus du plateau des grottes, au milieu de la Rivière Zora, une Skulltula d'Or sort la nuit, et le Grappin ne l'atteint que si vous montez sur le plateau lui-même.\n\nAdulte, grimpez au mur de lierre entre les rochers, près de l'eau. En haut, avancez jusqu'au bord et **tirez au Grappin vers le sommet de la paroi** pour l'éliminer et ramener l'emblème.",
+      "hint": "Depuis le sentier en bas, il vous faudrait le Super Grappin."
+    },
+    "rio-gs-04": {
+      "name": "Au-dessus du pont",
+      "desc": "Au-dessus du dernier pont de la Rivière Zora, dans la grotte menant à la cascade du Domaine Zora, se dresse une très haute paroi rocheuse où une Skulltula d'Or s'installe la nuit.\n\n**Touchez-la au Grappin depuis le pont même** et ramassez l'emblème."
+    },
+    "rio-bean-01": {
+      "name": "Terre meuble près du vendeur de haricots",
+      "desc": "Dès votre entrée dans la Rivière Zora, deux rochers fissurés bloquent le passage ; faites-les exploser avec une Bombe.\n\nJuste derrière, assis à côté d'une barrière, se tient le vendeur de haricots, et enfant il vaut la peine de lui en acheter plusieurs : le premier coûte 10 Rubis et chaque suivant augmente de 10. **Plantez-en un dans la terre meuble à côté de lui**, en l'utilisant depuis votre inventaire.",
+      "hint": "Plantez-le enfant et utilisez-le adulte."
+    },
+    "dominio-gs-01": {
+      "name": "Cascade gelée",
+      "desc": "Adulte, le Domaine Zora étant gelé, la Skulltula d'Or sort la nuit tout en haut de la cascade gelée, là où se trouvait le jeu de plongée enfant. Vous y accédez par le couloir à l'étage du Roi Zora, qui débouche sur une galerie en hauteur.\n\nPenchez-vous au bord et regardez sur votre gauche : elle se trouve sur une colonne couverte de plantes gelées, contre la paroi. **Atteignez-la au Grappin ou abattez-la d'une flèche** pour récupérer l'emblème."
+    },
+    "fuente-heart-01": {
+      "name": "Bloc de glace le plus éloigné",
+      "desc": "Ce quart de cœur repose sur le bloc de glace le plus éloigné de la Fontaine Zora gelée, à l'écart du chemin vers la Caverne Polaire. Adulte, vous entrez dans la fontaine par le passage derrière le trône gelé du Roi Zora.\n\n**Sautez de bloc en bloc jusqu'au tout dernier** : ce sont des blocs de glace glissants, jugez donc bien chaque saut. Si vous tombez à l'eau, nagez jusqu'au départ et remontez."
+    },
+    "fuente-heart-02": {
+      "name": "Fond de la fontaine",
+      "desc": "Ce Quart de Cœur attend au fond de la Fontaine Zora, au milieu d'un tas de Rubis verts. Adulte, il vous faut deux choses : la Tunique Zora, que le Roi Zora vous remet une fois libéré, pour respirer sous l'eau, et les Bottes de Plomb, pour couler.\n\nAvec la Tunique Zora équipée, entrez dans l'eau, **chaussez les Bottes de Plomb et coulez jusqu'au fond**, prenez le quart de cœur, puis retirez les bottes pour remonter à la surface."
+    },
+    "fuente-gs-01": {
+      "name": "Paroi au-dessus de l'arche immergée",
+      "desc": "Dès que vous entrez dans la Fontaine Zora depuis le Domaine Zora, longez la rive jusqu'à une arche en pierre en ruine, à moitié immergée et adossée à une paroi rocheuse couverte de lierre. Montez au sommet de l'arche : la nuit, une Skulltula d'Or apparaît sur cette paroi, et enfant vous pouvez l'atteindre avec le Boomerang.",
+      "hint": "Vous obtenez le Boomerang dans le Ventre de Jabu-Jabu."
+    },
+    "fuente-gs-02": {
+      "name": "Pin dans le coin sud-est",
+      "desc": "Dans le coin sud-est de la Fontaine Zora, celui avec les pins au pied de la falaise, à côté du mur qui cache la Fontaine de la Grande Fée, un arbre abrite une Skulltula d'Or enfant, à toute heure de la journée.\n\nPas besoin de nager : depuis la vasque d'offrande devant Jabu-Jabu, descendez sur la droite et suivez le sentier de terre le long de la rive. **Faites une roulade contre le pin** pour faire tomber la Skulltula, éliminez-la à l'épée et ramassez l'emblème."
+    },
+    "fuente-gs-03": {
+      "name": "Grotte derrière les blocs aux marques Zora",
+      "desc": "Adulte, rendez-vous tout au sud-est de la Fontaine Zora, où deux blocs de pierre noire ornés de marques Zora bouchent l'entrée d'une grotte. **Soulevez-les avec les Gantelets d'Argent** et entrez.\n\nÀ l'intérieur, des Skulltulas invisibles pendent au plafond ; esquivez-les, ou repérez-les avec le Monocle de Vérité. Au fond, escaladez le lierre pour déboucher sur une corniche extérieure.\n\nLa Skulltula d'Or ne **sort que la nuit**. Elle apparaît au-dessus de l'entrée d'une grotte sur la corniche ; vous pouvez l'abattre au Grappin et ramasser l'emblème.",
+      "hint": "À l'intérieur, quatre Skulltulas invisibles pendent au plafond."
+    },
+    "fuente-fairy-01": {
+      "name": "Grande Fée : Vent de Farore",
+      "desc": "Depuis la vasque d'offrande devant Jabu-Jabu, suivez à pied la rive en ruine sur la droite jusqu'au coin sud-est, celui avec les arbres au pied de la falaise. Là, la Fontaine de la Grande Fée se cache derrière une portion fissurée de la paroi rocheuse.\n\n**Posez une Bombe ou un Bombchu contre le mur fissuré** pour ouvrir le passage. À l'intérieur, jouez la Berceuse de Zelda sur l'emblème de la Triforce au sol. Avant de vous offrir le Vent de Farore, la Grande Fée demande une offrande de 100 Rubis, jetés dans la fontaine : pensez à les apporter.",
+      "hint": "Elle demande une offrande de 100 Rubis : pensez à les apporter."
+    },
+    "lago-heart-01": {
+      "name": "Plongée dans le laboratoire",
+      "desc": "À l'intérieur du Laboratoire du Lac, le bâtiment sur la rive, se trouve un bassin profond, et le Quart de Cœur est la récompense si vous plongez toucher le fond, ce qui n'est possible qu'avec l'Écaille d'Or, le prix du Bassin de Pêche.\n\nPeu importe que vous veniez enfant ou adulte : sautez dans l'eau, **plongez jusqu'à toucher le fond du bassin**, et en ressortant, le scientifique vous remettra le quart de cœur.",
+      "hint": "L'Écaille d'Or est la récompense de pêche à l'âge adulte."
+    },
+    "lago-heart-02": {
+      "name": "Toit du laboratoire",
+      "desc": "Enfant, plantez un Haricot Magique dans la terre meuble à côté du Laboratoire du Lac Hylia, puis revenez adulte. Montez sur la feuille : elle survole le lac en boucle et vous dépose sur le balcon en bois de la tour du laboratoire.\n\n**Grimpez à l'échelle jusqu'à l'observatoire tout en haut**, où se trouve le Quart de Cœur.",
+      "hint": "Attention aux corbeaux sur le toit : ils peuvent vous faire tomber."
+    },
+    "lago-heart-03": {
+      "name": "Pêche enfant",
+      "desc": "Le Bassin de Pêche se trouve sur une petite île du Lac Hylia, et son gérant vous prête la canne pour 10 Rubis. Quand vous attrapez un poisson, gardez-le, puis une fois fini parlez au gérant pour lui dire que vous arrêtez : il mesurera votre plus belle prise et, **si elle dépasse 50 cm, il vous offrira le Quart de Cœur enfant**.\n\nLes **plus gros poissons** se trouvent généralement **au centre de l'étang**.",
+      "hint": "Chaque essai coûte 10 Rubis ; le prix est pour un poisson de plus de 50 cm."
+    },
+    "lago-gs-01": {
+      "name": "Insectes dans la terre meuble près du laboratoire",
+      "desc": "Contre le mur du Laboratoire du Lac, près de tonneaux et de sacs, se trouve un carré de terre meuble. Enfant, à toute heure de la journée, la Skulltula d'Or sort dès que vous **ouvrez un flacon d'Insectes au-dessus du carré de terre** : les insectes s'engouffrent dans le trou et elle jaillit du sol. Votre épée suffit pour l'éliminer et garder l'emblème."
+    },
+    "lago-gs-02": {
+      "name": "Mur du laboratoire",
+      "desc": "Un pont part de l'arrière du Laboratoire du Lac. Enfant, de nuit, dès que vous posez le pied dessus, regardez à droite : sur la tour ronde du bâtiment, près d'un tuyau, se trouve cette Skulltula d'Or, trop haute pour votre épée.\n\n**Depuis le pont même, lancez-lui le Boomerang** : il la décroche et vous ramène l'emblème."
+    },
+    "lago-gs-03": {
+      "name": "Grotte sur la rive ouest",
+      "desc": "Enfant, longez la rive ouest du Lac Hylia vers le sud jusqu'au bout, où un recoin dans la roche renferme des pots, un tonneau et une Pensée de Fée sur le mur. De là, entrez dans l'eau et nagez jusqu'à la rive voisine : dans la paroi rocheuse, vous verrez une ouverture basse avec un linteau en pierre.\n\n**Rampez par cette ouverture** pour déboucher dans une petite grotte sombre. La Skulltula d'Or est sur le mur d'en face ; éliminez-la à l'épée et ramassez l'emblème.",
+      "hint": "Rampez dans le trou pour trouver la Skulltula d'Or."
+    },
+    "lago-gs-04": {
+      "name": "Caisse au fond du bassin du laboratoire",
+      "desc": "Le bassin du Laboratoire du Lac cache au fond une caisse en bois renfermant une Skulltula d'Or. Pour l'atteindre adulte, chaussez les Bottes de Plomb et plongez dans l'eau.\n\nUne fois au fond, **faites une roulade dans la caisse pour la briser**, achevez la Skulltula et récupérez l'emblème au Grappin."
+    },
+    "lago-gs-05": {
+      "name": "Arbre sur la grande île",
+      "desc": "Sur la plus grande île du lac, celle avec la dalle de la Sérénade de l'Eau, se dresse un arbre immense à la cime creuse. Adulte, **visez le sommet de l'arbre avec le Super Grappin pour vous hisser** jusqu'à la cime ; le Grappin simple est trop court.\n\nLa Skulltula d'Or ne sort que la nuit, à l'intérieur de la cime : s'il fait jour, jouez le Chant du Soleil sur place et elle apparaîtra. Éliminez-la à l'épée et ramassez l'emblème."
+    },
+    "lago-bean-01": {
+      "name": "Terre meuble près du laboratoire",
+      "desc": "Enfant, plantez un Haricot Magique dans le carré de terre meuble contre le mur du Laboratoire du Lac, le même que celui de la Skulltula d'Or aux Insectes. À votre retour adulte, une plante en forme d'anneau de feuilles colorées aura poussé.\n\n**Montez sur les feuilles et elles vous feront voler** au-dessus du lac jusqu'au toit du laboratoire.",
+      "hint": "Plantez-le enfant et utilisez-le adulte."
+    },
+    "valle-heart-01": {
+      "name": "Derrière la cascade",
+      "desc": "Derrière la grande cascade de la Vallée Gerudo, sur la berge au fond du canyon, se trouve une petite salle creusée dans la roche, au-dessus de l'eau. Pour y accéder, descendez au recoin de la vache au pied de la cascade, en planant avec la Cocotte ou en sautant dans la rivière pour nager jusqu'à la rive.\n\nDe là, longez la berge vers la cascade, passez la Pierre à Potins et sautez sur les rochers mouillés derrière le rideau d'eau. **Montez ensuite les marches taillées dans la roche** jusqu'à la salle, où vous attend le Quart de Cœur.",
+      "hint": "Si le courant vous emporte, vous finirez au Lac Hylia."
+    },
+    "valle-heart-02": {
+      "name": "Coffre sur la corniche du canyon",
+      "desc": "Dans la Vallée Gerudo, passé le pont, du côté de la tente des charpentiers, avancez au bord du canyon près des tas de rochers sombres vers l'arche rocheuse. En contrebas, à mi-hauteur de la rivière, une étroite corniche porte un coffre.\n\nSi vous êtes enfant, **utilisez la Cocotte pour planer** jusqu'au coffre.\n\nSi vous êtes adulte, **laissez-vous tomber du bord sur la corniche** et ouvrez le coffre.\n\nPour repartir, suivez la corniche et sautez dans la rivière : le courant vous porte jusqu'au Lac Hylia.",
+      "hint": "Le coffre est à flanc de falaise."
+    },
+    "valle-gs-01": {
+      "name": "Goulotte d'eau près de la passerelle",
+      "desc": "En entrant dans la Vallée Gerudo depuis la Plaine d'Hyrule, vous arrivez d'abord à une petite passerelle en bois au-dessus d'un bassin. La nuit, la Skulltula d'Or se trouve sous les planches, sur le mur de briques à côté du jet d'eau qui tombe dans le bassin.\n\nLaissez-vous tomber dans l'eau d'un côté de la passerelle, remontez sur la berge de pierre en dessous et **lancez-lui le Boomerang** pour la décrocher et ramener l'emblème. Remontez ensuite sur la passerelle."
+    },
+    "valle-gs-02": {
+      "name": "Insectes dans la terre meuble près de la vache",
+      "desc": "Au pied de la grande cascade, sur le tronçon supérieur de la rivière, se trouve un recoin avec une vache, une Gerudo et un carré de terre meuble. Enfant, vous y arrivez en planant avec la Cocotte depuis le bord de la falaise, à gauche du grand pont (vous pouvez faire étape sur une corniche et sauter à nouveau), ou en sautant dans la rivière pour nager jusqu'à la berge.\n\nUne fois là, **relâchez les Insectes du flacon sur la terre meuble** et éliminez la Skulltula d'Or qui sort pour ramasser l'emblème."
+    },
+    "valle-gs-03": {
+      "name": "Derrière la tente",
+      "desc": "Passé le pont, du côté de la vallée donnant sur la Forteresse Gerudo, se trouve la tente des charpentiers. Pour traverser adulte, sauter le pont brisé avec Epona suffit ; le Super Grappin ou le pont réparé (si vous avez sauvé les charpentiers) fonctionnent aussi.\n\nLa nuit, contournez la tente vers les ruines derrière elle. La Skulltula d'Or grimpe sur le mur de pierre sculptée, à mi-hauteur : **abattez-la au Grappin, qui vous ramène l'emblème par la même occasion**."
+    },
+    "valle-gs-04": {
+      "name": "Arche rocheuse en face de la tente",
+      "desc": "Sur le chemin entre la tente des charpentiers et la Forteresse Gerudo se dresse une grande arche naturelle de roche rougeâtre, avec deux tas de rochers sombres à son pied. La nuit, une Skulltula d'Or grimpe sur la face intérieure de l'arche.\n\nPlacez-vous entre les tas de rochers, levez les yeux vers le haut de l'arche jusqu'à la repérer et **tirez au Grappin pour la faire tomber** : une fois tuée, le Grappin lui-même vous ramène l'emblème."
+    },
+    "valle-bean-01": {
+      "name": "Terre meuble dans le canyon Gerudo",
+      "desc": "Cette terre meuble partage son emplacement avec la vache et la Gerudo, au pied de la grande cascade, et c'est aussi le carré de la Skulltula d'Or aux Insectes. Enfant, planez avec la Cocotte depuis le grand pont ou nagez hors de la rivière, et plantez le Haricot Magique.\n\nAdulte, la feuille descend et remonte les cascades en passant près de deux Rubis rouges : **à mi-hauteur de la grande cascade, sautez à travers l'eau** jusque dans le recoin du Quart de Cœur.",
+      "hint": "Plantez-le enfant et utilisez-le adulte."
+    },
+    "fortaleza-heart-01": {
+      "name": "Tir à l'arc à cheval - 1 000 points",
+      "desc": "La Carte Gerudo obtenue en sauvant les quatre charpentiers ouvre le champ de tir à l'arc à cheval. Venez de jour, car la nuit la responsable ne vous laissera pas jouer, et amenez Epona. Chaque essai coûte 30 Rubis.\n\nEpona parcourt la piste d'elle-même et vous disposez de 20 flèches pour les cibles et les pots ; chaque pot ou centre de cible vaut 100 points. **Atteignez 1 000 points pour gagner le Quart de Cœur** ; avec 1 400, vous repartez aussi avec le Plus Grand Carquois.",
+      "hint": "Chaque partie coûte 30 Rubis ; à 1 400 points, le Plus Grand Carquois."
+    },
+    "fortaleza-gs-01": {
+      "name": "Cible du champ de tir",
+      "desc": "Avec la Carte Gerudo, vous pouvez entrer au champ de tir à l'arc à cheval, et la nuit une Skulltula d'Or se pose sur la grande cible ronde montée sur un poteau au bout du parcours. Parcourez toute la piste, à dos d'Epona ou à pied, jusqu'à la zone circulaire tout au fond.\n\n**Tirez-lui dessus au Grappin dès que vous avez une ligne de mire dégagée** pour tuer la Skulltula et ramener l'emblème ; si vous ne la voyez pas de face, contournez la cible."
+    },
+    "fortaleza-gs-02": {
+      "name": "Toit supérieur",
+      "desc": "La nuit, la Skulltula d'Or apparaît sur les toits latéraux de la Forteresse Gerudo, à quelques pas du coffre du Quart de Cœur : elle se trouve sur le mur de briques du bloc qui s'élève contre la falaise rocheuse.\n\nPour monter là-haut, adulte, passez par la porte du couloir de la cuisine, traversez-le sans vous faire repérer et empruntez la sortie en hauteur au fond, qui mène sur les toits. Placez-vous face à ce mur et **tirez-lui dessus au Grappin**, ou sautez vers elle à l'épée, pour ramasser l'emblème."
+    },
+    "desierto-gs-01": {
+      "name": "À l'intérieur du monument",
+      "desc": "Pour atteindre le monument de pierre dans le Désert Hanté, traversez la rivière de sable adulte en suivant les drapeaux. Au monument, entrez par l'ouverture entre les colonnes et descendez l'échelle vers la salle en contrebas.\n\nLa Skulltula d'Or est sur le mur du fond, au-dessus de l'autel : **montez sur l'autel et abattez-la à l'épée**. Si vous allumez les torches avec les Flèches de Feu ou le Feu de Din, un coffre contenant des Graines Mojo apparaît."
+    },
+    "coloso-heart-01": {
+      "name": "Arche de pierre près du temple",
+      "desc": "Près de l'entrée du Temple de l'Esprit se dresse une arche de pierre que seule la plante magique permet d'atteindre ; le travail commence donc enfant. Rendez-vous au Colosse du Désert avec le Requiem des Esprits et plantez un Haricot Magique dans la terre meuble à gauche de l'entrée du temple.\n\nLe trajet sur la feuille, adulte, passe au-dessus de deux plateformes rocheuses et se termine au-dessus de l'arche : **lorsque vous êtes à son aplomb, sautez et prenez le Quart de Cœur**."
+    },
+    "coloso-gs-01": {
+      "name": "Insectes dans la terre meuble près du temple",
+      "desc": "Enfant, jouez le Requiem des Esprits pour vous téléporter au Colosse du Désert et marchez depuis la dalle d'arrivée jusqu'aux marches du Temple de l'Esprit : le carré de terre meuble est juste à gauche de l'entrée, contre la paroi rocheuse.\n\nSur ce carré, qui est aussi celui où l'on plante le Haricot Magique, **relâchez les Insectes d'un flacon** et la Skulltula d'Or sortira aussitôt : éliminez-la à l'épée et ramassez l'emblème."
+    },
+    "coloso-gs-02": {
+      "name": "Sommet du grand rocher",
+      "desc": "Un grand rocher s'élève près de la Fontaine de la Grande Fée, et son sommet, creusé en forme de cratère, constitue la deuxième plateforme survolée par la plante du Haricot Magique planté devant le Temple de l'Esprit. Adulte, montez sur la feuille et, lorsqu'elle atteint ce rocher, **sautez au sommet et descendez dans le creux**.\n\nLa Skulltula d'Or n'y sort que la nuit : s'il fait jour, jouez le Chant du Soleil et elle apparaîtra. Tuez-la à l'épée et ramassez l'Emblème de Skulltula d'Or."
+    },
+    "coloso-gs-03": {
+      "name": "Paroi rocheuse à côté du temple",
+      "desc": "La nuit, cette Skulltula d'Or du Colosse du Désert apparaît en hauteur sur la paroi rocheuse à droite du Temple de l'Esprit.\n\nRepérez la Skulltula et **touchez-la avec le Grappin** pour la tuer et attirer l'Emblème de Skulltula d'Or."
+    },
+    "coloso-bean-01": {
+      "name": "Terre meuble près du temple",
+      "desc": "Vous devez venir ici enfant avec le Requiem des Esprits pour planter le Haricot Magique : la terre meuble est à gauche de l'entrée du Temple de l'Esprit, et y déposer des Insectes fait aussi sortir une Skulltula d'Or.\n\nAdulte, la plante **vous transporte au-dessus de deux plateformes rocheuses jusqu'à l'arche de pierre** du Quart de Cœur, et la deuxième plateforme abrite l'autre Skulltula d'Or, qui ne sort que la nuit.",
+      "hint": "Plantez-le enfant, utilisez-le adulte."
+    },
+    "coloso-fairy-01": {
+      "name": "Grande Fée : Amour de Nayru",
+      "desc": "Au nord de l'oasis, de l'autre côté de l'étang en regardant depuis le Temple de l'Esprit, une paroi rocheuse fissurée entre les palmiers cache la Fontaine de la Grande Fée. Vous pouvez l'ouvrir aussi bien enfant, en arrivant avec le Requiem des Esprits, qu'adulte, en traversant le Désert Hanté.\n\n**Faites sauter la roche fissurée avec une Bombe, un Bombchu ou la Masse des Titans**, entrez, placez-vous sur l'emblème de la Triforce et jouez la Berceuse de Zelda. La Grande Fée vous demandera une offrande de 300 Rubis pour la fontaine : acceptez, et elle vous remettra l'Amour de Nayru.",
+      "hint": "Elle demande une offrande de 300 Rubis."
+    },
+    "deku-gs-01": {
+      "name": "Salle de la Boussole",
+      "desc": "La salle de la Boussole, à l'étage supérieur de l'Arbre Mojo, cache cette Skulltula d'Or dans un recoin à l'écart. Marchez sur l'interrupteur pour faire monter les plateformes et, au lieu d'aller chercher la Boussole, sautez dans l'alcôve latérale sur la gauche.\n\n**Sur le mur du fond, derrière le petit coffre**, elle est à portée : tuez-la à l'épée et ramassez l'Emblème de Skulltula d'Or."
+    },
+    "deku-gs-02": {
+      "name": "Lierre du sous-sol",
+      "desc": "En vous laissant tomber sur la grande toile au milieu de la salle principale, vous la déchirez et atterrissez dans l'eau du sous-sol. Dans le bassin circulaire à droite, cette Skulltula d'Or attend sur le mur de lierre qui remonte vers la salle principale.\n\nVous devez l'attaquer à distance : **abattez-la au Lance-Pierre ou au Boomerang** depuis l'eau, puis grimpez au lierre jusqu'à l'Emblème de Skulltula d'Or.",
+      "hint": "Vous obtenez le Lance-Pierre dans ce donjon même."
+    },
+    "deku-gs-03": {
+      "name": "Grille du sous-sol",
+      "desc": "Au premier sous-sol de l'Arbre Mojo se trouve un canal d'eau qui se termine sur une grille à barreaux, et cette Skulltula d'Or s'y accroche.\n\nMontez sur la plateforme ronde dans l'eau, face à la grille, **abattez-la au Lance-Pierre** et ramassez l'Emblème de Skulltula d'Or."
+    },
+    "deku-gs-04": {
+      "name": "Salle du fond",
+      "desc": "Au premier sous-sol de l'Arbre Mojo, après la salle des Larves Gohma, allumez un Bâton Mojo à la torche et **brûlez la toile sur le mur du fond**. Derrière se trouve un tunnel débouchant sur un mur de lierre.\n\nMéfiez-vous de la Grande Skulltula qui le garde : attendez qu'elle se retourne et frappez-la dans le dos. **Abattez ensuite la Skulltula d'Or au Lance-Pierre** et grimpez au lierre jusqu'à l'Emblème de Skulltula d'Or.",
+      "hint": "Vous pouvez la récupérer dès votre première visite."
+    },
+    "deku-heart-01": {
+      "name": "Réceptacle de Cœur - Gohma",
+      "desc": "Après avoir vaincu les trois Pestes Mojo dans l'ordre 2, 3, 1, vous entrez dans la salle de la Reine Gohma au deuxième sous-sol : dès l'entrée, levez les yeux au plafond, car le boss se laisse tomber de là.\n\n**Lorsque son œil devient rouge, tirez-lui dessus au Lance-Pierre** ou lancez une Noix Mojo pour l'étourdir, puis frappez son œil à l'épée ou au Bâton Mojo. Si elle grimpe au plafond pondre des œufs, détruisez-les avant l'éclosion des larves. Une fois vaincue, elle laisse le Réceptacle de Cœur.",
+      "hint": "Un tir de Lance-Pierre dans l'œil la fait aussi tomber du plafond."
+    },
+    "dodongos-gs-01": {
+      "name": "Derrière le mur des Bébés Dodongos",
+      "desc": "Après avoir géré la Sentinelle, faites sauter le mur fissuré à droite du hall principal avec un Chou-Péteur pour entrer dans le couloir des Bébés Dodongos, qui présente un autre mur fissuré sur la droite dès le début.\n\nOuvrez-le avec une Bombe ou **attirez un Bébé Dodongo et tuez-le collé au mur**, car son explosion le brise aussi.\n\nÀ l'intérieur se trouvent des Keese et la Skulltula d'Or.",
+      "hint": "Elle partage le même couloir que celle sur la corniche de l'épouvantail."
+    },
+    "dodongos-gs-02": {
+      "name": "Lierre du grand escalier",
+      "desc": "Le grand escalier de l'aile gauche, dans la salle pleine de Choux-Péteurs, ne descend pas tant que vous n'avez pas posé le Chou-Péteur isolé dans le trou de la rangée pour tous les faire exploser en chaîne ; commencez donc par là.\n\nMontez l'escalier, grimpez à l'échelle et suivez la corniche jusqu'à la porte du fond. Avant de l'atteindre se trouve **un mur grillagé escaladable avec une Skulltula ordinaire et la dorée** : éliminez les deux au Lance-Pierre (adulte, à l'Arc des Fées ou au Grappin) et grimpez chercher l'Emblème de Skulltula d'Or."
+    },
+    "dodongos-gs-03": {
+      "name": "Pilier entouré de Dodongos",
+      "desc": "Au premier étage, en sortant de la salle du coffre du Sac de Bombes, faites sauter le mur fissuré avec une Bombe et avancez jusqu'à la corniche surplombant la salle centrale. Un autre mur fissuré s'y trouve près du crâne géant : **ouvrez-le avec une Bombe et entrez dans cette caverne pleine de Dodongos**.\n\nLa Skulltula d'Or est sur un pilier rocheux au milieu de la salle, entouré de Dodongos. Esquivez-les ou éliminez-les, et abattez la Skulltula à l'épée pour prendre l'Emblème de Skulltula d'Or.",
+      "hint": "Votre épée suffit : vous pouvez l'avoir dès votre première visite."
+    },
+    "dodongos-gs-04": {
+      "name": "Salle des Armos après la gueule",
+      "desc": "Depuis le pont du deuxième étage, lâchez une Bombe dans chaque œil du crâne géant du hall principal pour qu'il ouvre la gueule, et entrez par là. Traversez la salle des Keese de Feu et montez au couloir des blocs.\n\nPoussez les blocs pour monter sur les poutres en bois et laissez-vous tomber dans la zone clôturée au fond. Là, **ouvrez le mur fissuré aux Bombes** et suivez le tunnel. Un Armos attend, s'éveillant à votre approche, et la Skulltula d'Or est sur le mur derrière lui."
+    },
+    "dodongos-gs-05": {
+      "name": "Corniche de l'épouvantail",
+      "desc": "Adulte, après avoir déjà appris le Chant de l'Épouvantail, retournez dans le couloir des Bébés Dodongos, le même que celui de la Skulltula derrière le mur. Restez près du début du couloir, face à une haute corniche sur le mur.\n\nLà, **jouez le Chant de l'Épouvantail pour faire apparaître Pierre sur la corniche** : accrochez-vous à lui au Grappin, grimpez, tuez la Skulltula d'Or à l'épée et ramassez l'Emblème de Skulltula d'Or.",
+      "hint": "Avec le Super Grappin, vous n'avez pas besoin de l'épouvantail."
+    },
+    "dodongos-heart-01": {
+      "name": "Réceptacle de Cœur - Roi Dodongo",
+      "desc": "Vous n'avez pas besoin de la Clé du Boss pour entrer dans l'antre du Roi Dodongo : après la grotte des Armos, revenez dans la salle des blocs et poussez-en un sur le grand interrupteur au sol pour ouvrir la porte à barreaux. Dans la salle suivante, brisez les pots (qui contiennent des Bombes) et **faites sauter la dalle fissurée au sol pour descendre**.\n\nÀ chaque fois qu'il ouvre la gueule pour inspirer, lancez une Bombe dedans et, une fois étourdi, frappez-le à l'épée. S'il se roule en boule, écartez-vous ou parez au bouclier, et prenez le Réceptacle de Cœur avant d'entrer dans le téléporteur bleu.",
+      "hint": "Si vous manquez de Bombes, les Choux-Péteurs de la salle feront l'affaire."
+    },
+    "jabu-gs-01": {
+      "name": "Salle de l'interrupteur d'eau",
+      "desc": "Laissez-vous tomber dans le même trou que Ruto et suivez les salles du sous-sol jusqu'à celle avec le bassin et l'interrupteur d'eau. La Skulltula d'Or est sur le mur, dans un recoin en haut du lierre, au-dessus d'une corniche à trois pots.\n\n**Laissez Ruto assise sur l'interrupteur pour faire monter l'eau**. Nagez vers le lierre, grimpez sur la corniche et tuez la Skulltula à l'épée pour prendre l'Emblème de Skulltula d'Or.",
+      "hint": "Ruto doit rester sur l'interrupteur pour que l'eau monte."
+    },
+    "jabu-gs-02": {
+      "name": "Sous-sol de la grande salle, celle du bas",
+      "desc": "Avec le Boomerang en main, retournez dans la grande salle aux trous où vous avez rencontré Ruto. Une fois le tentacule vert vaincu, le pilier couvrant son trou, au fond à droite, se retire : **laissez-vous tomber dans ce trou**, en y jetant Ruto d'abord si vous la portez.\n\nDes méduses dérivent en bas, et deux Skulltulas d'Or se trouvent sur deux murs adjacents ; voici celle du bas. Comme vous ne pouvez pas les cibler, visez manuellement au Boomerang : il la décroche et vous rapporte l'Emblème de Skulltula d'Or au retour.",
+      "hint": "Elle se récupère en même temps que sa voisine au-dessus."
+    },
+    "jabu-gs-03": {
+      "name": "Sous-sol de la grande salle, celle du haut",
+      "desc": "Sous la grande salle aux trous, dans le sous-sol où vous tombez par le trou que bouchait le tentacule vert, deux Skulltulas d'Or se tiennent sur des murs adjacents, au nord et au nord-ouest. Nous vous conseillons de prendre les deux en même temps, car toutes deux demandent le Boomerang.\n\nCelle qui nous intéresse ici est celle du haut : **visez-la manuellement au Boomerang**, car on ne peut pas la verrouiller non plus, puis relancez-le une fois qu'elle est tombée pour ramener l'Emblème de Skulltula d'Or."
+    },
+    "jabu-gs-04": {
+      "name": "Lierre avant le boss",
+      "desc": "Vous atteignez la salle précédant Barinade depuis la deuxième salle du donjon, celle avec la fosse où l'on saute, en portant une caisse sur l'interrupteur qui ouvre la porte.\n\nÉliminez d'abord les méduses électriques au Boomerang et cherchez la **colonne de lierre qui grimpe vers l'interrupteur de cristal** : la Skulltula d'Or s'y trouve. Tuez-la au Boomerang et grimpez chercher l'Emblème de Skulltula d'Or."
+    },
+    "jabu-heart-01": {
+      "name": "Réceptacle de Cœur - Barinade",
+      "desc": "La porte de Barinade, au fond de la salle au lierre, est verrouillée par un interrupteur protégé par un cristal : grimpez au mur, verrouillez l'interrupteur et **lancez le Boomerang pour qu'il contourne l'obstacle par derrière**.\n\nUne fois à l'intérieur, coupez au Boomerang les trois tentacules qui le relient au plafond en esquivant les décharges électriques, et achevez les méduses qu'il libère. Étourdissez-le ensuite au Boomerang et frappez-le à l'épée, répétez avec la seconde vague de méduses, et n'entrez pas dans le téléporteur bleu sans avoir pris le Réceptacle de Cœur."
+    },
+    "bosque-gs-01": {
+      "name": "Lierre de l'entrée",
+      "desc": "La première salle du temple est à ciel ouvert, avec deux arbres et une paire de Wolfos qui vous attaquent, et la Skulltula d'Or attend en hauteur, près du coffre de la Petite Clé.\n\nÉliminez les Wolfos, **grimpez au lierre sur la droite jusqu'en haut de l'arbre** et, depuis la branche, tuez-la au Grappin (l'Arc des Fées ou une Bombe fonctionnent aussi) ; le Grappin lui-même vous rapporte l'Emblème de Skulltula d'Or."
+    },
+    "bosque-gs-02": {
+      "name": "Hall central",
+      "desc": "Après la cinématique des Sœurs Esprits, vous atteignez le hall central, la grande salle aux quatre torches et à l'ascenseur. Cette Skulltula d'Or attend à droite de l'escalier, près de la porte opposée.\n\n**Montez cet escalier et tournez à droite** pour la voir en hauteur sur le mur, tuez-la au Grappin et tirez à nouveau pour ramener l'Emblème de Skulltula d'Or.",
+      "hint": "Regardez bien derrière les murs."
+    },
+    "bosque-gs-03": {
+      "name": "Balcon au-dessus de la porte vitrée",
+      "desc": "Depuis le palier près de la porte vitrée, dans la zone où débouche le canal d'eau du Temple de la Forêt, vous devez jouer le Chant de l'Épouvantail : Pierre apparaît sur le petit balcon au-dessus de la porte. **Accrochez-vous à lui au Grappin**, tuez la Skulltula d'Or sur le sol du balcon et ramassez l'Emblème de Skulltula d'Or.",
+      "hint": "Pierre n'apparaît que si vous jouez le Chant de l'Épouvantail."
+    },
+    "bosque-gs-04": {
+      "name": "Corniche de la cour ouest",
+      "desc": "Une fois le couloir tordu redressé et la Clé du Boss en poche, laissez-vous tomber par le trou au sol de cette salle dans la salle d'eau en dessous, montez son escalier et sortez sur la passerelle en pierre surplombant la cour ouest.\n\nAu bout de la passerelle, juste avant la porte, **laissez-vous tomber sur la plateforme en pierre moussue à gauche**. Levez les yeux : la Skulltula d'Or est sur le mur, prête pour le Grappin, qui vous ramène aussi l'Emblème de Skulltula d'Or. Avec le Super Grappin, vous pouvez l'atteindre depuis le sol de la cour.",
+      "hint": "Regardez tout en haut du mur de pierre."
+    },
+    "bosque-gs-05": {
+      "name": "Salle tournante au sous-sol",
+      "desc": "Les quatre Sœurs Esprits vaincues, l'ascenseur du hall central vous descend au sous-sol, une salle aux murs rotatifs menant à la porte du boss.\n\nVous n'avez pas besoin de faire pivoter les murs pour cette Skulltula d'Or : **suivez le couloir circulaire dès la sortie de l'ascenseur et entrez dans l'alcôve ouverte avec les pots**. Une Grande Skulltula tombe du plafond ; achevez-la et regardez haut sur le mur, où attend la dorée. Abattez-la au Grappin, qui vous rapporte aussi l'Emblème de Skulltula d'Or."
+    },
+    "bosque-heart-01": {
+      "name": "Réceptacle de Cœur - Ganon Spectral",
+      "desc": "La Clé du Boss ouvre la porte au fond de la salle tournante du sous-sol ; montez l'escalier pour atteindre la salle des tableaux. Ganon Spectral galope dans un tableau et plusieurs cavaliers en sortent : le vrai fait entendre des bruits de sabots et ouvre un portail violet en atteignant le cadre.\n\nQuand le vrai sort, **tirez-lui une flèche ou touchez-le au Grappin** ; trois flèches le font tomber de cheval. Renvoyez-lui ensuite ses boules d'énergie à l'épée ou avec un Flacon vide jusqu'à ce qu'une le touche et qu'il s'effondre ; frappez-le et répétez jusqu'à le vaincre."
+    },
+    "fuego-gs-01": {
+      "name": "Salle du Bloc du Temps",
+      "desc": "En haut de l'escalier du hall principal, la porte de droite s'ouvre avec une Petite Clé et mène à la grande salle de lave. Sur son côté gauche, un Bloc du Temps trône en haut d'un mur : placez-vous sur la plateforme juste devant, **marchez sur la dalle gravée au sol et jouez le Chant du Temps**. Le bloc descendra et vous pourrez l'escalader jusqu'à la porte au-dessus.\n\nÀ l'intérieur, protégez-vous des dalles volantes avec votre bouclier et achevez le Like Like : s'il vous attrape, il vole votre Bouclier Hylien (vous le récupérez en le battant). Abattez ensuite la Skulltula d'Or du mur.",
+      "hint": "En entrant dans la grande salle de lave, surveillez votre gauche."
+    },
+    "fuego-gs-02": {
+      "name": "Mur dans le labyrinthe des rochers",
+      "desc": "Cette Skulltula d'Or se cache derrière un pan de mur dans le labyrinthe aux rochers roulants. Vous y accédez en grimpant à la grille métallique ; de là, longez le mur extérieur en esquivant les rochers jusqu'à atteindre une section fissurée au bout d'un passage, tout près d'une cellule Goron.\n\nCette section est bien visible, inutile de tâtonner : **posez une Bombe ou un Bombchu contre elle** et, dans le tunnel qui s'ouvre derrière, abattez la Skulltula d'Or. Profitez-en pour libérer le Goron dans la cellule voisine."
+    },
+    "fuego-gs-03": {
+      "name": "Grille derrière l'Épouvantail",
+      "desc": "En quittant la salle où un mur de feu vous poursuit, la porte du haut vous ramène au labyrinthe des rochers, cette fois par le dessus. Placez-vous sur la plateforme juste devant la porte et **jouez le Chant de l'Épouvantail pour faire apparaître Pierre sur la plateforme en hauteur**.\n\nAccrochez-vous à lui au Grappin et, de là, tirez sur la cible voisine, sur une plateforme qui monte toute seule comme un ascenseur. Passez la porte et grimpez aux grilles : dès que vous atteignez le sommet, la Skulltula d'Or attend sur le mur et vous la décrochez au Grappin.",
+      "hint": "Le Chant de l'Épouvantail se compose enfant puis adulte au Lac Hylia."
+    },
+    "fuego-gs-04": {
+      "name": "Salle octogonale tout en haut",
+      "desc": "Grimpez tout en haut de la grille atteinte grâce à l'épouvantail, celle de l'autre Skulltula d'Or de cette zone, et passez la porte au sommet. Elle ouvre sur une grande salle octogonale remplie de lave, avec une plateforme à trois coffres cerclée de flammes.\n\nRegardez simplement à droite en entrant pour la trouver : **elle est sur le mur, à quelques pas de la porte**, près de la lave. Tuez-la au Grappin et ramassez l'emblème.",
+      "hint": "Juste à côté de celle sur la grille."
+    },
+    "fuego-gs-05": {
+      "name": "Derrière la statue du hall d'entrée",
+      "desc": "Gardez celle-ci pour la fin, une fois la Masse des Titans et la dernière Petite Clé en poche (celle du Goron dans la salle du Bloc du Temps après la masse). Ce Goron vous révèle une porte secrète derrière la statue de pierre à trois blocs de l'entrée : du côté droit du hall d'entrée, **fracassez la statue avec la masse** et ouvrez la porte avec la clé.\n\nDans la première salle, tuez les Limaces Torches pour ouvrir la suivante. Dans la seconde, parez les dalles volantes, vainquez le Like Like et brisez à la masse le tas de rochers qui cache la Skulltula d'Or.",
+      "hint": "Fracassez la statue du hall d'entrée et le tas de rochers avec la masse."
+    },
+    "fuego-heart-01": {
+      "name": "Réceptacle de Cœur - Volcania",
+      "desc": "Volcania sort la tête des trous de la plateforme : dès qu'il apparaît, **frappez-le avec la Masse des Titans et enchaînez à l'épée ou à la masse** tant qu'il est étourdi. Lorsqu'il s'envole, esquivez ses flammes et les chutes de pierres en surveillant leurs ombres.\n\nUne fois vaincu, le Réceptacle de Cœur apparaît près du téléporteur bleu.",
+      "hint": "Vous ne pouvez le blesser que lorsqu'il sort la tête de la lave."
+    },
+    "agua-gs-01": {
+      "name": "Près de la grille du sous-sol",
+      "desc": "Avec l'eau du temple au niveau le plus bas, utilisez une Petite Clé pour ouvrir la porte à la base du pilier central. À l'intérieur, jouez la Berceuse de Zelda devant le symbole de la Triforce pour faire monter l'eau, chaussez les Bottes de Plomb et coulez par le trou au sol jusqu'à la salle du sous-sol.\n\n**Touchez l'interrupteur de cristal en haut du mur avec le Grappin** : plusieurs ennemis apparaissent. Tuez-les, retirez les bottes pour remonter vers la corniche du coffre et décrochez au Grappin la Skulltula d'Or sur le mur, à côté de la grille."
+    },
+    "agua-gs-02": {
+      "name": "Rivière aux tourbillons",
+      "desc": "Après le combat contre Dark Link, montez l'escalier derrière le coffre du Super Grappin et, dans la salle suivante, laissez-vous tomber dans le puits grillagé. Suivez le tunnel inondé jusqu'à déboucher dans une rivière souterraine pleine de tourbillons, et tenez-vous à l'écart car ils vous aspirent.\n\nDans la zone des tourbillons, **chaussez les Bottes de Plomb et marchez au fond**, en esquivant les courants. La Skulltula d'Or est au-dessus de l'eau, haut sur la paroi rocheuse : visez vers le haut au Super Grappin, qui la tue et vous ramène l'emblème.",
+      "hint": "Surveillez la Skulltula au-dessus de l'eau."
+    },
+    "agua-gs-03": {
+      "name": "À l'intérieur du pilier central",
+      "desc": "Avec la Berceuse de Zelda, abaissez l'eau du temple au niveau le plus bas ou intermédiaire et passez la porte à la base du pilier central. À l'intérieur, au rez-de-chaussée, utilisez le Super Grappin sur la cible au mur pour atteindre une corniche à mi-hauteur.\n\nDe là, **regardez tout en haut du mur** : c'est là que se tient la Skulltula d'Or, et le même Super Grappin la tue et vous ramène l'emblème. Inutile de faire monter l'eau du pilier d'abord, mais vous pouvez grimper au besoin."
+    },
+    "agua-gs-04": {
+      "name": "Cascade aux rochers roulants",
+      "desc": "Au sous-sol nord, atteint avec le Super Grappin, traversez la salle des Tektites et la salle de l'énigme des blocs, puis dans la suivante marchez sur l'interrupteur et sautez de geyser en geyser jusqu'à l'autre porte. Derrière se trouve un canal où des rochers dévalent d'une cascade, juste à côté de la salle de la Clé du Boss.\n\nAbritez-vous des rochers dans le couloir latéral, où attend un Shell Blade, et de là **regardez vers la cascade, à l'ouest** : la Skulltula d'Or est sur cette paroi. Le Super Grappin l'atteint sans approcher et vous ramène l'emblème."
+    },
+    "agua-gs-05": {
+      "name": "Derrière le mur fissuré sous l'eau",
+      "desc": "Cette Skulltula d'Or se trouve dans une salle du côté est du premier étage. Avec l'eau au niveau intermédiaire, après avoir joué la Berceuse de Zelda devant la Triforce dans le pilier central, chaussez les Bottes de Plomb et descendez le couloir est inondé jusqu'à un mur fissuré sous l'eau : **brisez-le avec des Bombes ou la Masse des Titans**.\n\nDerrière se trouve une salle avec des ennemis. La Skulltula est sur une mosaïque au mur, près de l'escalier et à hauteur d'épée : abattez-la d'un coup d'épée et ramassez l'emblème.",
+      "hint": "Il vous faut des Bombes et l'eau au niveau intermédiaire."
+    },
+    "agua-heart-01": {
+      "name": "Réceptacle de Cœur - Morpha",
+      "desc": "Avec la Clé du Boss et l'eau à son niveau maximal, montez au troisième étage (3F) et utilisez le Super Grappin sur la cible de la colonne dorée côté nord. Montez les marches et gravissez la rampe remplie d'eau en esquivant les pièges à pointes qui glissent vers vous.\n\nMarchez sur les plateformes au centre pour faire apparaître Morpha et **reculez aussitôt sur le rebord extérieur de la salle, loin de l'eau**, car ses tentacules vous attrapent. Extrayez son noyau au Super Grappin, frappez-le à l'épée et, après le combat, prenez le Réceptacle de Cœur avant d'entrer dans le téléporteur bleu."
+    },
+    "sombra-gs-01": {
+      "name": "Salle des faux invisibles",
+      "desc": "Dans la grande salle du gouffre, après avoir traversé avec les Bottes des Airs jusqu'à la plateforme du Stalfos et l'avoir vaincu, tournez à gauche et activez le Monocle de Vérité : un chemin de plateformes invisibles vers une porte apparaît.\n\nDe l'autre côté se trouve la salle ronde aux pots, avec des faux que seul le Monocle révèle. Esquivez-les, abattez les Keese de Feu à l'arc et achevez le Like Like à l'épée : **vider la salle ouvre la porte d'une petite pièce avec la Skulltula d'Or au mur**, à portée d'épée.",
+      "hint": "L'alcôve qui s'ouvre contient aussi deux coffres, dont un invisible."
+    },
+    "sombra-gs-02": {
+      "name": "Mur du couloir des cellules",
+      "desc": "Dans la salle aux pointes qui tombent du plafond, le Monocle de Vérité révèle un bloc caché dans le mur : tirez-le sous les pointes comme un parapluie et montez dessus pour atteindre la partie supérieure. **La Skulltula d'Or est haut sur le mur du couloir des cellules**, et depuis la passerelle le Grappin l'atteint.",
+      "hint": "Montez sur le bloc pour l'atteindre depuis la passerelle."
+    },
+    "sombra-gs-03": {
+      "name": "Fosse dans le couloir aux ventilateurs",
+      "desc": "Après la salle du grand vase-crâne, où une bombe lancée dans le crâne fait tomber une Petite Clé, passez à la salle suivante : utilisez le Monocle de Vérité pour repérer la cible au plafond, hissez-vous au niveau supérieur au Grappin et ouvrez la porte verrouillée.\n\nDerrière se trouve le couloir aux ventilateurs. Chaussez les Bottes de Plomb pour ne pas être emporté par le vent et avancez jusqu'à la fosse aux grilles : **la Skulltula d'Or est sur la paroi de la fosse**. Penchez-vous au bord et attrapez-la au Grappin, qui vous ramène l'emblème.",
+      "hint": "Avec les Bottes de Plomb, le vent ne peut pas vous emporter."
+    },
+    "sombra-gs-04": {
+      "name": "Haute corniche dans la salle du bateau",
+      "desc": "Dès votre entrée dans la salle du bateau, tirez le bloc à gauche et poussez-le le long de la rainure au sol jusqu'à la passerelle en bois, puis montez dessus. La Skulltula d'Or est sur le mur d'une corniche grillagée voisine.\n\nVous devez **jouer le Chant de l'Épouvantail sur la passerelle et utiliser le Super Grappin sur Pierre** : il vous dépose sur la corniche, à côté de la Skulltula, et vous l'abattez à l'épée.",
+      "hint": "Vous devrez connaître le Chant de l'Épouvantail pour monter là-haut."
+    },
+    "sombra-gs-05": {
+      "name": "À l'intérieur des crânes géants",
+      "desc": "Lorsque le bateau coule, brûlez la toile sur la porte avec une Flèche de Feu et traversez la salle du Floormaster avec le Monocle de Vérité jusqu'à la porte ornée de l'œil Sheikah.\n\nÀ l'intérieur se trouvent les crânes géants. Montez à l'échelle jusqu'au balcon et **lancez des bombes dans les crânes** : quand le second éclate, l'Emblème de Skulltula d'Or en tombe.",
+      "hint": "La porte sur la rive est couverte d'une toile : brûlez-la avec une Flèche de Feu."
+    },
+    "sombra-heart-01": {
+      "name": "Réceptacle de Cœur - Bongo Bongo",
+      "desc": "Pendant le combat, chaussez les Bottes des Airs pour ne pas rebondir sur le tambour et **étourdissez les mains de Bongo Bongo avec des flèches ou le Grappin**. Ensuite, avec le Monocle activé, tirez dans son œil et frappez-le à l'épée.\n\nUne fois vaincu, il vous laisse le Réceptacle de Cœur."
+    },
+    "espiritu-gs-01": {
+      "name": "Grillage métallique dans la salle des Keese",
+      "desc": "Enfant, vous entrez en parlant à Nabooru et en vous glissant par le petit passage dans le hall d'entrée.\n\nPlus loin, vous arrivez dans la salle avec les Keese et le Wallmaster. Ramassez les Rubis d'Argent pour que la grille s'abaisse et forme un pont : de l'autre côté, **la Skulltula d'Or est sur le grillage du mur de droite**. Le Boomerang la tue et vous rapporte l'emblème.",
+      "hint": "Avec les cinq Rubis d'Argent, la grille s'abaisse et forme un pont."
+    },
+    "espiritu-gs-02": {
+      "name": "Sol de la salle de la grande statue",
+      "desc": "Une fois arrivé dans la salle de la grande statue, descendez l'escalier latéral vers l'étage inférieur et passez derrière la statue.\n\nDans l'étroit passage entre son flanc et le mur, côté est, **la Skulltula d'Or est sur le mur, au ras du sol**. Un coup d'épée suffit pour l'éliminer et ramasser l'emblème."
+    },
+    "espiritu-gs-03": {
+      "name": "Au-dessus de la porte de l'escalier",
+      "desc": "Dans la partie enfant du temple, la salle des blocs se résout en poussant le bloc au visage solaire dans le rayon de lumière : un coffre contenant une Petite Clé apparaît, celle de la porte enchaînée en haut de l'escalier suivant. En franchissant la porte vers cet escalier, vous entendez déjà la Skulltula.\n\nNe montez pas sans regarder derrière vous : retournez-vous et vous la verrez **au-dessus de la porte que vous venez de passer**. Enfant, le Boomerang la tue et vous rapporte l'emblème, et adulte le Grappin fait de même.",
+      "hint": "Avant le combat contre le Hache-Viande."
+    },
+    "espiritu-gs-04": {
+      "name": "Derrière le Bloc du Temps dans la salle des rochers roulants",
+      "desc": "La partie adulte du temple commence en poussant le grand bloc du hall d'entrée avec les Gantelets d'Argent. Dans la salle ronde suivante, détruisez la Sentinelle (un Bombchu suffit) et touchez l'interrupteur de cristal au plafond au Grappin pour ouvrir les portes.\n\nLa porte de droite mène à la salle des rochers roulants. Esquivez-les jusqu'à atteindre les deux Blocs du Temps dans les renfoncements du mur : le premier ne cache rien, mais **jouez le Chant du Temps près du second** et, lorsqu'il se déplace, il révèle la Skulltula d'Or au fond de sa niche. Tuez-la à l'épée et ramassez l'emblème.",
+      "hint": "Le bloc ne se déplace que d'une case, il ne disparaît pas."
+    },
+    "espiritu-gs-05": {
+      "name": "Corniche nord-ouest de la salle de la statue",
+      "desc": "La Skulltula d'Or se trouve sur la haute corniche nord-ouest de la grande salle de la statue de la déesse, dans le coin où apparaît un épouvantail.\n\nAdulte, utilisez le Super Grappin sur la cible du poignet de la statue pour monter dans sa paume. De là, **jouez le Chant de l'Épouvantail** : l'épouvantail apparaît en haut de la corniche et vous pouvez vous y accrocher au Super Grappin. Là-haut, la Skulltula est au sol à côté de lui ; tuez-la à l'épée et ramassez l'emblème.",
+      "hint": "Jouez le Chant de l'Épouvantail depuis la paume de la statue."
+    },
+    "espiritu-heart-01": {
+      "name": "Réceptacle de Cœur - Twinrova",
+      "desc": "Contre Twinrova, renvoyez d'abord le feu de Koume sur Kotake et la glace de Kotake sur Koume.\n\nLorsqu'elles fusionnent, **absorbez trois tirs du même élément d'affilée et renvoyez-les sur Twinrova** ; quand elle tombe, frappez-la à l'épée. Le Réceptacle de Cœur apparaît au centre de la plateforme.",
+      "hint": "La Clé du Boss demande la Berceuse de Zelda, l'arc et le Grappin."
+    },
+    "pozo-gs-01": {
+      "name": "Salle de gauche depuis la zone centrale",
+      "desc": "Il vous faut le Monocle de Vérité, trouvé au sous-sol, et une Petite Clé. Avec le Monocle activé, des coffres cachés apparaissent dans des alcôves des murs du puits, et l'un d'eux contient une clé.\n\nVous entrez dans la zone centrale par le faux mur en face de l'entrée, et devez contourner le X au sol, qui est un trou. **Ouvrez la porte verrouillée à gauche**, tuez la Mojo Baba au milieu de la salle et cherchez la Skulltula d'Or en haut du mur, au-dessus d'une niche à bougies : le Boomerang la décroche et revient avec l'emblème.",
+      "hint": "Il y a deux autres clés dans des alcôves cachées du couloir d'entrée."
+    },
+    "pozo-gs-02": {
+      "name": "Coin supérieur de la salle de la fosse",
+      "desc": "La porte verrouillée à droite de la zone centrale, où vous entrez par le faux mur face à l'entrée, mène à une salle avec des Keese et une grande fosse. Il vous faut une Petite Clé, comme celle du cercueil dans la salle des Gibdos, et le Monocle de Vérité.\n\nTuez les Keese et **mettez le Monocle pour voir la Skulltula d'Or dans un coin en hauteur, près d'une torche**. Utilisez le Boomerang pour l'attraper.",
+      "hint": "Il vous faut une clé et le Monocle de Vérité."
+    },
+    "pozo-gs-03": {
+      "name": "Salle du Like Like",
+      "desc": "Suivez le couloir extérieur qui fait le tour du centre du puits jusqu'au coin nord-est, où une porte porte un panneau avertissant : « Regardez où vous marchez ! » Écoutez-le, car juste dessous se cache un piège qui vous fait tomber au fond si vous ne l'évitez pas.\n\nLa salle suivante comporte des trous invisibles au sol : **mettez le Monocle de Vérité et traversez en surveillant vos pas**.\n\nÉliminez les Keese de Feu au Boomerang et faites sauter la Sentinelle avec une bombe. La porte de l'autre côté mène à la salle du Like Like : une fois battu, la Skulltula d'Or est sur le mur du fond, entre deux torches, à portée de Boomerang, qui vous rapporte aussi l'emblème.",
+      "hint": "Regardez où vous marchez !"
+    },
+    "hielo-gs-01": {
+      "name": "Salle de la lame tournante",
+      "desc": "Tuez les Glaçons dans la première salle pour ouvrir la grille et avancez jusqu'à la grande salle ronde avec la lame de glace tournante.\n\n**Repérez le coin aux stalagmites de glace, celui avec le Rubis d'Argent caché** : la Skulltula d'Or est en haut sur le mur, entre les parois de glace et au-dessus d'une stalagmite. Tuez-la au Grappin.",
+      "hint": "Les Rubis d'Argent ouvrent la salle de la Flamme Bleue."
+    },
+    "hielo-gs-02": {
+      "name": "Salle de la Boussole",
+      "desc": "Ramassez les Rubis d'Argent dans la salle de la lame tournante pour ouvrir le chemin vers la salle de la carte et remplissez-y un flacon de Flamme Bleue. Revenez dans la salle de la lame et faites fondre l'un de ses deux murs de glace rouge avec, celui qui mène à un couloir avec des pièges à pointes.\n\nAu bout se trouve la salle de la Boussole, pleine de stalagmites. Tuez les Keese de Glace et **regardez tout en haut du mur du fond, près d'un bloc de glace rouge** : c'est là qu'est la Skulltula d'Or. Utilisez le Grappin pour l'avoir."
+    },
+    "hielo-gs-03": {
+      "name": "Salle du bloc de glace",
+      "desc": "Dans la salle où vous devez pousser un bloc de glace, tuez les Keese de Glace et retournez-vous vers l'entrée : **la Skulltula d'Or est haut sur le mur, à gauche de la porte par laquelle vous entrez**. Elle est plus facile à repérer depuis les piliers de pierre ; décrochez-la au Grappin depuis le sol et ramassez l'emblème."
+    },
+    "castillo-fairy-02": {
+      "name": "Grande Fée : Double Défense",
+      "desc": "Vous accédez aux abords du Château de Ganon depuis le Bourg d'Hyrule en ruine, et le cul-de-sac sur la droite se termine là où se trouvait la fontaine de l'Attaque circulaire enfant. Désormais, un pilier de pierre noire aux gravures dorées bloque l'entrée : **soulevez-le avec les Gantelets d'Or**, obtenus dans l'Épreuve de l'Ombre du château.\n\nÀ l'intérieur, jouez la Berceuse de Zelda sur l'emblème de la Triforce et jetez dans la fontaine les 500 Rubis qu'elle demande en offrande. La Grande Fée du Courage double votre défense : vos cœurs s'entourent d'un liseré doré et vous subissez moitié moins de dégâts.",
+      "hint": "Elle demande une offrande de 500 Rubis ; le pilier à l'entrée se soulève avec les Gantelets d'Or."
+    },
+    "kakariko-bottle-01": {
+      "name": "Les sept Cocottes perdues",
+      "desc": "La Dame aux Cocottes, près de l'enclos, en a laissé s'échapper sept ; si vous les lui ramenez enfant, elle vous offre un Flacon Vide : **attrapez chaque Cocotte et jetez-la dans l'enclos**. Si vous lui parlez, elle vous indique combien il en manque et vous donne des indices ; celles déjà dans l'enclos y restent même si vous entrez dans les maisons.\n\nL'une est juste à côté d'elle, une autre près de l'entrée, une autre près de la porte du Mont du Péril et une autre derrière la clôture de la Maison des Skulltulas. La cinquième est dans une caisse à briser d'une roulade ; les deux dernières sont dans la zone clôturée derrière l'Apothicairerie, accessible en planant."
+    },
+    "lonlon-bottle-01": {
+      "name": "Super Cocottes de Talon",
+      "desc": "Avant tout, vous devez réveiller Talon, endormi au Château d'Hyrule, avec la Cocotte éclose de l'Œuf Bizarre, afin qu'il rentre au Ranch Lon Lon. Au ranch, entrez dans sa maison de jour : la nuit, Talon dort.\n\nPour 10 Rubis, il vous met au défi de **retrouver ses trois Super Cocottes parmi toutes celles de la pièce** en 30 secondes : soulevez des Cocottes et il vous dira quand vous tombez juste. Si vous réussissez, la première fois il vous offre un flacon de Lait Lon Lon.",
+      "hint": "Une partie coûte 10 Rubis."
+    },
+    "lago-bottle-01": {
+      "name": "Lettre de Ruto",
+      "desc": "Au fond du Lac Hylia, près de la sortie du tunnel sous-marin venant du Domaine Zora, repose un flacon contenant une lettre de la Princesse Ruto. Enfant, vous ne pouvez plonger aussi profondément qu'avec l'Écaille d'Argent, le prix du jeu de plongée du Domaine Zora.\n\nPrès des piliers de pierre qui dépassent de l'eau, **plongez jusqu'au fond et attrapez le flacon**.",
+      "hint": "Vous pouvez aussi rejoindre le lac en plongeant depuis le Domaine Zora."
+    },
+    "ciudadela-bottle-01": {
+      "name": "Le Collectionneur d'Âmes",
+      "desc": "Adulte, l'ancien poste de garde à l'entrée du Bourg d'Hyrule est devenu l'échoppe du Collectionneur d'Âmes. Pour chaque Grande Âme, il vous paie 30 Rubis et ajoute 100 points ; lorsque vous atteignez 500 points, à la cinquième, il vous remet un Flacon Vide. Si vous continuez jusqu'à 1 000, il vous offre un Rubis Géant, doré, d'une valeur de 200 Rubis.\n\nLes Grandes Âmes apparaissent dans la Plaine d'Hyrule lorsque vous chevauchez Epona et sautez certaines barrières hantées : **abattez-les à l'arc depuis le dos du cheval et capturez chaque âme dans un Flacon Vide**.",
+      "hint": "Il paie 30 Rubis par Grande Âme ; le flacon arrive à 500 points."
+    },
+    "ciudadela-bottle-02": {
+      "name": "L'insecte de l'apothicaire",
+      "desc": "Dans le Bourg d'Hyrule, entrez dans la Boutique de Potions, dans le bâtiment près du chemin montant vers le Temple du Temps. Le commerçant a laissé échapper un insecte : dites-lui que vous allez l'aider et il vous prêtera un Flacon Vide pour l'attraper.\n\nÉquipez le flacon et **capturez l'insecte qui file sur le sol de la boutique**. En remerciement, il le remplit d'une Potion Rouge, et vous gardez le flacon."
+    },
+    "dominio-heart-01": {
+      "name": "Coffre des torches",
+      "desc": "Derrière la cascade au niveau inférieur du Domaine Zora, un coffre contenant le quart de cœur apparaît lorsque, enfant, vous allumez toutes ses torches en même temps : enflammez un Bâton Mojo à l'une des torches de la salle du Roi Zora.\n\nDescendez et **allumez d'abord celle au pied de l'escalier**, qui ne s'éteint pas, puis les quatre éphémères, en utilisant chaque torche pour rallumer le bâton. Il s'agit de celle devant la Boutique Zora, de celle à l'étang au cercle de pierres, et des deux derrière la cascade, que vous atteignez en longeant le mur.",
+      "hint": "Le Feu de Din aide pour celles derrière la cascade."
+    },
+    "fortaleza-heart-02": {
+      "name": "Coffre sur le toit",
+      "desc": "Le coffre se trouve sur le toit le plus élevé de la Forteresse Gerudo, contre la paroi rocheuse, de l'autre côté d'un vide. Depuis les couloirs intérieurs, une échelle **à côté de votre cellule** vous mène sur une corniche rocheuse au-dessus des toits ; suivez-la jusqu'au bord d'où vous apercevez le coffre.\n\nDe là, **visez le coffre au Super Grappin** pour atteindre le butin.",
+      "hint": "Utilisez le Super Grappin pour atteindre le coffre."
+    },
+    "kakariko-heart-04": {
+      "name": "Récompense pour 50 Skulltulas",
+      "desc": "Avec 50 Emblèmes de Skulltula d'Or, retournez à la Maison des Skulltulas et **parlez au riche homme maudit** pour obtenir le Quart de Cœur.",
+      "hint": "Il vous faut 50 Emblèmes de Skulltula d'Or."
+    },
+    "castillo-gs-03": {
+      "name": "Arche en ruine",
+      "desc": "Adulte, le chemin de droite à l'extérieur du Château de Ganon, celui qui mène à la Fontaine de la Grande Fée, passe sous une arche de pierre en ruine qui formait autrefois l'entrée du Château d'Hyrule.\n\n**Passez sous l'arche et retournez-vous** : la Skulltula d'Or est en hauteur sur sa face arrière, hors de portée de votre épée. Abattez-la au Grappin."
+    },
+    "cementerio-thought-01": {
+      "name": "Piédestal brisé dans le Tombeau de la Famille Royale",
+      "desc": "Au Cimetière, entrez dans le Tombeau de la Famille Royale en jouant la Berceuse de Zelda sur la Triforce et avancez jusqu'à la dernière salle, celle avec la stèle de pierre qui enseigne le Chant du Soleil.\n\nLà, au-dessus du liquide vert, se trouve un piédestal brisé portant la pensée d'une fée qui ne se souvient plus de la mélodie gravée sur la stèle et voudrait l'entendre à nouveau pour ne pas l'oublier. **Jouez le Chant du Soleil près de la marque.**",
+      "hint": "Jouez le Chant du Soleil près de la marque."
+    },
+    "coloso-thought-01": {
+      "name": "Escalier du Temple de l'Esprit",
+      "desc": "Au Colosse du Désert, sur la corniche où vous obtenez les Gantelets d'Argent, entre les deux braseros, la pensée se trouve sur le muret au bord. La fée dit que la vue est à couper le souffle, mais qu'elle ne supporte pas cet air si sec et aimerait qu'une bonne averse tombe. Jouer le Chant des Tempêtes ici restaure votre magie et votre santé.",
+      "hint": "Jouez le Chant des Tempêtes devant la marque."
+    },
+    "hielo-thought-01": {
+      "name": "Tunnel de glace près de la salle de la Boussole",
+      "desc": "Dans la Caverne Polaire, une fois la Boussole en main, remplissez un flacon de Flamme Bleue dans cette zone et faites fondre le bloc de glace rouge voisin. Suivez le tunnel gelé derrière, celui qui mène au couloir des pièges à pointes et à la salle du bloc de glace : vous verrez cette Pensée de Fée sur sa paroi. La fée a les ailes givrées et donnerait n'importe quoi pour passer un petit moment au soleil. **Jouez le Chant du Soleil près de la marque.**",
+      "hint": "Jouez le Chant du Soleil près de la marque."
+    },
+    "lago-thought-01": {
+      "name": "Alcôve aux pots sur la rive ouest",
+      "desc": "Au Lac Hylia, longez la rive ouest vers le sud presque jusqu'au bout : cette pensée se trouve dans une alcôve de la paroi rocheuse, avec des pots, des sacs et des tonneaux. La fée dit que son secret pour jouer à cache-cache est un endroit que les autres fées ne peuvent ni lancer ni casser. **Cassez les pots de l'alcôve** : une fée sort de l'un d'eux, et il y a aussi quelques Rubis.",
+      "hint": "Cassez les pots de l'alcôve : une fée se cache dans l'un d'eux."
+    },
+    "llanura-thought-01": {
+      "name": "Ruines près du pont-levis",
+      "desc": "Sortez du Bourg d'Hyrule par le pont-levis et partez vers l'est jusqu'à la butte surplombant la rivière : parmi les ruines d'un mur de pierre couvert de mousse se trouve la première Pensée de Fée, et Navi en profite pour expliquer ce qu'elles sont. La fée dit que lorsqu'un objet tombe d'un arbre sur quelqu'un, ce n'est pas un hasard : c'est elle qui cache des choses dans les branches. **Faites une roulade contre les troncs d'arbres** pour en faire tomber ce qu'ils renferment ; le pin juste à côté laisse tomber un Rubis bleu.",
+      "hint": "Faites une roulade contre les arbres : quelque chose tombe parfois des branches."
+    },
+    "llanura-thought-02": {
+      "name": "Grotte au coffre près de la Vallée Gerudo",
+      "desc": "À l'ouest de la Plaine d'Hyrule, dans la zone aride menant à la Vallée Gerudo, une petite grotte s'ouvre dans la paroi rocheuse nord avec un coffre à l'intérieur. La fée qui y a laissé sa pensée dit au garçon au bonnet pointu que le trésor est pour lui et qu'elle ne l'a pas verrouillé. Adulte, vous arrivez trop tard : le coffre est ouvert et vide. **Revenez enfant et ouvrez le coffre**, qui contient alors un Quart de Cœur.",
+      "hint": "Revenez enfant et ouvrez le coffre dans la grotte."
+    },
+    "llanura-thought-03": {
+      "name": "Grotte de la Pierre à Potins au sud du ranch",
+      "desc": "Au sud-est du Ranch Lon Lon, près d'un petit étang, un cercle de buissons dissimule une grotte qui s'ouvre d'un coup de Masse des Titans au centre. À l'intérieur, une Skulltula pend au mur au-dessus d'une caisse en bois, avec une Pierre à Potins, et la pensée est sur la paroi rocheuse. La fée a trouvé ici un insecte doré brillant, mais la sale bête sur le mur lui a sauté dessus avant qu'elle ne puisse l'attraper. **Achevez la Skulltula du mur enfant et, adulte, faites une roulade dans la caisse en bois en dessous pour la briser** : à l'intérieur se trouve l'insecte doré, une Skulltula d'Or.",
+      "hint": "Brisez la caisse en bois sous la Grande Skulltula."
+    },
+    "llanura-thought-04": {
+      "name": "Arbre près du trou de la Peste Mojo marchande",
+      "desc": "Sortez du Bourg d'Hyrule par le pont-levis et longez vers l'est la bande d'herbe entre le mur et la rivière : cette pensée se trouve sur un arbre collé au mur et, à quelques pas, un trou abrite une Peste Mojo marchande qui ne vend qu'à ceux qui connaissent le mot de passe. La fée dit qu'elle a enfin trouvé, et que ce n'était ni « Pas mal du tout... » ni « Je vais payer les frais. » Adulte, elle n'a plus rien, alors **allez-y enfant et dites-lui « Vends-moi quelque chose ! »** : elle vous vendra un Quart de Cœur pour 100 Rubis.",
+      "hint": "Dites « Vends-moi quelque chose ! » à la Peste Mojo marchande dans le trou voisin."
+    },
+    "llanura-thought-05": {
+      "name": "Ruines près de la clôture du ranch",
+      "desc": "Dans la Plaine d'Hyrule, contournez le Ranch Lon Lon par l'extérieur jusqu'à son coin sud-ouest : juste contre la clôture en bois se trouvent les ruines d'un mur de briques couvert de lierre, et la pensée est en bas, sur la face du mur. La fée dit qu'elle adore la vue sur la plaine depuis cet endroit, de nuit comme de jour, et qu'elle aimerait passer de l'un à l'autre sans avoir à attendre. **Jouez le Chant du Soleil** et elle restaurera votre santé et votre magie.",
+      "hint": "Jouez le Chant du Soleil pour passer du jour à la nuit."
+    },
+    "llanura-thought-06": {
+      "name": "Recoin rocheux au nord-ouest de la Plaine d'Hyrule",
+      "desc": "Tout au nord-ouest de la Plaine d'Hyrule, près de la rivière, se trouve un recoin dans la roche avec des tonneaux, des sacs et une table, et cette pensée est sur le mur à l'entrée. La fée dit que les Peahats lui font peur parce qu'ils sont immenses, s'enracinent et font comme si la plaine leur appartenait, mais que, comme toute plante, ils ne supportent pas le feu. **Brûlez les Peahats avec le Feu de Din**."
+    },
+    "lonlon-thought-01": {
+      "name": "Mur du jardin du ranch",
+      "desc": "Au Ranch Lon Lon, contournez l'arrière de la maison et de l'étable jusqu'au jardin : la pensée est sur le mur de briques couvert de lierre, parmi des caisses, des tonneaux et une charrette en bois. La fée dit que le petit air que joue ce garçon est très joli et rend les vaches folles. C'est le Chant d'Epona, mais le jouer près de la marque ne fait rien : **jouez-le devant une vache** et elle vous donnera du Lait Lon Lon.",
+      "hint": "Jouez le Chant d'Epona devant une vache."
+    },
+    "pozo-thought-01": {
+      "name": "Cercueil dans la salle des Gibdos",
+      "desc": "Dans le Puits, descendez au B1 et entrez dans la salle des Gibdos, celle aux cercueils entourés de toiles, que vous dégagez en les brûlant avec un Bâton Mojo allumé aux torches. Cette Pensée de Fée est sur le côté de l'un des cercueils dressés : à la fée manque la chanson de cet homme qui parle de tourner « en rond encore et encore » et elle aimerait que quelqu'un par ici la connaisse. **Jouez le Chant des Tempêtes près du cercueil** pour restaurer magie et santé.",
+      "hint": "Jouez le Chant des Tempêtes près du cercueil."
+    },
+    "sendero-thought-01": {
+      "name": "Cercle de feuilles près du Village Goron",
+      "desc": "En montant le Chemin du Péril, à quelques pas de l'entrée du Village Goron, une corniche rocheuse sur la droite présente un trou au sol avec une plante dedans, et sur la paroi à côté, cette pensée. La fée dit que les jours calmes, les feuilles au sol dansent doucement en cercle, mais que les jours d'orage elles tourbillonnent à toute allure et semblent prêtes à s'envoler. **Jouez le Chant des Tempêtes sur le cercle** pour entrer dans le trou.",
+      "hint": "Jouez le Chant des Tempêtes sur le cercle de feuilles."
+    },
+    "sombra-thought-01": {
+      "name": "Mur de la salle aux pointes au plafond",
+      "desc": "Au B3 du Temple de l'Ombre se trouve la salle où le bloc caché vous protège des pointes qui tombent du plafond. Passé la cellule avec le coffre du Rubis rouge, près d'un trou dans le mur, vous verrez cette Pensée de Fée. La fée dit qu'elle adore les endroits où le vent souffle fort et **que cet endroit aurait bien besoin d'un bon coup de vent**."
+    },
+    "crater-heart-03": {
+      "name": "Peste Mojo marchande dans le Cratère",
+      "desc": "Dans le Cratère, enfant, partez vers l'ouest depuis l'entrée du sommet du Mont du Péril, en direction de l'endroit où la carte indique la Fontaine de la Grande Fée. Près d'un filet d'escalade sur la paroi, une Peste Mojo marchande sort de terre et tente de vous attaquer.\n\nApprochez-vous en esquivant ses tirs et frappez-la. Lorsqu'elle se rend, parlez-lui : **elle vous vend le Quart de Cœur pour 100 Rubis**.",
+      "hint": "Enfant, elle vous le vend pour 100 Rubis après l'avoir touchée."
+    },
+    "cementerio-thought-02": {
+      "name": "Ruines à l'entrée du Tombeau de la Famille Royale",
+      "desc": "Au Cimetière, approchez-vous de la dalle à la Triforce qui ouvre le Tombeau de la Famille Royale : cette pensée se trouve parmi les pierres brisées de l'entrée.\n\nLa fée raconte comment elle a fini au fond d'une tombe, qu'un monstre effrayant s'est jeté sur elle, et qu'il a cessé de la poursuivre quand elle a chanté un chant qui l'a ébloui, mais elle ne se souvient plus de son nom. **C'est le Chant du Soleil : jouez-le pour paralyser les Effrois.**",
+      "hint": "Le Chant du Soleil paralyse les Effrois."
+    },
+    "llanura-thought-07": {
+      "name": "Ruines près de la sortie vers le Lac Hylia",
+      "desc": "À la pointe sud de la Plaine d'Hyrule, près du chemin descendant vers le Lac Hylia, se trouvent des ruines de pierre parmi les arbres : la pensée est sur la face d'un des piliers.\n\nLa fée supplie que personne ne donne jamais un coup de bâton à un papillon, et encore moins sans bouger. **Frappez un papillon avec un Bâton Mojo sans bouger de place : il se transforme en Fée.**",
+      "hint": "Frappez un papillon avec un Bâton Mojo : il se transforme en Fée."
+    },
+    "llanura-thought-08": {
+      "name": "Recoin rocheux près de l'entrée de la Rivière Zora",
+      "desc": "Sur la bordure est de la Plaine d'Hyrule, un peu au sud de l'entrée de la Rivière Zora, un recoin dans la roche abrite des tonneaux, une table, un banc et les restes d'un feu de camp : la pensée est sur la paroi rocheuse.\n\nLa fée adore disposer des Rubis en jolis motifs. Elle les cache dans des fosses et des trous, ainsi que sous l'eau, et cela ne la dérange pas si quelqu'un les prend. **Cherchez des Rubis disposés en motifs dans les fosses, les trous et sous l'eau.**",
+      "hint": "Cherchez des Rubis disposés en motifs dans les fosses, les trous et sous l'eau."
+    },
+    "llanura-thought-09": {
+      "name": "Rochers près des douves à l'ouest du pont-levis",
+      "desc": "Sortez du Bourg d'Hyrule par le pont-levis et longez vers l'ouest la berge des douves : en face du mur d'où s'écoule l'eau se trouvent de gros rochers, et cette pensée est juste à côté.\n\nLa fée dit que personne ne soupçonnera jamais qu'elle a caché toute sa fortune dans une caisse en bois.",
+      "hint": "La fée dit qu'elle a caché toute sa fortune dans une caisse en bois."
+    },
+    "llanura-thought-10": {
+      "name": "Charrette près du potager à côté de Cocorico",
+      "desc": "Au nord-est de la Plaine d'Hyrule, non loin de la montée vers le Village Cocorico, une charrette en bois est posée contre un muret de pierre : la pensée est sur ses planches.\n\nLa fée dit que l'endroit a l'air désert, comme s'il n'y avait que des mauvaises herbes, mais qu'en regardant bien on voit de petites bêtes trottiner en cachette. **Descendez dans le potager : des Insectes courent parmi les plantes.**",
+      "hint": "Des Insectes courent parmi les plantes dans le potager juste à côté."
+    }
+  }
+}

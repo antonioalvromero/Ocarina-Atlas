@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-14
+
+### Added
+- **100% Live Collectible Auto Tracking (`184 / 184`):** Added authoritative live RAM (`GameDataMgr + 0x170` `Bool` & `+ 0x230` `Int` flags + `masterTable` Skulltula hashes) and `SaveBuf` / `progress.sav` fallback tracking across all 7 categories: 100 Gold Skulltulas, 36 Pieces of Heart, 8 Heart Containers, 10 Magic Beans, 6 Great Fairies, 5 Bottles (including Big Poe coupon threshold `>= 500`), and 19 Fairy Thoughts, with pickup toasts and automatic reconciliation on save reload.
+- **Multi-Language Support (`EN` / `ES` / `FR` / `PT`):** Added type-safe `i18n` (`src/lib/i18n.ts`), `LanguageSelector` in the Atlas and place sidebars, and full translations (`src/data/i18n/{es,fr,pt}.json`) for all UI controls, 7 categories, 32 zones/dungeons (including all 32 place guides), 35 requirements, and all 184 item names, descriptions, and hints.
+- **Live Camera Follow (`MapViewport`, `WorldMap`, `PlaceView`):** Enabling **Follow Link** now keeps Link smoothly centered as he moves even when deeply zoomed in (while preserving your zoom level and pausing briefly during manual pointer drags).
+- **Interactive Category Cards (`GlobalStatsDrawer`):** Click any category card in **Global Progress** to filter `Remaining` or `All` items and jump directly to the item's zone, floor, and pin.
+
+### Changed
+- **Fritchii-Inspired Hyrule Launcher UI (`OcarinaAtlas.exe`):** Redesigned `launcher/OcarinaAtlas.cs` with native Windows dark titlebars (`DWMWA_USE_IMMERSIVE_DARK_MODE`), subtle `Ink700` borders, `Theme.Gold` Hyrule accents, a clean 3-zone layout (borderless header with `Server`/`Emulator` pills, unified Control + Sync card with live telemetry strip, compact `Second Screen (LAN)` card with `QR Code` modal), tabbed `Settings` | `Logs` drawer, inline feedback instead of success popups, and Markdown rendering in `UpdateDialog`.
+- **Auto Tracking Rename & Category Cleanup:** Renamed **Auto-Skulltula** to **Auto Tracking** in the UI to reflect 184/184 coverage, and removed the unused empty `Keys` (`0 / 0`) category from `oot.json` and `progress-stats.ts`.
+- **Performance & Networking Optimizations:** Added a shared `120 ms` SSE broadcaster (`sseClients`), precomputed contiguous `GameDataMgr` read windows (`buildGdmBoolWindows`), parallelized independent RPC memory reads, added weak `ETag`/`304 Not Modified` caching in `scripts/server-entry.ts`, and split `useLichiiPosition()` / `LivePlayerPin` subscriptions to eliminate full-tree React re-renders on `120 ms` ticks.
+
 ## [1.2.1] - 2026-11-14
 
 ### Fixed

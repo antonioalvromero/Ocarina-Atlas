@@ -2,6 +2,7 @@ import { type MouseEvent, type ReactNode, type Ref } from 'react'
 import { boxToFraction, isInsideImage, pinPosition } from '../lib/coords'
 import { formatFloorLabel } from '../lib/data'
 import { floorToGrid, type FloorCell, type FloorGrid as Grid } from '../lib/floorGrid'
+import { useI18n, type TranslationKey } from '../lib/i18n'
 import type { Merge } from '../lib/merge'
 import { pinsSlot, useStored } from '../lib/storage'
 import type { Fraction, Item, Place } from '../lib/types'
@@ -33,6 +34,14 @@ type Shared = {
   onSelectItem: (id: string) => void
 }
 
+function translateFloorLabel(labelOrId: string, t: (key: TranslationKey) => string): string {
+  const formatted = formatFloorLabel(labelOrId)
+  if (formatted === 'Child') return t('floor.child')
+  if (formatted === 'Adult') return t('floor.adult')
+  if (formatted === 'Main') return t('floor.main')
+  return formatted
+}
+
 function Floor({
   cell,
   draft,
@@ -47,7 +56,9 @@ function Floor({
   onSelectCustom,
   onSelectItem,
 }: Shared & { cell: FloorCell; draft: Fraction | null; onDraft: (at: Fraction) => void }) {
+  const { t } = useI18n()
   const pins = useStored(pinsSlot(placeId, cell.map.id))
+  const floorLabel = translateFloorLabel(cell.map.label, t)
 
   function onClick(event: MouseEvent<HTMLDivElement>) {
     if ((event.target as Element).closest('[data-pin]')) return
@@ -69,7 +80,7 @@ function Floor({
       onClick={onClick}
     >
       <span className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-ink-900/90 px-2 py-0.5 text-xs font-medium text-parchment-200">
-        {formatFloorLabel(cell.map.label)}
+        {floorLabel}
       </span>
       <img src={cell.map.image} alt="" draggable={false} className="absolute inset-0 size-full max-w-none" />
       {officialItems.map(
@@ -101,8 +112,8 @@ function Floor({
           at={player.at}
           yaw={player.yaw}
           live={player.live}
-          label="Link"
-          sublabel={formatFloorLabel(cell.map.label)}
+          label={t('common.link')}
+          sublabel={floorLabel}
           position3d={player.position3d}
           onClick={player.onClick}
         />
@@ -132,12 +143,13 @@ export function FloorGrid({
   pinOverlay?: (projection: Projection) => ReactNode
   onCreate: (type: string, name?: string) => void
 }) {
+  const { t, tPlace } = useI18n()
   const draftCell = draft && grid.cells.find((cell) => cell.map.id === draft.mapId)
   return (
     <MapViewport
       ref={viewport}
       viewId={`${place.id}:all-floors`}
-      alt={`All floors of ${place.name}`}
+      alt={t('place.allFloorsAlt', { place: tPlace(place.id, place.name) })}
       aspect={grid.aspect}
       onDismiss={
         draft || onDismiss

@@ -1,5 +1,6 @@
 import { Check, Undo2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useI18n } from '../lib/i18n'
 import type { Merge } from '../lib/merge'
 import { categoryStyle } from './categories'
 
@@ -19,6 +20,7 @@ export function MergeNotice({
   onUndo: () => void
   onDismiss: () => void
 }) {
+  const { t, tItemName } = useI18n()
   const [paused, setPaused] = useState(false)
   const { icon: Icon, color } = categoryStyle(merge.item.cat)
 
@@ -43,12 +45,12 @@ export function MergeNotice({
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-medium text-parchment-400">
-            {merge.appeared ? 'Merged with official pin' : 'This one already exists'}
+            {merge.appeared ? t('merge.mergedTitle') : t('merge.existsTitle')}
           </p>
-          <p className="text-sm leading-snug text-parchment-50">{merge.item.name}</p>
-          <p className="mt-0.5 text-xs text-parchment-400">Your pin was close enough, so the official one replaces it.</p>
+          <p className="text-sm leading-snug text-parchment-50">{tItemName(merge.item.id, merge.item.name)}</p>
+          <p className="mt-0.5 text-xs text-parchment-400">{t('merge.description')}</p>
         </div>
-        <button type="button" aria-label="Dismiss" onClick={onDismiss} className="cursor-pointer text-parchment-400 hover:text-parchment-50">
+        <button type="button" aria-label={t('common.dismiss')} onClick={onDismiss} className="cursor-pointer text-parchment-400 hover:text-parchment-50">
           <X size={15} />
         </button>
       </div>
@@ -59,7 +61,7 @@ export function MergeNotice({
             onClick={onComplete}
             className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 text-xs text-parchment-200 hover:text-parchment-50"
           >
-            <Check size={13} /> Mark completed
+            <Check size={13} /> {t('panel.markCompleted')}
           </button>
         )}
         <button
@@ -67,7 +69,7 @@ export function MergeNotice({
           onClick={onUndo}
           className="flex cursor-pointer items-center gap-1 rounded bg-parchment-200 px-2 py-1 text-xs font-medium text-ink-950 hover:bg-parchment-50"
         >
-          <Undo2 size={13} /> Undo
+          <Undo2 size={13} /> {t('common.undo')}
         </button>
       </div>
     </div>

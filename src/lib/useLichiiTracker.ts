@@ -1,4 +1,4 @@
-import { useEffect, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { dataset } from './data'
 import type { LichiiTelemetryState } from './lichii-types'
 import {
@@ -15,7 +15,24 @@ import {
 import type { Item } from './types'
 
 const gsItemIds = new Set(dataset.items.filter((item) => item.cat === 'gs').map((item) => item.id))
-export const TRACKED_HEART_CONTAINER_IDS = new Set(['espiritu-heart-01'])
+export const TRACKED_HEART_CONTAINER_IDS = new Set(
+  dataset.items.filter((item) => item.cat === 'container').map((item) => item.id),
+)
+export const TRACKED_HEART_PIECE_IDS = new Set(
+  dataset.items.filter((item) => item.cat === 'heart').map((item) => item.id),
+)
+export const TRACKED_BEAN_IDS = new Set(
+  dataset.items.filter((item) => item.cat === 'bean').map((item) => item.id),
+)
+export const TRACKED_FAIRY_IDS = new Set(
+  dataset.items.filter((item) => item.cat === 'fairy').map((item) => item.id),
+)
+export const TRACKED_BOTTLE_IDS = new Set(
+  dataset.items.filter((item) => item.cat === 'bottle').map((item) => item.id),
+)
+export const TRACKED_THOUGHT_IDS = new Set(
+  dataset.items.filter((item) => item.cat === 'thought').map((item) => item.id),
+)
 const itemsById = new Map(dataset.items.map((item) => [item.id, item]))
 const placesById = new Map(dataset.places.map((p) => [p.id, p]))
 
@@ -67,15 +84,31 @@ type StoreState = {
   lastError: string | null
 }
 
+export type LichiiPositionState = {
+  position: LichiiTelemetryState['position']
+  mapFraction: LichiiTelemetryState['mapFraction']
+  worldMapFraction: LichiiTelemetryState['worldMapFraction']
+}
+
+const INITIAL_POSITION: LichiiPositionState = {
+  position: null,
+  mapFraction: null,
+  worldMapFraction: null,
+}
+
 let storeState: StoreState = {
   telemetry: INITIAL_TELEMETRY,
   toasts: [],
   lastError: null,
 }
+let metaStoreState: StoreState = storeState
+let positionSnapshot: LichiiPositionState = INITIAL_POSITION
 
 const SSE_RECONNECT_MS = 3000
 
 const storeListeners = new Set<() => void>()
+const metaListeners = new Set<() => void>()
+const positionListeners = new Set<() => void>()
 let pollTimer: ReturnType<typeof setTimeout> | null = null
 let pollToken = 0
 let pollInFlight = false
@@ -85,13 +118,102 @@ let sseReconnectTimer: ReturnType<typeof setTimeout> | null = null
 type CategorySyncState = {
   hasAuthoritativeSync: boolean
   lastSignature: string | null
+  lastAuthoritative: boolean | null
+  lastExtraId: string | null
+  lastCollectedIds: readonly string[] | null
   sessionAnnouncedIds: Set<string>
+}
+
+const EMPTY_IDS: readonly string[] = []
+
+function sameStringArray(a: readonly string[] | null, b: readonly string[]): boolean {
+  if (a === b) return true
+  if (!a || a.length !== b.length) return false
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) return false
+  }
+  return true
+}
+
+function sameOptionalStringArray(
+  a: readonly string[] | undefined,
+  b: readonly string[] | undefined,
+): boolean {
+  if (a === b) return true
+  if (!a || !b) return (a?.length ?? 0) === 0 && (b?.length ?? 0) === 0
+  return sameStringArray(a, b)
+}
+
+function samePosition(
+  a: LichiiTelemetryState['position'],
+  b: LichiiTelemetryState['position'],
+): boolean {
+  if (a === b) return true
+  if (!a || !b) return false
+  return a.x === b.x && a.y === b.y && a.z === b.z && a.yaw === b.yaw
+}
+
+function sameFraction(
+  a: LichiiTelemetryState['mapFraction'],
+  b: LichiiTelemetryState['mapFraction'],
+): boolean {
+  if (a === b) return true
+  if (!a || !b) return false
+  return a.x === b.x && a.y === b.y
+}
+
+function hasPositionChanged(prev: LichiiPositionState, next: LichiiTelemetryState): boolean {
+  return (
+    !samePosition(prev.position, next.position) ||
+    !sameFraction(prev.mapFraction, next.mapFraction) ||
+    !sameFraction(prev.worldMapFraction, next.worldMapFraction)
+  )
+}
+
+function hasMetaChanged(prev: StoreState, next: StoreState): boolean {
+  if (prev.toasts !== next.toasts || prev.lastError !== next.lastError) return true
+  const a = prev.telemetry
+  const b = next.telemetry
+  if (a === b) return false
+  return (
+    a.connected !== b.connected ||
+    a.emulatorRunning !== b.emulatorRunning ||
+    a.emulator !== b.emulator ||
+    a.titleId !== b.titleId ||
+    a.scene !== b.scene ||
+    a.placeId !== b.placeId ||
+    a.placeSlug !== b.placeSlug ||
+    a.placeName !== b.placeName ||
+    a.mapId !== b.mapId ||
+    a.age !== b.age ||
+    a.skulltulaCount !== b.skulltulaCount ||
+    a.authoritativeSkulltulas !== b.authoritativeSkulltulas ||
+    a.lastCollectedSkulltulaId !== b.lastCollectedSkulltulaId ||
+    a.lastPickedItem !== b.lastPickedItem ||
+    a.source !== b.source ||
+    a.authoritativeHeartContainers !== b.authoritativeHeartContainers ||
+    a.authoritativeHeartPieces !== b.authoritativeHeartPieces ||
+    a.authoritativeBeans !== b.authoritativeBeans ||
+    a.authoritativeFairies !== b.authoritativeFairies ||
+    a.authoritativeBottles !== b.authoritativeBottles ||
+    a.authoritativeThoughts !== b.authoritativeThoughts ||
+    !sameStringArray(a.collectedSkulltulaIds, b.collectedSkulltulaIds) ||
+    !sameOptionalStringArray(a.collectedHeartContainerIds, b.collectedHeartContainerIds) ||
+    !sameOptionalStringArray(a.collectedHeartPieceIds, b.collectedHeartPieceIds) ||
+    !sameOptionalStringArray(a.collectedBeanIds, b.collectedBeanIds) ||
+    !sameOptionalStringArray(a.collectedFairyIds, b.collectedFairyIds) ||
+    !sameOptionalStringArray(a.collectedBottleIds, b.collectedBottleIds) ||
+    !sameOptionalStringArray(a.collectedThoughtIds, b.collectedThoughtIds)
+  )
 }
 
 function createCategorySyncState(): CategorySyncState {
   return {
     hasAuthoritativeSync: false,
     lastSignature: null,
+    lastAuthoritative: null,
+    lastExtraId: null,
+    lastCollectedIds: null,
     sessionAnnouncedIds: new Set<string>(),
   }
 }
@@ -99,6 +221,9 @@ function createCategorySyncState(): CategorySyncState {
 function resetCategorySyncState(state: CategorySyncState, clearAnnounced: boolean): void {
   state.hasAuthoritativeSync = false
   state.lastSignature = null
+  state.lastAuthoritative = null
+  state.lastExtraId = null
+  state.lastCollectedIds = null
   if (clearAnnounced) {
     state.sessionAnnouncedIds.clear()
   }
@@ -107,8 +232,36 @@ function resetCategorySyncState(state: CategorySyncState, clearAnnounced: boolea
 let activeSubscribers = 0
 const gsSyncState = createCategorySyncState()
 const heartSyncState = createCategorySyncState()
+const heartPieceSyncState = createCategorySyncState()
+const beanSyncState = createCategorySyncState()
+const fairySyncState = createCategorySyncState()
+const bottleSyncState = createCategorySyncState()
+const thoughtSyncState = createCategorySyncState()
 
-function emitStore() {
+function resetAllCategorySyncStates(clearAnnounced: boolean): void {
+  resetCategorySyncState(gsSyncState, clearAnnounced)
+  resetCategorySyncState(heartSyncState, clearAnnounced)
+  resetCategorySyncState(heartPieceSyncState, clearAnnounced)
+  resetCategorySyncState(beanSyncState, clearAnnounced)
+  resetCategorySyncState(fairySyncState, clearAnnounced)
+  resetCategorySyncState(bottleSyncState, clearAnnounced)
+  resetCategorySyncState(thoughtSyncState, clearAnnounced)
+}
+
+function commitStoreState(next: StoreState) {
+  storeState = next
+  if (hasPositionChanged(positionSnapshot, next.telemetry)) {
+    positionSnapshot = {
+      position: next.telemetry.position,
+      mapFraction: next.telemetry.mapFraction,
+      worldMapFraction: next.telemetry.worldMapFraction,
+    }
+    for (const listener of positionListeners) listener()
+  }
+  if (hasMetaChanged(metaStoreState, next)) {
+    metaStoreState = next
+    for (const listener of metaListeners) listener()
+  }
   for (const listener of storeListeners) listener()
 }
 
@@ -208,7 +361,7 @@ export function reconcileSkulltulaLists(params: {
 
 /**
  * Reconciles officialDoneSlot / officialRevealedSlot with tracked Heart Container IDs.
- * Unmapped Heart Containers outside `TRACKED_HEART_CONTAINER_IDS` are never unmarked.
+ * Items outside `TRACKED_HEART_CONTAINER_IDS` are never unmarked.
  */
 export function reconcileHeartContainerLists(params: {
   doneList: string[]
@@ -223,6 +376,106 @@ export function reconcileHeartContainerLists(params: {
     collectedIds: params.collectedIds,
     authoritative: params.authoritative,
     validIds: params.validHeartIds ?? TRACKED_HEART_CONTAINER_IDS,
+  })
+}
+
+/**
+ * Reconciles officialDoneSlot / officialRevealedSlot with tracked Piece of Heart IDs.
+ * Items outside `TRACKED_HEART_PIECE_IDS` are never unmarked.
+ */
+export function reconcileHeartPieceLists(params: {
+  doneList: string[]
+  revealedList: string[]
+  collectedIds: string[]
+  authoritative: boolean
+  validHeartPieceIds?: Set<string>
+}): ReconcileResult {
+  return reconcileItemLists({
+    doneList: params.doneList,
+    revealedList: params.revealedList,
+    collectedIds: params.collectedIds,
+    authoritative: params.authoritative,
+    validIds: params.validHeartPieceIds ?? TRACKED_HEART_PIECE_IDS,
+  })
+}
+
+/**
+ * Reconciles officialDoneSlot / officialRevealedSlot with tracked Magic Bean IDs.
+ * Items outside `TRACKED_BEAN_IDS` are never unmarked.
+ */
+export function reconcileBeanLists(params: {
+  doneList: string[]
+  revealedList: string[]
+  collectedIds: string[]
+  authoritative: boolean
+  validBeanIds?: Set<string>
+}): ReconcileResult {
+  return reconcileItemLists({
+    doneList: params.doneList,
+    revealedList: params.revealedList,
+    collectedIds: params.collectedIds,
+    authoritative: params.authoritative,
+    validIds: params.validBeanIds ?? TRACKED_BEAN_IDS,
+  })
+}
+
+/**
+ * Reconciles officialDoneSlot / officialRevealedSlot with tracked Great Fairy IDs.
+ * Items outside `TRACKED_FAIRY_IDS` are never unmarked.
+ */
+export function reconcileFairyLists(params: {
+  doneList: string[]
+  revealedList: string[]
+  collectedIds: string[]
+  authoritative: boolean
+  validFairyIds?: Set<string>
+}): ReconcileResult {
+  return reconcileItemLists({
+    doneList: params.doneList,
+    revealedList: params.revealedList,
+    collectedIds: params.collectedIds,
+    authoritative: params.authoritative,
+    validIds: params.validFairyIds ?? TRACKED_FAIRY_IDS,
+  })
+}
+
+/**
+ * Reconciles officialDoneSlot / officialRevealedSlot with tracked Bottle IDs.
+ * Items outside `TRACKED_BOTTLE_IDS` are never unmarked.
+ */
+export function reconcileBottleLists(params: {
+  doneList: string[]
+  revealedList: string[]
+  collectedIds: string[]
+  authoritative: boolean
+  validBottleIds?: Set<string>
+}): ReconcileResult {
+  return reconcileItemLists({
+    doneList: params.doneList,
+    revealedList: params.revealedList,
+    collectedIds: params.collectedIds,
+    authoritative: params.authoritative,
+    validIds: params.validBottleIds ?? TRACKED_BOTTLE_IDS,
+  })
+}
+
+/**
+ * Reconciles officialDoneSlot / officialRevealedSlot with tracked Fairy Thought IDs.
+ * Items outside `TRACKED_THOUGHT_IDS` are never unmarked.
+ */
+export function reconcileThoughtLists(params: {
+  doneList: string[]
+  revealedList: string[]
+  collectedIds: string[]
+  authoritative: boolean
+  validThoughtIds?: Set<string>
+}): ReconcileResult {
+  return reconcileItemLists({
+    doneList: params.doneList,
+    revealedList: params.revealedList,
+    collectedIds: params.collectedIds,
+    authoritative: params.authoritative,
+    validIds: params.validThoughtIds ?? TRACKED_THOUGHT_IDS,
   })
 }
 
@@ -306,21 +559,74 @@ function syncTrackedCategory(params: {
   }
 }
 
-function processAutoSkulltulas(next: LichiiTelemetryState) {
-  const collectedIds = [...(next.collectedSkulltulaIds ?? [])]
-  if (next.lastCollectedSkulltulaId) {
-    collectedIds.push(next.lastCollectedSkulltulaId)
+function processTrackedCategory(params: {
+  next: LichiiTelemetryState
+  syncState: CategorySyncState
+  enabled: boolean
+  rawCollectedIds: readonly string[] | undefined
+  extraId?: string | null
+  authoritative: boolean
+  validIds: Set<string>
+  formatItemName: (item: Item) => string
+  skulltulaCount: number | null
+}): void {
+  const {
+    next,
+    syncState,
+    enabled,
+    rawCollectedIds,
+    extraId = null,
+    authoritative,
+    validIds,
+    formatItemName,
+    skulltulaCount,
+  } = params
+
+  if (!enabled) {
+    resetCategorySyncState(syncState, false)
+    return
   }
-  const isAuthoritative = Boolean(next.authoritativeSkulltulas)
-  const signature = `${isAuthoritative ? 1 : 0}:${next.lastCollectedSkulltulaId ?? ''}:${collectedIds.join(',')}`
+
+  const baseIds = rawCollectedIds ?? EMPTY_IDS
+  if (
+    syncState.lastCollectedIds !== null &&
+    syncState.lastAuthoritative === authoritative &&
+    syncState.lastExtraId === extraId &&
+    sameStringArray(syncState.lastCollectedIds, baseIds)
+  ) {
+    return
+  }
+
+  syncState.lastCollectedIds = baseIds.slice()
+  syncState.lastAuthoritative = authoritative
+  syncState.lastExtraId = extraId
+
+  const collectedIds = extraId ? [...baseIds, extraId] : (baseIds as string[])
+  const signature = extraId
+    ? `${authoritative ? 1 : 0}:${extraId}:${collectedIds.join(',')}`
+    : `${authoritative ? 1 : 0}:${collectedIds.join(',')}`
 
   syncTrackedCategory({
     next,
+    syncState,
+    enabled,
+    collectedIds,
+    authoritative,
+    signature,
+    validIds,
+    formatItemName,
+    skulltulaCount,
+  })
+}
+
+function processAutoSkulltulas(next: LichiiTelemetryState) {
+  processTrackedCategory({
+    next,
     syncState: gsSyncState,
     enabled: read(lichiiAutoSkulltulaSlot),
-    collectedIds,
-    authoritative: isAuthoritative,
-    signature,
+    rawCollectedIds: next.collectedSkulltulaIds,
+    extraId: next.lastCollectedSkulltulaId || null,
+    authoritative: Boolean(next.authoritativeSkulltulas),
     validIds: gsItemIds,
     formatItemName: (item) => item.name,
     skulltulaCount: next.skulltulaCount,
@@ -328,42 +634,117 @@ function processAutoSkulltulas(next: LichiiTelemetryState) {
 }
 
 function processAutoHeartContainers(next: LichiiTelemetryState) {
-  const collectedIds = next.collectedHeartContainerIds ?? []
   const isAuthoritative = Boolean(next.authoritativeHeartContainers)
-  const signature = `${isAuthoritative ? 1 : 0}:${collectedIds.join(',')}`
-
-  syncTrackedCategory({
+  processTrackedCategory({
     next,
     syncState: heartSyncState,
     enabled: isAuthoritative,
-    collectedIds,
+    rawCollectedIds: next.collectedHeartContainerIds,
     authoritative: isAuthoritative,
-    signature,
     validIds: TRACKED_HEART_CONTAINER_IDS,
     formatItemName: (item) => `Heart Container collected: ${item.name}`,
     skulltulaCount: null,
   })
 }
 
+function processAutoHeartPieces(next: LichiiTelemetryState) {
+  const isAuthoritative = Boolean(next.authoritativeHeartPieces)
+  processTrackedCategory({
+    next,
+    syncState: heartPieceSyncState,
+    enabled: isAuthoritative,
+    rawCollectedIds: next.collectedHeartPieceIds,
+    authoritative: isAuthoritative,
+    validIds: TRACKED_HEART_PIECE_IDS,
+    formatItemName: (item) => `Piece of Heart collected: ${item.name}`,
+    skulltulaCount: null,
+  })
+}
+
+function processAutoBeans(next: LichiiTelemetryState) {
+  const isAuthoritative = Boolean(next.authoritativeBeans)
+  processTrackedCategory({
+    next,
+    syncState: beanSyncState,
+    enabled: isAuthoritative,
+    rawCollectedIds: next.collectedBeanIds,
+    authoritative: isAuthoritative,
+    validIds: TRACKED_BEAN_IDS,
+    formatItemName: (item) => `Magic Bean planted: ${item.name}`,
+    skulltulaCount: null,
+  })
+}
+
+function processAutoFairies(next: LichiiTelemetryState) {
+  const isAuthoritative = Boolean(next.authoritativeFairies)
+  processTrackedCategory({
+    next,
+    syncState: fairySyncState,
+    enabled: isAuthoritative,
+    rawCollectedIds: next.collectedFairyIds,
+    authoritative: isAuthoritative,
+    validIds: TRACKED_FAIRY_IDS,
+    formatItemName: (item) => `Great Fairy visited: ${item.name}`,
+    skulltulaCount: null,
+  })
+}
+
+function processAutoBottles(next: LichiiTelemetryState) {
+  const isAuthoritative = Boolean(next.authoritativeBottles)
+  processTrackedCategory({
+    next,
+    syncState: bottleSyncState,
+    enabled: isAuthoritative,
+    rawCollectedIds: next.collectedBottleIds,
+    authoritative: isAuthoritative,
+    validIds: TRACKED_BOTTLE_IDS,
+    formatItemName: (item) => `Bottle collected: ${item.name}`,
+    skulltulaCount: null,
+  })
+}
+
+function processAutoThoughts(next: LichiiTelemetryState) {
+  const isAuthoritative = Boolean(next.authoritativeThoughts)
+  processTrackedCategory({
+    next,
+    syncState: thoughtSyncState,
+    enabled: isAuthoritative,
+    rawCollectedIds: next.collectedThoughtIds,
+    authoritative: isAuthoritative,
+    validIds: TRACKED_THOUGHT_IDS,
+    formatItemName: (item) => `Fairy Thought read: ${item.name}`,
+    skulltulaCount: null,
+  })
+}
+
 export function applyTelemetryState(data: LichiiTelemetryState) {
-  processAutoSkulltulas(data)
-  processAutoHeartContainers(data)
-  storeState = {
+  if (!isLiveMemoryState(data)) {
+    resetAllCategorySyncStates(true)
+  } else {
+    processAutoSkulltulas(data)
+    processAutoHeartContainers(data)
+    processAutoHeartPieces(data)
+    processAutoBeans(data)
+    processAutoFairies(data)
+    processAutoBottles(data)
+    processAutoThoughts(data)
+  }
+  commitStoreState({
     ...storeState,
     telemetry: data,
     lastError: null,
-  }
-  emitStore()
+  })
 }
 
 export function resetTrackerForTests() {
-  resetCategorySyncState(gsSyncState, true)
-  resetCategorySyncState(heartSyncState, true)
+  resetAllCategorySyncStates(true)
   storeState = {
     telemetry: INITIAL_TELEMETRY,
     toasts: [],
     lastError: null,
   }
+  metaStoreState = storeState
+  positionSnapshot = INITIAL_POSITION
 }
 
 export function getTrackerSnapshotForTests(): StoreState {
@@ -392,9 +773,8 @@ async function pollOnce() {
     const data = (await response.json()) as LichiiTelemetryState
     applyTelemetryState(data)
   } catch (err) {
-    resetCategorySyncState(gsSyncState, true)
-    resetCategorySyncState(heartSyncState, true)
-    storeState = {
+    resetAllCategorySyncStates(true)
+    commitStoreState({
       ...storeState,
       telemetry: {
         ...INITIAL_TELEMETRY,
@@ -402,8 +782,7 @@ async function pollOnce() {
         updatedAt: Date.now(),
       },
       lastError: err instanceof Error ? err.message : 'Connection failed',
-    }
-    emitStore()
+    })
   } finally {
     pollInFlight = false
   }
@@ -500,15 +879,15 @@ function connectEventSource() {
   })
 }
 
-function subscribeStore(listener: () => void): () => void {
-  storeListeners.add(listener)
+function registerSubscriber(listeners: Set<() => void>, listener: () => void): () => void {
+  listeners.add(listener)
   activeSubscribers += 1
   if (activeSubscribers === 1 && typeof window !== 'undefined') {
     void initRemoteSync()
     connectEventSource()
   }
   return () => {
-    storeListeners.delete(listener)
+    listeners.delete(listener)
     activeSubscribers = Math.max(0, activeSubscribers - 1)
     if (activeSubscribers === 0) {
       stopPolling()
@@ -521,8 +900,36 @@ function subscribeStore(listener: () => void): () => void {
   }
 }
 
+function subscribeStore(listener: () => void): () => void {
+  return registerSubscriber(storeListeners, listener)
+}
+
+function subscribeMeta(listener: () => void): () => void {
+  return registerSubscriber(metaListeners, listener)
+}
+
+function subscribePosition(listener: () => void): () => void {
+  return registerSubscriber(positionListeners, listener)
+}
+
 function getStoreSnapshot(): StoreState {
   return storeState
+}
+
+function getMetaSnapshot(): StoreState {
+  return metaStoreState
+}
+
+export function getLichiiPositionSnapshot(): LichiiPositionState {
+  return positionSnapshot
+}
+
+export function subscribeLichiiPosition(listener: () => void): () => void {
+  return subscribePosition(listener)
+}
+
+function getServerPositionSnapshot(): LichiiPositionState {
+  return INITIAL_POSITION
 }
 
 const SERVER_SNAPSHOT: StoreState = {
@@ -536,15 +943,23 @@ function getServerSnapshot(): StoreState {
 }
 
 export function dismissSkulltulaToast(toastId: string): void {
-  storeState = {
+  commitStoreState({
     ...storeState,
     toasts: storeState.toasts.filter((t) => t.id !== toastId),
-  }
-  emitStore()
+  })
 }
 
-export function useLichiiTracker() {
-  const snapshot = useSyncExternalStore(subscribeStore, getStoreSnapshot, getServerSnapshot)
+export function useLichiiPosition(): LichiiPositionState {
+  return useSyncExternalStore(subscribePosition, getLichiiPositionSnapshot, getServerPositionSnapshot)
+}
+
+export function useLichiiTracker(options?: { trackPosition?: boolean }) {
+  const trackPosition = options?.trackPosition ?? true
+  const snapshot = useSyncExternalStore(
+    trackPosition ? subscribeStore : subscribeMeta,
+    trackPosition ? getStoreSnapshot : getMetaSnapshot,
+    getServerSnapshot,
+  )
   const followPlayer = useStored(lichiiFollowSlot)
   const autoMarkSkulltulas = useStored(lichiiAutoSkulltulaSlot)
 
@@ -553,14 +968,21 @@ export function useLichiiTracker() {
     if (snapshot.toasts.length === 0) return
     const timer = setTimeout(() => {
       const cutoff = Date.now() - 6500
-      storeState = {
+      commitStoreState({
         ...storeState,
         toasts: storeState.toasts.filter((t) => t.timestamp > cutoff),
-      }
-      emitStore()
+      })
     }, 7000)
     return () => clearTimeout(timer)
   }, [snapshot.toasts])
+
+  const setFollowPlayer = useCallback((next: boolean) => write(lichiiFollowSlot, next), [])
+  const toggleFollowPlayer = useCallback(() => write(lichiiFollowSlot, !followPlayer), [followPlayer])
+  const setAutoMarkSkulltulas = useCallback((next: boolean) => write(lichiiAutoSkulltulaSlot, next), [])
+  const toggleAutoMarkSkulltulas = useCallback(
+    () => write(lichiiAutoSkulltulaSlot, !autoMarkSkulltulas),
+    [autoMarkSkulltulas],
+  )
 
   return {
     state: snapshot.telemetry,
@@ -568,11 +990,11 @@ export function useLichiiTracker() {
     error: snapshot.lastError,
     lastError: snapshot.lastError,
     followPlayer,
-    setFollowPlayer: (next: boolean) => write(lichiiFollowSlot, next),
-    toggleFollowPlayer: () => write(lichiiFollowSlot, !followPlayer),
+    setFollowPlayer,
+    toggleFollowPlayer,
     autoMarkSkulltulas,
-    setAutoMarkSkulltulas: (next: boolean) => write(lichiiAutoSkulltulaSlot, next),
-    toggleAutoMarkSkulltulas: () => write(lichiiAutoSkulltulaSlot, !autoMarkSkulltulas),
+    setAutoMarkSkulltulas,
+    toggleAutoMarkSkulltulas,
     dismissToast: dismissSkulltulaToast,
     refresh: pollOnce,
   }

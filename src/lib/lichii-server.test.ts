@@ -5,6 +5,7 @@ import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import { dataset, formatFloorLabel } from './data'
 import {
+  classifyGdmCollectibles,
   deriveConnectionStatus,
   deriveDynamicVtables,
   deriveLastPickedItem,
@@ -14,16 +15,31 @@ import {
   getCandidateSaveDirs,
   getLichiiHost,
   getLichiiPort,
+  GHOST_SHOP_COUPON_BOTTLE_ITEM_ID,
+  GHOST_SHOP_COUPON_NUM_HASH,
   isValidSub36Buffer,
+  KNOWN_BEAN_BOOL_HASH_MAP,
+  KNOWN_BOTTLE_BOOL_HASH_MAP,
+  KNOWN_FAIRY_BOOL_HASH_MAP,
   KNOWN_HEART_CONTAINER_HASH_MAP,
+  KNOWN_HEART_PIECE_BOOL_HASH_MAP,
+  KNOWN_HEART_PIECE_HASH_MAP,
   KNOWN_SKULLTULA_HASH_MAP,
+  KNOWN_THOUGHT_BOOL_HASH_MAP,
   LichiiRpcClient,
+  parseGdmBoolEntryBuffer,
+  parseGdmContainerHeader,
+  parseGdmIntEntryBuffer,
   parseGdmSkulltulaCount,
   parseGdmStockNumBuffer,
   parseLichiiPort,
   parseMasterFlagTableBuffer,
+  parseSaveBufCollectibleRange,
+  parseSaveBufHeartPieceBoolRange,
+  parseSaveSlot,
   projectToPlaceMap,
   resolveEffectiveScene,
+  scanGdmContainerHashTableBuffer,
   validateMainBaseHeader,
 } from './lichii-server'
 import { reconcileSkulltulaLists } from './useLichiiTracker'
@@ -363,32 +379,75 @@ describe('parseMasterFlagTableBuffer', () => {
     expect(parsed?.presentItemIds.size).toBe(100)
     expect(parsed?.collectedItemIds).toEqual(['espiritu-gs-01', 'espiritu-gs-02'])
     expect(parsed?.collectedHeartContainerIds).toEqual([])
+    expect(parsed?.collectedHeartPieceIds).toEqual([])
   })
 
-  it('detects collected Heart Containers when 0x100000000n is set and omits when unset', () => {
-    const hcEntry = KNOWN_HEART_CONTAINER_HASH_MAP.find((e) =>
-      e.itemIds.includes('espiritu-heart-01'),
-    )
-    expect(hcEntry).toBeDefined()
-    expect(hcEntry?.hashes).toContain(0x41811f125b1eedd5n)
+  it('detects all 8 Dungeon Heart Containers when 0x100000000n is set and omits when unset', () => {
+    expect(KNOWN_HEART_CONTAINER_HASH_MAP).toHaveLength(8)
+    const allContainerIds = KNOWN_HEART_CONTAINER_HASH_MAP.flatMap((e) => e.itemIds)
+    expect(new Set(allContainerIds).size).toBe(8)
 
-    const collectedBuf = buildSortedTable(
-      new Set(['espiritu-gs-01']),
-      new Map([[0x41811f125b1eedd5n, 0x0002000100000018n]]),
+    const allDatasetIds = new Set(
+      dataset.items.filter((i) => i.cat === 'container').map((i) => i.id),
     )
-    const parsedCollected = parseMasterFlagTableBuffer(collectedBuf)
+    for (const id of allContainerIds) {
+      expect(allDatasetIds.has(id)).toBe(true)
+    }
+
+    const collectedFlags = new Map<bigint, bigint>()
+    const uncollectedFlags = new Map<bigint, bigint>()
+    for (const entry of KNOWN_HEART_CONTAINER_HASH_MAP) {
+      for (const h of entry.hashes) {
+        collectedFlags.set(h, 0x0002000100000018n)
+        uncollectedFlags.set(h, 0x0000000000000018n)
+      }
+    }
+
+    const parsedCollected = parseMasterFlagTableBuffer(
+      buildSortedTable(new Set(['espiritu-gs-01']), collectedFlags),
+    )
     expect(parsedCollected).not.toBeNull()
     expect(parsedCollected?.collectedItemIds).toEqual(['espiritu-gs-01'])
-    expect(parsedCollected?.collectedHeartContainerIds).toEqual(['espiritu-heart-01'])
+    expect(parsedCollected?.collectedHeartContainerIds).toEqual([...allContainerIds].sort())
 
-    const uncollectedBuf = buildSortedTable(
-      new Set(['espiritu-gs-01']),
-      new Map([[0x41811f125b1eedd5n, 0x0000000000000018n]]),
+    const parsedUncollected = parseMasterFlagTableBuffer(
+      buildSortedTable(new Set(['espiritu-gs-01']), uncollectedFlags),
     )
-    const parsedUncollected = parseMasterFlagTableBuffer(uncollectedBuf)
     expect(parsedUncollected).not.toBeNull()
     expect(parsedUncollected?.collectedItemIds).toEqual(['espiritu-gs-01'])
     expect(parsedUncollected?.collectedHeartContainerIds).toEqual([])
+  })
+
+  it('detects all 20 Type 0/1 Heart Pieces when 0x100000000n is set and omits when unset', () => {
+    expect(KNOWN_HEART_PIECE_HASH_MAP).toHaveLength(20)
+    const allHpIds = KNOWN_HEART_PIECE_HASH_MAP.flatMap((e) => e.itemIds)
+    expect(new Set(allHpIds).size).toBe(20)
+
+    const heartItems = new Set(
+      dataset.items.filter((i) => i.cat === 'heart').map((i) => i.id),
+    )
+    for (const id of allHpIds) {
+      expect(heartItems.has(id)).toBe(true)
+    }
+
+    const collectedFlags = new Map<bigint, bigint>()
+    const uncollectedFlags = new Map<bigint, bigint>()
+    for (const entry of KNOWN_HEART_PIECE_HASH_MAP) {
+      for (const h of entry.hashes) {
+        collectedFlags.set(h, 0x0002000100000018n)
+        uncollectedFlags.set(h, 0x0000000000000018n)
+      }
+    }
+
+    const parsedCollected = parseMasterFlagTableBuffer(buildSortedTable(new Set(), collectedFlags))
+    expect(parsedCollected).not.toBeNull()
+    expect(parsedCollected?.collectedHeartPieceIds).toEqual([...allHpIds].sort())
+
+    const parsedUncollected = parseMasterFlagTableBuffer(
+      buildSortedTable(new Set(), uncollectedFlags),
+    )
+    expect(parsedUncollected).not.toBeNull()
+    expect(parsedUncollected?.collectedHeartPieceIds).toEqual([])
   })
 
   it('returns null on bad header or incomplete table', () => {
@@ -397,6 +456,288 @@ describe('parseMasterFlagTableBuffer', () => {
     partial.writeBigUInt64LE(0x00006e56f79838e8n, 0)
     partial.writeBigUInt64LE(0x00006e56f79838ean, 16)
     expect(parseMasterFlagTableBuffer(partial)).toBeNull()
+  })
+})
+
+describe('Type 2 SaveBuf Sec 1 Heart Piece bools', () => {
+  it('covers all 16 remaining Heart Pieces in dataset with no overlap with Master Flag Table', () => {
+    expect(KNOWN_HEART_PIECE_BOOL_HASH_MAP).toHaveLength(16)
+    const boolIds = KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.itemId)
+    const boolHashes = KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.hash >>> 0)
+    expect(new Set(boolIds).size).toBe(16)
+    expect(new Set(boolHashes).size).toBe(16)
+
+    const masterHpIds = new Set(KNOWN_HEART_PIECE_HASH_MAP.flatMap((e) => e.itemIds))
+    for (const id of boolIds) {
+      expect(masterHpIds.has(id)).toBe(false)
+    }
+    expect(masterHpIds.size + boolIds.length).toBe(36)
+
+    const heartItems = new Set(
+      dataset.items.filter((i) => i.cat === 'heart').map((i) => i.id),
+    )
+    for (const id of boolIds) {
+      expect(heartItems.has(id)).toBe(true)
+    }
+  })
+
+  it('parseSaveBufHeartPieceBoolRange verifies hashes and extracts collected Type 2 Heart Pieces', () => {
+    const minOff = 0x100
+    const offsets = new Map<number, number>()
+    const rangeBuf = Buffer.alloc(KNOWN_HEART_PIECE_BOOL_HASH_MAP.length * 16)
+
+    KNOWN_HEART_PIECE_BOOL_HASH_MAP.forEach((entry, idx) => {
+      const rel = idx * 16
+      offsets.set(entry.hash >>> 0, minOff + rel)
+      rangeBuf.writeUInt32LE(entry.hash >>> 0, rel)
+      // Mark even indices collected (1), odd indices uncollected (0)
+      rangeBuf.writeUInt32LE(idx % 2 === 0 ? 1 : 0, rel + 4)
+    })
+
+    const expectedCollected = KNOWN_HEART_PIECE_BOOL_HASH_MAP.filter((_, idx) => idx % 2 === 0)
+      .map((e) => e.itemId)
+      .sort()
+    expect(parseSaveBufHeartPieceBoolRange(rangeBuf, minOff, offsets)).toEqual(expectedCollected)
+
+    // Corrupting a cached u32 hash must return null so caller triggers a re-scan
+    const corrupted = Buffer.from(rangeBuf)
+    corrupted.writeUInt32LE(0xdeadbeef, 0)
+    expect(parseSaveBufHeartPieceBoolRange(corrupted, minOff, offsets)).toBeNull()
+  })
+
+  it('parseSaveSlot collects all 16 Type 2 bools from progress.sav Sec 1 and 64-bit hashes from 0xa3db7114', () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'lichii-hp-save-'))
+    try {
+      const slotDir = path.join(tmpRoot, 'slot_00')
+      fs.mkdirSync(slotDir, { recursive: true })
+
+      // Build synthetic progress.sav:
+      // 0x28 header + 16 Sec 1 entries + 1 section boundary (h=0,v=1) + 1 Sec 2 ptr (0xa3db7114) + data blob
+      const sec1Entries = KNOWN_HEART_PIECE_BOOL_HASH_MAP.length
+      const dirStart = 0x28
+      const dirEntryCount = sec1Entries + 2 // +1 sentinel, +1 0xa3db7114 ptr
+      const dataOff = dirStart + dirEntryCount * 8
+      const blobHashes = [0x88358af5b5300aa9n, 0x292e3ed6acacbe44n, 0xf914fa367471a3e3n]
+      const prog = Buffer.alloc(dataOff + blobHashes.length * 8)
+      prog.writeUInt32LE(dataOff, 8)
+
+      let off = dirStart
+      for (const entry of KNOWN_HEART_PIECE_BOOL_HASH_MAP) {
+        prog.writeUInt32LE(entry.hash >>> 0, off)
+        prog.writeUInt32LE(1, off + 4)
+        off += 8
+      }
+      // Sentinel advancing sec from 1 to 2 (INPLACE_SECTIONS has 1, not 2)
+      prog.writeUInt32LE(0, off)
+      prog.writeUInt32LE(1, off + 4)
+      off += 8
+
+      // 0xa3db7114 pointer entry
+      prog.writeUInt32LE(0xa3db7114, off)
+      prog.writeUInt32LE(dataOff, off + 4)
+
+      blobHashes.forEach((h, i) => {
+        prog.writeBigUInt64LE(h, dataOff + i * 8)
+      })
+
+      fs.writeFileSync(path.join(slotDir, 'progress.sav'), prog)
+      const parsed = parseSaveSlot({ dir: slotDir, key: `hp-test-${Date.now()}`, mtimeMs: 1234 })
+      expect(parsed).not.toBeNull()
+      expect(parsed?.savedHeartPieceBoolIds).toEqual(
+        KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
+      )
+      for (const h of blobHashes) {
+        expect(parsed?.savedHashes.has(h)).toBe(true)
+      }
+    } finally {
+      fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('SaveBuf Sec 1 & Sec 3 Beans, Great Fairies, and Bottles', () => {
+  it('covers all 10 beans, 6 great fairies, 5 bottles, and 19 fairy thoughts in dataset with unique hashes', () => {
+    expect(KNOWN_BEAN_BOOL_HASH_MAP).toHaveLength(10)
+    expect(KNOWN_FAIRY_BOOL_HASH_MAP).toHaveLength(6)
+    expect(KNOWN_BOTTLE_BOOL_HASH_MAP).toHaveLength(4)
+    expect(KNOWN_THOUGHT_BOOL_HASH_MAP).toHaveLength(19)
+
+    const allSec1Entries = [
+      ...KNOWN_HEART_PIECE_BOOL_HASH_MAP,
+      ...KNOWN_BEAN_BOOL_HASH_MAP,
+      ...KNOWN_FAIRY_BOOL_HASH_MAP,
+      ...KNOWN_BOTTLE_BOOL_HASH_MAP,
+      ...KNOWN_THOUGHT_BOOL_HASH_MAP,
+    ]
+    expect(new Set(allSec1Entries.map((e) => e.hash >>> 0)).size).toBe(55)
+    expect(new Set(allSec1Entries.map((e) => e.hash >>> 0)).has(GHOST_SHOP_COUPON_NUM_HASH >>> 0)).toBe(
+      false,
+    )
+
+    const beanItems = new Set(dataset.items.filter((i) => i.cat === 'bean').map((i) => i.id))
+    const fairyItems = new Set(dataset.items.filter((i) => i.cat === 'fairy').map((i) => i.id))
+    const bottleItems = new Set(dataset.items.filter((i) => i.cat === 'bottle').map((i) => i.id))
+    const thoughtItems = new Set(dataset.items.filter((i) => i.cat === 'thought').map((i) => i.id))
+
+    expect(KNOWN_BEAN_BOOL_HASH_MAP.map((e) => e.itemId).sort()).toEqual([...beanItems].sort())
+    expect(
+      KNOWN_BEAN_BOOL_HASH_MAP.map((e) => [e.hash >>> 0, e.itemId]),
+    ).toEqual([
+      [0xb55acadd, 'kokiri-bean-01'],
+      [0x5ebf7c8b, 'perdido-bean-01'],
+      [0x610eb13c, 'perdido-bean-02'],
+      [0x274b7e3d, 'cementerio-bean-01'],
+      [0xf2ceba92, 'sendero-bean-01'],
+      [0x562fab76, 'crater-bean-01'],
+      [0x5eea40a6, 'rio-bean-01'],
+      [0xb0377637, 'lago-bean-01'],
+      [0x50a1775e, 'valle-bean-01'],
+      [0x2a1c58ce, 'coloso-bean-01'],
+    ])
+    expect(KNOWN_FAIRY_BOOL_HASH_MAP.map((e) => e.itemId).sort()).toEqual([...fairyItems].sort())
+    const mappedBottleIds = [
+      ...KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.itemId),
+      GHOST_SHOP_COUPON_BOTTLE_ITEM_ID,
+    ].sort()
+    expect(mappedBottleIds).toEqual([...bottleItems].sort())
+    expect(KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.itemId).sort()).toEqual([...thoughtItems].sort())
+    expect(KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => [e.hash >>> 0, e.itemId])).toEqual([
+      [0x2e9d02ca, 'cementerio-thought-01'],
+      [0x444057da, 'cementerio-thought-02'],
+      [0xbb7912c6, 'coloso-thought-01'],
+      [0x304c49c8, 'hielo-thought-01'],
+      [0x8b8f3a34, 'lago-thought-01'],
+      [0xea520731, 'llanura-thought-01'],
+      [0x668de3c8, 'llanura-thought-02'],
+      [0x74f0b017, 'llanura-thought-03'],
+      [0x8e8f3ae5, 'llanura-thought-04'],
+      [0x00f5171f, 'llanura-thought-05'],
+      [0x151ed981, 'llanura-thought-06'],
+      [0xed1a38ad, 'llanura-thought-07'],
+      [0x4ac77991, 'llanura-thought-08'],
+      [0x87917159, 'llanura-thought-09'],
+      [0x80dffa7d, 'llanura-thought-10'],
+      [0x494cf2ac, 'lonlon-thought-01'],
+      [0xd74884be, 'pozo-thought-01'],
+      [0x39885d67, 'sendero-thought-01'],
+      [0xa2c78425, 'sombra-thought-01'],
+    ])
+  })
+
+  it('parseSaveBufCollectibleRange extracts beans, fairies, bottles, thoughts and handles GhostShop_CouponNum 499 vs 500', () => {
+    const allHashes = [
+      ...KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_BEAN_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_FAIRY_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      GHOST_SHOP_COUPON_NUM_HASH >>> 0,
+    ]
+    const minOff = 0x100
+    const offsets = new Map<number, number>()
+    const rangeBuf = Buffer.alloc(allHashes.length * 16)
+
+    allHashes.forEach((h, idx) => {
+      const rel = idx * 16
+      offsets.set(h, minOff + rel)
+      rangeBuf.writeUInt32LE(h, rel)
+      rangeBuf.writeUInt32LE(h === (GHOST_SHOP_COUPON_NUM_HASH >>> 0) ? 499 : 1, rel + 4)
+    })
+
+    const belowThreshold = parseSaveBufCollectibleRange(rangeBuf, minOff, offsets)
+    expect(belowThreshold).not.toBeNull()
+    expect(belowThreshold?.heartPieceIds).toEqual(
+      KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
+    )
+    expect(belowThreshold?.beanIds).toEqual(KNOWN_BEAN_BOOL_HASH_MAP.map((e) => e.itemId).sort())
+    expect(belowThreshold?.fairyIds).toEqual(KNOWN_FAIRY_BOOL_HASH_MAP.map((e) => e.itemId).sort())
+    expect(belowThreshold?.bottleIds).toEqual(
+      KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
+    )
+    expect(belowThreshold?.thoughtIds).toEqual(
+      KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
+    )
+
+    // Set GhostShop_CouponNum to 500 -> ciudadela-bottle-01 is awarded
+    const couponRel = (allHashes.length - 1) * 16
+    rangeBuf.writeInt32LE(500, couponRel + 4)
+    const atThreshold = parseSaveBufCollectibleRange(rangeBuf, minOff, offsets)
+    expect(atThreshold?.bottleIds).toEqual(
+      [...KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.itemId), GHOST_SHOP_COUPON_BOTTLE_ITEM_ID].sort(),
+    )
+
+    // Corrupting any cached hash must return null
+    const corrupted = Buffer.from(rangeBuf)
+    corrupted.writeUInt32LE(0xdeadbeef, 0)
+    expect(parseSaveBufCollectibleRange(corrupted, minOff, offsets)).toBeNull()
+  })
+
+  it('parseSaveSlot collects all 10 beans, 6 fairies, 5 bottles, and 19 fairy thoughts from progress.sav (499 vs 500)', () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'lichii-collectibles-save-'))
+    try {
+      const slotDir = path.join(tmpRoot, 'slot_00')
+      fs.mkdirSync(slotDir, { recursive: true })
+
+      const buildProgress = (couponScore: number) => {
+        const sec1Entries = [
+          ...KNOWN_BEAN_BOOL_HASH_MAP,
+          ...KNOWN_FAIRY_BOOL_HASH_MAP,
+          ...KNOWN_BOTTLE_BOOL_HASH_MAP,
+          ...KNOWN_THOUGHT_BOOL_HASH_MAP,
+        ]
+        const dirStart = 0x28
+        // Sec 1 entries + sentinel (sec=3) + Sec 3 GhostShop_CouponNum
+        const dirEntryCount = sec1Entries.length + 2
+        const dataOff = dirStart + dirEntryCount * 8
+        const prog = Buffer.alloc(dataOff)
+        prog.writeUInt32LE(dataOff, 8)
+
+        let off = dirStart
+        for (const entry of sec1Entries) {
+          prog.writeUInt32LE(entry.hash >>> 0, off)
+          prog.writeUInt32LE(1, off + 4)
+          off += 8
+        }
+        // Sentinel advancing sec from 1 to 3 (v = 2 -> sec = 3)
+        prog.writeUInt32LE(0, off)
+        prog.writeUInt32LE(2, off + 4)
+        off += 8
+
+        // Sec 3 GhostShop_CouponNum
+        prog.writeUInt32LE(GHOST_SHOP_COUPON_NUM_HASH >>> 0, off)
+        prog.writeInt32LE(couponScore, off + 4)
+        return prog
+      }
+
+      fs.writeFileSync(path.join(slotDir, 'progress.sav'), buildProgress(499))
+      const parsed499 = parseSaveSlot({
+        dir: slotDir,
+        key: `collectibles-499-${Date.now()}`,
+        mtimeMs: 1000,
+      })
+      expect(parsed499?.savedBeanIds).toEqual(KNOWN_BEAN_BOOL_HASH_MAP.map((e) => e.itemId).sort())
+      expect(parsed499?.savedFairyIds).toEqual(
+        KNOWN_FAIRY_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
+      )
+      expect(parsed499?.savedBottleIds).toEqual(
+        KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
+      )
+      expect(parsed499?.savedThoughtIds).toEqual(
+        KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
+      )
+
+      fs.writeFileSync(path.join(slotDir, 'progress.sav'), buildProgress(500))
+      const parsed500 = parseSaveSlot({
+        dir: slotDir,
+        key: `collectibles-500-${Date.now()}`,
+        mtimeMs: 2000,
+      })
+      expect(parsed500?.savedBottleIds).toEqual(
+        [...KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.itemId), GHOST_SHOP_COUPON_BOTTLE_ITEM_ID].sort(),
+      )
+    } finally {
+      fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
   })
 })
 
@@ -593,6 +934,7 @@ describe('Sub[36] and GameDataMgr RAM validators', () => {
       sub36Vt2: 0x84b7ef8cn,
       pObjVt: 0x8583c7c8n,
       gdmVt: 0x858f2270n,
+      gdmBoolVt: 0x858ba658n,
       gdmStockVt: 0x858ba718n,
       gdmCountVt: 0x858bae98n,
     })
@@ -634,6 +976,152 @@ describe('Sub[36] and GameDataMgr RAM validators', () => {
     const badStockTag = Buffer.from(slidGdmStock)
     badStockTag.writeUInt32LE(8, 8)
     expect(parseGdmStockNumBuffer(badStockTag, vtables.gdmStockVt)).toBeNull()
+  })
+})
+
+describe('Live GameDataMgr +0x170 Bool & +0x230 Int containers', () => {
+  it('parseGdmContainerHeader validates gdm + 0x170 Bool container dimensions and rejects invalid headers', () => {
+    const hdr = Buffer.alloc(0x28)
+    hdr.writeUInt32LE(11292, 0x08)
+    hdr.writeBigUInt64LE(0x218551d418n, 0x10)
+    hdr.writeBigUInt64LE(0x21854f1258n, 0x18)
+    hdr.writeUInt32LE(22584, 0x24)
+
+    expect(parseGdmContainerHeader(hdr)).toEqual({
+      cnt: 11292,
+      entriesPtr: 0x218551d418n,
+      hashTablePtr: 0x21854f1258n,
+      cap: 22584,
+    })
+
+    const badCap = Buffer.from(hdr)
+    badCap.writeUInt32LE(100, 0x24)
+    expect(parseGdmContainerHeader(badCap)).toBeNull()
+
+    const badPtr = Buffer.from(hdr)
+    badPtr.writeBigUInt64LE(0x1000n, 0x10)
+    expect(parseGdmContainerHeader(badPtr)).toBeNull()
+
+    expect(parseGdmContainerHeader(Buffer.alloc(0x20))).toBeNull()
+    expect(parseGdmContainerHeader(null)).toBeNull()
+  })
+
+  it('scanGdmContainerHashTableBuffer resolves all 55 Bool entries (0x18 stride) and GhostShop_CouponNum (0x28 stride)', () => {
+    const allBoolHashes = [
+      ...KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_BEAN_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_FAIRY_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+    ]
+    const boolTargetSet = new Set(allBoolHashes)
+    const entriesPtr = 0x218551d418n
+    const cnt = 11292
+
+    // Include an out-of-range idx entry that must be ignored, plus all 55 valid entries
+    const hashBuf = Buffer.alloc((allBoolHashes.length + 1) * 8)
+    hashBuf.writeUInt32LE(0x2a1c58ce, 0)
+    hashBuf.writeUInt32LE(cnt, 4) // idx === cnt -> out of range, must be ignored
+
+    allBoolHashes.forEach((h, i) => {
+      const off = (i + 1) * 8
+      hashBuf.writeUInt32LE(h, off)
+      // Use idx=9240 for coloso-bean-01 (0x2a1c58ce) to match live memory layout
+      const idx = h === 0x2a1c58ce ? 9240 : 9000 + i
+      hashBuf.writeUInt32LE(idx, off + 4)
+    })
+
+    const boolAddrs = scanGdmContainerHashTableBuffer(
+      hashBuf,
+      cnt,
+      boolTargetSet,
+      entriesPtr,
+      0x18n,
+    )
+    expect(boolAddrs.size).toBe(55)
+    expect(boolAddrs.get(0x2a1c58ce)).toBe(entriesPtr + 9240n * 0x18n)
+    expect(boolAddrs.has(0x8e8f3ae5)).toBe(true)
+
+    // Int container GhostShop_CouponNum (0xe3407cee, idx=822, 0x28 stride)
+    const intEntriesPtr = 0x2185600000n
+    const intHashBuf = Buffer.alloc(16)
+    intHashBuf.writeUInt32LE(0x11223344, 0)
+    intHashBuf.writeUInt32LE(10, 4)
+    intHashBuf.writeUInt32LE(GHOST_SHOP_COUPON_NUM_HASH >>> 0, 8)
+    intHashBuf.writeUInt32LE(822, 12)
+
+    const intAddrs = scanGdmContainerHashTableBuffer(
+      intHashBuf,
+      2000,
+      new Set([GHOST_SHOP_COUPON_NUM_HASH >>> 0]),
+      intEntriesPtr,
+      0x28n,
+    )
+    expect(intAddrs.get(GHOST_SHOP_COUPON_NUM_HASH >>> 0)).toBe(intEntriesPtr + 822n * 0x28n)
+  })
+
+  it('parseGdmBoolEntryBuffer and parseGdmIntEntryBuffer validate vtables and read +0x16 / +0x1c values', () => {
+    const vtables = deriveDynamicVtables(0x80075000n)
+    expect(vtables.gdmBoolVt).toBe(0x84c95658n)
+    expect(vtables.gdmStockVt).toBe(0x84c95718n)
+
+    // Two 0x18-byte Bool entries in one coalesced buffer: [false, true]
+    const boolBuf = Buffer.alloc(0x30)
+    boolBuf.writeBigUInt64LE(vtables.gdmBoolVt, 0x00)
+    boolBuf.writeUInt8(0, 0x16)
+    boolBuf.writeBigUInt64LE(vtables.gdmBoolVt, 0x18)
+    boolBuf.writeUInt8(1, 0x18 + 0x16)
+
+    expect(parseGdmBoolEntryBuffer(boolBuf, vtables.gdmBoolVt, 0x00)).toBe(false)
+    expect(parseGdmBoolEntryBuffer(boolBuf, vtables.gdmBoolVt, 0x18)).toBe(true)
+    expect(parseGdmBoolEntryBuffer(boolBuf, 0xdeadbeefn, 0x18)).toBeNull()
+    expect(parseGdmBoolEntryBuffer(boolBuf.subarray(0, 0x17), vtables.gdmBoolVt, 0)).toBeNull()
+
+    // 0x28-byte Int entry for GhostShop_CouponNum at +0x1c
+    const intBuf = Buffer.alloc(0x28)
+    intBuf.writeBigUInt64LE(vtables.gdmStockVt, 0x00)
+    intBuf.writeInt32LE(499, 0x1c)
+    expect(parseGdmIntEntryBuffer(intBuf, vtables.gdmStockVt)).toBe(499)
+
+    intBuf.writeInt32LE(500, 0x1c)
+    expect(parseGdmIntEntryBuffer(intBuf, vtables.gdmStockVt)).toBe(500)
+    expect(parseGdmIntEntryBuffer(intBuf, 0xdeadbeefn)).toBeNull()
+    expect(parseGdmIntEntryBuffer(intBuf.subarray(0, 0x20), vtables.gdmStockVt)).toBeNull()
+  })
+
+  it('classifyGdmCollectibles maps all 55 Bool entries and GhostShop_CouponNum threshold (499 vs 500)', () => {
+    const boolValues = new Map<number, boolean>()
+    for (const e of KNOWN_HEART_PIECE_BOOL_HASH_MAP) boolValues.set(e.hash >>> 0, false)
+    for (const e of KNOWN_BEAN_BOOL_HASH_MAP) boolValues.set(e.hash >>> 0, false)
+    for (const e of KNOWN_FAIRY_BOOL_HASH_MAP) boolValues.set(e.hash >>> 0, false)
+    for (const e of KNOWN_BOTTLE_BOOL_HASH_MAP) boolValues.set(e.hash >>> 0, false)
+    for (const e of KNOWN_THOUGHT_BOOL_HASH_MAP) boolValues.set(e.hash >>> 0, false)
+
+    boolValues.set(0x2a1c58ce, true) // coloso-bean-01
+    boolValues.set(0x8fa2608e, true) // castillo-fairy-01
+    boolValues.set(0x7a7961c3, true) // kakariko-bottle-01
+    boolValues.set(0x5ff7aa30, true) // perdido-heart-01
+    boolValues.set(0x8e8f3ae5, true) // llanura-thought-04
+
+    expect(classifyGdmCollectibles(boolValues, 499)).toEqual({
+      heartPieceIds: ['perdido-heart-01'],
+      beanIds: ['coloso-bean-01'],
+      fairyIds: ['castillo-fairy-01'],
+      bottleIds: ['kakariko-bottle-01'],
+      thoughtIds: ['llanura-thought-04'],
+    })
+
+    expect(classifyGdmCollectibles(boolValues, 500)).toEqual({
+      heartPieceIds: ['perdido-heart-01'],
+      beanIds: ['coloso-bean-01'],
+      fairyIds: ['castillo-fairy-01'],
+      bottleIds: [GHOST_SHOP_COUPON_BOTTLE_ITEM_ID, 'kakariko-bottle-01'].sort(),
+      thoughtIds: ['llanura-thought-04'],
+    })
+
+    expect(classifyGdmCollectibles(boolValues, null)).toBeNull()
+    boolValues.delete(0x2a1c58ce)
+    expect(classifyGdmCollectibles(boolValues, 500)).toBeNull()
   })
 })
 

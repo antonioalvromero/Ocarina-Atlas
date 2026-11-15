@@ -1,10 +1,11 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, Check, EyeOff, Maximize2, Minimize2, Trash2, X } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { dataset, formatFloorLabel, isUnplaced, itemsOfPlace, matchesAge, startMapOf } from '../lib/data'
 import { floorToGrid, gridPoint, layoutFloors } from '../lib/floorGrid'
+import { useI18n, type TranslationKey } from '../lib/i18n'
 import { findMerge, type Merge } from '../lib/merge'
-import { OTHER_PIN, pinTypeLabel } from '../lib/pinTypes'
+import { OTHER_PIN, PIN_TYPES, pinTypeLabel } from '../lib/pinTypes'
 import {
   addPin,
   ageFilterSlot,
@@ -24,19 +25,42 @@ import {
 } from '../lib/storage'
 import type { Fraction, Item, Place, PlaceMap } from '../lib/types'
 import { useFullscreenMap } from '../lib/useFullscreenMap'
-import { isLiveMemoryState, useLichiiTracker } from '../lib/useLichiiTracker'
+import {
+  getLichiiPositionSnapshot,
+  isLiveMemoryState,
+  subscribeLichiiPosition,
+  useLichiiTracker,
+} from '../lib/useLichiiTracker'
 import { categoryStyle } from './categories'
 import { FloorGrid, type FloorDraft } from './FloorGrid'
 import { ItemDetail } from './ItemDetail'
+import { LanguageSelector } from './LanguageSelector'
 import { LichiiStatusPanel } from './LichiiStatusPanel'
 import { MapViewport, type MapViewportHandle, type Projection } from './MapViewport'
 import { MergeNotice } from './MergeNotice'
 import { NewPinPopover } from './NewPinPopover'
 import { CustomPinList, OfficialList, OfficialToggle, RevealedList, Section } from './Panels'
 import { CustomMarker, DraftMarker, MergeTrail, OfficialMarker } from './Pins'
-import { PlayerPin } from './PlayerPin'
+import { LivePlayerPin } from './PlayerPin'
 
 type Selection = { kind: 'custom'; id: string; mapId: string } | { kind: 'item'; id: string } | null
+
+const PIN_TYPE_KEYS = new Set<string>(PIN_TYPES.map((p) => p.key))
+
+function translatedPinTypeLabel(type: string, t: (key: TranslationKey) => string): string {
+  if (PIN_TYPE_KEYS.has(type)) {
+    return t(`pin.type.${type}` as TranslationKey)
+  }
+  return pinTypeLabel(type)
+}
+
+function translateFloorLabel(labelOrId: string, t: (key: TranslationKey) => string): string {
+  const formatted = formatFloorLabel(labelOrId)
+  if (formatted === 'Child') return t('floor.child')
+  if (formatted === 'Adult') return t('floor.adult')
+  if (formatted === 'Main') return t('floor.main')
+  return formatted
+}
 
 function useOfficialProgress(items: Item[]) {
   const doneIds = useStored(officialDoneSlot)
@@ -45,17 +69,18 @@ function useOfficialProgress(items: Item[]) {
 }
 
 function ItemCount({ placeId, progress, total }: { placeId: string; progress: number; total: number }) {
+  const { t } = useI18n()
   const shown = useStored(itemCountVisibleSlot).includes(placeId)
   return (
     <>
       {' · '}
-      {shown && <span className="tabular-nums">{progress}/{total} items · </span>}
+      {shown && <span className="tabular-nums">{t('place.itemsCount', { done: progress, total })} · </span>}
       <button
         type="button"
         onClick={() => toggleInList(itemCountVisibleSlot, placeId)}
         className="cursor-pointer underline hover:text-parchment-50"
       >
-        {shown ? 'Hide' : 'Show item count'}
+        {shown ? t('place.hideCount') : t('place.showItemCount')}
       </button>
     </>
   )
@@ -74,37 +99,43 @@ function Sidebar({
   onEnterFullscreen?: () => void
   children: ReactNode
 }) {
+  const { t, tPlace, tRegion, tPlaceIntro } = useI18n()
   return (
     <aside className="flex min-h-0 flex-1 flex-col overflow-y-auto border-ink-700 bg-ink-900 max-lg:border-t max-lg:landscape:w-72 max-lg:landscape:flex-none max-lg:landscape:border-t-0 max-lg:landscape:border-l lg:w-96 lg:flex-none lg:border-l">
       <header className="px-4 pt-3 pb-3">
         <div className="flex items-center justify-between gap-2">
           <Link to="/" className="inline-flex items-center gap-1 text-xs text-parchment-400 hover:text-parchment-50">
-            <ArrowLeft size={13} /> Atlas
+            <ArrowLeft size={13} /> {t('place.atlas')}
           </Link>
-          {onEnterFullscreen && (
-            <button
-              type="button"
-              onClick={onEnterFullscreen}
-              aria-label="Enter fullscreen map"
-              title="Fullscreen map"
-              className="inline-flex cursor-pointer items-center gap-1 rounded border border-ink-600 bg-ink-800/90 px-2 py-0.5 text-xs font-medium text-parchment-200 transition-colors hover:border-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
-            >
-              <Maximize2 size={12} />
-              Fullscreen
-            </button>
-          )}
+          <div className="flex items-center gap-1.5">
+            <LanguageSelector />
+            {onEnterFullscreen && (
+              <button
+                type="button"
+                onClick={onEnterFullscreen}
+                aria-label={t('map.enterFullscreen')}
+                title={t('map.fullscreenMap')}
+                className="inline-flex cursor-pointer items-center gap-1 rounded border border-ink-600 bg-ink-800/90 px-2 py-0.5 text-xs font-medium text-parchment-200 transition-colors hover:border-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
+              >
+                <Maximize2 size={12} />
+                {t('map.fullscreen')}
+              </button>
+            )}
+          </div>
         </div>
-        <h1 className="mt-1.5 font-serif text-2xl leading-tight text-parchment-50">{place.name}</h1>
+        <h1 className="mt-1.5 font-serif text-2xl leading-tight text-parchment-50">{tPlace(place.id, place.name)}</h1>
         <p className="mt-0.5 text-xs text-parchment-400">
           <span className={place.kind === 'dungeon' ? 'text-ember' : ''}>
-            {place.kind === 'dungeon' ? 'Dungeon' : 'Zone'}
-          </span>{' '}
-          in {place.region}
+            {t('place.inRegion', {
+              kind: t(place.kind === 'dungeon' ? 'world.dungeon' : 'world.zone'),
+              region: tRegion(place.region),
+            })}
+          </span>
           {total > 0 && <ItemCount placeId={place.id} progress={progress} total={total} />}
         </p>
         <details className="mt-2 text-sm leading-relaxed text-parchment-200">
-          <summary className="cursor-pointer text-xs text-parchment-400 hover:text-parchment-50">About this place</summary>
-          <p className="mt-1">{place.intro}</p>
+          <summary className="cursor-pointer text-xs text-parchment-400 hover:text-parchment-50">{t('place.about')}</summary>
+          <p className="mt-1">{tPlaceIntro(place.id, place.intro)}</p>
         </details>
       </header>
       {children}
@@ -127,10 +158,11 @@ function MapSwitcher({
   onChange: (id: string) => void
   allFloors?: { active: boolean; onShow: () => void }
 }) {
+  const { t } = useI18n()
   return (
     <div
       role="group"
-      aria-label="Choose a map"
+      aria-label={t('place.chooseMap')}
       className="absolute top-3 left-3 z-30 flex max-w-[calc(100%-8.5rem)] overflow-x-auto overflow-y-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg"
     >
       {allFloors && (
@@ -142,7 +174,7 @@ function MapSwitcher({
             allFloors.active ? 'bg-parchment-200 font-medium text-ink-950' : 'text-parchment-200 hover:bg-ink-700'
           }`}
         >
-          All floors
+          {t('place.allFloors')}
         </button>
       )}
       {maps.map((map) => {
@@ -159,7 +191,7 @@ function MapSwitcher({
           >
             {hasPlayer && (
               <span
-                title={playerLive ? 'Link is on this floor' : 'Link is on this floor (Saved)'}
+                title={playerLive ? t('place.linkOnFloor') : t('place.linkOnFloorSaved')}
                 className={`size-2 rounded-full ${
                   map.id === current
                     ? playerLive
@@ -171,7 +203,7 @@ function MapSwitcher({
                 }`}
               />
             )}
-            {formatFloorLabel(map.label)}
+            {translateFloorLabel(map.label, t)}
           </button>
         )
       })}
@@ -190,6 +222,7 @@ function FloorPinList({
   selectedId: string | null
   onSelect: (pin: CustomPin) => void
 }) {
+  const { t } = useI18n()
   const pins = useStored(pinsSlot(place.id, map.id))
   return (
     <CustomPinList
@@ -198,7 +231,7 @@ function FloorPinList({
       mapId={map.id}
       selectedId={selectedId}
       onSelect={onSelect}
-      title={`Your pins · ${formatFloorLabel(map.label)}`}
+      title={t('place.yourPinsFloor', { floor: translateFloorLabel(map.label, t) })}
       hideWhenEmpty
     />
   )
@@ -215,6 +248,7 @@ function PinPopoverFrame({
   title: string
   children: ReactNode
 }) {
+  const { t } = useI18n()
   const width = Math.min(288, Math.max(220, projection.size.width - 24))
   const pt = projection.project(at)
   const left = Math.min(Math.max(12, pt.x - width / 2), Math.max(12, projection.size.width - width - 12))
@@ -227,7 +261,7 @@ function PinPopoverFrame({
     <div
       data-pin-popover
       role="dialog"
-      aria-label={`${title} details`}
+      aria-label={t('world.placeDetails', { name: title })}
       style={style}
       className="pointer-events-auto absolute z-50 max-h-[min(65dvh,360px)] overflow-y-auto rounded-lg border border-ink-600 bg-ink-900/95 p-3 text-parchment-50 shadow-xl backdrop-blur-sm"
     >
@@ -251,18 +285,20 @@ function ItemPinPopover({
   revealed: boolean
   onClose: () => void
 }) {
+  const { t, tItemName } = useI18n()
   const { icon: Icon, color } = categoryStyle(item.cat)
+  const itemName = tItemName(item.id, item.name)
   return (
-    <PinPopoverFrame at={at} projection={projection} title={item.name}>
+    <PinPopoverFrame at={at} projection={projection} title={itemName}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-1.5">
           <Icon size={15} style={{ color }} className="shrink-0" aria-hidden />
-          <h2 className="truncate font-serif text-base leading-tight text-parchment-50">{item.name}</h2>
+          <h2 className="truncate font-serif text-base leading-tight text-parchment-50">{itemName}</h2>
         </div>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close pin info"
+          aria-label={t('panel.closePinInfo')}
           className="-mt-0.5 -mr-0.5 grid size-6 shrink-0 cursor-pointer place-items-center rounded text-parchment-400 transition-colors hover:bg-ink-800 hover:text-parchment-50"
         >
           <X size={14} />
@@ -280,7 +316,7 @@ function ItemPinPopover({
           }`}
         >
           <Check size={12} strokeWidth={3} />
-          {done ? 'Completed' : 'Mark completed'}
+          {done ? t('panel.completed') : t('panel.markCompleted')}
         </button>
         {revealed && (
           <button
@@ -292,7 +328,7 @@ function ItemPinPopover({
             className="inline-flex cursor-pointer items-center gap-1 rounded border border-ink-600 px-2 py-1 text-xs text-parchment-200 hover:border-parchment-400"
           >
             <EyeOff size={12} />
-            Hide again
+            {t('panel.hideAgain')}
           </button>
         )}
       </div>
@@ -318,6 +354,7 @@ function CustomPinPopover({
   projectAnchor?: (pin: CustomPin) => Fraction | null
   onClose: () => void
 }) {
+  const { t } = useI18n()
   const pins = useStored(pinsSlot(placeId, mapId))
   const pin = pins.find((p) => p.id === pinId)
   const [name, setName] = useState(pin?.name ?? '')
@@ -349,7 +386,7 @@ function CustomPinPopover({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close pin info"
+          aria-label={t('panel.closePinInfo')}
           className="-mt-0.5 -mr-0.5 grid size-6 shrink-0 cursor-pointer place-items-center rounded text-parchment-400 transition-colors hover:bg-ink-800 hover:text-parchment-50"
         >
           <X size={14} />
@@ -367,11 +404,11 @@ function CustomPinPopover({
           }`}
         >
           <Check size={12} strokeWidth={3} />
-          {pin.done ? 'Completed' : 'Mark completed'}
+          {pin.done ? t('panel.completed') : t('panel.markCompleted')}
         </button>
         <button
           type="button"
-          aria-label={`Delete ${pin.name}`}
+          aria-label={t('panel.deleteItem', { name: pin.name })}
           onClick={() => {
             removePin(placeId, mapId, pin.id)
             onClose()
@@ -383,7 +420,7 @@ function CustomPinPopover({
       </div>
       <form onSubmit={rename} className="mt-2 flex gap-1.5">
         <input
-          aria-label={`Rename ${pin.name}`}
+          aria-label={t('panel.renameItem', { name: pin.name })}
           value={name}
           maxLength={80}
           onChange={(event) => setName(event.target.value)}
@@ -394,7 +431,7 @@ function CustomPinPopover({
           disabled={!name.trim() || name.trim() === pin.name}
           className="cursor-pointer rounded bg-parchment-200 px-2 py-1 text-xs font-medium text-ink-950 hover:bg-parchment-50 disabled:opacity-40"
         >
-          Rename
+          {t('common.rename')}
         </button>
       </form>
     </PinPopoverFrame>
@@ -417,9 +454,23 @@ function resolvePlayerMapId(place: Place, rawMapId: string | null, age: 'child' 
   return place.startMap ?? place.maps[0]?.id ?? null
 }
 
-function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) {
+function MappedPlace({
+  place,
+  firstMap,
+  initialItemId,
+  initialMapId,
+}: {
+  place: Place
+  firstMap: PlaceMap
+  initialItemId?: string
+  initialMapId?: string
+}) {
+  const { t, tPlace } = useI18n()
   const navigate = useNavigate()
-  const tracker = useLichiiTracker()
+  const hasFloorGrid = place.kind === 'dungeon' && place.maps.length > 1
+  const [showAllFloors, setShowAllFloors] = useState(false)
+  const allFloors = hasFloorGrid && showAllFloors
+  const tracker = useLichiiTracker({ trackPosition: allFloors })
   const isLiveMemory = isLiveMemoryState(tracker.state)
   const hasPlayerPin = isLiveMemory || tracker.state.source === 'save'
   const isPlayerInPlace =
@@ -429,16 +480,28 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
     ? resolvePlayerMapId(place, tracker.state.mapId, tracker.state.age)
     : null
 
+  const items = useMemo(() => itemsOfPlace(place.id), [place.id])
+  const initialItem = useMemo(
+    () => (initialItemId ? items.find((item) => item.id === initialItemId) ?? null : null),
+    [initialItemId, items],
+  )
+
   const [map, setMap] = useState<PlaceMap>(() => {
+    const requestedMapId = initialMapId ?? initialItem?.at?.map
+    if (requestedMapId) {
+      const matched = place.maps.find((candidate) => candidate.id === requestedMapId)
+      if (matched) return matched
+    }
     if (playerMapId) {
       const matched = place.maps.find((candidate) => candidate.id === playerMapId)
       if (matched) return matched
     }
     return firstMap
   })
-  const [selection, setSelection] = useState<Selection>(null)
+  const [selection, setSelection] = useState<Selection>(() =>
+    initialItem ? { kind: 'item', id: initialItem.id } : null,
+  )
   const [draft, setDraft] = useState<FloorDraft | null>(null)
-  const [showAllFloors, setShowAllFloors] = useState(false)
   const [merge, setMerge] = useState<Merge | null>(null)
   const mainRef = useRef<HTMLElement>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
@@ -477,18 +540,24 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
   const revealedIds = useStored(officialRevealedSlot)
   const revealed = useMemo(() => new Set(revealedIds), [revealedIds])
 
-  const items = useMemo(() => itemsOfPlace(place.id), [place.id])
   const { done, count } = useOfficialProgress(items)
-  const hasFloorGrid = place.kind === 'dungeon' && place.maps.length > 1
   const grid = useMemo(() => layoutFloors(place.maps), [place.maps])
-  const allFloors = hasFloorGrid && showAllFloors
-  const inView = items.filter((item) => (allFloors ? item.at : item.at?.map === map.id))
-  const onMap = inView.filter((item) => matchesAge(item, age))
-  const unplaced = items.filter((item) => matchesAge(item, age) && isUnplaced(item, place))
+  const inView = useMemo(
+    () => items.filter((item) => (allFloors ? item.at : item.at?.map === map.id)),
+    [items, allFloors, map.id],
+  )
+  const onMap = useMemo(() => inView.filter((item) => matchesAge(item, age)), [inView, age])
+  const unplaced = useMemo(
+    () => items.filter((item) => matchesAge(item, age) && isUnplaced(item, place)),
+    [items, age, place],
+  )
   // With official pins off, only reveals count, and no filter can hide those.
-  const isShown = (item: Item) =>
-    showOfficial ? matchesAge(item, age) && !hidden.includes(item.cat) : revealed.has(item.id)
-  const shownOnMap = inView.filter(isShown)
+  const isShown = useCallback(
+    (item: Item) =>
+      showOfficial ? matchesAge(item, age) && !hidden.includes(item.cat) : revealed.has(item.id),
+    [showOfficial, age, hidden, revealed],
+  )
+  const shownOnMap = useMemo(() => inView.filter(isShown), [inView, isShown])
 
   const selectedCustom = selection?.kind === 'custom' ? selection.id : null
   const selectedItem = selection?.kind === 'item' ? selection.id : null
@@ -549,6 +618,32 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
     navigate,
   ])
 
+  useEffect(() => {
+    if (!tracker.followPlayer || !isLiveMemory || !isPlayerInPlace) return
+    const resolveTarget = (): Fraction | null => {
+      const at = getLichiiPositionSnapshot().mapFraction
+      if (!at) return null
+      if (allFloors) {
+        if (!playerMapId) return null
+        const cell = grid.cells.find((c) => c.map.id === playerMapId)
+        return cell ? floorToGrid(cell, at) : null
+      }
+      if (playerMapId && playerMapId !== map.id) return null
+      return at
+    }
+    const syncCamera = (snap: boolean) => {
+      const target = resolveTarget()
+      if (!target) return
+      if (snap) {
+        viewport.current?.centerOn(target)
+      } else {
+        viewport.current?.panToFraction(target.x, target.y)
+      }
+    }
+    syncCamera(true)
+    return subscribeLichiiPosition(() => syncCamera(false))
+  }, [tracker.followPlayer, isLiveMemory, isPlayerInPlace, allFloors, playerMapId, map.id, grid])
+
   function toggleSelection(next: NonNullable<Selection>, focus?: Fraction | null) {
     const closing = selection?.kind === next.kind && selection.id === next.id
     setSelection(closing ? null : next)
@@ -596,7 +691,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
     setSelection(null)
   }
 
-  function createPin(type: string, name = pinTypeLabel(type)) {
+  function createPin(type: string, name = translatedPinTypeLabel(type, t)) {
     if (!draft) return
     const floor = place.maps.find((candidate) => candidate.id === draft.mapId)
     const match =
@@ -635,6 +730,10 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
     toggleSelection({ kind: 'item', id: item.id }, item.at && focusPoint(item.at.map, item.at))
   }
 
+  const centerOnPlayerPoint = useCallback((at: Fraction) => {
+    viewport.current?.centerOn(at)
+  }, [])
+
   function jumpToPlayer() {
     const targetPlace = dataset.places.find(
       (p) => p.id === tracker.state.placeId || p.slug === tracker.state.placeSlug,
@@ -649,7 +748,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
       if (next) setMap(next)
       if (allFloors) setShowAllFloors(false)
     }
-    const targetAt = tracker.state.mapFraction
+    const targetAt = getLichiiPositionSnapshot().mapFraction
     if (targetAt) {
       viewport.current?.centerOn(targetAt)
       setTimeout(() => viewport.current?.centerOn(targetAt), 0)
@@ -734,7 +833,10 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
             ref={viewport}
             viewId={`${place.id}:${map.id}`}
             image={map.image}
-            alt={`Map of ${place.name}, ${formatFloorLabel(map.label)}`}
+            alt={t('place.mapAlt', {
+              place: tPlace(place.id, place.name),
+              floor: translateFloorLabel(map.label, t),
+            })}
             aspect={map.aspect}
             onMapClick={(at) => {
               setDraft({ mapId: map.id, at })
@@ -785,21 +887,15 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
                 onSelect={() => toggleSelection({ kind: 'custom', id: pin.id, mapId: map.id })}
               />
             ))}
-            {isPlayerInPlace &&
-              playerMapId === map.id &&
-              tracker.state.mapFraction && (
-                <PlayerPin
-                  at={tracker.state.mapFraction}
-                  yaw={tracker.state.position?.yaw}
-                  live={isLiveMemory}
-                  label="Link"
-                  sublabel={formatFloorLabel(map.label)}
-                  position3d={tracker.state.position}
-                  onClick={() =>
-                    tracker.state.mapFraction && viewport.current?.centerOn(tracker.state.mapFraction)
-                  }
-                />
-              )}
+            {isPlayerInPlace && playerMapId === map.id && (
+              <LivePlayerPin
+                mode="place"
+                live={isLiveMemory}
+                label={t('common.link')}
+                sublabel={translateFloorLabel(map.label, t)}
+                onClick={centerOnPlayerPoint}
+              />
+            )}
             {draft && <DraftMarker at={draft.at} />}
             {merge && <MergeTrail key={merge.id} merge={merge} />}
           </MapViewport>
@@ -828,23 +924,23 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
           <button
             type="button"
             onClick={() => void exitFullscreen()}
-            aria-label="Exit fullscreen map"
-            title="Exit fullscreen map"
+            aria-label={t('map.exitFullscreenAria')}
+            title={t('map.exitFullscreenAria')}
             className="absolute top-3 right-3 z-40 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-3 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800"
           >
             <Minimize2 size={14} />
-            Exit fullscreen
+            {t('map.exitFullscreen')}
           </button>
         ) : (
           <button
             type="button"
             onClick={() => void enterFullscreen()}
-            aria-label="Enter fullscreen map"
-            title="Fullscreen map"
+            aria-label={t('map.enterFullscreen')}
+            title={t('map.fullscreenMap')}
             className="absolute top-3 right-3 z-30 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-2.5 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800 lg:hidden"
           >
             <Maximize2 size={14} />
-            <span className="max-sm:hidden">Fullscreen</span>
+            <span className="max-sm:hidden">{t('map.fullscreen')}</span>
           </button>
         )}
         {!isFullscreen && (
@@ -871,8 +967,8 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
         <Sidebar place={place} progress={count} total={items.length} onEnterFullscreen={() => void enterFullscreen()}>
           {allFloors ? (
             <>
-              <Section title="Your pins">
-                <p className="text-sm text-parchment-400">Click any floor to add a pin.</p>
+              <Section title={t('place.yourPins')}>
+                <p className="text-sm text-parchment-400">{t('place.clickFloorToAdd')}</p>
               </Section>
               {place.maps.map((floor) => (
                 <FloorPinList
@@ -893,7 +989,7 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
               onSelect={(pin) => toggleSelection({ kind: 'custom', id: pin.id, mapId: map.id }, pin)}
             />
           )}
-          <Section title="Official pins" aside={<OfficialToggle on={showOfficial} />}>
+          <Section title={t('place.officialPins')} aside={<OfficialToggle on={showOfficial} />}>
             {showOfficial ? (
               <OfficialList
                 onMap={onMap}
@@ -914,15 +1010,18 @@ function MappedPlace({ place, firstMap }: { place: Place; firstMap: PlaceMap }) 
   )
 }
 
-function MaplessPlace({ place }: { place: Place }) {
+function MaplessPlace({ place, initialItemId }: { place: Place; initialItemId?: string }) {
+  const { t } = useI18n()
   const navigate = useNavigate()
-  const tracker = useLichiiTracker()
+  const tracker = useLichiiTracker({ trackPosition: false })
   const isLiveMemory = isLiveMemoryState(tracker.state)
-  const [selected, setSelected] = useState<string | null>(null)
+  const items = useMemo(() => itemsOfPlace(place.id), [place.id])
+  const [selected, setSelected] = useState<string | null>(() =>
+    initialItemId && items.some((item) => item.id === initialItemId) ? initialItemId : null,
+  )
   const hidden = useStored(hiddenCategoriesSlot)
   const age = useStored(ageFilterSlot)
   const showOfficial = useStored(officialVisibleSlot)
-  const items = useMemo(() => itemsOfPlace(place.id), [place.id])
   const { done, count } = useOfficialProgress(items)
 
   const targetPlace = useMemo(
@@ -956,11 +1055,9 @@ function MaplessPlace({ place }: { place: Place }) {
     <main className="flex h-dvh flex-col bg-ink-950 max-lg:landscape:flex-row lg:flex-row">
       <div className="relative grid flex-none place-items-center p-8 text-center max-lg:landscape:flex-1 lg:flex-1">
         <div className="max-w-sm rounded-lg border border-parchment-600/50 bg-ink-900 px-6 py-5">
-          <h2 className="font-serif text-lg text-parchment-50">No map for this place</h2>
+          <h2 className="font-serif text-lg text-parchment-50">{t('place.noMapTitle')}</h2>
           <p className="mt-1 text-sm text-parchment-400">
-            {items.length > 0
-              ? 'Show official pins to track its items from the list. Custom pins need a map.'
-              : 'There are no tracked items here either. Custom pins need a map.'}
+            {items.length > 0 ? t('place.noMapWithItems') : t('place.noMapEmpty')}
           </p>
         </div>
         <LichiiStatusPanel
@@ -983,7 +1080,7 @@ function MaplessPlace({ place }: { place: Place }) {
       </div>
       <Sidebar place={place} progress={count} total={items.length}>
         {items.length > 0 && (
-          <Section title="Official pins" aside={<OfficialToggle on={showOfficial} />}>
+          <Section title={t('place.officialPins')} aside={<OfficialToggle on={showOfficial} />}>
             {showOfficial && (
               <OfficialList
                 onMap={[]}
@@ -1002,7 +1099,24 @@ function MaplessPlace({ place }: { place: Place }) {
   )
 }
 
-export function PlaceView({ place }: { place: Place }) {
+export function PlaceView({
+  place,
+  initialItemId,
+  initialMapId,
+}: {
+  place: Place
+  initialItemId?: string
+  initialMapId?: string
+}) {
   const firstMap = startMapOf(place)
-  return firstMap ? <MappedPlace place={place} firstMap={firstMap} /> : <MaplessPlace place={place} />
+  return firstMap ? (
+    <MappedPlace
+      place={place}
+      firstMap={firstMap}
+      initialItemId={initialItemId}
+      initialMapId={initialMapId}
+    />
+  ) : (
+    <MaplessPlace place={place} initialItemId={initialItemId} />
+  )
 }

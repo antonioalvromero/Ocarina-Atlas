@@ -15,6 +15,7 @@ import {
   type CustomPin,
 } from '../lib/storage'
 import { dataset } from '../lib/data'
+import { useI18n, type TranslationKey } from '../lib/i18n'
 import { PIN_TYPES, pinTypeLabel } from '../lib/pinTypes'
 import type { AgeFilter, Item } from '../lib/types'
 import { categoryStyle } from './categories'
@@ -58,6 +59,15 @@ function useRevealWhen(active: boolean) {
   return ref
 }
 
+const PIN_TYPE_KEYS = new Set<string>(PIN_TYPES.map((p) => p.key))
+
+function translatedPinTypeLabel(type: string, t: (key: TranslationKey) => string): string {
+  if (PIN_TYPE_KEYS.has(type)) {
+    return t(`pin.type.${type}` as TranslationKey)
+  }
+  return pinTypeLabel(type)
+}
+
 function CustomPinRow({
   pin,
   placeId,
@@ -71,13 +81,15 @@ function CustomPinRow({
   selected: boolean
   onSelect: () => void
 }) {
+  const { t } = useI18n()
   const ref = useRevealWhen(selected)
   const [name, setName] = useState(pin.name)
   const { icon: Icon, color } = categoryStyle(pin.type)
 
   function changeType(type: string) {
     // A default name follows the type. One you wrote stays.
-    const next = pin.name === pinTypeLabel(pin.type) ? pinTypeLabel(type) : pin.name
+    const isDefault = pin.name === pinTypeLabel(pin.type) || pin.name === translatedPinTypeLabel(pin.type, t)
+    const next = isDefault ? translatedPinTypeLabel(type, t) : pin.name
     updatePin(placeId, mapId, pin.id, { type, name: next })
     setName(next)
   }
@@ -94,7 +106,7 @@ function CustomPinRow({
       <div className="flex items-center gap-2 px-2 py-1.5">
         <DoneBox
           done={pin.done}
-          label={`Mark ${pin.name} completed`}
+          label={t('panel.markItemCompleted', { name: pin.name })}
           onToggle={() => updatePin(placeId, mapId, pin.id, { done: !pin.done })}
         />
         <Icon size={14} style={{ color }} className="shrink-0" aria-hidden />
@@ -111,15 +123,15 @@ function CustomPinRow({
       </div>
       {selected && (
         <label className="flex items-center gap-2 px-2 pb-1.5 text-xs text-parchment-400">
-          Type
+          {t('panel.type')}
           <select
             value={pin.type}
             onChange={(event) => changeType(event.target.value)}
             className="min-w-0 flex-1 rounded border border-ink-600 bg-ink-950 px-1.5 py-1 text-sm text-parchment-50 outline-none focus:border-parchment-400"
           >
-            {PIN_TYPES.map(({ key, label }) => (
+            {PIN_TYPES.map(({ key }) => (
               <option key={key} value={key}>
-                {label}
+                {translatedPinTypeLabel(key, t)}
               </option>
             ))}
           </select>
@@ -128,7 +140,7 @@ function CustomPinRow({
       {selected && (
         <form onSubmit={rename} className="flex gap-1.5 px-2 pb-2">
           <input
-            aria-label={`Rename ${pin.name}`}
+            aria-label={t('panel.renameItem', { name: pin.name })}
             value={name}
             maxLength={80}
             onChange={(event) => setName(event.target.value)}
@@ -139,11 +151,11 @@ function CustomPinRow({
             disabled={!name.trim() || name.trim() === pin.name}
             className="rounded bg-parchment-200 px-2 text-xs font-medium text-ink-950 hover:bg-parchment-50 disabled:opacity-40"
           >
-            Rename
+            {t('common.rename')}
           </button>
           <button
             type="button"
-            aria-label={`Delete ${pin.name}`}
+            aria-label={t('panel.deleteItem', { name: pin.name })}
             onClick={() => removePin(placeId, mapId, pin.id)}
             className="grid w-8 place-items-center rounded border border-ink-600 text-ember hover:border-ember"
           >
@@ -161,7 +173,7 @@ export function CustomPinList({
   mapId,
   selectedId,
   onSelect,
-  title = 'Your pins',
+  title,
   hideWhenEmpty = false,
 }: {
   pins: CustomPin[]
@@ -172,15 +184,16 @@ export function CustomPinList({
   title?: string
   hideWhenEmpty?: boolean
 }) {
+  const { t } = useI18n()
   const done = pins.filter((pin) => pin.done).length
   if (hideWhenEmpty && pins.length === 0) return null
   return (
     <Section
-      title={title}
+      title={title ?? t('place.yourPins')}
       aside={pins.length > 0 && <span className="text-xs text-parchment-400 tabular-nums">{done}/{pins.length}</span>}
     >
       {pins.length === 0 ? (
-        <p className="text-sm text-parchment-400">Click the map to add a pin.</p>
+        <p className="text-sm text-parchment-400">{t('place.clickMapToAdd')}</p>
       ) : (
         <ul className="-mx-2 space-y-0.5">
           {pins.map((pin) => (
@@ -210,13 +223,15 @@ function ItemRow({
   selected: boolean
   onSelect: () => void
 }) {
+  const { t, tItemName } = useI18n()
   const ref = useRevealWhen(selected)
   const { icon: Icon, color } = categoryStyle(item.cat)
   const revealed = useStored(officialRevealedSlot).includes(item.id)
+  const itemName = tItemName(item.id, item.name)
   return (
     <li ref={ref} className={`rounded-md ${selected ? 'bg-ink-900 ring-1 ring-ink-600' : ''}`}>
       <div className="flex items-center gap-2 px-2 py-1.5">
-        <DoneBox done={done} label={`Mark ${item.name} completed`} onToggle={() => toggleInList(officialDoneSlot, item.id)} />
+        <DoneBox done={done} label={t('panel.markItemCompleted', { name: itemName })} onToggle={() => toggleInList(officialDoneSlot, item.id)} />
         <Icon size={14} style={{ color }} className="shrink-0" aria-hidden />
         <button
           type="button"
@@ -226,7 +241,7 @@ function ItemRow({
             done ? 'text-parchment-600 line-through' : 'text-parchment-200'
           }`}
         >
-          <span className={selected ? '' : 'truncate'}>{item.name}</span>
+          <span className={selected ? '' : 'truncate'}>{itemName}</span>
           <ChevronDown size={14} className={`shrink-0 text-parchment-600 ${selected ? 'rotate-180' : ''}`} />
         </button>
       </div>
@@ -238,7 +253,7 @@ function ItemRow({
             onClick={() => setInList(officialRevealedSlot, item.id, false)}
             className="flex cursor-pointer items-center gap-1 rounded border border-ink-600 px-2 py-1 text-xs text-parchment-200 hover:border-parchment-400"
           >
-            <EyeOff size={13} /> Hide again
+            <EyeOff size={13} /> {t('panel.hideAgain')}
           </button>
         </div>
       )}
@@ -272,16 +287,17 @@ function ItemList({
   )
 }
 
-const ageOptions: { value: AgeFilter; label: string }[] = [
-  { value: 'child', label: 'Child' },
-  { value: 'adult', label: 'Adult' },
-  { value: 'both', label: 'Both' },
+const ageOptions: { value: AgeFilter; key: TranslationKey }[] = [
+  { value: 'child', key: 'panel.ageChild' },
+  { value: 'adult', key: 'panel.ageAdult' },
+  { value: 'both', key: 'panel.ageBoth' },
 ]
 
 function AgeSelector({ age }: { age: AgeFilter }) {
+  const { t } = useI18n()
   return (
-    <div role="group" aria-label="Filter by age" className="mb-2 flex overflow-hidden rounded border border-ink-600">
-      {ageOptions.map(({ value, label }) => (
+    <div role="group" aria-label={t('panel.filterByAge')} className="mb-2 flex overflow-hidden rounded border border-ink-600">
+      {ageOptions.map(({ value, key }) => (
         <button
           key={value}
           type="button"
@@ -291,7 +307,7 @@ function AgeSelector({ age }: { age: AgeFilter }) {
             value === age ? 'bg-parchment-200 font-medium text-ink-950' : 'text-parchment-200 hover:bg-ink-700'
           }`}
         >
-          {label}
+          {t(key)}
         </button>
       ))}
     </div>
@@ -299,26 +315,28 @@ function AgeSelector({ age }: { age: AgeFilter }) {
 }
 
 function CategoryFilter({ items, hidden }: { items: Item[]; hidden: string[] }) {
+  const { t, tCategory } = useI18n()
   return (
-    <div role="group" aria-label="Filter by category" className="mb-2 flex flex-wrap gap-1">
+    <div role="group" aria-label={t('panel.filterByCategory')} className="mb-2 flex flex-wrap gap-1">
       {dataset.categories.map((category) => {
         const count = items.filter((item) => item.cat === category.key).length
         if (count === 0) return null
         const { icon: Icon, color } = categoryStyle(category.key)
         const on = !hidden.includes(category.key)
+        const label = tCategory(category.key, category.name)
         return (
           <button
             key={category.key}
             type="button"
             aria-pressed={on}
-            title={category.name}
+            title={label}
             onClick={() => toggleInList(hiddenCategoriesSlot, category.key)}
             className={`flex cursor-pointer items-center gap-1 rounded border px-1.5 py-1 text-[11px] tabular-nums ${
               on ? 'border-ink-600 bg-ink-800 text-parchment-200' : 'border-ink-700 text-parchment-600 opacity-60'
             }`}
           >
             <Icon size={12} style={{ color: on ? color : undefined }} aria-hidden />
-            <span>{category.name}</span>
+            <span>{label}</span>
             <span className="opacity-70">{count}</span>
           </button>
         )
@@ -328,6 +346,7 @@ function CategoryFilter({ items, hidden }: { items: Item[]; hidden: string[] }) 
 }
 
 export function OfficialToggle({ on }: { on: boolean }) {
+  const { t } = useI18n()
   return (
     <button
       type="button"
@@ -336,7 +355,7 @@ export function OfficialToggle({ on }: { on: boolean }) {
       onClick={() => write(officialVisibleSlot, !on)}
       className="flex cursor-pointer items-center gap-2 text-xs text-parchment-200"
     >
-      Show official pins
+      {t('panel.showOfficialPins')}
       <span className={`relative h-5 w-9 rounded-full transition-colors ${on ? 'bg-moss' : 'bg-ink-600'}`}>
         <span className={`absolute top-0.5 left-0.5 size-4 rounded-full bg-parchment-50 transition-transform ${on ? 'translate-x-4' : ''}`} />
       </span>
@@ -377,6 +396,7 @@ export function OfficialList({
   selectedId: string | null
   onSelect: (item: Item) => void
 }) {
+  const { t } = useI18n()
   const shown = (items: Item[]) => items.filter((item) => !hidden.includes(item.cat))
   const mapped = shown(onMap)
   const listed = shown(unplaced)
@@ -390,13 +410,13 @@ export function OfficialList({
       {listed.length > 0 && (
         <>
           <h3 className="mt-3 mb-1 text-[11px] font-medium tracking-wide text-parchment-400 uppercase">
-            Not on a map
+            {t('panel.notOnMap')}
           </h3>
           <ItemList items={listed} done={done} selectedId={selectedId} onSelect={onSelect} />
         </>
       )}
       {mapped.length === 0 && listed.length === 0 && (
-        <p className="text-sm text-parchment-400">Nothing to show on this map.</p>
+        <p className="text-sm text-parchment-400">{t('panel.nothingToShow')}</p>
       )}
     </>
   )

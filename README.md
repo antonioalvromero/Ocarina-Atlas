@@ -4,7 +4,7 @@
 
 # Ocarina Atlas
 
-Interactive Hyrule field atlas and dungeon floor tracker for *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`),<br>featuring live [Lichii](https://github.com/zortos293/Lichii) &amp; [Fritchii](https://github.com/Frizti/Fritchii) memory telemetry, automatic Gold Skulltula tracking, and a portable Windows launcher.
+Interactive Hyrule field atlas and dungeon floor tracker for *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`),<br>featuring live [Lichii](https://github.com/zortos293/Lichii) &amp; Fritchii memory telemetry, 100% (184/184) automatic collectible tracking, and a portable Windows launcher.
 
 [![Windows x64](https://img.shields.io/badge/Platform-Windows%20x64-0078D6?logo=windows)](https://github.com/antonioalvromero/Ocarina-Atlas/releases)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -29,8 +29,8 @@ Run the live tracker on Windows without installing Node.js or editing code:
    - Open the extracted folder and double-click **`OcarinaAtlas.exe`**.
    - *(If Windows SmartScreen shows "Windows protected your PC" for an unsigned open-source binary, click **More info** -> **Run anyway**.)*
 
-3. **Step 1 · Emulator Live Sync (Lichii / Fritchii)**
-   - **Recommended (1-Click Setup):** In the **Step 1 · Emulator Live Sync** card, click **1-Click Setup Sync**.
+3. **Emulator Live Sync (Lichii / Fritchii)**
+   - **Recommended (1-Click Setup):** In the main control card, click **1-Click Setup Sync** (shown as **Configured ↻** once active so you can re-apply anytime).
      - This creates or updates `nx2_switches.txt` in your detected emulator profile folder(s) (`%APPDATA%\fritchii\nx2_switches.txt` and/or `%APPDATA%\lichii\nx2_switches.txt`) with `EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545` while preserving your existing switches.
      - **If Lichii or Fritchii is already running, close and restart it completely** so it loads the debug server on startup.
    - **Manual Fallback:**
@@ -43,25 +43,25 @@ Run the live tracker on Windows without installing Node.js or editing code:
 
 4. **Start Map**
    - Click **Start Map** in `OcarinaAtlas.exe`.
-   - Your default browser opens `http://127.0.0.1:3000` automatically when **Auto-open browser** is enabled (or click **Open in Browser**).
+   - Your default browser opens `http://127.0.0.1:3000` automatically when **Auto-open browser** is enabled in **Settings** (or click **Open Map**).
 
-5. **Step 2 · Play on Another Device (Optional)**
+5. **Second Screen (LAN, Optional)**
    - Ensure your PC and second-screen device (iPad, tablet, phone, or another PC) are on the **same local Wi-Fi or Ethernet network** with Windows set to a **Private** network profile.
-   - In **Step 2 · Play on Another Device (Optional)**, click **Allow LAN Access** once and approve the Administrator prompt if your tablet cannot reach the page yet (creates an inbound Windows Defender Firewall rule scoped strictly to **Private** networks).
-   - If your PC has multiple active networks (such as Ethernet + Mesh Wi-Fi), choose the matching adapter from the LAN URL selector, click **Copy URL**, and open that `http://` address in your browser. *(Live Link coordinates and Gold Skulltula status stream automatically; pins marked on a second screen are stored in that device's browser `localStorage`.)*
+   - In the **Second Screen (LAN)** card, click **Allow LAN Access** once and approve the Administrator prompt if your tablet cannot reach the page yet (creates an inbound Windows Defender Firewall rule scoped strictly to **Private** networks).
+   - If your PC has multiple active networks (such as Ethernet + Mesh Wi-Fi), choose the matching adapter from the LAN URL selector, click **Copy URL** or **QR Code** to scan from a phone/tablet, and open that `http://` address in your browser. *(Live Link coordinates, collectibles, and pins sync automatically across devices.)*
 
 6. **Play in Lichii or Fritchii**
    - Boot *Ocarina of Time* Remake (`0400486024DEC000`) in Lichii or Fritchii and load a save slot.
-   - Confirm the launcher reads **In-game live tracking** and the bottom-left Gold Skulltula medallion pulses green. Hover (or tap on touch devices) over the medallion to expand the tracker card.
+   - Confirm the launcher telemetry strip shows your live scene/age/Skulltula count and the bottom-left Gold Skulltula medallion pulses green. Hover (or tap on touch devices) over the medallion to expand the tracker card.
 
 ### Connection States
 
-| Map Tracker Status | Launcher RPC Status | Meaning |
+| Map Tracker Status | Launcher Status | Meaning |
 | --- | --- | --- |
-| **Lichii · Live** (pulsing green) | **In-game live tracking** | Connected to Lichii or Fritchii `:6545` and streaming live RAM coordinates, floor, and Gold Skulltula flags. |
-| **Waiting for game** (amber) | **RPC open (Waiting for game)** | Emulator RPC `:6545` is open, but Link is not in an active gameplay scene yet (title/boot screen). Displays save fallback data if available. |
-| **Save only** (static amber) | **Port 6545 closed (Not detected)** | RPC `:6545` is unreachable; displaying the latest local `caption.sav` / `progress.sav` snapshot (`(Saved)`). Live movement and Auto-Skulltula are paused. |
-| **Disconnected** (muted) | **Port 6545 closed (Not detected)** | Neither emulator RPC `:6545` nor a local save directory was found (or the local server stopped). Click **Retry** once ready. |
+| **Lichii · Live** (pulsing green) | **Emulator: Live** | Connected to Lichii or Fritchii `:6545` and streaming live RAM coordinates, floor, and 184/184 collectible flags. |
+| **Waiting for game** (amber) | **Emulator: Waiting** | Emulator RPC `:6545` is open, but Link is not in an active gameplay scene yet (title/boot screen). Displays save fallback data if available. |
+| **Save only** (static amber) | **Emulator: Closed** | RPC `:6545` is unreachable; displaying the latest local `caption.sav` / `progress.sav` snapshot (`(Saved)`). Live movement and Auto Tracking are paused. |
+| **Disconnected** (muted) | **Emulator: Closed** | Neither emulator RPC `:6545` nor a local save directory was found (or the local server stopped). Click **Retry** once ready. |
 
 <details>
 <summary>Launcher CLI Flags &amp; Environment Variables</summary>
@@ -104,13 +104,13 @@ Run the live tracker on Windows without installing Node.js or editing code:
 ### Live Emulator Telemetry (Lichii & Fritchii)
 - **Real-Time `PlayerPin`:** Displays Link's live position, compass heading cone (`yaw`), current floor badge (`1F`–`5F`, `B1`–`B4`), and 3D `(X, Y, Z)` hover coordinates across the Hyrule World Map, zone/dungeon maps, and All-Floors grid view.
 - **ASLR-Safe `MOD0` Reader:** Dynamically resolves the Switch `MOD0` main NSO base and `.bss` singletons over Lichii / Fritchii JSON-RPC (`127.0.0.1:6545`), recovering cleanly across emulator restarts.
-- **Automatic Gold Skulltula Tracking (`100 / 100`):** Reads exact collected actor ID hashes (`masterTable` / `0xa3db7114`) and `PouchData.Item_Token_Gold.StockNum` in RAM to mark, reveal, and reconcile Gold Skulltulas automatically (including unmarking Skulltulas when reloading an earlier save) with pickup toast notifications.
-- **Follow Link & Jump Controls:** Toggle **Follow Link** to switch zones and dungeon floors automatically as Link moves, or click **Go to Link** anytime.
+- **100% Automatic Collectible Tracking (`184 / 184`):** Reads exact collected actor ID hashes (`masterTable` / `0xa3db7114`), `PouchData.Item_Token_Gold.StockNum`, and live `GameDataMgr` `Bool` / `Int` flags in RAM to mark, reveal, and reconcile all 7 categories automatically (100 Gold Skulltulas, 36 Pieces of Heart, 8 Heart Containers, 10 Magic Beans, 6 Great Fairies, 5 Bottles, and 19 Fairy Thoughts), including unmarking items when reloading an earlier save and showing pickup toast notifications.
+- **Follow Link & Camera Follow:** Toggle **Follow Link** to switch zones and dungeon floors automatically as Link moves and keep Link centered on screen even when zoomed in (pauses briefly while dragging manually), or click **Go to Link** anytime.
 - **Read-Only Save Fallback:** When RPC `:6545` is closed, reads the newest local save slot (`caption.sav` / `progress.sav`) in read-only mode and labels the state **Save only** (`(Saved)`).
 
 ### Interactive Map & Progress Tracker
-- **Complete Atlas Dataset:** 32 places (20 overworld zones and 12 dungeons) and 184 official collectibles across 8 categories (100 Gold Skulltulas, Pieces of Heart, Heart Containers, Magic Beans, Great Fairies, Bottles, Keys, and Fairy Thoughts).
-- **Global Progress Stats:** Open the **Stats** drawer from the World Map to view overall completion (`X / 184`) broken down by category and location.
+- **Complete Atlas Dataset:** 32 places (20 overworld zones and 12 dungeons) and 184 official collectibles across 7 categories (Gold Skulltulas, Pieces of Heart, Heart Containers, Magic Beans, Great Fairies, Bottles, and Fairy Thoughts).
+- **Global Progress Stats & Interactive Categories:** Open the **Stats** drawer from the World Map to view overall completion (`X / 184`), click any category card to filter `Remaining` or `All` items, and click an item to jump directly to its zone, floor, and pin.
 - **Mobile & Tablet Fullscreen / Landscape Mode:** Use the **Fullscreen** (`Exit fullscreen`) toggle on the World Map or any zone/dungeon view to hide the header and sidebar for a dedicated map-only canvas, enjoy a landscape-optimized layout on phones and tablets, and tap any pin to open a floating info popover that dismisses automatically when tapping outside.
 - **Custom Pins & Smart Merge:** Drop typed custom pins anywhere on a map; placing a pin near a matching official pin merges and reveals it automatically.
 - **Age & Category Filtering:** Filter by **Child**, **Adult**, or **Both**, hide completed categories, inspect **All floors** side-by-side, and persist per-map zoom/pan state in `localStorage` (`oot-map:v1:*`).
@@ -129,7 +129,7 @@ Run the live tracker on Windows without installing Node.js or editing code:
 - **Windows 10 / 11 (x64):** Required for `OcarinaAtlas.exe` and live Lichii & Fritchii emulator telemetry.
 - **Supported Game Build:** *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`).
 - **Web-Only (Linux / macOS / Docker):** The interactive web map UI runs on any OS via Node.js or the included [`Dockerfile`](Dockerfile) (`oven/bun:1.4`) without Windows emulator features.
-- **Reporting Bugs:** Open an issue with your **Ocarina Atlas** release version, emulator version (Lichii / Fritchii), and relevant output copied from **`▸ Advanced Settings & Logs`** in `OcarinaAtlas.exe`. Please **never** attach ROMs, decryption keys, NAND dumps, or personal save archives.
+- **Reporting Bugs:** Open an issue with your **Ocarina Atlas** release version, emulator version (Lichii / Fritchii), and relevant output copied from the **`Logs`** drawer in `OcarinaAtlas.exe`. Please **never** attach ROMs, decryption keys, NAND dumps, or personal save archives.
 
 ---
 
@@ -161,9 +161,9 @@ Lichii / Fritchii Emulator (:6545) / Local Save Slots (Read-Only Fallback)
         ▼
 Telemetry Bridge (src/lib/lichii-server.ts)
   • Discovers Switch MOD0 base -> .bss singletons -> Sub[36], GDM, flags
-  • Maps 32 scenes + floor thresholds + 100/100 Gold Skulltula hashes
-  • Exposes GET /api/lichii/state (Vite middleware or scripts/server-entry.ts)
-        │  HTTP JSON polling (150 ms live / 750 ms idle)
+  • Maps 32 scenes + floor thresholds + 184/184 collectible flags (masterTable + GameDataMgr)
+  • Exposes /api/lichii/stream (120 ms shared SSE broadcaster) & GET /api/lichii/state
+        │  SSE stream (120 ms) + HTTP fallback (150 ms live / 750 ms idle)
         ▼
 React / TanStack Start UI (src/lib/useLichiiTracker.ts + src/components/*)
         ▲  Supervised via Windows Job Object
@@ -173,7 +173,7 @@ Windows Launcher (launcher/OcarinaAtlas.cs -> OcarinaAtlas.exe)
 | Path | Purpose |
 | --- | --- |
 | `src/routes/` | TanStack Start routes (`__root.tsx`, `index.tsx`, `$zone.tsx`). |
-| `src/components/` | Map viewport, world/place views, floor grid, `PlayerPin.tsx`, and `LichiiStatusPanel.tsx`. |
+| `src/components/` | `MapViewport.tsx` (zoom/pan + Camera Follow), `WorldMap.tsx`, `PlaceView.tsx`, `FloorGrid.tsx`, `GlobalStatsDrawer.tsx`, `PlayerPin.tsx`, and `LichiiStatusPanel.tsx`. |
 | `src/lib/` | Dataset helpers (`data.ts`), projection math (`coords.ts`), pin merging (`merge.ts`), `localStorage` persistence (`storage.ts`), Lichii telemetry (`lichii-server.ts`, `lichii-types.ts`), client polling (`useLichiiTracker.ts`), and `*.test.ts` Vitest suites. |
 | `src/data/oot.json` | Atlas dataset (32 places, 184 official items, categories, requirements). |
 | `launcher/` | Native C# WinForms Windows launcher source (`OcarinaAtlas.cs`) and icon (`OcarinaAtlas.ico`). |

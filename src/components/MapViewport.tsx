@@ -26,6 +26,7 @@ import {
   type Point,
   type Size,
 } from '../lib/coords'
+import { useI18n } from '../lib/i18n'
 import { read, viewSlot, write } from '../lib/storage'
 import type { Fraction } from '../lib/types'
 
@@ -34,8 +35,13 @@ const KEY_PAN = 80
 const BUTTON_ZOOM = 1.5
 /** Wheel and drag change the view on every event, so saving waits for a pause. */
 const SAVE_DELAY = 200
+/** Brief pause after manual drag/key-pan so auto-follow doesn't immediately fight the user. */
+const DRAG_PAUSE_MS = 1500
 
-export type MapViewportHandle = { centerOn: (fraction: Fraction) => void }
+export type MapViewportHandle = {
+  centerOn: (fraction: Fraction) => void
+  panToFraction: (x: number, y: number) => void
+}
 
 export type Projection = { size: Size; project: (fraction: Fraction) => Point }
 
@@ -62,14 +68,22 @@ function distance(a: Point, b: Point) {
 }
 
 export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDismiss, children, overlay }: Props) {
+  const { t } = useI18n()
   const containerRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState<Size | null>(null)
   const [view, setView] = useState(INITIAL_VIEW)
+  const [smoothPan, setSmoothPan] = useState(false)
+
+  const sizeRef = useRef<Size | null>(null)
+  sizeRef.current = size
+  const aspectRef = useRef(aspect)
+  aspectRef.current = aspect
 
   const pointers = useRef(new Map<number, Point>())
   const pressStart = useRef<Point>({ x: 0, y: 0 })
   const dragged = useRef(false)
+  const pauseUntil = useRef(0)
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -95,7 +109,28 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
 
   useImperativeHandle(
     ref,
-    () => ({ centerOn: ({ x, y }) => setView((v) => ({ ...v, cx: x, cy: y })) }),
+    () => ({
+      centerOn: ({ x, y }) => {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return
+        pauseUntil.current = 0
+        setSmoothPan(false)
+        setView((v) => ({ ...v, cx: x, cy: y }))
+      },
+      panToFraction: (x, y) => {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return
+        if (pointers.current.size > 0 || Date.now() < pauseUntil.current) return
+        setSmoothPan(true)
+        setView((v) => {
+          const currentSize = sizeRef.current
+          if (!currentSize) {
+            return v.cx === x && v.cy === y ? v : { ...v, cx: x, cy: y }
+          }
+          const next = clampView({ ...v, cx: x, cy: y }, currentSize, aspectRef.current)
+          if (Math.abs(next.cx - v.cx) < 1e-6 && Math.abs(next.cy - v.cy) < 1e-6) return v
+          return next
+        })
+      },
+    }),
     [],
   )
 
@@ -110,6 +145,7 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
       const lines = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : 1
       const speed = event.ctrlKey ? 0.01 : 0.002
       const factor = Math.exp(-event.deltaY * lines * speed)
+      setSmoothPan(false)
       setView((v) => zoomViewAt(clampView(v, size, aspect), anchor, factor, size, aspect))
     }
     container.addEventListener('wheel', onWheel, { passive: false })
@@ -123,6 +159,7 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
 
   function onPointerDown(event: PointerEvent) {
     if (event.pointerType === 'mouse' && event.button !== 0) return
+    setSmoothPan(false)
     const point = localPoint(event)
     if (pointers.current.size === 0) {
       dragged.current = false
@@ -137,6 +174,9 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
     // The release can land outside the map, on a control or another window.
     if (event.pointerType === 'mouse' && event.buttons === 0) {
       pointers.current.delete(event.pointerId)
+      if (pointers.current.size === 0 && dragged.current) {
+        pauseUntil.current = Date.now() + DRAG_PAUSE_MS
+      }
       return
     }
     const point = localPoint(event)
@@ -168,6 +208,9 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
 
   function onPointerEnd(event: PointerEvent) {
     pointers.current.delete(event.pointerId)
+    if (pointers.current.size === 0 && dragged.current) {
+      pauseUntil.current = Date.now() + DRAG_PAUSE_MS
+    }
   }
 
   function onClickCapture(event: MouseEvent) {
@@ -193,13 +236,17 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
   function zoomBy(factor: number) {
     if (!size) return
     const middle = { x: size.width / 2, y: size.height / 2 }
+    setSmoothPan(false)
     setView((v) => zoomViewAt(clampView(v, size, aspect), middle, factor, size, aspect))
   }
 
   function onKeyDown(event: KeyboardEvent) {
     if (!size) return
-    const pan = (x: number, y: number) =>
+    const pan = (x: number, y: number) => {
+      pauseUntil.current = Date.now() + DRAG_PAUSE_MS
+      setSmoothPan(false)
       setView((v) => panView(clampView(v, size, aspect), { x, y }, size, aspect))
+    }
     const actions: Record<string, () => void> = {
       ArrowLeft: () => pan(KEY_PAN, 0),
       ArrowRight: () => pan(-KEY_PAN, 0),
@@ -208,7 +255,10 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
       '+': () => zoomBy(BUTTON_ZOOM),
       '=': () => zoomBy(BUTTON_ZOOM),
       '-': () => zoomBy(1 / BUTTON_ZOOM),
-      '0': () => setView(INITIAL_VIEW),
+      '0': () => {
+        setSmoothPan(false)
+        setView(INITIAL_VIEW)
+      },
     }
     const action = actions[event.key]
     if (!action) return
@@ -236,7 +286,7 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
       <div
         ref={containerRef}
         role="group"
-        aria-label={`${alt}. Drag to pan, scroll to zoom, or use the arrow, plus and minus keys.`}
+        aria-label={t('map.dragHint', { alt })}
         tabIndex={0}
         style={{ containerType: 'size' }}
         className={`relative size-full touch-none overflow-clip select-none focus-visible:outline-offset-[-3px] ${
@@ -251,7 +301,11 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
         onKeyDown={onKeyDown}
         onDragStart={(event) => event.preventDefault()}
       >
-        <div ref={stageRef} className="absolute" style={stageStyle}>
+        <div
+          ref={stageRef}
+          className={`absolute ${smoothPan ? 'transition-[left,top] duration-150 ease-linear will-change-[left,top]' : ''}`}
+          style={stageStyle}
+        >
           {image && <img src={image} alt="" draggable={false} className="absolute inset-0 size-full max-w-none" />}
           {children}
         </div>
@@ -262,13 +316,21 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
       </div>
 
       <div className="absolute right-3 bottom-3 flex flex-col divide-y divide-ink-600 overflow-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg">
-        <button type="button" aria-label="Zoom in" className={control} disabled={shown.zoom >= MAX_ZOOM} onClick={() => zoomBy(BUTTON_ZOOM)}>
+        <button type="button" aria-label={t('map.zoomIn')} className={control} disabled={shown.zoom >= MAX_ZOOM} onClick={() => zoomBy(BUTTON_ZOOM)}>
           <Plus size={16} />
         </button>
-        <button type="button" aria-label="Zoom out" className={control} disabled={shown.zoom <= MIN_ZOOM} onClick={() => zoomBy(1 / BUTTON_ZOOM)}>
+        <button type="button" aria-label={t('map.zoomOut')} className={control} disabled={shown.zoom <= MIN_ZOOM} onClick={() => zoomBy(1 / BUTTON_ZOOM)}>
           <Minus size={16} />
         </button>
-        <button type="button" aria-label="Reset view" className={control} onClick={() => setView(INITIAL_VIEW)}>
+        <button
+          type="button"
+          aria-label={t('map.resetView')}
+          className={control}
+          onClick={() => {
+            setSmoothPan(false)
+            setView(INITIAL_VIEW)
+          }}
+        >
           <Scan size={16} />
         </button>
       </div>

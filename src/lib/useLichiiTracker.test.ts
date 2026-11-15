@@ -2,10 +2,21 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { LichiiTelemetryState } from './lichii-types'
 import { officialDoneSlot, officialRevealedSlot, read, resetSyncForTests, write } from './storage'
 import {
+  TRACKED_BEAN_IDS,
+  TRACKED_BOTTLE_IDS,
+  TRACKED_FAIRY_IDS,
   TRACKED_HEART_CONTAINER_IDS,
+  TRACKED_HEART_PIECE_IDS,
+  TRACKED_THOUGHT_IDS,
   applyTelemetryState,
+  getLichiiPositionSnapshot,
   getTrackerSnapshotForTests,
+  reconcileBeanLists,
+  reconcileBottleLists,
+  reconcileFairyLists,
   reconcileHeartContainerLists,
+  reconcileHeartPieceLists,
+  reconcileThoughtLists,
   resetTrackerForTests,
 } from './useLichiiTracker'
 
@@ -62,40 +73,112 @@ afterEach(() => {
 })
 
 describe('reconcileHeartContainerLists', () => {
-  it('tracks only verified Heart Containers and preserves unmapped ones like deku-heart-01', () => {
-    expect(TRACKED_HEART_CONTAINER_IDS.has('espiritu-heart-01')).toBe(true)
-    expect(TRACKED_HEART_CONTAINER_IDS.has('deku-heart-01')).toBe(false)
+  it('tracks all 8 Dungeon Heart Containers and preserves non-container items', () => {
+    const allDungeonHeartContainers = [
+      'deku-heart-01',
+      'dodongos-heart-01',
+      'jabu-heart-01',
+      'bosque-heart-01',
+      'fuego-heart-01',
+      'agua-heart-01',
+      'sombra-heart-01',
+      'espiritu-heart-01',
+    ]
+    expect(TRACKED_HEART_CONTAINER_IDS.size).toBe(8)
+    for (const id of allDungeonHeartContainers) {
+      expect(TRACKED_HEART_CONTAINER_IDS.has(id)).toBe(true)
+    }
 
     const added = reconcileHeartContainerLists({
-      doneList: ['deku-heart-01'],
-      revealedList: ['deku-heart-01'],
-      collectedIds: ['espiritu-heart-01', 'deku-heart-01'],
+      doneList: ['kakariko-heart-01'],
+      revealedList: ['kakariko-heart-01'],
+      collectedIds: ['espiritu-heart-01', 'deku-heart-01', 'unknown-container-99'],
       authoritative: true,
     })
 
-    expect(added.nextDone).toEqual(['deku-heart-01', 'espiritu-heart-01'])
-    expect(added.nextRevealed).toEqual(['deku-heart-01', 'espiritu-heart-01'])
-    expect(added.addedIds).toEqual(['espiritu-heart-01'])
+    expect(added.nextDone).toEqual(['kakariko-heart-01', 'espiritu-heart-01', 'deku-heart-01'])
+    expect(added.nextRevealed).toEqual(['kakariko-heart-01', 'espiritu-heart-01', 'deku-heart-01'])
+    expect(added.addedIds).toEqual(['espiritu-heart-01', 'deku-heart-01'])
     expect(added.removedIds).toEqual([])
 
     const reloaded = reconcileHeartContainerLists({
-      doneList: ['deku-heart-01', 'espiritu-heart-01'],
-      revealedList: ['deku-heart-01', 'espiritu-heart-01'],
-      collectedIds: [],
+      doneList: ['kakariko-heart-01', 'deku-heart-01', 'espiritu-heart-01'],
+      revealedList: ['kakariko-heart-01', 'deku-heart-01', 'espiritu-heart-01'],
+      collectedIds: ['deku-heart-01'],
       authoritative: true,
     })
 
-    expect(reloaded.nextDone).toEqual(['deku-heart-01'])
-    expect(reloaded.nextRevealed).toEqual(['deku-heart-01'])
+    expect(reloaded.nextDone).toEqual(['kakariko-heart-01', 'deku-heart-01'])
+    expect(reloaded.nextRevealed).toEqual(['kakariko-heart-01', 'deku-heart-01'])
     expect(reloaded.removedIds).toEqual(['espiritu-heart-01'])
     expect(reloaded.doneChanged).toBe(true)
   })
 })
 
+describe('reconcileHeartPieceLists', () => {
+  it('tracks all 36 Pieces of Heart and preserves non-heart-piece items', () => {
+    expect(TRACKED_HEART_PIECE_IDS.size).toBe(36)
+    expect(TRACKED_HEART_PIECE_IDS.has('kakariko-heart-01')).toBe(true)
+    expect(TRACKED_HEART_PIECE_IDS.has('crater-heart-03')).toBe(true)
+    expect(TRACKED_HEART_PIECE_IDS.has('espiritu-heart-01')).toBe(false)
+
+    const added = reconcileHeartPieceLists({
+      doneList: ['deku-heart-01'],
+      revealedList: ['deku-heart-01'],
+      collectedIds: ['kakariko-heart-01', 'valle-heart-01', 'unknown-heart-99'],
+      authoritative: true,
+    })
+
+    expect(added.nextDone).toEqual(['deku-heart-01', 'kakariko-heart-01', 'valle-heart-01'])
+    expect(added.nextRevealed).toEqual(['deku-heart-01', 'kakariko-heart-01', 'valle-heart-01'])
+    expect(added.addedIds).toEqual(['kakariko-heart-01', 'valle-heart-01'])
+    expect(added.removedIds).toEqual([])
+
+    const reloaded = reconcileHeartPieceLists({
+      doneList: ['deku-heart-01', 'kakariko-heart-01', 'valle-heart-01'],
+      revealedList: ['deku-heart-01', 'kakariko-heart-01', 'valle-heart-01'],
+      collectedIds: ['kakariko-heart-01'],
+      authoritative: true,
+    })
+
+    expect(reloaded.nextDone).toEqual(['deku-heart-01', 'kakariko-heart-01'])
+    expect(reloaded.nextRevealed).toEqual(['deku-heart-01', 'kakariko-heart-01'])
+    expect(reloaded.removedIds).toEqual(['valle-heart-01'])
+    expect(reloaded.doneChanged).toBe(true)
+  })
+})
+
+describe('reconcileBeanLists, reconcileFairyLists, reconcileBottleLists, reconcileThoughtLists', () => {
+  it('exposes tracked ID sets and reconciles bean, fairy, bottle, and thought lists', () => {
+    expect(TRACKED_BEAN_IDS.size).toBeGreaterThan(0)
+    expect(TRACKED_FAIRY_IDS.size).toBeGreaterThan(0)
+    expect(TRACKED_BOTTLE_IDS.size).toBeGreaterThan(0)
+    expect(TRACKED_THOUGHT_IDS.size).toBeGreaterThan(0)
+
+    const beanId = Array.from(TRACKED_BEAN_IDS)[0]!
+    const fairyId = Array.from(TRACKED_FAIRY_IDS)[0]!
+    const bottleId = Array.from(TRACKED_BOTTLE_IDS)[0]!
+    const thoughtId = Array.from(TRACKED_THOUGHT_IDS)[0]!
+
+    expect(
+      reconcileBeanLists({ doneList: [], revealedList: [], collectedIds: [beanId], authoritative: true }).addedIds,
+    ).toEqual([beanId])
+    expect(
+      reconcileFairyLists({ doneList: [], revealedList: [], collectedIds: [fairyId], authoritative: true }).addedIds,
+    ).toEqual([fairyId])
+    expect(
+      reconcileBottleLists({ doneList: [], revealedList: [], collectedIds: [bottleId], authoritative: true }).addedIds,
+    ).toEqual([bottleId])
+    expect(
+      reconcileThoughtLists({ doneList: [], revealedList: [], collectedIds: [thoughtId], authoritative: true }).addedIds,
+    ).toEqual([thoughtId])
+  })
+})
+
 describe('applyTelemetryState Heart Container auto-marking', () => {
-  it('auto-marks espiritu-heart-01 with a toast on live pickup while preserving deku-heart-01', () => {
-    write(officialDoneSlot, ['deku-heart-01'])
-    write(officialRevealedSlot, ['deku-heart-01'])
+  it('auto-marks espiritu-heart-01 with a toast on live pickup while preserving kakariko-heart-01', () => {
+    write(officialDoneSlot, ['kakariko-heart-01'])
+    write(officialRevealedSlot, ['kakariko-heart-01'])
 
     // Initial authoritative sync establishes baseline without firing a toast
     applyTelemetryState(
@@ -114,8 +197,8 @@ describe('applyTelemetryState Heart Container auto-marking', () => {
       }),
     )
 
-    expect(read(officialDoneSlot)).toEqual(['deku-heart-01', 'espiritu-heart-01'])
-    expect(read(officialRevealedSlot)).toEqual(['deku-heart-01', 'espiritu-heart-01'])
+    expect(read(officialDoneSlot)).toEqual(['kakariko-heart-01', 'espiritu-heart-01'])
+    expect(read(officialRevealedSlot)).toEqual(['kakariko-heart-01', 'espiritu-heart-01'])
 
     const toasts = getTrackerSnapshotForTests().toasts
     expect(toasts).toHaveLength(1)
@@ -126,19 +209,19 @@ describe('applyTelemetryState Heart Container auto-marking', () => {
       skulltulaCount: null,
     })
 
-    // Save reload without Twinrova Heart Container unmarks espiritu-heart-01 but keeps deku-heart-01
+    // Save reload without Twinrova Heart Container unmarks espiritu-heart-01 but keeps kakariko-heart-01
     applyTelemetryState(
       makeTelemetry({
         collectedHeartContainerIds: [],
         authoritativeHeartContainers: true,
       }),
     )
-    expect(read(officialDoneSlot)).toEqual(['deku-heart-01'])
-    expect(read(officialRevealedSlot)).toEqual(['deku-heart-01'])
+    expect(read(officialDoneSlot)).toEqual(['kakariko-heart-01'])
+    expect(read(officialRevealedSlot)).toEqual(['kakariko-heart-01'])
   })
 
   it('ignores Heart Container reconciliation when not live memory or not authoritative', () => {
-    write(officialDoneSlot, ['deku-heart-01'])
+    write(officialDoneSlot, ['kakariko-heart-01'])
 
     applyTelemetryState(
       makeTelemetry({
@@ -149,7 +232,7 @@ describe('applyTelemetryState Heart Container auto-marking', () => {
         authoritativeHeartContainers: true,
       }),
     )
-    expect(read(officialDoneSlot)).toEqual(['deku-heart-01'])
+    expect(read(officialDoneSlot)).toEqual(['kakariko-heart-01'])
 
     applyTelemetryState(
       makeTelemetry({
@@ -157,7 +240,123 @@ describe('applyTelemetryState Heart Container auto-marking', () => {
         authoritativeHeartContainers: false,
       }),
     )
-    expect(read(officialDoneSlot)).toEqual(['deku-heart-01'])
+    expect(read(officialDoneSlot)).toEqual(['kakariko-heart-01'])
     expect(getTrackerSnapshotForTests().toasts).toHaveLength(0)
+  })
+})
+
+describe('applyTelemetryState Fairy Thought auto-marking', () => {
+  it('auto-marks cementerio-thought-01 with a toast and unmarks on save reload', () => {
+    write(officialDoneSlot, ['deku-heart-01'])
+    write(officialRevealedSlot, ['deku-heart-01'])
+
+    applyTelemetryState(
+      makeTelemetry({
+        collectedThoughtIds: [],
+        authoritativeThoughts: true,
+      }),
+    )
+    expect(getTrackerSnapshotForTests().toasts).toHaveLength(0)
+
+    applyTelemetryState(
+      makeTelemetry({
+        collectedThoughtIds: ['cementerio-thought-01'],
+        authoritativeThoughts: true,
+      }),
+    )
+
+    expect(read(officialDoneSlot)).toEqual(['deku-heart-01', 'cementerio-thought-01'])
+    expect(read(officialRevealedSlot)).toEqual(['deku-heart-01', 'cementerio-thought-01'])
+
+    const toasts = getTrackerSnapshotForTests().toasts
+    expect(toasts).toHaveLength(1)
+    expect(toasts[0]).toMatchObject({
+      itemId: 'cementerio-thought-01',
+      itemName: "Fairy Thought read: Broken pedestal in the Royal Family's Tomb",
+      skulltulaCount: null,
+    })
+
+    applyTelemetryState(
+      makeTelemetry({
+        collectedThoughtIds: [],
+        authoritativeThoughts: true,
+      }),
+    )
+    expect(read(officialDoneSlot)).toEqual(['deku-heart-01'])
+    expect(read(officialRevealedSlot)).toEqual(['deku-heart-01'])
+  })
+
+  it('ignores Fairy Thought reconciliation when not live memory or not authoritative', () => {
+    write(officialDoneSlot, ['espiritu-gs-04'])
+
+    applyTelemetryState(
+      makeTelemetry({
+        source: 'save',
+        connected: false,
+        emulatorRunning: false,
+        collectedThoughtIds: ['cementerio-thought-01'],
+        authoritativeThoughts: true,
+      }),
+    )
+    expect(read(officialDoneSlot)).toEqual(['espiritu-gs-04'])
+
+    applyTelemetryState(
+      makeTelemetry({
+        collectedThoughtIds: ['cementerio-thought-01'],
+        authoritativeThoughts: false,
+      }),
+    )
+    expect(read(officialDoneSlot)).toEqual(['espiritu-gs-04'])
+    expect(getTrackerSnapshotForTests().toasts).toHaveLength(0)
+  })
+})
+
+describe('position snapshot and short-circuiting', () => {
+  it('updates getLichiiPositionSnapshot on position ticks without re-running category reconciliation', () => {
+    applyTelemetryState(
+      makeTelemetry({
+        collectedSkulltulaIds: ['espiritu-gs-04'],
+        authoritativeSkulltulas: true,
+        position: { x: 10, y: 20, z: 30, yaw: 90 },
+        mapFraction: { x: 0.25, y: 0.5 },
+        worldMapFraction: { x: 0.1, y: 0.2 },
+      }),
+    )
+
+    const firstPos = getLichiiPositionSnapshot()
+    expect(firstPos).toEqual({
+      position: { x: 10, y: 20, z: 30, yaw: 90 },
+      mapFraction: { x: 0.25, y: 0.5 },
+      worldMapFraction: { x: 0.1, y: 0.2 },
+    })
+
+    // Identical position tick should preserve snapshot object reference
+    applyTelemetryState(
+      makeTelemetry({
+        collectedSkulltulaIds: ['espiritu-gs-04'],
+        authoritativeSkulltulas: true,
+        position: { x: 10, y: 20, z: 30, yaw: 90 },
+        mapFraction: { x: 0.25, y: 0.5 },
+        worldMapFraction: { x: 0.1, y: 0.2 },
+        updatedAt: 2000,
+      }),
+    )
+    expect(getLichiiPositionSnapshot()).toBe(firstPos)
+
+    // New position tick with fresh array instance containing same IDs updates position cleanly
+    applyTelemetryState(
+      makeTelemetry({
+        collectedSkulltulaIds: ['espiritu-gs-04'],
+        authoritativeSkulltulas: true,
+        position: { x: 15, y: 20, z: 35, yaw: 180 },
+        mapFraction: { x: 0.3, y: 0.55 },
+        worldMapFraction: { x: 0.12, y: 0.22 },
+        updatedAt: 3000,
+      }),
+    )
+    const secondPos = getLichiiPositionSnapshot()
+    expect(secondPos).not.toBe(firstPos)
+    expect(secondPos.position).toEqual({ x: 15, y: 20, z: 35, yaw: 180 })
+    expect(read(officialDoneSlot)).toEqual(['espiritu-gs-04'])
   })
 })

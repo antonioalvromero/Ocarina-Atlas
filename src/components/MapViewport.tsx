@@ -41,6 +41,7 @@ const DRAG_PAUSE_MS = 1500
 export type MapViewportHandle = {
   centerOn: (fraction: Fraction) => void
   panToFraction: (x: number, y: number) => void
+  resetView: () => void
 }
 
 export type Projection = { size: Size; project: (fraction: Fraction) => Point }
@@ -57,6 +58,10 @@ type Props = {
   onMapClick?: (fraction: Fraction) => void
   /** Set while a popover is open: the next click off a pin closes it and does nothing else. */
   onDismiss?: () => void
+  /** Optional control(s) rendered directly above the zoom buttons (e.g. World Map button in fullscreen). */
+  controlsAboveZoom?: ReactNode
+  /** Applies safe-area inset offsets when the map fills the screen edge-to-edge. */
+  isFullscreen?: boolean
   /** Pins, laid out in the stage: 0-100% of the image. */
   children?: ReactNode
   /** UI over the map that must not move or zoom with it. */
@@ -67,7 +72,19 @@ function distance(a: Point, b: Point) {
   return Math.hypot(a.x - b.x, a.y - b.y)
 }
 
-export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDismiss, children, overlay }: Props) {
+export function MapViewport({
+  viewId,
+  image,
+  alt,
+  aspect,
+  ref,
+  onMapClick,
+  onDismiss,
+  controlsAboveZoom,
+  isFullscreen = false,
+  children,
+  overlay,
+}: Props) {
   const { t } = useI18n()
   const containerRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
@@ -129,6 +146,11 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
           if (Math.abs(next.cx - v.cx) < 1e-6 && Math.abs(next.cy - v.cy) < 1e-6) return v
           return next
         })
+      },
+      resetView: () => {
+        pauseUntil.current = 0
+        setSmoothPan(false)
+        setView(INITIAL_VIEW)
       },
     }),
     [],
@@ -315,24 +337,37 @@ export function MapViewport({ viewId, image, alt, aspect, ref, onMapClick, onDis
         {size && box && overlay?.({ size, project: (f) => fractionToBox(f, box) })}
       </div>
 
-      <div className="absolute right-3 bottom-3 flex flex-col divide-y divide-ink-600 overflow-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg">
-        <button type="button" aria-label={t('map.zoomIn')} className={control} disabled={shown.zoom >= MAX_ZOOM} onClick={() => zoomBy(BUTTON_ZOOM)}>
-          <Plus size={16} />
-        </button>
-        <button type="button" aria-label={t('map.zoomOut')} className={control} disabled={shown.zoom <= MIN_ZOOM} onClick={() => zoomBy(1 / BUTTON_ZOOM)}>
-          <Minus size={16} />
-        </button>
-        <button
-          type="button"
-          aria-label={t('map.resetView')}
-          className={control}
-          onClick={() => {
-            setSmoothPan(false)
-            setView(INITIAL_VIEW)
-          }}
-        >
-          <Scan size={16} />
-        </button>
+      <div
+        className="absolute right-3 bottom-3 flex flex-col items-end gap-2"
+        style={
+          isFullscreen
+            ? {
+                right: 'calc(0.75rem + env(safe-area-inset-right, 0px))',
+                bottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
+              }
+            : undefined
+        }
+      >
+        {controlsAboveZoom}
+        <div className="flex flex-col divide-y divide-ink-600 overflow-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg">
+          <button type="button" aria-label={t('map.zoomIn')} className={control} disabled={shown.zoom >= MAX_ZOOM} onClick={() => zoomBy(BUTTON_ZOOM)}>
+            <Plus size={16} />
+          </button>
+          <button type="button" aria-label={t('map.zoomOut')} className={control} disabled={shown.zoom <= MIN_ZOOM} onClick={() => zoomBy(1 / BUTTON_ZOOM)}>
+            <Minus size={16} />
+          </button>
+          <button
+            type="button"
+            aria-label={t('map.resetView')}
+            className={control}
+            onClick={() => {
+              setSmoothPan(false)
+              setView(INITIAL_VIEW)
+            }}
+          >
+            <Scan size={16} />
+          </button>
+        </div>
       </div>
     </div>
   )

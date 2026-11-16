@@ -106,20 +106,25 @@ describe('Lichii environment config helpers', () => {
     expect(getLichiiPort({ LICHII_PORT: 'invalid' })).toBe(6545)
   })
 
-  it('checks LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR before default APPDATA and Longshot save directories', () => {
+  it('checks LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR before default APPDATA and recomp save directories', () => {
     const appData = path.join(os.tmpdir(), 'fake-appdata')
     const explicit = path.join(os.tmpdir(), 'custom-lichii-saves')
     const explicitFritchii = path.join(os.tmpdir(), 'custom-fritchii-saves')
     const explicitLongshot = path.join(os.tmpdir(), 'custom-longshot-saves')
+    const explicitRelink = path.join(os.tmpdir(), 'custom-relink-saves')
     const fritchiiDefault = path.join(appData, 'fritchii', 'nand', 'user', 'save', '0000000000000000')
     const lichiiDefault = path.join(appData, 'lichii', 'nand', 'user', 'save', '0000000000000000')
     const edenDefault = path.join(appData, 'eden', 'nand', 'user', 'save', '0000000000000000')
-    const longshotDefaults = [
+    const recompDefaults = [
       path.resolve('E:\\Longshot\\Game\\user'),
       path.resolve(path.join(os.homedir(), 'Games', 'Longshot', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'Hookshot', 'user')),
+      path.resolve(path.join(os.homedir(), 'Games', 'ProjectReLink', 'user')),
+      path.resolve(path.join(os.homedir(), 'Games', 'ProjectReLink', 'game', 'user')),
+      path.resolve(path.join(os.homedir(), 'Games', 'ReLink', 'user')),
+      path.resolve(path.join(os.homedir(), 'Games', 'ReLink', 'game', 'user')),
     ]
-    const defaultDirs = [fritchiiDefault, lichiiDefault, edenDefault, ...longshotDefaults]
+    const defaultDirs = [fritchiiDefault, lichiiDefault, edenDefault, ...recompDefaults]
 
     expect(getCandidateSaveDirs({ APPDATA: appData })).toEqual(defaultDirs)
     expect(getCandidateSaveDirs({ APPDATA: appData, LICHII_SAVE_DIR: '   ' })).toEqual(defaultDirs)
@@ -129,11 +134,13 @@ describe('Lichii environment config helpers', () => {
         LICHII_SAVE_DIR: explicit,
         FRITCHII_SAVE_DIR: explicitFritchii,
         LONGSHOT_SAVE_DIR: explicitLongshot,
+        RELINK_SAVE_DIR: explicitRelink,
       }),
     ).toEqual([
       path.resolve(explicit),
       path.resolve(explicitFritchii),
       path.resolve(explicitLongshot),
+      path.resolve(explicitRelink),
       ...defaultDirs,
     ])
   })
@@ -325,11 +332,19 @@ describe('Lichii environment config helpers', () => {
       expect(newerLichii?.dir).toBe(lichiiSlot)
       expect(detectEmulatorFromPath(newerLichii!.dir)).toBe('lichii')
 
-      // 3. detectEmulatorFromPath recognizes both Longshot and Hookshot segments
+      // 3. detectEmulatorFromPath recognizes Longshot, Hookshot, and ProjectReLink/ReLink segments
       expect(detectEmulatorFromPath(gamesLongshotSlot)).toBe('longshot')
       expect(
         detectEmulatorFromPath(path.join(tmpRoot, 'Games', 'Hookshot', 'user', 'save', uid, 'slot_00')),
       ).toBe('longshot')
+      expect(
+        detectEmulatorFromPath(
+          path.join(tmpRoot, 'Games', 'ProjectReLink', 'game', 'user', 'save', uid, 'slot_00'),
+        ),
+      ).toBe('relink')
+      expect(
+        detectEmulatorFromPath(path.join(tmpRoot, 'Games', 'ReLink', 'user', 'save', uid, 'slot_00')),
+      ).toBe('relink')
     } finally {
       homeSpy.mockRestore()
       fs.rmSync(tmpRoot, { recursive: true, force: true })

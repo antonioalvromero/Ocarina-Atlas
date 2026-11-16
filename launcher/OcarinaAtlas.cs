@@ -1039,7 +1039,7 @@ namespace OcarinaAtlasLauncher
 
         public static string DetectRunningEmulator()
         {
-            string[] names = new[] { "fritchii", "lichii", "eden", "hookshot", "Longshot" };
+            string[] names = new[] { "fritchii", "lichii", "eden", "hookshot", "Longshot", "relink-game", "relink" };
             string detected = null;
 
             for (int i = 0; i < names.Length; i++)
@@ -1080,6 +1080,12 @@ namespace OcarinaAtlasLauncher
                 string.Equals(fallbackName, "Longshot", StringComparison.OrdinalIgnoreCase))
             {
                 return "Longshot";
+            }
+
+            if (string.Equals(fallbackName, "relink-game", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(fallbackName, "relink", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Project ReLink";
             }
 
             try
@@ -1162,7 +1168,7 @@ namespace OcarinaAtlasLauncher
         private const uint PageExecuteWriteCopy = 0x80;
         private const uint PageGuard = 0x100;
 
-        private static readonly string[] ProcessNames = new[] { "hookshot", "Longshot" };
+        private static readonly string[] ProcessNames = new[] { "hookshot", "Longshot", "relink-game", "relink" };
         private static readonly char[] HexDigits = "0123456789abcdef".ToCharArray();
 
         [StructLayout(LayoutKind.Sequential)]
@@ -1207,6 +1213,7 @@ namespace OcarinaAtlasLauncher
         private readonly Process _attachedProcess;
         private readonly int _processId;
         private readonly string _detectedUserSaveDir;
+        private readonly string _emulatorKind;
         private readonly object _handleLock = new object();
         private readonly object _clientsLock = new object();
         private readonly List<TcpClient> _clients = new List<TcpClient>();
@@ -1218,12 +1225,13 @@ namespace OcarinaAtlasLauncher
         private volatile bool _running;
         private int _disposed = 0;
 
-        private LongshotRpcBridge(Process attachedProcess, int processId, IntPtr processHandle, string detectedUserSaveDir)
+        private LongshotRpcBridge(Process attachedProcess, int processId, IntPtr processHandle, string detectedUserSaveDir, string emulatorKind)
         {
             _attachedProcess = attachedProcess;
             _processId = processId;
             _processHandle = processHandle;
             _detectedUserSaveDir = detectedUserSaveDir;
+            _emulatorKind = string.IsNullOrEmpty(emulatorKind) ? "longshot" : emulatorKind;
         }
 
         public int ProcessId
@@ -1307,6 +1315,9 @@ namespace OcarinaAtlasLauncher
                         }
 
                         string userSaveDir = ResolveUserSaveDir(proc);
+                        string emulatorKind = ProcessNames[n].StartsWith("relink", StringComparison.OrdinalIgnoreCase)
+                            ? "relink"
+                            : "longshot";
                         keepProc = true;
                         for (int k = i + 1; k < procs.Length; k++)
                         {
@@ -1315,7 +1326,7 @@ namespace OcarinaAtlasLauncher
                                 try { procs[k].Dispose(); } catch { }
                             }
                         }
-                        return new LongshotRpcBridge(proc, proc.Id, handle, userSaveDir);
+                        return new LongshotRpcBridge(proc, proc.Id, handle, userSaveDir, emulatorKind);
                     }
                     catch
                     {
@@ -1666,14 +1677,16 @@ namespace OcarinaAtlasLauncher
                 {
                     return string.Format(
                         CultureInfo.InvariantCulture,
-                        "{{\"id\":{0},\"result\":{{\"powered_on\":true,\"program_id\":\"{1}\",\"emulator\":\"longshot\"}}}}",
+                        "{{\"id\":{0},\"result\":{{\"powered_on\":true,\"program_id\":\"{1}\",\"emulator\":\"{2}\"}}}}",
                         idJson,
-                        OotProgramId);
+                        OotProgramId,
+                        _emulatorKind);
                 }
                 return string.Format(
                     CultureInfo.InvariantCulture,
-                    "{{\"id\":{0},\"result\":{{\"powered_on\":false,\"program_id\":\"\",\"emulator\":\"longshot\"}}}}",
-                    idJson);
+                    "{{\"id\":{0},\"result\":{{\"powered_on\":false,\"program_id\":\"\",\"emulator\":\"{1}\"}}}}",
+                    idJson,
+                    _emulatorKind);
             }
 
             if (string.Equals(method, "read_memory", StringComparison.Ordinal))
@@ -4470,7 +4483,7 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "2.1.0";
+        public const string AppVersion = "2.2.0";
 
         private const int CollapsedClientHeight = 392;
         private const int ExpandedClientHeight = 640;
@@ -6591,6 +6604,7 @@ namespace OcarinaAtlasLauncher
         private static string FormatEmulatorDisplayName(string emulatorKind)
         {
             if (string.Equals(emulatorKind, "longshot", StringComparison.OrdinalIgnoreCase)) return "Longshot";
+            if (string.Equals(emulatorKind, "relink", StringComparison.OrdinalIgnoreCase)) return "Project ReLink";
             if (string.Equals(emulatorKind, "fritchii", StringComparison.OrdinalIgnoreCase)) return "Fritchii";
             if (string.Equals(emulatorKind, "lichii", StringComparison.OrdinalIgnoreCase)) return "Lichii";
             if (string.Equals(emulatorKind, "eden", StringComparison.OrdinalIgnoreCase)) return "Eden";

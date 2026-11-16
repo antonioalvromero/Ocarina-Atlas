@@ -131,16 +131,34 @@ export function WorldMap() {
   const [statsOpen, setStatsOpen] = useState(false)
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
   const [isCoarsePointer, setIsCoarsePointer] = useState(false)
+  const [isCompactViewport, setIsCompactViewport] = useState(false)
   const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreenMap(mainRef)
+  const prevFullscreenRef = useRef(isFullscreen)
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
-    const query = window.matchMedia('(pointer: coarse)')
-    const sync = () => setIsCoarsePointer(query.matches)
+    const coarseQuery = window.matchMedia('(pointer: coarse)')
+    const compactQuery = window.matchMedia('(max-width: 1023px), (pointer: coarse)')
+    const sync = () => {
+      setIsCoarsePointer(coarseQuery.matches)
+      setIsCompactViewport(compactQuery.matches)
+    }
     sync()
-    query.addEventListener('change', sync)
-    return () => query.removeEventListener('change', sync)
+    coarseQuery.addEventListener('change', sync)
+    compactQuery.addEventListener('change', sync)
+    return () => {
+      coarseQuery.removeEventListener('change', sync)
+      compactQuery.removeEventListener('change', sync)
+    }
   }, [])
+
+  useEffect(() => {
+    const wasFullscreen = prevFullscreenRef.current
+    prevFullscreenRef.current = isFullscreen
+    if (wasFullscreen && !isFullscreen && isCompactViewport) {
+      viewport.current?.resetView()
+    }
+  }, [isFullscreen, isCompactViewport])
 
   useEffect(() => {
     if (!isFullscreen) setSelectedPlaceId(null)
@@ -257,7 +275,14 @@ export function WorldMap() {
   const preferPinPopover = isFullscreen || isCoarsePointer
 
   return (
-    <main ref={mainRef} className="relative h-dvh overflow-clip bg-ink-950">
+    <main
+      ref={mainRef}
+      className={
+        isFullscreen
+          ? 'fixed inset-0 z-50 h-dvh w-full overflow-clip bg-ink-950'
+          : 'relative h-dvh overflow-clip bg-ink-950'
+      }
+    >
       <img
         src="/content/maps/hyrule.webp"
         alt=""
@@ -270,6 +295,7 @@ export function WorldMap() {
         image={dataset.map.image}
         alt={t('world.mapAlt')}
         aspect={dataset.map.width / dataset.map.height}
+        isFullscreen={isFullscreen}
         onDismiss={selectedPlaceId ? dismissSelectedPlace : undefined}
         overlay={({ size, project }) => {
           if (!selectedPlace) return null
@@ -370,6 +396,10 @@ export function WorldMap() {
           onClick={() => void exitFullscreen()}
           aria-label={t('map.exitFullscreenAria')}
           title={t('map.exitFullscreenAria')}
+          style={{
+            top: 'calc(0.75rem + env(safe-area-inset-top, 0px))',
+            right: 'calc(0.75rem + env(safe-area-inset-right, 0px))',
+          }}
           className="absolute top-3 right-3 z-40 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-3 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800"
         >
           <Minimize2 size={14} />
@@ -438,20 +468,21 @@ export function WorldMap() {
             </ul>
           </header>
           <GlobalStatsDrawer open={statsOpen} onClose={closeStats} summary={summary} doneIds={doneIds} />
-          <LichiiStatusPanel
-            state={tracker.state}
-            followPlayer={tracker.followPlayer}
-            onToggleFollow={tracker.toggleFollowPlayer}
-            autoMarkSkulltulas={tracker.autoMarkSkulltulas}
-            onToggleAutoMark={tracker.toggleAutoMarkSkulltulas}
-            toasts={tracker.toasts}
-            onDismissToast={tracker.dismissToast}
-            onJumpToPlayer={jumpToPlayer}
-            error={tracker.error}
-            onRetry={tracker.refresh}
-          />
         </>
       )}
+      <LichiiStatusPanel
+        state={tracker.state}
+        followPlayer={tracker.followPlayer}
+        onToggleFollow={tracker.toggleFollowPlayer}
+        autoMarkSkulltulas={tracker.autoMarkSkulltulas}
+        onToggleAutoMark={tracker.toggleAutoMarkSkulltulas}
+        toasts={tracker.toasts}
+        onDismissToast={tracker.dismissToast}
+        onJumpToPlayer={jumpToPlayer}
+        error={tracker.error}
+        onRetry={tracker.refresh}
+        isFullscreen={isFullscreen}
+      />
     </main>
   )
 }

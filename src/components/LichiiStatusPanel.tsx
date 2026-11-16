@@ -31,6 +31,9 @@ export type LichiiStatusPanelProps = {
   onSelectItem?: (itemId: string) => void
   error?: string | null
   onRetry?: () => void
+  isFullscreen?: boolean
+  /** CSS length (e.g. '5.75rem') overriding the default fullscreen top-right toast offset when extra controls stack under Exit fullscreen. */
+  fullscreenToastTop?: string
 }
 
 export type ConnectionTone = 'live' | 'waiting' | 'save' | 'error' | 'disconnected'
@@ -49,6 +52,7 @@ function getEmulatorDisplayName(emulator?: LichiiTelemetryState['emulator']): st
   if (emulator === 'fritchii') return 'Fritchii'
   if (emulator === 'eden') return 'Eden'
   if (emulator === 'longshot') return 'Longshot'
+  if (emulator === 'relink') return 'Project ReLink'
   return 'Lichii'
 }
 
@@ -273,6 +277,8 @@ export function LichiiStatusPanel({
   onSelectItem,
   error,
   onRetry,
+  isFullscreen = false,
+  fullscreenToastTop = '3.25rem',
 }: LichiiStatusPanelProps) {
   const panelId = useId()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -445,6 +451,14 @@ export function LichiiStatusPanel({
         onKeyDownCapture={handleWrapperKeyDownCapture}
         onFocus={handleWrapperFocus}
         onBlur={handleWrapperBlur}
+        style={
+          isFullscreen
+            ? {
+                bottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
+                left: 'calc(0.75rem + env(safe-area-inset-left, 0px))',
+              }
+            : undefined
+        }
         className="pointer-events-none absolute bottom-3 left-3 z-30 flex max-w-[calc(100%-1.5rem)] flex-col-reverse items-start"
       >
         {/* Compact circular Gold Skulltula medallion trigger */}
@@ -654,7 +668,17 @@ export function LichiiStatusPanel({
       {toasts.length > 0 && (
         <div
           aria-live="polite"
-          className="pointer-events-none absolute top-3 right-3 z-40 flex max-w-sm flex-col gap-2"
+          style={
+            isFullscreen
+              ? {
+                  top: `calc(${fullscreenToastTop} + env(safe-area-inset-top, 0px))`,
+                  right: 'calc(0.75rem + env(safe-area-inset-right, 0px))',
+                }
+              : undefined
+          }
+          className={`pointer-events-none absolute right-3 z-40 flex max-w-sm flex-col gap-2 ${
+            isFullscreen ? 'top-13' : 'top-3'
+          }`}
         >
           {toasts.map((toast) => {
             const item = itemsById.get(toast.itemId)

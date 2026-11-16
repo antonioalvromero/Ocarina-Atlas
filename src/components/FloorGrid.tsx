@@ -132,6 +132,8 @@ export function FloorGrid({
   onDismiss,
   pinOverlay,
   onCreate,
+  controlsAboveZoom,
+  isFullscreen = false,
   ...shared
 }: Omit<Shared, 'placeId'> & {
   place: Place
@@ -142,6 +144,8 @@ export function FloorGrid({
   onDismiss?: () => void
   pinOverlay?: (projection: Projection) => ReactNode
   onCreate: (type: string, name?: string) => void
+  controlsAboveZoom?: ReactNode
+  isFullscreen?: boolean
 }) {
   const { t, tPlace } = useI18n()
   const draftCell = draft && grid.cells.find((cell) => cell.map.id === draft.mapId)
@@ -151,6 +155,8 @@ export function FloorGrid({
       viewId={`${place.id}:all-floors`}
       alt={t('place.allFloorsAlt', { place: tPlace(place.id, place.name) })}
       aspect={grid.aspect}
+      controlsAboveZoom={controlsAboveZoom}
+      isFullscreen={isFullscreen}
       onDismiss={
         draft || onDismiss
           ? () => {

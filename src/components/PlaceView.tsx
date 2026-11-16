@@ -101,7 +101,7 @@ function Sidebar({
 }) {
   const { t, tPlace, tRegion, tPlaceIntro } = useI18n()
   return (
-    <aside className="flex min-h-0 flex-1 flex-col overflow-y-auto border-ink-700 bg-ink-900 max-lg:border-t max-lg:landscape:w-72 max-lg:landscape:flex-none max-lg:landscape:border-t-0 max-lg:landscape:border-l lg:w-96 lg:flex-none lg:border-l">
+    <aside className="hyrule-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto border-ink-700 bg-ink-900 max-lg:border-t max-lg:landscape:w-72 max-lg:landscape:flex-none max-lg:landscape:border-t-0 max-lg:landscape:border-l lg:w-96 lg:flex-none lg:border-l">
       <header className="px-4 pt-3 pb-3">
         <div className="flex items-center justify-between gap-2">
           <Link to="/" className="inline-flex items-center gap-1 text-xs text-parchment-400 hover:text-parchment-50">
@@ -150,6 +150,8 @@ function MapSwitcher({
   playerLive = true,
   onChange,
   allFloors,
+  inline = false,
+  isFullscreen = false,
 }: {
   maps: PlaceMap[]
   current: string | null
@@ -157,13 +159,27 @@ function MapSwitcher({
   playerLive?: boolean
   onChange: (id: string) => void
   allFloors?: { active: boolean; onShow: () => void }
+  inline?: boolean
+  isFullscreen?: boolean
 }) {
   const { t } = useI18n()
   return (
     <div
       role="group"
       aria-label={t('place.chooseMap')}
-      className="absolute top-3 left-3 z-30 flex max-w-[calc(100%-8.5rem)] overflow-x-auto overflow-y-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg"
+      style={
+        !inline && isFullscreen
+          ? {
+              top: 'calc(0.75rem + env(safe-area-inset-top, 0px))',
+              left: 'calc(0.75rem + env(safe-area-inset-left, 0px))',
+            }
+          : undefined
+      }
+      className={
+        inline
+          ? 'pointer-events-auto flex max-w-[calc(100vw-1.5rem)] overflow-x-auto overflow-y-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg backdrop-blur-sm'
+          : 'absolute top-3 left-3 z-30 flex max-w-[calc(100%-8.5rem)] overflow-x-auto overflow-y-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg'
+      }
     >
       {allFloors && (
         <button
@@ -263,7 +279,8 @@ function PinPopoverFrame({
       role="dialog"
       aria-label={t('world.placeDetails', { name: title })}
       style={style}
-      className="pointer-events-auto absolute z-50 max-h-[min(65dvh,360px)] overflow-y-auto rounded-lg border border-ink-600 bg-ink-900/95 p-3 text-parchment-50 shadow-xl backdrop-blur-sm"
+      onWheel={(event) => event.stopPropagation()}
+      className="hyrule-scrollbar pointer-events-auto absolute z-50 max-h-[min(65dvh,360px)] touch-pan-y overflow-y-auto overscroll-contain rounded-lg border border-ink-600 bg-ink-900/95 p-3 text-parchment-50 shadow-xl backdrop-blur-sm"
     >
       {children}
     </div>
@@ -508,6 +525,7 @@ function MappedPlace({
   const viewport = useRef<MapViewportHandle>(null)
   const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreenMap(mainRef)
   const [isCompactViewport, setIsCompactViewport] = useState(false)
+  const prevFullscreenRef = useRef(isFullscreen)
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
@@ -517,6 +535,14 @@ function MappedPlace({
     query.addEventListener('change', sync)
     return () => query.removeEventListener('change', sync)
   }, [])
+
+  useEffect(() => {
+    const wasFullscreen = prevFullscreenRef.current
+    prevFullscreenRef.current = isFullscreen
+    if (wasFullscreen && !isFullscreen && isCompactViewport) {
+      viewport.current?.resetView()
+    }
+  }, [isFullscreen, isCompactViewport])
 
   const showPinPopover = isFullscreen || isCompactViewport
 
@@ -786,8 +812,44 @@ function MappedPlace({
     )
   }
 
+  const isChildAdultPlace =
+    place.maps.length > 1 && place.maps.every((candidate) => candidate.id === 'nino' || candidate.id === 'adulto')
+
+  const fullscreenWorldMapButton = isFullscreen ? (
+    <Link
+      to="/"
+      aria-label={t('map.worldMap')}
+      title={t('map.worldMap')}
+      className="grid size-9 place-items-center rounded-lg border border-ink-600 bg-ink-900/90 text-parchment-200 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
+    >
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20V6.5Z" />
+        <path d="M9 4v13.5" />
+        <path d="M15 6.5V20" />
+        <path d="m12 9.2 1.8 3.1h-3.6L12 9.2Z" fill="currentColor" stroke="none" />
+      </svg>
+    </Link>
+  ) : null
+
   return (
-    <main ref={mainRef} className="flex h-dvh flex-col bg-ink-950 max-lg:landscape:flex-row lg:flex-row">
+    <main
+      ref={mainRef}
+      className={
+        isFullscreen
+          ? 'fixed inset-0 z-50 flex h-dvh w-full flex-col bg-ink-950 max-lg:landscape:flex-row lg:flex-row'
+          : 'flex h-dvh flex-col bg-ink-950 max-lg:landscape:flex-row lg:flex-row'
+      }
+    >
       <div ref={mapContainerRef} className="relative min-h-0 flex-[1.3] max-lg:landscape:flex-1 lg:flex-1">
         {allFloors ? (
           <FloorGrid
@@ -795,6 +857,8 @@ function MappedPlace({
             grid={grid}
             viewport={viewport}
             draft={draft}
+            controlsAboveZoom={fullscreenWorldMapButton}
+            isFullscreen={isFullscreen}
             onDraft={(next) => {
               setDraft(next)
               if (next) setSelection(null)
@@ -838,6 +902,8 @@ function MappedPlace({
               floor: translateFloorLabel(map.label, t),
             })}
             aspect={map.aspect}
+            controlsAboveZoom={fullscreenWorldMapButton}
+            isFullscreen={isFullscreen}
             onMapClick={(at) => {
               setDraft({ mapId: map.id, at })
               setSelection(null)
@@ -900,7 +966,7 @@ function MappedPlace({
             {merge && <MergeTrail key={merge.id} merge={merge} />}
           </MapViewport>
         )}
-        {place.maps.length > 1 && (
+        {place.maps.length > 1 && !(isFullscreen && isChildAdultPlace) && (
           <MapSwitcher
             maps={place.maps}
             current={allFloors ? null : map.id}
@@ -908,6 +974,7 @@ function MappedPlace({
             playerLive={isLiveMemory}
             onChange={changeMap}
             allFloors={hasFloorGrid ? { active: allFloors, onShow: showGrid } : undefined}
+            isFullscreen={isFullscreen}
           />
         )}
         {merge && (
@@ -921,16 +988,35 @@ function MappedPlace({
           />
         )}
         {isFullscreen ? (
-          <button
-            type="button"
-            onClick={() => void exitFullscreen()}
-            aria-label={t('map.exitFullscreenAria')}
-            title={t('map.exitFullscreenAria')}
-            className="absolute top-3 right-3 z-40 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-3 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800"
+          <div
+            style={{
+              top: 'calc(0.75rem + env(safe-area-inset-top, 0px))',
+              right: 'calc(0.75rem + env(safe-area-inset-right, 0px))',
+            }}
+            className="pointer-events-none absolute top-3 right-3 z-40 flex flex-col items-end gap-2"
           >
-            <Minimize2 size={14} />
-            {t('map.exitFullscreen')}
-          </button>
+            <button
+              type="button"
+              onClick={() => void exitFullscreen()}
+              aria-label={t('map.exitFullscreenAria')}
+              title={t('map.exitFullscreenAria')}
+              className="pointer-events-auto inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-3 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800"
+            >
+              <Minimize2 size={14} />
+              {t('map.exitFullscreen')}
+            </button>
+            {isChildAdultPlace && (
+              <MapSwitcher
+                maps={place.maps}
+                current={allFloors ? null : map.id}
+                playerMapId={playerMapId}
+                playerLive={isLiveMemory}
+                onChange={changeMap}
+                inline
+                isFullscreen
+              />
+            )}
+          </div>
         ) : (
           <button
             type="button"
@@ -943,24 +1029,24 @@ function MappedPlace({
             <span className="max-sm:hidden">{t('map.fullscreen')}</span>
           </button>
         )}
-        {!isFullscreen && (
-          <LichiiStatusPanel
-            state={tracker.state}
-            followPlayer={tracker.followPlayer}
-            onToggleFollow={tracker.toggleFollowPlayer}
-            autoMarkSkulltulas={tracker.autoMarkSkulltulas}
-            onToggleAutoMark={tracker.toggleAutoMarkSkulltulas}
-            toasts={tracker.toasts}
-            onDismissToast={tracker.dismissToast}
-            onJumpToPlayer={jumpToPlayer}
-            onSelectItem={(itemId) => {
-              const target = items.find((i) => i.id === itemId)
-              if (target) selectOfficial(target)
-            }}
-            error={tracker.error}
-            onRetry={tracker.refresh}
-          />
-        )}
+        <LichiiStatusPanel
+          state={tracker.state}
+          followPlayer={tracker.followPlayer}
+          onToggleFollow={tracker.toggleFollowPlayer}
+          autoMarkSkulltulas={tracker.autoMarkSkulltulas}
+          onToggleAutoMark={tracker.toggleAutoMarkSkulltulas}
+          toasts={tracker.toasts}
+          onDismissToast={tracker.dismissToast}
+          onJumpToPlayer={jumpToPlayer}
+          onSelectItem={(itemId) => {
+            const target = items.find((i) => i.id === itemId)
+            if (target) selectOfficial(target)
+          }}
+          error={tracker.error}
+          onRetry={tracker.refresh}
+          isFullscreen={isFullscreen}
+          fullscreenToastTop={isChildAdultPlace ? '6rem' : undefined}
+        />
       </div>
 
       {!isFullscreen && (

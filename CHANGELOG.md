@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-16
+
+### Added
+- **Project ReLink & Hookshot Support (`launcher/OcarinaAtlas.cs`, `src/lib/lichii-server.ts`, `src/lib/lichii-types.ts`, `src/components/LichiiStatusPanel.tsx`):** Expanded zero-config read-only live memory telemetry (`LongshotRpcBridge`) and save-slot auto-discovery to [Project ReLink](https://github.com/pixl27/ProjectReLink) (`relink-game.exe` / `relink.exe`, `RELINK_SAVE_DIR`, `~/Games/ProjectReLink/...`, `~/Games/ReLink/...`) alongside [Hookshot](https://git.notrexed.dev/Hookshot/Hookshot) and [Longshot](https://git.magicbean.dev/MagicBeanDev/Longshot).
+- **Fullscreen World Map Button (`src/components/PlaceView.tsx`, `src/components/MapViewport.tsx`, `src/components/FloorGrid.tsx`, `src/lib/i18n.ts`):** Added a fullscreen-only World Map navigation button (`<Link to="/">`) with a custom Hyrule folded-map + Triforce icon positioned directly above the zoom controls on all devices.
+- **Fullscreen Skulltula Counter & Tracker (`src/components/PlaceView.tsx`, `src/components/WorldMap.tsx`, `src/components/LichiiStatusPanel.tsx`):** Kept the circular Skulltula tracker medallion visible and fully interactive in fullscreen mode, with `fullscreenToastTop` offsetting pickup toasts below stacked top-right controls.
+
+### Fixed & Improved
+- **Desktop Fullscreen Guide Scrollbar (`src/styles.css`, `src/components/PlaceView.tsx`):** Added `.hyrule-scrollbar` (`@media (pointer: fine)`) styling matching the Hyrule dark/parchment/gold theme for guide popovers and sidebars on PC.
+- **Mobile/Tablet Fullscreen Scroll-Up Exit Bug (`src/styles.css`, `src/components/PlaceView.tsx`):** Prevented overscroll/scroll-chaining at `scrollTop === 0` inside pin guide popovers (`overscroll-behavior: contain`, `touch-pan-y`, `onWheel` `stopPropagation`) from exiting fullscreen when scrolling guide text on phones and tablets.
+- **Fullscreen Layout, Mobile Exit Reset & iOS Safe-Area Polish (`src/components/PlaceView.tsx`, `src/components/WorldMap.tsx`, `src/components/MapViewport.tsx`, `src/routes/__root.tsx`):** Placed the Child/Adult (`nino`/`adulto`) map toggle directly below **Exit fullscreen**, automatically ran `resetView()` when exiting fullscreen on compact viewports so the map never overlaps the tracking panel, and added `viewport-fit=cover`, PWA meta tags, `h-dvh`, and `env(safe-area-inset-*)` offsets for iPhone/iPad Safari.
+
 ## [2.1.0] - 2026-11-16
 
 ### Added

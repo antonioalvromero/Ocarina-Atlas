@@ -139,6 +139,7 @@ const EN_MESSAGES = {
   'map.fullscreen': 'Fullscreen',
   'map.exitFullscreen': 'Exit fullscreen',
   'map.exitFullscreenAria': 'Exit fullscreen map',
+  'map.worldMap': 'World Map',
 
   'world.mapAlt': 'Map of Hyrule',
   'world.stats': 'Stats',
@@ -302,6 +303,7 @@ const ES_MESSAGES: Record<TranslationKey, string> = {
   'map.fullscreen': 'Pantalla completa',
   'map.exitFullscreen': 'Salir de pantalla completa',
   'map.exitFullscreenAria': 'Salir del mapa en pantalla completa',
+  'map.worldMap': 'Mapa mundial',
 
   'world.mapAlt': 'Mapa de Hyrule',
   'world.stats': 'Progreso',
@@ -463,6 +465,7 @@ const FR_MESSAGES: Record<TranslationKey, string> = {
   'map.fullscreen': 'Plein écran',
   'map.exitFullscreen': 'Quitter le plein écran',
   'map.exitFullscreenAria': 'Quitter la carte en plein écran',
+  'map.worldMap': 'Carte du monde',
 
   'world.mapAlt': 'Carte d’Hyrule',
   'world.stats': 'Stats',
@@ -624,6 +627,7 @@ const PT_MESSAGES: Record<TranslationKey, string> = {
   'map.fullscreen': 'Tela cheia',
   'map.exitFullscreen': 'Sair da tela cheia',
   'map.exitFullscreenAria': 'Sair do mapa em tela cheia',
+  'map.worldMap': 'Mapa-múndi',
 
   'world.mapAlt': 'Mapa de Hyrule',
   'world.stats': 'Progresso',

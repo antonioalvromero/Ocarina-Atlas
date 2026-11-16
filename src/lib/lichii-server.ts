@@ -38,12 +38,17 @@ export function getLichiiPort(env: NodeJS.ProcessEnv = process.env): number {
 
 /**
  * Returns candidate emulator save root directories in priority order:
- * explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR overrides first, then default
- * %APPDATA%\{fritchii,lichii,eden}\nand\user\save\0000000000000000 and Longshot/Hookshot user paths.
+ * explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR overrides first, then default
+ * %APPDATA%\{fritchii,lichii,eden}\nand\user\save\0000000000000000 and Longshot/Hookshot/ProjectReLink user paths.
  */
 export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): string[] {
   const dirs: string[] = []
-  for (const explicitRaw of [env.LICHII_SAVE_DIR, env.FRITCHII_SAVE_DIR, env.LONGSHOT_SAVE_DIR]) {
+  for (const explicitRaw of [
+    env.LICHII_SAVE_DIR,
+    env.FRITCHII_SAVE_DIR,
+    env.LONGSHOT_SAVE_DIR,
+    env.RELINK_SAVE_DIR,
+  ]) {
     const explicit = explicitRaw?.trim()
     if (explicit) {
       const resolved = path.resolve(explicit)
@@ -59,12 +64,16 @@ export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): stri
       dirs.push(defaultBase)
     }
   }
-  for (const longshotUserDir of [
+  for (const recompUserDir of [
     'E:\\Longshot\\Game\\user',
     path.join(os.homedir(), 'Games', 'Longshot', 'user'),
     path.join(os.homedir(), 'Games', 'Hookshot', 'user'),
+    path.join(os.homedir(), 'Games', 'ProjectReLink', 'user'),
+    path.join(os.homedir(), 'Games', 'ProjectReLink', 'game', 'user'),
+    path.join(os.homedir(), 'Games', 'ReLink', 'user'),
+    path.join(os.homedir(), 'Games', 'ReLink', 'game', 'user'),
   ]) {
-    const resolved = path.resolve(longshotUserDir)
+    const resolved = path.resolve(recompUserDir)
     if (!dirs.includes(resolved)) {
       dirs.push(resolved)
     }
@@ -1346,6 +1355,9 @@ export function detectEmulatorFromPath(dirPath: string): EmulatorKind | undefine
   for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
     if (segments.includes(emu)) return emu
   }
+  if (segments.includes('projectrelink') || segments.includes('relink')) {
+    return 'relink'
+  }
   if (segments.includes('longshot') || segments.includes('hookshot')) {
     return 'longshot'
   }
@@ -1361,12 +1373,16 @@ function isDefaultEmulatorSaveDir(dir: string): boolean {
   ) {
     return true
   }
-  const defaultLongshotDirs = [
+  const defaultRecompDirs = [
     'E:\\Longshot\\Game\\user',
     path.join(os.homedir(), 'Games', 'Longshot', 'user'),
     path.join(os.homedir(), 'Games', 'Hookshot', 'user'),
+    path.join(os.homedir(), 'Games', 'ProjectReLink', 'user'),
+    path.join(os.homedir(), 'Games', 'ProjectReLink', 'game', 'user'),
+    path.join(os.homedir(), 'Games', 'ReLink', 'user'),
+    path.join(os.homedir(), 'Games', 'ReLink', 'game', 'user'),
   ]
-  return defaultLongshotDirs.some((d) => normalized === path.resolve(d).toLowerCase())
+  return defaultRecompDirs.some((d) => normalized === path.resolve(d).toLowerCase())
 }
 
 function findBestSlotInRoot(
@@ -3791,6 +3807,7 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
 
   const rpcEmulator =
     cachedStatusRes?.emulator === 'longshot' ||
+    cachedStatusRes?.emulator === 'relink' ||
     cachedStatusRes?.emulator === 'fritchii' ||
     cachedStatusRes?.emulator === 'lichii' ||
     cachedStatusRes?.emulator === 'eden'

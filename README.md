@@ -4,7 +4,7 @@
 
 # Ocarina Atlas
 
-Interactive Hyrule field atlas and dungeon floor tracker for *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`),<br>featuring live [Lichii](https://github.com/zortos293/Lichii), Fritchii &amp; [Longshot](https://git.magicbean.dev/MagicBeanDev/Longshot) memory telemetry, 100% (184/184) automatic collectible tracking, and a portable Windows launcher.
+Interactive Hyrule field atlas and dungeon floor tracker for *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`),<br>featuring live [Lichii](https://github.com/zortos293/Lichii), Fritchii, [Longshot](https://git.magicbean.dev/MagicBeanDev/Longshot) &amp; [Project ReLink](https://github.com/pixl27/ProjectReLink) memory telemetry, 100% (184/184) automatic collectible tracking, and a portable Windows launcher.
 
 [![Windows x64](https://img.shields.io/badge/Platform-Windows%20x64-0078D6?logo=windows)](https://github.com/antonioalvromero/Ocarina-Atlas/releases)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -29,8 +29,8 @@ Run the live tracker on Windows without installing Node.js or editing code:
    - Open the extracted folder and double-click **`OcarinaAtlas.exe`**.
    - *(If Windows SmartScreen shows "Windows protected your PC" for an unsigned open-source binary, click **More info** -> **Run anyway**.)*
 
-3. **Live Sync Setup (Longshot / Lichii / Fritchii)**
-   - **Longshot (Native PC Recomp — Zero Config):** Simply launch `longshot.exe` (or `hookshot.exe`) and load a save. `OcarinaAtlas.exe` automatically attaches a read-only `LongshotRpcBridge` on `:6545` whenever Lichii/Fritchii is not using the port—no switches or game modifications needed.
+3. **Live Sync Setup (Longshot / Project ReLink / Lichii / Fritchii)**
+   - **Longshot & Project ReLink (Native PC Recomp — Zero Config):** Simply launch `longshot.exe` / `hookshot.exe` or `relink-game.exe` / `ReLink.exe` and load a save. `OcarinaAtlas.exe` automatically attaches a read-only `LongshotRpcBridge` on `:6545` whenever Lichii/Fritchii is not using the port—no switches or game modifications needed.
    - **Lichii / Fritchii (1-Click Setup):** In the main control card, click **1-Click Setup Sync** (shown as **Configured ↻** once active so you can re-apply anytime).
      - This creates or updates `nx2_switches.txt` in your detected emulator profile folder(s) (`%APPDATA%\fritchii\nx2_switches.txt` and/or `%APPDATA%\lichii\nx2_switches.txt`) with `EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545` while preserving your existing switches.
      - **If Lichii or Fritchii is already running, close and restart it completely** so it loads the debug server on startup.
@@ -51,8 +51,8 @@ Run the live tracker on Windows without installing Node.js or editing code:
    - In the **Second Screen (LAN)** card, click **Allow LAN Access** once and approve the Administrator prompt if your tablet cannot reach the page yet (creates an inbound Windows Defender Firewall rule scoped strictly to **Private** networks).
    - If your PC has multiple active networks (such as Ethernet + Mesh Wi-Fi), choose the matching adapter from the LAN URL selector, click **Copy URL** or **QR Code** to scan from a phone/tablet, and open that `http://` address in your browser. *(Live Link coordinates, collectibles, and pins sync automatically across devices.)*
 
-6. **Play in Longshot, Lichii, or Fritchii**
-   - Boot *Ocarina of Time* Remake (`0400486024DEC000`) in Longshot, Lichii, or Fritchii and load a save slot.
+6. **Play in Longshot, Project ReLink, Lichii, or Fritchii**
+   - Boot *Ocarina of Time* Remake (`0400486024DEC000`) in Longshot, Project ReLink, Lichii, or Fritchii and load a save slot.
    - Confirm the launcher telemetry strip shows your live scene/age/Skulltula count and the bottom-left Gold Skulltula medallion pulses green. Hover (or tap on touch devices) over the medallion to expand the tracker card.
 
 ### Connection States

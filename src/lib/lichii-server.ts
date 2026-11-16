@@ -14,7 +14,7 @@ const DEFAULT_LICHII_PORT = 6545
 const OOT_REMAKE_TITLE_ID = '0400486024DEC000'
 const placesById = new Map<string, Place>(dataset.places.map((p) => [p.id, p]))
 
-const DEFAULT_EMULATOR_SAVE_ROOTS: readonly EmulatorKind[] = ['fritchii', 'lichii', 'eden']
+const DEFAULT_EMULATOR_SAVE_ROOTS = ['fritchii', 'lichii', 'eden'] as const
 
 /** Resolves the Lichii/Fritchii TCP debug host from LICHII_HOST or FRITCHII_HOST (default '127.0.0.1'). */
 export function getLichiiHost(env: NodeJS.ProcessEnv = process.env): string {
@@ -38,12 +38,12 @@ export function getLichiiPort(env: NodeJS.ProcessEnv = process.env): number {
 
 /**
  * Returns candidate emulator save root directories in priority order:
- * explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR overrides first, then default
- * %APPDATA%\{fritchii,lichii,eden}\nand\user\save\0000000000000000 paths.
+ * explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR overrides first, then default
+ * %APPDATA%\{fritchii,lichii,eden}\nand\user\save\0000000000000000 and Longshot/Hookshot user paths.
  */
 export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): string[] {
   const dirs: string[] = []
-  for (const explicitRaw of [env.LICHII_SAVE_DIR, env.FRITCHII_SAVE_DIR]) {
+  for (const explicitRaw of [env.LICHII_SAVE_DIR, env.FRITCHII_SAVE_DIR, env.LONGSHOT_SAVE_DIR]) {
     const explicit = explicitRaw?.trim()
     if (explicit) {
       const resolved = path.resolve(explicit)
@@ -57,6 +57,16 @@ export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): stri
     const defaultBase = path.join(appData, emu, 'nand', 'user', 'save', '0000000000000000')
     if (!dirs.includes(defaultBase)) {
       dirs.push(defaultBase)
+    }
+  }
+  for (const longshotUserDir of [
+    'E:\\Longshot\\Game\\user',
+    path.join(os.homedir(), 'Games', 'Longshot', 'user'),
+    path.join(os.homedir(), 'Games', 'Hookshot', 'user'),
+  ]) {
+    const resolved = path.resolve(longshotUserDir)
+    if (!dirs.includes(resolved)) {
+      dirs.push(resolved)
     }
   }
   return dirs
@@ -508,12 +518,30 @@ const SCENE_TO_PLACE: Record<
   InsideTheDekuTree: {
     placeId: 'deku',
     defaultAge: 'child',
-    capture: { camX: -36.0, camY: 200.0, camZ: 18.0, height: 125.0 },
+    capture: {
+      camX: -36.0,
+      camY: 200.0,
+      camZ: 18.0,
+      height: 125.0,
+      scaleX: 8.5609,
+      cx: 733.86,
+      scaleZ: 8.9211,
+      cz: 139.64,
+    },
   },
   DekuTree: {
     placeId: 'deku',
     defaultAge: 'child',
-    capture: { camX: -36.0, camY: 200.0, camZ: 18.0, height: 125.0 },
+    capture: {
+      camX: -36.0,
+      camY: 200.0,
+      camZ: 18.0,
+      height: 125.0,
+      scaleX: 8.5609,
+      cx: 733.86,
+      scaleZ: 8.9211,
+      cz: 139.64,
+    },
   },
   DodongoCavern: {
     placeId: 'dodongos',
@@ -1270,6 +1298,7 @@ function collectSlotsFromAccountDir(accountDir: string, slots: Set<string>): voi
   if (!fs.existsSync(accountDir)) return
   for (const userName of listSubdirs(accountDir)) {
     collectSlotsFromTitleDir(path.join(accountDir, userName, OOT_REMAKE_TITLE_ID), slots)
+    collectSlotsFromTitleDir(path.join(accountDir, userName), slots)
   }
 }
 
@@ -1278,6 +1307,8 @@ function collectSlotsFromSaveBase(saveBaseDir: string, slots: Set<string>): void
   for (const accountName of listSubdirs(saveBaseDir)) {
     collectSlotsFromAccountDir(path.join(saveBaseDir, accountName), slots)
   }
+  // Longshot/Hookshot store saves at <user>/save/<32-hex-uid>/slot_* without an account folder
+  collectSlotsFromAccountDir(saveBaseDir, slots)
 }
 
 function collectSlotsInCandidateRoot(rootDir: string): string[] {
@@ -1286,14 +1317,14 @@ function collectSlotsInCandidateRoot(rootDir: string): string[] {
 
   // 1. Direct slot_* folder (or folder directly holding caption.sav / progress.sav)
   addSlotIfValid(rootDir, slots)
-  // 2. Title ID folder (0400486024DEC000) containing slot_*
+  // 2. Title ID folder (0400486024DEC000) or Longshot UID folder containing slot_*
   collectSlotsFromTitleDir(rootDir, slots)
   // 3. Profile folder (<userId>) containing 0400486024DEC000/slot_*
   collectSlotsFromTitleDir(path.join(rootDir, OOT_REMAKE_TITLE_ID), slots)
   // 4. Account folder (0000000000000000) containing <userId>/0400486024DEC000/slot_*
   collectSlotsFromAccountDir(rootDir, slots)
 
-  // 5. Full Lichii root / nand / user / save directory layouts
+  // 5. Full Lichii / Longshot root / nand / user / save directory layouts
   const saveRoots = [
     path.join(rootDir, 'nand', 'user', 'save'),
     path.join(rootDir, 'user', 'save'),
@@ -1315,14 +1346,27 @@ export function detectEmulatorFromPath(dirPath: string): EmulatorKind | undefine
   for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
     if (segments.includes(emu)) return emu
   }
+  if (segments.includes('longshot') || segments.includes('hookshot')) {
+    return 'longshot'
+  }
   return undefined
 }
 
 function isDefaultEmulatorSaveDir(dir: string): boolean {
   const normalized = path.resolve(dir).toLowerCase()
-  return DEFAULT_EMULATOR_SAVE_ROOTS.some((emu) =>
-    normalized.endsWith(path.join(emu, 'nand', 'user', 'save', '0000000000000000').toLowerCase()),
-  )
+  if (
+    DEFAULT_EMULATOR_SAVE_ROOTS.some((emu) =>
+      normalized.endsWith(path.join(emu, 'nand', 'user', 'save', '0000000000000000').toLowerCase()),
+    )
+  ) {
+    return true
+  }
+  const defaultLongshotDirs = [
+    'E:\\Longshot\\Game\\user',
+    path.join(os.homedir(), 'Games', 'Longshot', 'user'),
+    path.join(os.homedir(), 'Games', 'Hookshot', 'user'),
+  ]
+  return defaultLongshotDirs.some((d) => normalized === path.resolve(d).toLowerCase())
 }
 
 function findBestSlotInRoot(
@@ -1971,6 +2015,7 @@ const MAIN_BASE_RESCAN_THROTTLE_MS = 1500
 const MAIN_SUB6_BSS_OFFSET = 0x04e6c7a8n
 const MAIN_SUB24_BSS_OFFSET = 0x04e6c938n
 const MAIN_GDM_BSS_OFFSET = 0x04e90ce8n
+const MIN_GUEST_HEAP_PTR = 0x1000000000n // Longshot uses HOS_HEAP_BASE=0x1000000000; Lichii/Fritchii/Eden use 0x2000000000+
 
 const LEGACY_SUB36_VT1 = 0x84fce818n
 const LEGACY_SUB36_VT2 = 0x84311f8cn
@@ -2116,7 +2161,7 @@ async function resolveGameDataMgr(mainBase: bigint, vtables: DynamicVtables): Pr
   if (cachedGdmAddr !== 0n) return cachedGdmAddr
   if (mainBase === 0n || !lichiiRpc.isConnected()) return 0n
   const gdmPtr = await readU64At(bigintToHex(mainBase + MAIN_GDM_BSS_OFFSET), 400)
-  if (gdmPtr <= 0x2000000000n) return 0n
+  if (gdmPtr <= MIN_GUEST_HEAP_PTR) return 0n
   const vt = await readU64At(bigintToHex(gdmPtr), 400)
   if (vt !== vtables.gdmVt) return 0n
   cachedGdmAddr = gdmPtr
@@ -2248,7 +2293,7 @@ async function resolveMasterTableMetaFromGdm(
   if (!tblMeta || tblMeta.length < 16) return false
   const count = Number(tblMeta.readBigUInt64LE(0))
   const ptr = tblMeta.readBigUInt64LE(8)
-  if (ptr <= 0x2000000000n || count < 100 || count > 65536) return false
+  if (ptr <= MIN_GUEST_HEAP_PTR || count < 100 || count > 65536) return false
   cachedMasterFlagTableAddr = bigintToHex(ptr)
   cachedMasterFlagTableCount = count
   return true
@@ -2401,8 +2446,8 @@ export function parseGdmContainerHeader(
     cnt > maxCnt ||
     cap < cnt ||
     cap > maxCap ||
-    entriesPtr <= 0x2000000000n ||
-    hashTablePtr <= 0x2000000000n
+    entriesPtr <= MIN_GUEST_HEAP_PTR ||
+    hashTablePtr <= MIN_GUEST_HEAP_PTR
   ) {
     return null
   }
@@ -2603,14 +2648,14 @@ async function resolveSubPointersFromPObj(
   vtables: DynamicVtables,
   validatePObjVt: boolean,
 ): Promise<{ sub36Ptr: bigint; sub7Ptr: bigint; sub23Ptr: bigint } | null> {
-  if (pObjPtr <= 0x2000000000n) return null
+  if (pObjPtr <= MIN_GUEST_HEAP_PTR) return null
   const pObjBuf = await readMemoryBuffer(bigintToHex(pObjPtr), 0x60, 500)
   if (!pObjBuf || pObjBuf.length < 0x60) return null
   if (validatePObjVt && pObjBuf.readBigUInt64LE(0) !== vtables.pObjVt) return null
 
   const subCount = pObjBuf.readUInt32LE(0x50)
   const subArrPtr = pObjBuf.readBigUInt64LE(0x58)
-  if (subCount <= 36 || subCount > 128 || subArrPtr <= 0x2000000000n) return null
+  if (subCount <= 36 || subCount > 128 || subArrPtr <= MIN_GUEST_HEAP_PTR) return null
 
   const arrBuf = await readMemoryBuffer(bigintToHex(subArrPtr), subCount * 8, 500)
   if (!arrBuf || arrBuf.length < 37 * 8) return null
@@ -2629,21 +2674,21 @@ async function resolvePlayerFromBss(
   for (const bssOff of [MAIN_SUB6_BSS_OFFSET, MAIN_SUB24_BSS_OFFSET]) {
     if (!lichiiRpc.isConnected()) return null
     const subSingletonPtr = await readU64At(bigintToHex(mainBase + bssOff), 400)
-    if (subSingletonPtr <= 0x2000000000n) continue
+    if (subSingletonPtr <= MIN_GUEST_HEAP_PTR) continue
 
     const singletonBuf = await readMemoryBuffer(bigintToHex(subSingletonPtr), 0x18, 400)
     if (!singletonBuf || singletonBuf.length < 0x18) continue
     const pObjPtr = singletonBuf.readBigUInt64LE(0x10)
     const subs = await resolveSubPointersFromPObj(pObjPtr, vtables, true)
-    if (!subs || subs.sub36Ptr <= 0x2000000000n) continue
+    if (!subs || subs.sub36Ptr <= MIN_GUEST_HEAP_PTR) continue
 
     const subBuf = await readMemoryBuffer(bigintToHex(subs.sub36Ptr), 0x40, 500)
     if (!isValidSub36Buffer(subBuf, vtables.sub36Vt1, vtables.sub36Vt2)) continue
 
     cachedSub36Addr = bigintToHex(subs.sub36Ptr)
     cachedParentObjAddr = pObjPtr
-    cachedSub7Addr = subs.sub7Ptr > 0x2000000000n ? subs.sub7Ptr : 0n
-    cachedSub23Addr = subs.sub23Ptr > 0x2000000000n ? subs.sub23Ptr : 0n
+    cachedSub7Addr = subs.sub7Ptr > MIN_GUEST_HEAP_PTR ? subs.sub7Ptr : 0n
+    cachedSub23Addr = subs.sub23Ptr > MIN_GUEST_HEAP_PTR ? subs.sub23Ptr : 0n
     return subBuf
   }
   return null
@@ -2687,20 +2732,20 @@ async function resolvePlayerViaHeapFallbacks(vtables: DynamicVtables): Promise<B
       continue
     }
     const sub7Candidate = hitAddr - 0x34n
-    if (sub7Candidate <= 0x2000000000n) continue
+    if (sub7Candidate <= MIN_GUEST_HEAP_PTR) continue
     const sub7Hdr = await readMemoryBuffer(bigintToHex(sub7Candidate), 0x34, 400)
     if (!sub7Hdr || sub7Hdr.length < 0x34) continue
     if (sub7Hdr.readBigUInt64LE(0x28) !== hitAddr) continue
     const pObjCandidate = sub7Hdr.readBigUInt64LE(0x10)
     const subs = await resolveSubPointersFromPObj(pObjCandidate, vtables, false)
-    if (!subs || subs.sub36Ptr <= 0x2000000000n) continue
+    if (!subs || subs.sub36Ptr <= MIN_GUEST_HEAP_PTR) continue
 
     const candidate = await readMemoryBuffer(bigintToHex(subs.sub36Ptr), 0x40, 500)
     if (isValidSub36Buffer(candidate, vtables.sub36Vt1, vtables.sub36Vt2)) {
       cachedSub36Addr = bigintToHex(subs.sub36Ptr)
       cachedParentObjAddr = pObjCandidate
       cachedSub7Addr = sub7Candidate
-      cachedSub23Addr = subs.sub23Ptr > 0x2000000000n ? subs.sub23Ptr : 0n
+      cachedSub23Addr = subs.sub23Ptr > MIN_GUEST_HEAP_PTR ? subs.sub23Ptr : 0n
       return candidate
     }
   }
@@ -2879,7 +2924,7 @@ async function readLiveGdmCollectibles(
 async function resolveSaveBufFallbackAddresses(gdm: bigint): Promise<void> {
   if (gdm === 0n || !lichiiRpc.isConnected()) return
   const saveBufPtr = await readU64At(bigintToHex(gdm + 0x1160n), 400)
-  if (saveBufPtr <= 0x2000000000n) return
+  if (saveBufPtr <= MIN_GUEST_HEAP_PTR) return
   const hdr = await readMemoryBuffer(bigintToHex(saveBufPtr), 0x28, 400)
   if (!hdr || hdr.length < 0x28) return
   const dataOff = hdr.readUInt32LE(8)
@@ -2997,7 +3042,7 @@ async function resolveSaveBufCollectibleOffsets(
   const gdm = await resolveGameDataMgr(mainBase, vtables)
   if (gdm === 0n || !lichiiRpc.isConnected()) return false
   const saveBufPtr = await readU64At(bigintToHex(gdm + 0x1160n), 400)
-  if (saveBufPtr <= 0x2000000000n) return false
+  if (saveBufPtr <= MIN_GUEST_HEAP_PTR) return false
   const hdr = await readMemoryBuffer(bigintToHex(saveBufPtr), 0x28, 400)
   if (!hdr || hdr.length < 0x28) return false
   const dataOff = hdr.readUInt32LE(8)
@@ -3193,7 +3238,7 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
   const canSpeculateWarmReads = cachedSub36Addr !== '0x0'
   const [initialSubBuf, prefetchedPrimaryStrBuf, prefetchedStockBuf] = await Promise.all([
     readMemoryBuffer(cachedSub36Addr, 0x40),
-    canSpeculateWarmReads && cachedSub7Addr > 0x2000000000n
+    canSpeculateWarmReads && cachedSub7Addr > MIN_GUEST_HEAP_PTR
       ? readMemoryBuffer(bigintToHex(cachedSub7Addr + 0x34n), 0x80, 400)
       : Promise.resolve(null),
     canSpeculateWarmReads && cachedLiveStockAddr !== '0x0'
@@ -3270,20 +3315,20 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
   }
 
   // Refresh scene name from Sub[7] + 0x34 (fallback pObj + 0x768) and age hint from Sub[23] + 0x80
-  if (pObj > 0x2000000000n) {
+  if (pObj > MIN_GUEST_HEAP_PTR) {
     let primaryStrBuf: Buffer | null = null
     if (pObj !== cachedParentObjAddr) {
       cachedParentObjAddr = pObj
       const subs = await resolveSubPointersFromPObj(pObj, vtables, false)
       if (subs) {
-        cachedSub7Addr = subs.sub7Ptr > 0x2000000000n ? subs.sub7Ptr : 0n
-        cachedSub23Addr = subs.sub23Ptr > 0x2000000000n ? subs.sub23Ptr : 0n
+        cachedSub7Addr = subs.sub7Ptr > MIN_GUEST_HEAP_PTR ? subs.sub7Ptr : 0n
+        cachedSub23Addr = subs.sub23Ptr > MIN_GUEST_HEAP_PTR ? subs.sub23Ptr : 0n
       }
       primaryStrBuf =
-        cachedSub7Addr > 0x2000000000n
+        cachedSub7Addr > MIN_GUEST_HEAP_PTR
           ? await readMemoryBuffer(bigintToHex(cachedSub7Addr + 0x34n), 0x80, 400)
           : null
-    } else if (cachedSub7Addr > 0x2000000000n) {
+    } else if (cachedSub7Addr > MIN_GUEST_HEAP_PTR) {
       primaryStrBuf =
         initialSubValid && prefetchedPrimaryStrBuf !== null
           ? prefetchedPrimaryStrBuf
@@ -3313,7 +3358,7 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
     const sceneChanged = cachedLiveScene !== prevScene
     if (!cachedLiveAgeHint && lichiiRpc.isConnected() && (sceneChanged || now - lastAgeReadTime > 1000)) {
       lastAgeReadTime = now
-      if (cachedSub23Addr > 0x2000000000n) {
+      if (cachedSub23Addr > MIN_GUEST_HEAP_PTR) {
         const adjBuf = await readMemoryBuffer(bigintToHex(cachedSub23Addr + 0x80n), 0x80, 400)
         if (adjBuf) {
           const adjAscii = readNullTerminatedAscii(adjBuf, 0, 0x80)
@@ -3744,7 +3789,15 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
     }
   }
 
-  const emulator = cachedLatestSlotInfo ? detectEmulatorFromPath(cachedLatestSlotInfo.dir) : undefined
+  const rpcEmulator =
+    cachedStatusRes?.emulator === 'longshot' ||
+    cachedStatusRes?.emulator === 'fritchii' ||
+    cachedStatusRes?.emulator === 'lichii' ||
+    cachedStatusRes?.emulator === 'eden'
+      ? cachedStatusRes.emulator
+      : undefined
+  const emulator =
+    rpcEmulator ?? (cachedLatestSlotInfo ? detectEmulatorFromPath(cachedLatestSlotInfo.dir) : undefined)
 
   return {
     connected,

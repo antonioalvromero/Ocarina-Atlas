@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { dataset, formatFloorLabel } from './data'
 import {
   classifyGdmCollectibles,
+  closeLichiiRpc,
   deriveConnectionStatus,
   deriveDynamicVtables,
   deriveLastPickedItem,
@@ -15,6 +16,7 @@ import {
   getCandidateSaveDirs,
   getLichiiHost,
   getLichiiPort,
+  getLichiiTelemetryState,
   GHOST_SHOP_COUPON_BOTTLE_ITEM_ID,
   GHOST_SHOP_COUPON_NUM_HASH,
   isValidSub36Buffer,
@@ -104,36 +106,35 @@ describe('Lichii environment config helpers', () => {
     expect(getLichiiPort({ LICHII_PORT: 'invalid' })).toBe(6545)
   })
 
-  it('checks LICHII_SAVE_DIR / FRITCHII_SAVE_DIR before default APPDATA save directories', () => {
+  it('checks LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR before default APPDATA and Longshot save directories', () => {
     const appData = path.join(os.tmpdir(), 'fake-appdata')
     const explicit = path.join(os.tmpdir(), 'custom-lichii-saves')
     const explicitFritchii = path.join(os.tmpdir(), 'custom-fritchii-saves')
+    const explicitLongshot = path.join(os.tmpdir(), 'custom-longshot-saves')
     const fritchiiDefault = path.join(appData, 'fritchii', 'nand', 'user', 'save', '0000000000000000')
     const lichiiDefault = path.join(appData, 'lichii', 'nand', 'user', 'save', '0000000000000000')
     const edenDefault = path.join(appData, 'eden', 'nand', 'user', 'save', '0000000000000000')
+    const longshotDefaults = [
+      path.resolve('E:\\Longshot\\Game\\user'),
+      path.resolve(path.join(os.homedir(), 'Games', 'Longshot', 'user')),
+      path.resolve(path.join(os.homedir(), 'Games', 'Hookshot', 'user')),
+    ]
+    const defaultDirs = [fritchiiDefault, lichiiDefault, edenDefault, ...longshotDefaults]
 
-    expect(getCandidateSaveDirs({ APPDATA: appData })).toEqual([
-      fritchiiDefault,
-      lichiiDefault,
-      edenDefault,
-    ])
-    expect(getCandidateSaveDirs({ APPDATA: appData, LICHII_SAVE_DIR: '   ' })).toEqual([
-      fritchiiDefault,
-      lichiiDefault,
-      edenDefault,
-    ])
+    expect(getCandidateSaveDirs({ APPDATA: appData })).toEqual(defaultDirs)
+    expect(getCandidateSaveDirs({ APPDATA: appData, LICHII_SAVE_DIR: '   ' })).toEqual(defaultDirs)
     expect(
       getCandidateSaveDirs({
         APPDATA: appData,
         LICHII_SAVE_DIR: explicit,
         FRITCHII_SAVE_DIR: explicitFritchii,
+        LONGSHOT_SAVE_DIR: explicitLongshot,
       }),
     ).toEqual([
       path.resolve(explicit),
       path.resolve(explicitFritchii),
-      fritchiiDefault,
-      lichiiDefault,
-      edenDefault,
+      path.resolve(explicitLongshot),
+      ...defaultDirs,
     ])
   })
 
@@ -262,6 +263,75 @@ describe('Lichii environment config helpers', () => {
       )
       expect(fullLayoutFound?.dir).toBe(slot1)
     } finally {
+      fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('supports Longshot <game>/user/save/<32-hex-uid>/slot_00/caption.sav without title ID via LONGSHOT_SAVE_DIR and Games/Longshot/user', () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'longshot-save-test-'))
+    const homeSpy = vi.spyOn(os, 'homedir').mockReturnValue(tmpRoot)
+    try {
+      const uid = '0123456789abcdef0123456789abcdef'
+      const appDataDir = path.join(tmpRoot, 'appdata')
+      const lichiiSlot = path.join(
+        appDataDir,
+        'lichii',
+        'nand',
+        'user',
+        'save',
+        '0000000000000000',
+        '0000000000000001',
+        '0400486024DEC000',
+        'slot_00',
+      )
+      fs.mkdirSync(lichiiSlot, { recursive: true })
+      const lichiiCap = path.join(lichiiSlot, 'caption.sav')
+      fs.writeFileSync(lichiiCap, Buffer.alloc(0x30))
+      fs.utimesSync(lichiiCap, new Date(9000), new Date(9000))
+
+      // 1. Explicit LONGSHOT_SAVE_DIR pointing to <game>/user beats newer default Lichii save
+      const customGameDir = path.join(tmpRoot, 'custom-game')
+      const customUserDir = path.join(customGameDir, 'user')
+      const customSlot = path.join(customUserDir, 'save', uid, 'slot_00')
+      fs.mkdirSync(customSlot, { recursive: true })
+      const customCap = path.join(customSlot, 'caption.sav')
+      fs.writeFileSync(customCap, Buffer.alloc(0x30))
+      fs.utimesSync(customCap, new Date(1000), new Date(1000))
+
+      for (const saveDir of [customGameDir, customUserDir, path.join(customUserDir, 'save')]) {
+        const found = findLatestSaveSlotDir(
+          getCandidateSaveDirs({ APPDATA: appDataDir, LONGSHOT_SAVE_DIR: saveDir }),
+        )
+        expect(found?.dir).toBe(customSlot)
+      }
+      expect(detectEmulatorFromPath(customSlot)).toBeUndefined()
+
+      // 2. Default ~/Games/Longshot/user discovery compares mtime cleanly across emulators
+      const gamesLongshotUser = path.join(tmpRoot, 'Games', 'Longshot', 'user')
+      const gamesLongshotSlot = path.join(gamesLongshotUser, 'save', uid, 'slot_00')
+      fs.mkdirSync(gamesLongshotSlot, { recursive: true })
+      const longshotCap = path.join(gamesLongshotSlot, 'caption.sav')
+      fs.writeFileSync(longshotCap, Buffer.alloc(0x30))
+
+      // Newer Longshot default save wins over Lichii
+      fs.utimesSync(longshotCap, new Date(12000), new Date(12000))
+      const newerLongshot = findLatestSaveSlotDir(getCandidateSaveDirs({ APPDATA: appDataDir }))
+      expect(newerLongshot?.dir).toBe(gamesLongshotSlot)
+      expect(detectEmulatorFromPath(newerLongshot!.dir)).toBe('longshot')
+
+      // Newer Lichii default save wins over Longshot (no shadowing)
+      fs.utimesSync(lichiiCap, new Date(15000), new Date(15000))
+      const newerLichii = findLatestSaveSlotDir(getCandidateSaveDirs({ APPDATA: appDataDir }))
+      expect(newerLichii?.dir).toBe(lichiiSlot)
+      expect(detectEmulatorFromPath(newerLichii!.dir)).toBe('lichii')
+
+      // 3. detectEmulatorFromPath recognizes both Longshot and Hookshot segments
+      expect(detectEmulatorFromPath(gamesLongshotSlot)).toBe('longshot')
+      expect(
+        detectEmulatorFromPath(path.join(tmpRoot, 'Games', 'Hookshot', 'user', 'save', uid, 'slot_00')),
+      ).toBe('longshot')
+    } finally {
+      homeSpy.mockRestore()
       fs.rmSync(tmpRoot, { recursive: true, force: true })
     }
   })
@@ -1002,6 +1072,20 @@ describe('Live GameDataMgr +0x170 Bool & +0x230 Int containers', () => {
     badPtr.writeBigUInt64LE(0x1000n, 0x10)
     expect(parseGdmContainerHeader(badPtr)).toBeNull()
 
+    const boundaryPtr = Buffer.from(hdr)
+    boundaryPtr.writeBigUInt64LE(0x1000000000n, 0x10)
+    expect(parseGdmContainerHeader(boundaryPtr)).toBeNull()
+
+    const longshotHdr = Buffer.from(hdr)
+    longshotHdr.writeBigUInt64LE(0x118551d418n, 0x10)
+    longshotHdr.writeBigUInt64LE(0x11854f1258n, 0x18)
+    expect(parseGdmContainerHeader(longshotHdr)).toEqual({
+      cnt: 11292,
+      entriesPtr: 0x118551d418n,
+      hashTablePtr: 0x11854f1258n,
+      cap: 22584,
+    })
+
     expect(parseGdmContainerHeader(Buffer.alloc(0x20))).toBeNull()
     expect(parseGdmContainerHeader(null)).toBeNull()
   })
@@ -1230,6 +1314,398 @@ describe('LichiiRpcClient', () => {
       for (const s of serverSockets) s.destroy()
       await new Promise<void>((resolve) => server.close(() => resolve()))
     }
+  })
+})
+
+describe('Longshot live .bss telemetry resolution (getLichiiTelemetryState)', () => {
+  const MAIN_MOD0_OFFSET = 0x03c4705cn
+  const MAIN_MOD0_PATTERN_HEX = '4d4f44305467030124fb0f016c342501'
+  const MAIN_SUB6_BSS_OFFSET = 0x04e6c7a8n
+  const MAIN_SUB24_BSS_OFFSET = 0x04e6c938n
+  const MAIN_GDM_BSS_OFFSET = 0x04e90ce8n
+  const GDM_STOCK_TOKEN_HASH = 0x04735978
+
+  function buildMasterFlagTable(options: {
+    collectedSkulltulaIds: Set<string>
+    collectedHeartContainerIds?: Set<string>
+    collectedHeartPieceIds?: Set<string>
+  }): { buf: Buffer; count: number } {
+    const records: Array<{ hash: bigint; flags: bigint }> = [
+      { hash: 0x00006e56f79838e8n, flags: 0x18n },
+      { hash: 0x00006e56f79838ean, flags: 0x0700000000000058n },
+    ]
+    const categories: Array<{
+      entries: Array<{ hashes: bigint[]; itemIds: string[] }>
+      collected?: Set<string>
+    }> = [
+      { entries: KNOWN_SKULLTULA_HASH_MAP, collected: options.collectedSkulltulaIds },
+      { entries: KNOWN_HEART_CONTAINER_HASH_MAP, collected: options.collectedHeartContainerIds },
+      { entries: KNOWN_HEART_PIECE_HASH_MAP, collected: options.collectedHeartPieceIds },
+    ]
+    for (const { entries, collected } of categories) {
+      for (const entry of entries) {
+        const isCollected = entry.itemIds.some((id) => collected?.has(id))
+        const flags = isCollected ? 0x0002000100000018n : 0x18n
+        for (const h of entry.hashes) {
+          records.push({ hash: h, flags })
+        }
+      }
+    }
+    records.sort((a, b) => (a.hash < b.hash ? -1 : a.hash > b.hash ? 1 : 0))
+    const buf = Buffer.alloc(records.length * 16)
+    records.forEach((rec, idx) => {
+      buf.writeBigUInt64LE(rec.hash, idx * 16)
+      buf.writeBigUInt64LE(rec.flags, idx * 16 + 8)
+    })
+    return { buf, count: records.length }
+  }
+
+  function createLongshotMemoryRegions(config: {
+    mainBase: bigint
+    useSub24Bss?: boolean
+    sub6OverridePtr?: bigint
+    subSingletonPtr: bigint
+    pObjPtr: bigint
+    subArrPtr: bigint
+    sub7Ptr: bigint
+    sub23Ptr: bigint
+    sub36Ptr: bigint
+    gdmPtr: bigint
+    boolEntriesPtr: bigint
+    boolHashTablePtr: bigint
+    intEntriesPtr: bigint
+    intHashTablePtr: bigint
+    masterTablePtr: bigint
+    scenePath: string
+    x: number
+    y: number
+    z: number
+    skulltulaCount: number
+    couponCount: number
+    collectedSkulltulaIds: Set<string>
+    collectedHeartContainerIds: Set<string>
+    collectedMasterHeartPieceIds: Set<string>
+    collectedBoolHashes: Set<number>
+  }): Array<{ base: bigint; buf: Buffer }> {
+    const vtables = deriveDynamicVtables(config.mainBase)
+
+    const mainHdr = Buffer.alloc(16)
+    mainHdr.writeUInt32LE(1, 0)
+    mainHdr.writeUInt32LE(Number(MAIN_MOD0_OFFSET), 4)
+
+    const sub6Bss = Buffer.alloc(8)
+    sub6Bss.writeBigUInt64LE(
+      config.sub6OverridePtr ?? (config.useSub24Bss ? 0n : config.subSingletonPtr),
+      0,
+    )
+
+    const sub24Bss = Buffer.alloc(8)
+    sub24Bss.writeBigUInt64LE(config.useSub24Bss ? config.subSingletonPtr : 0n, 0)
+
+    const gdmBss = Buffer.alloc(8)
+    gdmBss.writeBigUInt64LE(config.gdmPtr, 0)
+
+    const subSingleton = Buffer.alloc(0x18)
+    subSingleton.writeBigUInt64LE(config.pObjPtr, 0x10)
+
+    const subCount = 40
+    const pObj = Buffer.alloc(0x60)
+    pObj.writeBigUInt64LE(vtables.pObjVt, 0x00)
+    pObj.writeUInt32LE(subCount, 0x50)
+    pObj.writeBigUInt64LE(config.subArrPtr, 0x58)
+
+    const subArr = Buffer.alloc(subCount * 8)
+    subArr.writeBigUInt64LE(config.sub7Ptr, 7 * 8)
+    subArr.writeBigUInt64LE(config.sub23Ptr, 23 * 8)
+    subArr.writeBigUInt64LE(config.sub36Ptr, 36 * 8)
+
+    const sub36 = Buffer.alloc(0x40)
+    sub36.writeBigUInt64LE(vtables.sub36Vt1, 0x00)
+    sub36.writeBigUInt64LE(vtables.sub36Vt2, 0x08)
+    sub36.writeBigUInt64LE(config.pObjPtr, 0x10)
+    sub36.writeFloatLE(config.x, 0x1c)
+    sub36.writeFloatLE(config.y, 0x20)
+    sub36.writeFloatLE(config.z, 0x24)
+    sub36.writeFloatLE(0.0, 0x28)
+    sub36.writeFloatLE(-1.0, 0x30)
+
+    const sub7 = Buffer.alloc(0xb4)
+    sub7.write(config.scenePath + '\0', 0x34, 'ascii')
+
+    const sub23 = Buffer.alloc(0x100)
+    sub23.write('Link_Child\0', 0x80, 'ascii')
+
+    const allBoolHashes = [
+      ...KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_BEAN_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_FAIRY_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+    ]
+    const boolHashTable = Buffer.alloc(allBoolHashes.length * 8)
+    const boolEntries = Buffer.alloc(allBoolHashes.length * 0x18)
+    allBoolHashes.forEach((h, idx) => {
+      boolHashTable.writeUInt32LE(h, idx * 8)
+      boolHashTable.writeUInt32LE(idx, idx * 8 + 4)
+
+      const entryOff = idx * 0x18
+      boolEntries.writeBigUInt64LE(vtables.gdmBoolVt, entryOff)
+      boolEntries.writeUInt8(config.collectedBoolHashes.has(h) ? 1 : 0, entryOff + 0x16)
+    })
+
+    const intHashTable = Buffer.alloc(16)
+    intHashTable.writeUInt32LE(GDM_STOCK_TOKEN_HASH, 0)
+    intHashTable.writeUInt32LE(0, 4)
+    intHashTable.writeUInt32LE(GHOST_SHOP_COUPON_NUM_HASH >>> 0, 8)
+    intHashTable.writeUInt32LE(1, 12)
+
+    const intEntries = Buffer.alloc(2 * 0x28)
+    intEntries.writeBigUInt64LE(vtables.gdmStockVt, 0x00)
+    intEntries.writeUInt32LE(0x20, 0x08)
+    intEntries.writeUInt32LE(config.skulltulaCount, 0x1c)
+    intEntries.writeBigUInt64LE(vtables.gdmStockVt, 0x28)
+    intEntries.writeInt32LE(config.couponCount, 0x28 + 0x1c)
+
+    const masterTable = buildMasterFlagTable({
+      collectedSkulltulaIds: config.collectedSkulltulaIds,
+      collectedHeartContainerIds: config.collectedHeartContainerIds,
+      collectedHeartPieceIds: config.collectedMasterHeartPieceIds,
+    })
+
+    const gdm = Buffer.alloc(0xdd0)
+    gdm.writeBigUInt64LE(vtables.gdmVt, 0x00)
+    // +0x170 Bool container header
+    gdm.writeUInt32LE(allBoolHashes.length, 0x170 + 0x08)
+    gdm.writeBigUInt64LE(config.boolEntriesPtr, 0x170 + 0x10)
+    gdm.writeBigUInt64LE(config.boolHashTablePtr, 0x170 + 0x18)
+    gdm.writeUInt32LE(allBoolHashes.length, 0x170 + 0x24)
+    // +0x230 Int container header
+    gdm.writeUInt32LE(2, 0x230 + 0x08)
+    gdm.writeBigUInt64LE(config.intEntriesPtr, 0x230 + 0x10)
+    gdm.writeBigUInt64LE(config.intHashTablePtr, 0x230 + 0x18)
+    gdm.writeUInt32LE(2, 0x230 + 0x24)
+    // +0xdc0 MasterFlagTable metadata
+    gdm.writeBigUInt64LE(BigInt(masterTable.count), 0xdc0)
+    gdm.writeBigUInt64LE(config.masterTablePtr, 0xdc8)
+
+    return [
+      { base: config.mainBase, buf: mainHdr },
+      { base: config.mainBase + MAIN_SUB6_BSS_OFFSET, buf: sub6Bss },
+      { base: config.mainBase + MAIN_SUB24_BSS_OFFSET, buf: sub24Bss },
+      { base: config.mainBase + MAIN_GDM_BSS_OFFSET, buf: gdmBss },
+      { base: config.subSingletonPtr, buf: subSingleton },
+      { base: config.pObjPtr, buf: pObj },
+      { base: config.subArrPtr, buf: subArr },
+      { base: config.sub36Ptr, buf: sub36 },
+      { base: config.sub7Ptr, buf: sub7 },
+      { base: config.sub23Ptr, buf: sub23 },
+      { base: config.gdmPtr, buf: gdm },
+      { base: config.boolEntriesPtr, buf: boolEntries },
+      { base: config.boolHashTablePtr, buf: boolHashTable },
+      { base: config.intEntriesPtr, buf: intEntries },
+      { base: config.intHashTablePtr, buf: intHashTable },
+      { base: config.masterTablePtr, buf: masterTable.buf },
+    ]
+  }
+
+  async function withMockLongshotRpcServer(
+    mainBase: bigint,
+    regions: Array<{ base: bigint; buf: Buffer }>,
+    fn: (info: { searchPatterns: string[] }) => Promise<void>,
+  ): Promise<void> {
+    const serverSockets = new Set<net.Socket>()
+    const searchPatterns: string[] = []
+    const mod0AddrHex = '0x' + (mainBase + MAIN_MOD0_OFFSET).toString(16)
+
+    const server = net.createServer((sock) => {
+      serverSockets.add(sock)
+      sock.on('close', () => serverSockets.delete(sock))
+      let buf = ''
+      sock.on('data', (chunk) => {
+        buf += chunk.toString('utf8')
+        let nl = buf.indexOf('\n')
+        while (nl !== -1) {
+          const line = buf.slice(0, nl)
+          buf = buf.slice(nl + 1)
+          if (line.trim()) {
+            const req = JSON.parse(line) as {
+              id: number
+              method: string
+              params?: Record<string, unknown>
+            }
+            if (req.method === 'status') {
+              sock.write(
+                JSON.stringify({
+                  id: req.id,
+                  result: {
+                    powered_on: true,
+                    program_id: '0400486024DEC000',
+                    emulator: 'longshot',
+                  },
+                }) + '\n',
+              )
+            } else if (req.method === 'search_memory') {
+              const pattern = String(req.params?.pattern ?? '')
+              searchPatterns.push(pattern)
+              const hits = pattern === MAIN_MOD0_PATTERN_HEX ? [mod0AddrHex] : []
+              sock.write(JSON.stringify({ id: req.id, result: { hits } }) + '\n')
+            } else if (req.method === 'read_memory') {
+              const addr = BigInt(String(req.params?.address ?? '0x0'))
+              const size = Number(req.params?.size ?? 0)
+              const region = regions.find(
+                (r) => addr >= r.base && addr + BigInt(size) <= r.base + BigInt(r.buf.length),
+              )
+              if (region) {
+                const startOff = Number(addr - region.base)
+                const slice = region.buf.subarray(startOff, startOff + size)
+                sock.write(
+                  JSON.stringify({ id: req.id, result: { hex: slice.toString('hex') } }) + '\n',
+                )
+              } else {
+                sock.write(JSON.stringify({ id: req.id, result: null }) + '\n')
+              }
+            } else {
+              sock.write(JSON.stringify({ id: req.id, result: null }) + '\n')
+            }
+          }
+          nl = buf.indexOf('\n')
+        }
+      })
+    })
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()))
+    const addr = server.address() as net.AddressInfo
+    const prevHost = process.env.LICHII_HOST
+    const prevPort = process.env.LICHII_PORT
+    closeLichiiRpc()
+
+    try {
+      process.env.LICHII_HOST = '127.0.0.1'
+      process.env.LICHII_PORT = String(addr.port)
+      await fn({ searchPatterns })
+    } finally {
+      closeLichiiRpc()
+      if (prevHost === undefined) delete process.env.LICHII_HOST
+      else process.env.LICHII_HOST = prevHost
+      if (prevPort === undefined) delete process.env.LICHII_PORT
+      else process.env.LICHII_PORT = prevPort
+      for (const s of serverSockets) s.destroy()
+      await new Promise<void>((resolve) => server.close(() => resolve()))
+    }
+  }
+
+  it('resolves GameDataMgr and Player via .bss in Longshot 0x1000000000n..0x1fffffffffn heap range with emulator: "longshot"', async () => {
+    const mainBase = 0x80000000n
+    const regions = createLongshotMemoryRegions({
+      mainBase,
+      subSingletonPtr: 0x1100100000n,
+      pObjPtr: 0x1100200000n,
+      subArrPtr: 0x1100300000n,
+      sub7Ptr: 0x1100400000n,
+      sub23Ptr: 0x1100500000n,
+      sub36Ptr: 0x1100600000n,
+      gdmPtr: 0x1200000000n,
+      intEntriesPtr: 0x1200100000n,
+      intHashTablePtr: 0x1200200000n,
+      boolEntriesPtr: 0x1400100000n,
+      boolHashTablePtr: 0x1400200000n,
+      masterTablePtr: 0x1f00000000n,
+      scenePath: 'Work/Banc/Scene/HyruleCastle/HyruleCastle_Child.bcett.json',
+      x: 13.49,
+      y: 114.15,
+      z: -14.0,
+      skulltulaCount: 2,
+      couponCount: 500,
+      collectedSkulltulaIds: new Set(['castillo-gs-01', 'espiritu-gs-01']),
+      collectedHeartContainerIds: new Set(['deku-heart-01']),
+      collectedMasterHeartPieceIds: new Set(['lonlon-heart-01']),
+      collectedBoolHashes: new Set([
+        0x5ff7aa30, // perdido-heart-01
+        0x2a1c58ce, // coloso-bean-01
+        0x8fa2608e, // castillo-fairy-01
+        0x7a7961c3, // kakariko-bottle-01
+        0x8e8f3ae5, // llanura-thought-04
+      ]),
+    })
+
+    await withMockLongshotRpcServer(mainBase, regions, async ({ searchPatterns }) => {
+      const state = await getLichiiTelemetryState()
+      expect(state.connected).toBe(true)
+      expect(state.emulatorRunning).toBe(true)
+      expect(state.emulator).toBe('longshot')
+      expect(state.titleId).toBe('0400486024DEC000')
+      expect(state.source).toBe('memory')
+      expect(state.scene).toBe('HyruleCastle')
+      expect(state.placeId).toBe('castillo')
+      expect(state.mapId).toBe('nino')
+      expect(state.age).toBe('child')
+      expect(state.position).toEqual({ x: 13.49, y: 114.15, z: -14, yaw: 0 })
+      expect(state.mapFraction).toEqual({ x: 0.4726, y: 0.8888 })
+      expect(state.skulltulaCount).toBe(2)
+      expect(state.collectedSkulltulaIds).toEqual(['castillo-gs-01', 'espiritu-gs-01'])
+      expect(state.authoritativeSkulltulas).toBe(true)
+      expect(state.collectedHeartContainerIds).toEqual(['deku-heart-01'])
+      expect(state.authoritativeHeartContainers).toBe(true)
+      expect(state.collectedHeartPieceIds).toEqual(['lonlon-heart-01', 'perdido-heart-01'])
+      expect(state.authoritativeHeartPieces).toBe(true)
+      expect(state.collectedBeanIds).toEqual(['coloso-bean-01'])
+      expect(state.authoritativeBeans).toBe(true)
+      expect(state.collectedFairyIds).toEqual(['castillo-fairy-01'])
+      expect(state.authoritativeFairies).toBe(true)
+      expect(state.collectedBottleIds).toEqual([GHOST_SHOP_COUPON_BOTTLE_ITEM_ID, 'kakariko-bottle-01'].sort())
+      expect(state.authoritativeBottles).toBe(true)
+      expect(state.collectedThoughtIds).toEqual(['llanura-thought-04'])
+      expect(state.authoritativeThoughts).toBe(true)
+      // Only MOD0 discovery ran search_memory; Player and GameDataMgr resolved directly via .bss
+      expect(searchPatterns).toEqual([MAIN_MOD0_PATTERN_HEX])
+    })
+  })
+
+  it('rejects pointers <= MIN_GUEST_HEAP_PTR (0x1000000000n) and resolves ASLR .bss via SUB24 in Longshot heap range', async () => {
+    const mainBase = 0x80c9a000n
+    const regions = createLongshotMemoryRegions({
+      mainBase,
+      useSub24Bss: true,
+      sub6OverridePtr: 0x1000000000n, // Exact MIN_GUEST_HEAP_PTR boundary must be rejected
+      subSingletonPtr: 0x1000001000n, // Strictly above MIN_GUEST_HEAP_PTR
+      pObjPtr: 0x1080000000n,
+      subArrPtr: 0x1080010000n,
+      sub7Ptr: 0x1080020000n,
+      sub23Ptr: 0x1080030000n,
+      sub36Ptr: 0x1080040000n,
+      gdmPtr: 0x1f00000000n,
+      intEntriesPtr: 0x1f00100000n,
+      intHashTablePtr: 0x1f00200000n,
+      boolEntriesPtr: 0x1f10100000n,
+      boolHashTablePtr: 0x1f10200000n,
+      masterTablePtr: 0x1ff0000000n,
+      scenePath: 'Work/Banc/Scene/KokiriForest/KokiriForest.bcett.json',
+      x: 0.3,
+      y: 12.5,
+      z: -5.5,
+      skulltulaCount: 1,
+      couponCount: 499,
+      collectedSkulltulaIds: new Set(['kokiri-gs-01']),
+      collectedHeartContainerIds: new Set(),
+      collectedMasterHeartPieceIds: new Set(),
+      collectedBoolHashes: new Set(),
+    })
+
+    await withMockLongshotRpcServer(mainBase, regions, async ({ searchPatterns }) => {
+      const state = await getLichiiTelemetryState()
+      expect(state.connected).toBe(true)
+      expect(state.emulatorRunning).toBe(true)
+      expect(state.emulator).toBe('longshot')
+      expect(state.source).toBe('memory')
+      expect(state.scene).toBe('KokiriForest')
+      expect(state.placeId).toBe('kokiri')
+      expect(state.age).toBe('child')
+      expect(state.skulltulaCount).toBe(1)
+      expect(state.collectedSkulltulaIds).toEqual(['kokiri-gs-01'])
+      expect(state.collectedBottleIds).toEqual([])
+      expect(state.authoritativeBottles).toBe(true)
+      expect(searchPatterns).toEqual([MAIN_MOD0_PATTERN_HEX])
+    })
   })
 })
 
@@ -1500,5 +1976,21 @@ describe('projectToPlaceMap', () => {
     expect(projected!.x).toBeLessThan(0.98)
     expect(projected!.y).toBeGreaterThan(0.02)
     expect(projected!.y).toBeLessThan(0.98)
+  })
+
+  it('projects calibrated InsideTheDekuTree landmarks accurately', () => {
+    const deku = dataset.places.find((p) => p.id === 'deku')!
+    expect(deku).toBeDefined()
+
+    // South entrance on 1F (Point 1)
+    expect(projectToPlaceMap('InsideTheDekuTree', deku, '1F', -0.17, 14.25)).toEqual({
+      x: 0.4457,
+      y: 0.8023,
+    })
+    // Northeast corner on 1F (Point 2)
+    expect(projectToPlaceMap('InsideTheDekuTree', deku, '1F', 10.83, -7.94)).toEqual({
+      x: 0.8516,
+      y: 0.22,
+    })
   })
 })

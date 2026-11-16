@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-11-16
+
+### Added
+- **Longshot (Native PC Recompilation) Compatibility (`launcher/OcarinaAtlas.cs`, `src/lib/lichii-server.ts`, `src/lib/lichii-types.ts`, `src/components/LichiiStatusPanel.tsx`):** Added zero-config read-only support for [Longshot](https://git.magicbean.dev/MagicBeanDev/Longshot) (`longshot.exe` / `hookshot.exe`):
+  - `LongshotRpcBridge` in `OcarinaAtlas.exe` opens the running game process strictly read-only (`PROCESS_VM_READ | PROCESS_QUERY_INFORMATION`), inspects the `A64_HOST_BASE` (`0x100000000000`) guest window via `VirtualQueryEx` / `ReadProcessMemory`, and serves an automatic loopback JSON-RPC bridge on `127.0.0.1:6545` (`status`, `read_memory`, `search_memory` with `0x1000000000+` heap fallback) while releasing the port on exit.
+  - Lowered backend guest heap validation (`MIN_GUEST_HEAP_PTR = 0x1000000000n` for `HOS_HEAP_BASE`), added `LONGSHOT_SAVE_DIR` and `<user>/save/<uid>/slot_*` save-slot fallback discovery, and added unit tests in `src/lib/lichii-server.test.ts`.
+- **Inside the Deku Tree 2-Point SVG Calibration (`src/lib/lichii-server.ts`):** Calibrated `InsideTheDekuTree` / `DekuTree` (`scaleX: 8.5609, cx: 733.86, scaleZ: 8.9211, cz: 139.64`) across all dungeon floors (`3F`, `2F`, `1F`, `B1`, `B2`).
+
 ## [2.0.0] - 2026-11-14
 
 ### Added

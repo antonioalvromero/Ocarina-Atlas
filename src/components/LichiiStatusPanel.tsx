@@ -48,6 +48,7 @@ export type ConnectionView = {
 function getEmulatorDisplayName(emulator?: LichiiTelemetryState['emulator']): string {
   if (emulator === 'fritchii') return 'Fritchii'
   if (emulator === 'eden') return 'Eden'
+  if (emulator === 'longshot') return 'Longshot'
   return 'Lichii'
 }
 

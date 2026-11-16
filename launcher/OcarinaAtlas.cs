@@ -1039,7 +1039,7 @@ namespace OcarinaAtlasLauncher
 
         public static string DetectRunningEmulator()
         {
-            string[] names = new[] { "fritchii", "lichii", "eden" };
+            string[] names = new[] { "fritchii", "lichii", "eden", "hookshot", "Longshot" };
             string detected = null;
 
             for (int i = 0; i < names.Length; i++)
@@ -1074,6 +1074,12 @@ namespace OcarinaAtlasLauncher
             if (string.Equals(fallbackName, "fritchii", StringComparison.OrdinalIgnoreCase))
             {
                 return "Fritchii";
+            }
+
+            if (string.Equals(fallbackName, "hookshot", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(fallbackName, "Longshot", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Longshot";
             }
 
             try
@@ -1120,6 +1126,1200 @@ namespace OcarinaAtlasLauncher
         public static bool IsLichiiRunning()
         {
             return DetectRunningEmulator() != null;
+        }
+    }
+
+    /// <summary>
+    /// Read-only Windows process memory JSON-RPC bridge for Longshot / hookshot.
+    /// Exposes LichiiRpcClient-compatible status, read_memory, and search_memory
+    /// over 127.0.0.1 using strictly PROCESS_VM_READ | PROCESS_QUERY_INFORMATION.
+    /// </summary>
+    internal sealed class LongshotRpcBridge : IDisposable
+    {
+        public const ulong GuestWindowBase = 0x100000000000UL; // A64_HOST_BASE
+        public const ulong GuestWindowSize = 0x8000000000UL;   // 512 GB
+        public const ulong GuestCodeBase = 0x80000000UL;
+
+        private const ulong LongshotHeapBase = 0x1000000000UL; // HOS_HEAP_BASE
+        private const ulong LongshotHeapEnd = 0x2000000000UL;
+        private const ulong StandardHeapThreshold = 0x2000000000UL;
+        private const int MaxReadMemorySize = 262144;
+        private const int SearchChunkSize = 1048576; // 1 MB
+        private const int DefaultMaxHits = 64;
+        private const int MaxAllowedHits = 1024;
+        private const string OotProgramId = "0400486024DEC000";
+
+        private const uint ProcessVmRead = 0x0010;
+        private const uint ProcessQueryInformation = 0x0400;
+        private const uint ProcessReadAccess = ProcessVmRead | ProcessQueryInformation; // 0x0410
+
+        private const uint MemCommit = 0x1000;
+        private const uint PageReadOnly = 0x02;
+        private const uint PageReadWrite = 0x04;
+        private const uint PageWriteCopy = 0x08;
+        private const uint PageExecuteRead = 0x20;
+        private const uint PageExecuteReadWrite = 0x40;
+        private const uint PageExecuteWriteCopy = 0x80;
+        private const uint PageGuard = 0x100;
+
+        private static readonly string[] ProcessNames = new[] { "hookshot", "Longshot" };
+        private static readonly char[] HexDigits = "0123456789abcdef".ToCharArray();
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MEMORY_BASIC_INFORMATION
+        {
+            public UIntPtr BaseAddress;
+            public UIntPtr AllocationBase;
+            public uint AllocationProtect;
+            public ushort PartitionId;
+            public UIntPtr RegionSize;
+            public uint State;
+            public uint Protect;
+            public uint Type;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr OpenProcess(
+            uint dwDesiredAccess,
+            [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle,
+            int dwProcessId);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool ReadProcessMemory(
+            IntPtr hProcess,
+            UIntPtr lpBaseAddress,
+            [Out] byte[] lpBuffer,
+            UIntPtr nSize,
+            out UIntPtr lpNumberOfBytesRead);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern UIntPtr VirtualQueryEx(
+            IntPtr hProcess,
+            UIntPtr lpAddress,
+            out MEMORY_BASIC_INFORMATION lpBuffer,
+            UIntPtr dwLength);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool CloseHandle(IntPtr hObject);
+
+        private readonly Process _attachedProcess;
+        private readonly int _processId;
+        private readonly string _detectedUserSaveDir;
+        private readonly object _handleLock = new object();
+        private readonly object _clientsLock = new object();
+        private readonly List<TcpClient> _clients = new List<TcpClient>();
+
+        private IntPtr _processHandle;
+        private TcpListener _listener;
+        private Thread _acceptThread;
+        private int _port;
+        private volatile bool _running;
+        private int _disposed = 0;
+
+        private LongshotRpcBridge(Process attachedProcess, int processId, IntPtr processHandle, string detectedUserSaveDir)
+        {
+            _attachedProcess = attachedProcess;
+            _processId = processId;
+            _processHandle = processHandle;
+            _detectedUserSaveDir = detectedUserSaveDir;
+        }
+
+        public int ProcessId
+        {
+            get { return _processId; }
+        }
+
+        public int Port
+        {
+            get { return _port; }
+        }
+
+        public string DetectedUserSaveDir
+        {
+            get { return _detectedUserSaveDir; }
+        }
+
+        public bool IsRunning
+        {
+            get { return _running && _disposed == 0; }
+        }
+
+        public bool IsProcessAlive
+        {
+            get
+            {
+                if (_disposed != 0) return false;
+                try
+                {
+                    return _attachedProcess != null && !_attachedProcess.HasExited;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        public static LongshotRpcBridge TryFindLongshotProcess()
+        {
+            for (int n = 0; n < ProcessNames.Length; n++)
+            {
+                Process[] procs = null;
+                try
+                {
+                    procs = Process.GetProcessesByName(ProcessNames[n]);
+                }
+                catch
+                {
+                    procs = null;
+                }
+
+                if (procs == null || procs.Length == 0)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < procs.Length; i++)
+                {
+                    Process proc = procs[i];
+                    if (proc == null) continue;
+
+                    IntPtr handle = IntPtr.Zero;
+                    bool keepProc = false;
+                    try
+                    {
+                        if (proc.HasExited)
+                        {
+                            continue;
+                        }
+
+                        handle = OpenProcess(ProcessReadAccess, false, proc.Id);
+                        if (handle == IntPtr.Zero)
+                        {
+                            continue;
+                        }
+
+                        if (!VerifyGuestCodeMapped(handle))
+                        {
+                            continue;
+                        }
+
+                        string userSaveDir = ResolveUserSaveDir(proc);
+                        keepProc = true;
+                        for (int k = i + 1; k < procs.Length; k++)
+                        {
+                            if (procs[k] != null)
+                            {
+                                try { procs[k].Dispose(); } catch { }
+                            }
+                        }
+                        return new LongshotRpcBridge(proc, proc.Id, handle, userSaveDir);
+                    }
+                    catch
+                    {
+                        // Ignore inaccessible or exiting process.
+                    }
+                    finally
+                    {
+                        if (!keepProc)
+                        {
+                            if (handle != IntPtr.Zero)
+                            {
+                                CloseHandle(handle);
+                            }
+                            try { proc.Dispose(); } catch { }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public static string DetectRunningUserSaveDir()
+        {
+            for (int n = 0; n < ProcessNames.Length; n++)
+            {
+                Process[] procs = null;
+                try
+                {
+                    procs = Process.GetProcessesByName(ProcessNames[n]);
+                }
+                catch
+                {
+                    procs = null;
+                }
+
+                if (procs == null) continue;
+
+                string found = null;
+                for (int i = 0; i < procs.Length; i++)
+                {
+                    Process proc = procs[i];
+                    if (proc == null) continue;
+                    try
+                    {
+                        if (found == null && !proc.HasExited)
+                        {
+                            string candidate = ResolveUserSaveDir(proc);
+                            if (!string.IsNullOrEmpty(candidate) && Directory.Exists(candidate))
+                            {
+                                found = candidate;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore process inspection failure.
+                    }
+                    finally
+                    {
+                        try { proc.Dispose(); } catch { }
+                    }
+                }
+
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+
+            return null;
+        }
+
+        private static string ResolveUserSaveDir(Process proc)
+        {
+            if (proc == null) return null;
+            try
+            {
+                ProcessModule mod = proc.MainModule;
+                string exePath = mod != null ? mod.FileName : null;
+                if (string.IsNullOrEmpty(exePath)) return null;
+
+                string exeDir = Path.GetDirectoryName(exePath);
+                if (string.IsNullOrEmpty(exeDir)) return null;
+                exeDir = exeDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+                string leaf = Path.GetFileName(exeDir);
+                string gameRoot = string.Equals(leaf, "bin", StringComparison.OrdinalIgnoreCase)
+                    ? Path.GetDirectoryName(exeDir)
+                    : exeDir;
+                if (string.IsNullOrEmpty(gameRoot)) return null;
+
+                return Path.Combine(gameRoot, "user");
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static bool VerifyGuestCodeMapped(IntPtr handle)
+        {
+            ulong hostCodeAddr = GuestWindowBase + GuestCodeBase;
+            MEMORY_BASIC_INFORMATION mbi;
+            int mbiSize = Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION));
+            UIntPtr queried = VirtualQueryEx(handle, new UIntPtr(hostCodeAddr), out mbi, new UIntPtr((uint)mbiSize));
+            if (queried == UIntPtr.Zero)
+            {
+                return false;
+            }
+            if (mbi.State != MemCommit || !IsReadableProtect(mbi.Protect))
+            {
+                return false;
+            }
+
+            byte[] probe = new byte[8];
+            UIntPtr bytesRead;
+            if (!ReadProcessMemory(handle, new UIntPtr(hostCodeAddr), probe, new UIntPtr((uint)probe.Length), out bytesRead))
+            {
+                return false;
+            }
+            return bytesRead.ToUInt64() == (ulong)probe.Length;
+        }
+
+        private static bool IsReadableProtect(uint protect)
+        {
+            if ((protect & PageGuard) != 0)
+            {
+                return false;
+            }
+            uint baseProtect = protect & 0xFFu;
+            return baseProtect == PageReadOnly ||
+                   baseProtect == PageReadWrite ||
+                   baseProtect == PageWriteCopy ||
+                   baseProtect == PageExecuteRead ||
+                   baseProtect == PageExecuteReadWrite ||
+                   baseProtect == PageExecuteWriteCopy;
+        }
+
+        public bool Start(int port)
+        {
+            if (_disposed != 0 || _running) return false;
+            if (port < 1 || port > 65535) return false;
+            if (!IsProcessAlive) return false;
+
+            TcpListener listener = null;
+            try
+            {
+                listener = new TcpListener(IPAddress.Loopback, port);
+                listener.Start();
+            }
+            catch
+            {
+                if (listener != null)
+                {
+                    try { listener.Stop(); } catch { }
+                }
+                return false;
+            }
+
+            _listener = listener;
+            _port = port;
+            _running = true;
+
+            _acceptThread = new Thread(AcceptLoop);
+            _acceptThread.IsBackground = true;
+            _acceptThread.Name = "LongshotRpcBridge";
+            _acceptThread.Start();
+            return true;
+        }
+
+        public void Stop()
+        {
+            _running = false;
+
+            TcpListener listener = _listener;
+            _listener = null;
+            if (listener != null)
+            {
+                try { listener.Stop(); } catch { }
+            }
+
+            List<TcpClient> clientsToClose;
+            lock (_clientsLock)
+            {
+                clientsToClose = new List<TcpClient>(_clients);
+                _clients.Clear();
+            }
+
+            for (int i = 0; i < clientsToClose.Count; i++)
+            {
+                try { clientsToClose[i].Close(); } catch { }
+            }
+
+            Thread acceptThread = _acceptThread;
+            _acceptThread = null;
+            if (acceptThread != null && Thread.CurrentThread != acceptThread)
+            {
+                try { acceptThread.Join(300); } catch { }
+            }
+        }
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0) return;
+
+            Stop();
+
+            lock (_handleLock)
+            {
+                if (_processHandle != IntPtr.Zero)
+                {
+                    CloseHandle(_processHandle);
+                    _processHandle = IntPtr.Zero;
+                }
+            }
+
+            if (_attachedProcess != null)
+            {
+                try { _attachedProcess.Dispose(); } catch { }
+            }
+        }
+
+        private void AcceptLoop()
+        {
+            while (_running)
+            {
+                TcpClient client = null;
+                try
+                {
+                    TcpListener listener = _listener;
+                    if (listener == null) break;
+                    client = listener.AcceptTcpClient();
+                }
+                catch
+                {
+                    if (!_running) break;
+                    Thread.Sleep(25);
+                    continue;
+                }
+
+                if (!_running)
+                {
+                    try { client.Close(); } catch { }
+                    break;
+                }
+
+                try
+                {
+                    client.NoDelay = true;
+                }
+                catch
+                {
+                    // Ignore if socket closed before configuring NoDelay.
+                }
+
+                lock (_clientsLock)
+                {
+                    if (!_running)
+                    {
+                        try { client.Close(); } catch { }
+                        break;
+                    }
+                    _clients.Add(client);
+                }
+
+                TcpClient accepted = client;
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    HandleClient(accepted);
+                });
+            }
+        }
+
+        private void HandleClient(TcpClient client)
+        {
+            UTF8Encoding utf8 = new UTF8Encoding(false);
+            try
+            {
+                using (NetworkStream stream = client.GetStream())
+                using (StreamReader reader = new StreamReader(stream, utf8))
+                {
+                    while (_running)
+                    {
+                        string line = reader.ReadLine();
+                        if (line == null) break;
+                        if (line.Trim().Length == 0) continue;
+
+                        string responseJson = ProcessRpcLine(line);
+                        if (responseJson == null) continue;
+
+                        byte[] bytes = utf8.GetBytes(responseJson + "\n");
+                        stream.Write(bytes, 0, bytes.Length);
+                        stream.Flush();
+                    }
+                }
+            }
+            catch
+            {
+                // Client disconnected or bridge stopped.
+            }
+            finally
+            {
+                lock (_clientsLock)
+                {
+                    _clients.Remove(client);
+                }
+                try { client.Close(); } catch { }
+            }
+        }
+
+        private string ProcessRpcLine(string line)
+        {
+            Dictionary<string, object> req;
+            try
+            {
+                req = SimpleJsonParser.ParseObject(line);
+            }
+            catch
+            {
+                return BuildErrorResponse("null", -32700, "Parse error");
+            }
+
+            if (req == null)
+            {
+                return BuildErrorResponse("null", -32600, "Invalid request");
+            }
+
+            object idObj = null;
+            req.TryGetValue("id", out idObj);
+            string idJson = FormatJsonId(idObj);
+
+            string method = SimpleJsonParser.GetString(req, "method");
+            if (string.IsNullOrEmpty(method))
+            {
+                return BuildErrorResponse(idJson, -32600, "Missing method");
+            }
+
+            object rawParams;
+            Dictionary<string, object> paramsDict = req.TryGetValue("params", out rawParams)
+                ? rawParams as Dictionary<string, object>
+                : null;
+
+            if (string.Equals(method, "status", StringComparison.Ordinal))
+            {
+                bool alive = IsProcessAlive && _running && _disposed == 0;
+                if (alive)
+                {
+                    return string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{{\"id\":{0},\"result\":{{\"powered_on\":true,\"program_id\":\"{1}\",\"emulator\":\"longshot\"}}}}",
+                        idJson,
+                        OotProgramId);
+                }
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    "{{\"id\":{0},\"result\":{{\"powered_on\":false,\"program_id\":\"\",\"emulator\":\"longshot\"}}}}",
+                    idJson);
+            }
+
+            if (string.Equals(method, "read_memory", StringComparison.Ordinal))
+            {
+                return HandleReadMemory(idJson, paramsDict);
+            }
+
+            if (string.Equals(method, "search_memory", StringComparison.Ordinal))
+            {
+                return HandleSearchMemory(idJson, paramsDict);
+            }
+
+            return BuildErrorResponse(idJson, -32601, "Method not found");
+        }
+
+        private string HandleReadMemory(string idJson, Dictionary<string, object> paramsDict)
+        {
+            if (paramsDict == null)
+            {
+                return BuildErrorResponse(idJson, -32602, "Missing params");
+            }
+
+            object rawAddr;
+            ulong guestAddr;
+            if (!paramsDict.TryGetValue("address", out rawAddr) || !TryParseGuestAddress(rawAddr, out guestAddr))
+            {
+                return BuildErrorResponse(idJson, -32602, "Invalid address");
+            }
+
+            int size;
+            if (!TryGetBoundedInt(paramsDict, "size", 1, MaxReadMemorySize, out size))
+            {
+                return BuildErrorResponse(idJson, -32602, "Invalid size (expected 1..262144)");
+            }
+
+            if (guestAddr >= GuestWindowSize || (ulong)size > GuestWindowSize - guestAddr)
+            {
+                return BuildErrorResponse(idJson, -32602, "Address out of guest window");
+            }
+
+            byte[] data;
+            if (!TryReadGuestMemory(guestAddr, size, out data))
+            {
+                return BuildErrorResponse(idJson, -32000, "ReadProcessMemory failed");
+            }
+
+            string hex = BytesToLowerHex(data);
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{{\"id\":{0},\"result\":{{\"hex\":\"{1}\"}}}}",
+                idJson,
+                hex);
+        }
+
+        private string HandleSearchMemory(string idJson, Dictionary<string, object> paramsDict)
+        {
+            if (paramsDict == null)
+            {
+                return BuildErrorResponse(idJson, -32602, "Missing params");
+            }
+
+            string pattern = SimpleJsonParser.GetString(paramsDict, "pattern");
+            byte[] patternBytes;
+            bool[] patternMask;
+            if (!ParseHexPattern(pattern, out patternBytes, out patternMask))
+            {
+                return BuildErrorResponse(idJson, -32602, "Invalid hex pattern");
+            }
+
+            string regions = SimpleJsonParser.GetString(paramsDict, "regions");
+            bool isHeapRegion = string.Equals(regions, "heap", StringComparison.OrdinalIgnoreCase);
+
+            object rawStart;
+            bool hasStart = paramsDict.TryGetValue("start", out rawStart) && rawStart != null;
+            ulong guestStart = isHeapRegion ? StandardHeapThreshold : 0UL;
+            if (hasStart && !TryParseGuestAddress(rawStart, out guestStart))
+            {
+                return BuildErrorResponse(idJson, -32602, "Invalid start address");
+            }
+
+            object rawEnd;
+            bool hasEnd = paramsDict.TryGetValue("end", out rawEnd) && rawEnd != null;
+            ulong guestEnd = GuestWindowSize;
+            if (hasEnd && !TryParseGuestAddress(rawEnd, out guestEnd))
+            {
+                return BuildErrorResponse(idJson, -32602, "Invalid end address");
+            }
+
+            if (guestStart > GuestWindowSize) guestStart = GuestWindowSize;
+            if (guestEnd > GuestWindowSize) guestEnd = GuestWindowSize;
+
+            int maxHits = DefaultMaxHits;
+            int parsedMaxHits;
+            if (TryGetBoundedInt(paramsDict, "max_hits", 1, MaxAllowedHits, out parsedMaxHits))
+            {
+                maxHits = parsedMaxHits;
+            }
+            else
+            {
+                object rawMaxHits;
+                if (paramsDict.TryGetValue("max_hits", out rawMaxHits) && rawMaxHits is double)
+                {
+                    double dMax = (double)rawMaxHits;
+                    if (!double.IsNaN(dMax) && !double.IsInfinity(dMax))
+                    {
+                        if (dMax < 1.0) maxHits = 1;
+                        else if (dMax > MaxAllowedHits) maxHits = MaxAllowedHits;
+                    }
+                }
+            }
+
+            int budgetMs = 0;
+            int parsedBudget;
+            if (TryGetBoundedInt(paramsDict, "budget_ms", 50, 10000, out parsedBudget))
+            {
+                budgetMs = parsedBudget;
+            }
+
+            List<string> hits = SearchGuestMemory(
+                patternBytes,
+                patternMask,
+                guestStart,
+                guestEnd,
+                isHeapRegion,
+                maxHits,
+                budgetMs);
+
+            StringBuilder sb = new StringBuilder(64 + hits.Count * 16);
+            sb.Append("{\"id\":");
+            sb.Append(idJson);
+            sb.Append(",\"result\":{\"hits\":[");
+            for (int i = 0; i < hits.Count; i++)
+            {
+                if (i > 0) sb.Append(',');
+                sb.Append('"');
+                sb.Append(hits[i]);
+                sb.Append('"');
+            }
+            sb.Append("]}}");
+            return sb.ToString();
+        }
+
+        private bool TryReadGuestMemory(ulong guestAddr, int size, out byte[] buffer)
+        {
+            buffer = null;
+            if (size < 1 || size > MaxReadMemorySize) return false;
+            if (guestAddr >= GuestWindowSize || (ulong)size > GuestWindowSize - guestAddr) return false;
+
+            ulong hostAddr = GuestWindowBase + guestAddr;
+            byte[] data = new byte[size];
+
+            lock (_handleLock)
+            {
+                if (_disposed != 0 || !_running || _processHandle == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                UIntPtr bytesRead;
+                bool ok = ReadProcessMemory(
+                    _processHandle,
+                    new UIntPtr(hostAddr),
+                    data,
+                    new UIntPtr((uint)size),
+                    out bytesRead);
+                if (!ok || bytesRead.ToUInt64() != (ulong)size)
+                {
+                    return false;
+                }
+            }
+
+            buffer = data;
+            return true;
+        }
+
+        private List<string> SearchGuestMemory(
+            byte[] patternBytes,
+            bool[] patternMask,
+            ulong guestStart,
+            ulong guestEnd,
+            bool isHeapRegion,
+            int maxHits,
+            int budgetMs)
+        {
+            List<string> hits = new List<string>();
+            if (!IsProcessAlive || !_running || _disposed != 0) return hits;
+
+            int anchorIdx = -1;
+            for (int i = 0; i < patternMask.Length; i++)
+            {
+                if (patternMask[i] && patternBytes[i] != 0x00 && patternBytes[i] != 0xFF)
+                {
+                    anchorIdx = i;
+                    break;
+                }
+            }
+            if (anchorIdx < 0)
+            {
+                for (int i = 0; i < patternMask.Length; i++)
+                {
+                    if (patternMask[i])
+                    {
+                        anchorIdx = i;
+                        break;
+                    }
+                }
+            }
+            bool hasAnchor = anchorIdx >= 0;
+
+            int chunkSize = Math.Max(SearchChunkSize, patternBytes.Length);
+            byte[] scanBuffer = new byte[chunkSize];
+            Stopwatch sw = Stopwatch.StartNew();
+
+            lock (_handleLock)
+            {
+                if (_disposed != 0 || !_running || _processHandle == IntPtr.Zero)
+                {
+                    return hits;
+                }
+
+                if (guestEnd > guestStart)
+                {
+                    SearchHostRange(
+                        GuestWindowBase + guestStart,
+                        GuestWindowBase + guestEnd,
+                        patternBytes,
+                        patternMask,
+                        anchorIdx,
+                        hasAnchor,
+                        maxHits,
+                        hits,
+                        sw,
+                        budgetMs,
+                        scanBuffer);
+                }
+
+                if (hits.Count == 0 && (isHeapRegion || guestStart >= StandardHeapThreshold))
+                {
+                    bool alreadyCovered = guestStart <= LongshotHeapBase && guestEnd >= LongshotHeapEnd;
+                    if (!alreadyCovered)
+                    {
+                        SearchHostRange(
+                            GuestWindowBase + LongshotHeapBase,
+                            GuestWindowBase + LongshotHeapEnd,
+                            patternBytes,
+                            patternMask,
+                            anchorIdx,
+                            hasAnchor,
+                            maxHits,
+                            hits,
+                            sw,
+                            budgetMs,
+                            scanBuffer);
+                    }
+                }
+            }
+
+            return hits;
+        }
+
+        private void SearchHostRange(
+            ulong rangeStartHost,
+            ulong rangeEndHost,
+            byte[] patternBytes,
+            bool[] patternMask,
+            int anchorIdx,
+            bool hasAnchor,
+            int maxHits,
+            List<string> hits,
+            Stopwatch sw,
+            int budgetMs,
+            byte[] scanBuffer)
+        {
+            ulong addr = rangeStartHost;
+            int mbiSize = Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION));
+
+            while (addr < rangeEndHost && hits.Count < maxHits)
+            {
+                if (!_running || _disposed != 0) break;
+                if (budgetMs > 0 && sw.ElapsedMilliseconds >= budgetMs) break;
+
+                MEMORY_BASIC_INFORMATION mbi;
+                UIntPtr queried = VirtualQueryEx(_processHandle, new UIntPtr(addr), out mbi, new UIntPtr((uint)mbiSize));
+                if (queried == UIntPtr.Zero)
+                {
+                    break;
+                }
+
+                ulong regionBase = mbi.BaseAddress.ToUInt64();
+                ulong regionSize = mbi.RegionSize.ToUInt64();
+                if (regionSize == 0)
+                {
+                    break;
+                }
+
+                ulong regionEnd = regionBase + regionSize;
+                if (regionEnd < regionBase)
+                {
+                    regionEnd = ulong.MaxValue;
+                }
+
+                if (mbi.State == MemCommit && IsReadableProtect(mbi.Protect))
+                {
+                    ulong scanStart = regionBase > addr ? regionBase : addr;
+                    ulong scanEnd = regionEnd < rangeEndHost ? regionEnd : rangeEndHost;
+                    if (scanEnd > scanStart)
+                    {
+                        ScanHostRegion(
+                            scanStart,
+                            scanEnd,
+                            patternBytes,
+                            patternMask,
+                            anchorIdx,
+                            hasAnchor,
+                            maxHits,
+                            hits,
+                            sw,
+                            budgetMs,
+                            scanBuffer);
+                    }
+                }
+
+                if (regionEnd >= rangeEndHost || regionEnd <= addr)
+                {
+                    break;
+                }
+                addr = regionEnd;
+            }
+        }
+
+        private void ScanHostRegion(
+            ulong scanStart,
+            ulong scanEnd,
+            byte[] patternBytes,
+            bool[] patternMask,
+            int anchorIdx,
+            bool hasAnchor,
+            int maxHits,
+            List<string> hits,
+            Stopwatch sw,
+            int budgetMs,
+            byte[] scanBuffer)
+        {
+            int patternLen = patternBytes.Length;
+            ulong overlap = (ulong)(patternLen - 1);
+            if (scanEnd <= scanStart || scanEnd - scanStart < (ulong)patternLen)
+            {
+                return;
+            }
+
+            ulong cursor = scanStart;
+            while (cursor < scanEnd && hits.Count < maxHits)
+            {
+                if (!_running || _disposed != 0) break;
+                if (budgetMs > 0 && sw.ElapsedMilliseconds >= budgetMs) break;
+
+                ulong remaining = scanEnd - cursor;
+                if (remaining < (ulong)patternLen) break;
+
+                int toRead = remaining > (ulong)scanBuffer.Length
+                    ? scanBuffer.Length
+                    : (int)remaining;
+
+                UIntPtr bytesReadPtr;
+                bool ok = ReadProcessMemory(
+                    _processHandle,
+                    new UIntPtr(cursor),
+                    scanBuffer,
+                    new UIntPtr((uint)toRead),
+                    out bytesReadPtr);
+
+                ulong actualRead = ok ? bytesReadPtr.ToUInt64() : 0UL;
+                if (actualRead < (ulong)patternLen)
+                {
+                    break;
+                }
+
+                int bufLen = (int)Math.Min(actualRead, (ulong)toRead);
+                MatchBuffer(scanBuffer, bufLen, cursor, patternBytes, patternMask, anchorIdx, hasAnchor, maxHits, hits);
+
+                if (cursor + (ulong)bufLen >= scanEnd || (ulong)bufLen <= overlap)
+                {
+                    break;
+                }
+
+                cursor += (ulong)bufLen - overlap;
+            }
+        }
+
+        private static void MatchBuffer(
+            byte[] buf,
+            int bufLen,
+            ulong baseHostAddr,
+            byte[] patternBytes,
+            bool[] patternMask,
+            int anchorIdx,
+            bool hasAnchor,
+            int maxHits,
+            List<string> hits)
+        {
+            int m = patternBytes.Length;
+            if (bufLen < m) return;
+            int maxStart = bufLen - m;
+
+            if (!hasAnchor)
+            {
+                for (int i = 0; i <= maxStart && hits.Count < maxHits; i++)
+                {
+                    ulong guestAddr = (baseHostAddr + (ulong)i) - GuestWindowBase;
+                    hits.Add("0x" + guestAddr.ToString("x", CultureInfo.InvariantCulture));
+                }
+                return;
+            }
+
+            byte anchorByte = patternBytes[anchorIdx];
+            int searchPos = anchorIdx;
+            int searchEnd = maxStart + anchorIdx;
+
+            while (searchPos <= searchEnd && hits.Count < maxHits)
+            {
+                int foundAnchor = Array.IndexOf(buf, anchorByte, searchPos, searchEnd - searchPos + 1);
+                if (foundAnchor < 0)
+                {
+                    break;
+                }
+
+                int start = foundAnchor - anchorIdx;
+                bool matched = true;
+                for (int k = 0; k < m; k++)
+                {
+                    if (patternMask[k] && buf[start + k] != patternBytes[k])
+                    {
+                        matched = false;
+                        break;
+                    }
+                }
+
+                if (matched)
+                {
+                    ulong guestAddr = (baseHostAddr + (ulong)start) - GuestWindowBase;
+                    hits.Add("0x" + guestAddr.ToString("x", CultureInfo.InvariantCulture));
+                }
+
+                searchPos = foundAnchor + 1;
+            }
+        }
+
+        private static bool TryParseGuestAddress(object raw, out ulong addr)
+        {
+            addr = 0;
+            if (raw == null) return false;
+
+            string s = raw as string;
+            if (s != null)
+            {
+                string trimmed = s.Trim();
+                if (trimmed.Length == 0) return false;
+                if (trimmed.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                {
+                    return ulong.TryParse(
+                        trimmed.Substring(2),
+                        NumberStyles.AllowHexSpecifier,
+                        CultureInfo.InvariantCulture,
+                        out addr);
+                }
+                return ulong.TryParse(
+                    trimmed,
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out addr);
+            }
+
+            if (raw is double)
+            {
+                double d = (double)raw;
+                if (double.IsNaN(d) || double.IsInfinity(d) || d < 0 || d > ulong.MaxValue)
+                {
+                    return false;
+                }
+                addr = (ulong)Math.Round(d);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool TryGetBoundedInt(
+            Dictionary<string, object> obj,
+            string key,
+            int minValue,
+            int maxValue,
+            out int result)
+        {
+            result = 0;
+            object val;
+            if (obj == null || !obj.TryGetValue(key, out val) || !(val is double))
+            {
+                return false;
+            }
+
+            double d = (double)val;
+            if (double.IsNaN(d) || double.IsInfinity(d) || d < minValue || d > maxValue)
+            {
+                return false;
+            }
+
+            result = (int)Math.Round(d);
+            return result >= minValue && result <= maxValue;
+        }
+
+        private static bool ParseHexPattern(string pattern, out byte[] patternBytes, out bool[] patternMask)
+        {
+            patternBytes = null;
+            patternMask = null;
+            if (string.IsNullOrEmpty(pattern)) return false;
+
+            StringBuilder clean = new StringBuilder(pattern.Length);
+            for (int i = 0; i < pattern.Length; i++)
+            {
+                char c = pattern[i];
+                if (!char.IsWhiteSpace(c))
+                {
+                    clean.Append(c);
+                }
+            }
+
+            if (clean.Length < 2 || (clean.Length % 2) != 0)
+            {
+                return false;
+            }
+
+            int byteLen = clean.Length / 2;
+            patternBytes = new byte[byteLen];
+            patternMask = new bool[byteLen];
+
+            for (int i = 0; i < byteLen; i++)
+            {
+                char hi = clean[i * 2];
+                char lo = clean[i * 2 + 1];
+                if (hi == '?' && lo == '?')
+                {
+                    patternBytes[i] = 0;
+                    patternMask[i] = false;
+                }
+                else
+                {
+                    int hVal = HexCharToNibble(hi);
+                    int lVal = HexCharToNibble(lo);
+                    if (hVal < 0 || lVal < 0)
+                    {
+                        return false;
+                    }
+                    patternBytes[i] = (byte)((hVal << 4) | lVal);
+                    patternMask[i] = true;
+                }
+            }
+
+            return true;
+        }
+
+        private static int HexCharToNibble(char c)
+        {
+            if (c >= '0' && c <= '9') return c - '0';
+            if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+            if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+            return -1;
+        }
+
+        private static string BytesToLowerHex(byte[] data)
+        {
+            char[] chars = new char[data.Length * 2];
+            for (int i = 0; i < data.Length; i++)
+            {
+                byte b = data[i];
+                chars[i * 2] = HexDigits[b >> 4];
+                chars[i * 2 + 1] = HexDigits[b & 0x0F];
+            }
+            return new string(chars);
+        }
+
+        private static string FormatJsonId(object idObj)
+        {
+            if (idObj == null) return "null";
+            if (idObj is double)
+            {
+                double d = (double)idObj;
+                if (!double.IsNaN(d) && !double.IsInfinity(d))
+                {
+                    long l = (long)Math.Round(d);
+                    if (Math.Abs(d - l) < 1e-9)
+                    {
+                        return l.ToString(CultureInfo.InvariantCulture);
+                    }
+                    return d.ToString("R", CultureInfo.InvariantCulture);
+                }
+                return "null";
+            }
+            if (idObj is bool)
+            {
+                return (bool)idObj ? "true" : "false";
+            }
+            string s = idObj as string;
+            if (s != null)
+            {
+                return "\"" + EscapeJsonString(s) + "\"";
+            }
+            return "null";
+        }
+
+        private static string BuildErrorResponse(string idJson, int code, string message)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{{\"id\":{0},\"error\":{{\"code\":{1},\"message\":\"{2}\"}}}}",
+                idJson,
+                code,
+                EscapeJsonString(message ?? "Error"));
+        }
+
+        private static string EscapeJsonString(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return string.Empty;
+            StringBuilder sb = new StringBuilder(input.Length);
+            for (int i = 0; i < input.Length; i++)
+            {
+                char c = input[i];
+                switch (c)
+                {
+                    case '\\': sb.Append("\\\\"); break;
+                    case '"': sb.Append("\\\""); break;
+                    case '\r': sb.Append("\\r"); break;
+                    case '\n': sb.Append("\\n"); break;
+                    case '\t': sb.Append("\\t"); break;
+                    default:
+                        if (c < 0x20)
+                        {
+                            sb.AppendFormat(CultureInfo.InvariantCulture, "\\u{0:x4}", (int)c);
+                        }
+                        else
+                        {
+                            sb.Append(c);
+                        }
+                        break;
+                }
+            }
+            return sb.ToString();
         }
     }
 
@@ -3270,18 +4470,21 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "2.0.0";
+        public const string AppVersion = "2.1.0";
 
         private const int CollapsedClientHeight = 392;
         private const int ExpandedClientHeight = 640;
 
         private readonly LaunchOptions _options;
         private readonly object _procLock = new object();
+        private readonly object _bridgeLock = new object();
         private readonly System.Windows.Forms.Timer _pollTimer;
         private readonly Icon _appIcon;
 
         private JobObject _jobObject;
         private Process _serverProcess;
+        private LongshotRpcBridge _longshotBridge;
+        private volatile bool _isShuttingDown = false;
         private ServerLifecycle _lifecycle = ServerLifecycle.Stopped;
         private bool _hasStartupError = false;
         private int _activePort = 3000;
@@ -4825,6 +6028,11 @@ namespace OcarinaAtlasLauncher
                 {
                     psi.EnvironmentVariables["APP_DIST_DIR"] = target.DistDirectory;
                 }
+                string longshotSaveDir = ResolveLongshotSaveDir();
+                if (!string.IsNullOrEmpty(longshotSaveDir))
+                {
+                    psi.EnvironmentVariables["LONGSHOT_SAVE_DIR"] = longshotSaveDir;
+                }
 
                 Process proc = new Process();
                 proc.StartInfo = psi;
@@ -5028,11 +6236,14 @@ namespace OcarinaAtlasLauncher
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
             // Normal close exits the application cleanly (minimize-to-tray only triggers on Minimize).
+            _isShuttingDown = true;
             if (_pollTimer != null)
             {
                 _pollTimer.Stop();
                 _pollTimer.Dispose();
             }
+
+            StopLongshotBridge();
 
             Process proc;
             lock (_procLock)
@@ -5220,9 +6431,136 @@ namespace OcarinaAtlasLauncher
             TriggerPollNow();
         }
 
+        private string ResolveLongshotSaveDir()
+        {
+            string bridgeDir = null;
+            lock (_bridgeLock)
+            {
+                if (_longshotBridge != null)
+                {
+                    bridgeDir = _longshotBridge.DetectedUserSaveDir;
+                }
+            }
+            if (!string.IsNullOrEmpty(bridgeDir) && Directory.Exists(bridgeDir))
+            {
+                return bridgeDir;
+            }
+
+            string runningDir = LongshotRpcBridge.DetectRunningUserSaveDir();
+            if (!string.IsNullOrEmpty(runningDir) && Directory.Exists(runningDir))
+            {
+                return runningDir;
+            }
+
+            const string defaultLongshotDir = @"E:\Longshot\Game\user";
+            if (Directory.Exists(defaultLongshotDir))
+            {
+                return defaultLongshotDir;
+            }
+
+            return null;
+        }
+
+        private void StopLongshotBridge()
+        {
+            lock (_bridgeLock)
+            {
+                if (_longshotBridge != null)
+                {
+                    _longshotBridge.Dispose();
+                    _longshotBridge = null;
+                }
+            }
+        }
+
+        private static bool IsBridgeLoopbackHost(string host)
+        {
+            if (string.IsNullOrEmpty(host)) return true;
+            string normalized = host.Trim();
+            return string.Equals(normalized, "127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(normalized, "localhost", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void ManageLongshotBridge(string lichiiHost, int lichiiPort)
+        {
+            if (_isShuttingDown) return;
+
+            bool isLoopback = IsBridgeLoopbackHost(lichiiHost);
+            string logMsg = null;
+
+            lock (_bridgeLock)
+            {
+                if (_isShuttingDown) return;
+
+                if (_longshotBridge != null)
+                {
+                    bool processAlive = _longshotBridge.IsProcessAlive;
+                    bool portOrHostMismatch = !isLoopback || _longshotBridge.Port != lichiiPort;
+                    if (portOrHostMismatch || !processAlive)
+                    {
+                        int oldPid = _longshotBridge.ProcessId;
+                        int oldPort = _longshotBridge.Port;
+                        _longshotBridge.Dispose();
+                        _longshotBridge = null;
+
+                        if (portOrHostMismatch)
+                        {
+                            logMsg = string.Format(
+                                CultureInfo.InvariantCulture,
+                                "Stopped Longshot RPC bridge on 127.0.0.1:{0} due to RPC target change.",
+                                oldPort);
+                        }
+                        else
+                        {
+                            logMsg = string.Format(
+                                CultureInfo.InvariantCulture,
+                                "Longshot process (PID {0}) exited; freed TCP port {1}.",
+                                oldPid,
+                                oldPort);
+                        }
+                    }
+                }
+
+                if (_longshotBridge == null && isLoopback && lichiiPort >= 1 && lichiiPort <= 65535)
+                {
+                    if (!ProbeTcpPort("127.0.0.1", lichiiPort, 120))
+                    {
+                        LongshotRpcBridge candidate = LongshotRpcBridge.TryFindLongshotProcess();
+                        if (candidate != null)
+                        {
+                            if (candidate.Start(lichiiPort))
+                            {
+                                _longshotBridge = candidate;
+                                string saveNote = string.IsNullOrEmpty(candidate.DetectedUserSaveDir)
+                                    ? "no user save dir"
+                                    : candidate.DetectedUserSaveDir;
+                                string startMsg = string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "Started read-only Longshot RPC bridge on 127.0.0.1:{0} (PID {1}, saves: {2}).",
+                                    lichiiPort,
+                                    candidate.ProcessId,
+                                    saveNote);
+                                logMsg = logMsg != null ? (logMsg + " " + startMsg) : startMsg;
+                            }
+                            else
+                            {
+                                candidate.Dispose();
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(logMsg))
+            {
+                string msgToLog = logMsg;
+                BeginInvokeSafe(delegate { AppendLog(msgToLog); });
+            }
+        }
+
         private void TriggerPollNow()
         {
-            if (IsDisposed || !IsHandleCreated) return;
+            if (IsDisposed || !IsHandleCreated || _isShuttingDown) return;
             if (Interlocked.CompareExchange(ref _pollInFlight, 1, 0) != 0) return;
 
             bool serverActive = _lifecycle == ServerLifecycle.Starting || _lifecycle == ServerLifecycle.Running;
@@ -5239,6 +6577,7 @@ namespace OcarinaAtlasLauncher
             {
                 try
                 {
+                    ManageLongshotBridge(lichiiHost, lichiiPort);
                     PollSnapshot snap = FetchStatusSnapshot(serverActive, serverPort, lichiiHost, lichiiPort);
                     BeginInvokeSafe(delegate { ApplyPollSnapshot(snap); });
                 }
@@ -5247,6 +6586,15 @@ namespace OcarinaAtlasLauncher
                     Interlocked.Exchange(ref _pollInFlight, 0);
                 }
             });
+        }
+
+        private static string FormatEmulatorDisplayName(string emulatorKind)
+        {
+            if (string.Equals(emulatorKind, "longshot", StringComparison.OrdinalIgnoreCase)) return "Longshot";
+            if (string.Equals(emulatorKind, "fritchii", StringComparison.OrdinalIgnoreCase)) return "Fritchii";
+            if (string.Equals(emulatorKind, "lichii", StringComparison.OrdinalIgnoreCase)) return "Lichii";
+            if (string.Equals(emulatorKind, "eden", StringComparison.OrdinalIgnoreCase)) return "Eden";
+            return emulatorKind;
         }
 
         private static PollSnapshot FetchStatusSnapshot(bool serverActive, int serverPort, string lichiiHost, int lichiiPort)
@@ -5285,7 +6633,16 @@ namespace OcarinaAtlasLauncher
                                     snap.MapId = SimpleJsonParser.GetString(obj, "mapId");
                                     snap.Age = SimpleJsonParser.GetString(obj, "age");
                                     snap.SkulltulaCount = SimpleJsonParser.GetInt(obj, "skulltulaCount");
-                                    snap.RpcPortOpen = snap.Connected;
+                                    snap.RpcPortOpen = snap.Connected || ProbeTcpPort(lichiiHost, lichiiPort, 150);
+                                    snap.RunningEmulator = LichiiConfigManager.DetectRunningEmulator();
+                                    if (snap.Connected && string.IsNullOrEmpty(snap.RunningEmulator))
+                                    {
+                                        string emuKind = SimpleJsonParser.GetString(obj, "emulator");
+                                        if (!string.IsNullOrEmpty(emuKind))
+                                        {
+                                            snap.RunningEmulator = FormatEmulatorDisplayName(emuKind);
+                                        }
+                                    }
                                     return snap;
                                 }
                             }
@@ -5380,17 +6737,27 @@ namespace OcarinaAtlasLauncher
             }
             else if (!string.IsNullOrEmpty(snap.RunningEmulator))
             {
+                bool isLongshot = string.Equals(snap.RunningEmulator, "Longshot", StringComparison.OrdinalIgnoreCase);
                 _heroLichiiDot.DotColor = Theme.Ember;
-                _heroLichiiLabel.Text = "RPC Closed";
+                _heroLichiiLabel.Text = isLongshot ? "Waiting" : "RPC Closed";
                 _heroLichiiLabel.ForeColor = Theme.Ember;
                 _emulatorStatusPill.BorderColor = Theme.Ember;
-                string fullEmuTip = snap.RunningEmulator + ": RPC closed";
+                string fullEmuTip = isLongshot ? "Longshot: Waiting for game" : (snap.RunningEmulator + ": RPC closed");
                 _toolTip.SetToolTip(_emulatorStatusPill, fullEmuTip);
                 _toolTip.SetToolTip(_heroLichiiLabel, fullEmuTip);
 
                 if (_syncFeedbackTicks == 0)
                 {
-                    if (_lichiiConfigured)
+                    if (isLongshot)
+                    {
+                        string currentHost = _lifecycle == ServerLifecycle.Stopped
+                            ? ((_lichiiHostInput.Text ?? string.Empty).Trim())
+                            : _activeLichiiHost;
+                        _lichiiStepDetailLabel.Text = IsBridgeLoopbackHost(currentHost)
+                            ? "Longshot detected \u2014 load Ocarina of Time to start the read-only live sync bridge."
+                            : "Longshot detected \u2014 set Emulator RPC Host to 127.0.0.1 for automatic live sync.";
+                    }
+                    else if (_lichiiConfigured)
                     {
                         _lichiiStepDetailLabel.Text = "Restart " + snap.RunningEmulator + " so its debug server starts on the configured port.";
                     }
@@ -5495,11 +6862,14 @@ namespace OcarinaAtlasLauncher
 
         internal void PrepareForSelfUpdate()
         {
+            _isShuttingDown = true;
             if (_pollTimer != null)
             {
                 _pollTimer.Stop();
                 _pollTimer.Dispose();
             }
+
+            StopLongshotBridge();
 
             Process proc;
             lock (_procLock)

@@ -831,9 +831,9 @@ export const KNOWN_SKULLTULA_HASH_MAP: Array<{ hashes: bigint[]; itemIds: string
   { hashes: [0xa6a4e87da18fa678n, 0xa6a4e87da18fa67an], itemIds: ['llanura-gs-02'] },
   // Lon Lon Ranch
   { hashes: [0x04be4a8ff29f2099n, 0x04be4a8ff29f209bn], itemIds: ['lonlon-gs-01'] },
-  { hashes: [0x25e6072d4df023b3n, 0x25e6072d4df023b1n], itemIds: ['lonlon-gs-02'] },
+  { hashes: [0x7d8ec14bdd1f6341n, 0x7d8ec14bdd1f6343n], itemIds: ['lonlon-gs-02'] },
   { hashes: [0xdc8113831c56b194n, 0xdc8113831c56b196n], itemIds: ['lonlon-gs-03'] },
-  { hashes: [0x7d8ec14bdd1f6341n, 0x7d8ec14bdd1f6343n], itemIds: ['lonlon-gs-04'] },
+  { hashes: [0x25e6072d4df023b3n, 0x25e6072d4df023b1n], itemIds: ['lonlon-gs-04'] },
   // Hyrule Castle
   { hashes: [0x22c0f7dff5ebb86dn, 0x22c0f7dff5ebb86fn], itemIds: ['castillo-gs-01'] },
   { hashes: [0x7f28485fa5d3688fn, 0x7f28485fa5d3688dn], itemIds: ['castillo-gs-02'] },

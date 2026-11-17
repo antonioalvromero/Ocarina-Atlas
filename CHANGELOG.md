@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.3.0-linux.2] - 2026-11-16 (Pre-release / Experimental Linux Support)
+
+> **Experimental Pre-release (`v2.3.0-linux.2`).** Includes the [`v2.2.2`](#222---2026-11-16) Lon Lon Ranch Gold Skulltula fix (`#34`) and [`v2.2.1`](#221---2026-11-16) chest Heart Piece fix (`#33`) alongside the experimental, untested-on-real-hardware Linux x64 bundle (`OcarinaAtlas-Linux-x64.tar.gz`) and Windows x64 bundle (`OcarinaAtlas-Windows-x64.zip`).
+
+### Fixed
+- **Lon Lon Ranch Gold Skulltula Swap (`src/lib/lichii-server.ts`, [#34](https://github.com/antonioalvromero/Ocarina-Atlas/issues/34)):** Swapped `lonlon-gs-02` (`0x7d8ec14bdd1f6341n` / `...6343n`) and `lonlon-gs-04` (`0x25e6072d4df023b3n` / `...23b1n`) actor hashes in `KNOWN_SKULLTULA_HASH_MAP` (also confirmed [#33](https://github.com/antonioalvromero/Ocarina-Atlas/issues/33) chest Heart Pieces resolved since `v2.2.1`).
+
 ## [2.3.0-linux.1] - 2026-11-16 (Pre-release / Experimental Linux Support)
 
 > **Experimental Pre-release (`v2.3.0-linux.1`).** Introduces experimental, untested-on-real-hardware Linux x64 support (`OcarinaAtlas-Linux-x64.tar.gz`) alongside the portable Windows x64 bundle (`OcarinaAtlas-Windows-x64.zip`). Windows `OcarinaAtlas.exe` stays at `2.2.1` so stable Windows testers remain cleanly upgradable to `v2.3.0`.
@@ -15,6 +22,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Read-Only Linux Recomp Memory Bridge (`launcher/linux/longshot_rpc_bridge.c` -> `runtime/longshot-rpc-bridge`):** Added a native C99 POSIX utility using `process_vm_readv()` (with read-only `/proc/<pid>/mem` fallback) against `0x100000000000` guest mappings for Linux Longshot, Hookshot, Project ReLink, and Triforce processes, serving loopback JSON-RPC on `127.0.0.1:6545` with `kernel.yama.ptrace_scope` diagnostics.
 - **Linux XDG Save-Slot Auto-Discovery (`src/lib/lichii-server.ts`, `src/lib/lichii-server.test.ts`):** Added `$XDG_DATA_HOME/{fritchii,lichii,eden,cheezyemu}/nand/user/save/0000000000000000` (default `~/.local/share/...`) alongside existing Windows `%APPDATA%` and `~/Games/...` save paths.
 - **Dual-Platform CI & Release Packaging (`.github/workflows/ci.yml`, `.github/workflows/release-windows.yml`, `scripts/smoke-test-linux.sh`, `scripts/generate-release-notes.mjs`, `src/lib/release-notes.ts`):** Added `build-linux` CI + smoke verification, `package-linux` release job with `.sha256` + build provenance attestation, and multi-asset Windows + Linux release notes and checksum tables.
+
+## [2.2.2] - 2026-11-16
+
+### Fixed
+- **Lon Lon Ranch Gold Skulltula Swap (`src/lib/lichii-server.ts`, [#34](https://github.com/antonioalvromero/Ocarina-Atlas/issues/34)):** Swapped `lonlon-gs-02` (`0x7d8ec14bdd1f6341n` / `...6343n`) and `lonlon-gs-04` (`0x25e6072d4df023b3n` / `...23b1n`) actor hashes in `KNOWN_SKULLTULA_HASH_MAP`. *(Related: [#33](https://github.com/antonioalvromero/Ocarina-Atlas/issues/33) chest Heart Pieces resolved in `v2.2.1`.)*
 
 ## [2.2.1] - 2026-11-16
 

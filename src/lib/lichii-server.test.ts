@@ -552,6 +552,11 @@ describe('KNOWN_SKULLTULA_HASH_MAP', () => {
     const gs04 = KNOWN_SKULLTULA_HASH_MAP.find((e) => e.itemIds.includes('espiritu-gs-04'))
     expect(gs02?.hashes).toContain(0xb3d9f353599eea51n)
     expect(gs04?.hashes).toContain(0x70b0fca66ca48088n)
+
+    const lonlon02 = KNOWN_SKULLTULA_HASH_MAP.find((e) => e.itemIds.includes('lonlon-gs-02'))
+    const lonlon04 = KNOWN_SKULLTULA_HASH_MAP.find((e) => e.itemIds.includes('lonlon-gs-04'))
+    expect(lonlon02?.hashes).toContain(0x7d8ec14bdd1f6341n)
+    expect(lonlon04?.hashes).toContain(0x25e6072d4df023b3n)
   })
 })
 

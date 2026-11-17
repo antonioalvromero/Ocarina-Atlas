@@ -43,6 +43,8 @@
 
 typedef struct {
     pid_t pid;
+    uint64_t starttime;
+    bool has_starttime;
     char emulator[32];
     char save_dir[PATH_MAX];
     bool has_save_dir;
@@ -75,7 +77,7 @@ typedef struct client_node {
 
 static volatile sig_atomic_t g_stop = 0;
 static pthread_mutex_t g_target_mutex = PTHREAD_MUTEX_INITIALIZER;
-static target_state_t g_target = {0, "longshot", "", false, false};
+static target_state_t g_target = {0, 0, false, "longshot", "", false, false};
 static pid_t g_forced_pid = 0;
 static bool g_yama_warned = false;
 static pthread_mutex_t g_diag_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -101,7 +103,9 @@ static const char *classify_target_name(const char *name) {
     if (!name || !*name) {
         return NULL;
     }
-    if (strcasecmp(name, "hookshot") == 0 || strcasecmp(name, "longshot") == 0) {
+    if (strcasecmp(name, "hookshot") == 0 ||
+        strcasecmp(name, "longshot") == 0 ||
+        strcasecmp(name, "heylisten") == 0) {
         return "longshot";
     }
     if (strcasecmp(name, "relink-game") == 0 || strcasecmp(name, "relink") == 0) {
@@ -113,11 +117,75 @@ static const char *classify_target_name(const char *name) {
     return NULL;
 }
 
-static bool is_pid_alive(pid_t pid) {
-    if (pid <= 0) {
+static bool ends_with_ignore_case(const char *str, size_t len, const char *suffix) {
+    size_t slen = strlen(suffix);
+    if (len < slen) {
         return false;
     }
-    if (kill(pid, 0) != 0 && errno == ESRCH) {
+    return strcasecmp(str + (len - slen), suffix) == 0;
+}
+
+static const char *match_normalized_target(const char *raw_name, bool allow_truncated_comm) {
+    if (!raw_name || !*raw_name) {
+        return NULL;
+    }
+
+    const char *base = raw_name;
+    for (const char *p = raw_name; *p; p++) {
+        if (*p == '/' || *p == '\\') {
+            base = p + 1;
+        }
+    }
+    if (!*base) {
+        return NULL;
+    }
+
+    size_t raw_len = strlen(base);
+    char buf[256];
+    if (raw_len >= sizeof(buf)) {
+        raw_len = sizeof(buf) - 1;
+    }
+    memcpy(buf, base, raw_len);
+    buf[raw_len] = '\0';
+
+    size_t len = raw_len;
+    bool stripped = true;
+    while (stripped) {
+        stripped = false;
+        static const char *const suffixes[] = {".exe", ".appimage", ".x86_64"};
+        for (size_t i = 0; i < sizeof(suffixes) / sizeof(suffixes[0]); i++) {
+            if (ends_with_ignore_case(buf, len, suffixes[i])) {
+                len -= strlen(suffixes[i]);
+                buf[len] = '\0';
+                stripped = true;
+                break;
+            }
+        }
+    }
+
+    const char *emu = classify_target_name(buf);
+    if (emu) {
+        return emu;
+    }
+
+    /* Linux /proc/<pid>/comm is limited to 15 chars (TASK_COMM_LEN - 1), which can truncate
+     * suffixes like ".AppImage" or ".x86_64" (e.g. "HeyListen.AppIm", "relink-game.x86"). */
+    if (allow_truncated_comm && raw_len >= 15) {
+        char *dot = strchr(buf, '.');
+        if (dot && dot != buf) {
+            *dot = '\0';
+            emu = classify_target_name(buf);
+            if (emu) {
+                return emu;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+static bool read_proc_stat_info(pid_t pid, char *out_state, uint64_t *out_starttime) {
+    if (pid <= 0) {
         return false;
     }
     char stat_path[64];
@@ -126,22 +194,72 @@ static bool is_pid_alive(pid_t pid) {
     if (!fp) {
         return false;
     }
-    char buf[512];
+    char buf[2048];
     size_t n = fread(buf, 1, sizeof(buf) - 1, fp);
     fclose(fp);
     if (n == 0) {
         return false;
     }
     buf[n] = '\0';
+
     const char *rparen = strrchr(buf, ')');
     if (!rparen) {
-        return true;
+        return false;
     }
     const char *p = rparen + 1;
     while (*p == ' ') {
         p++;
     }
-    return *p != 'Z' && *p != 'X';
+    if (!*p) {
+        return false;
+    }
+    if (out_state) {
+        *out_state = *p;
+    }
+
+    if (out_starttime) {
+        /* Field 3 is state (token 0 after ')'); field 22 is starttime (token 19). */
+        for (int tok = 0; tok < 19; tok++) {
+            while (*p && *p != ' ') {
+                p++;
+            }
+            while (*p == ' ') {
+                p++;
+            }
+            if (!*p) {
+                return false;
+            }
+        }
+        char *endp = NULL;
+        errno = 0;
+        unsigned long long st = strtoull(p, &endp, 10);
+        if (errno != 0 || endp == p) {
+            return false;
+        }
+        *out_starttime = (uint64_t)st;
+    }
+    return true;
+}
+
+static bool is_pid_alive(pid_t pid, bool check_starttime, uint64_t expected_starttime) {
+    if (pid <= 0) {
+        return false;
+    }
+    if (kill(pid, 0) != 0 && errno == ESRCH) {
+        return false;
+    }
+    char state = '\0';
+    uint64_t starttime = 0;
+    if (!read_proc_stat_info(pid, &state, check_starttime ? &starttime : NULL)) {
+        return false;
+    }
+    if (state == 'Z' || state == 'X') {
+        return false;
+    }
+    if (check_starttime && starttime != expected_starttime) {
+        return false;
+    }
+    return true;
 }
 
 static void print_yama_diagnostic_once(pid_t pid) {
@@ -314,21 +432,12 @@ static bool verify_guest_code_mapped(pid_t pid, int *out_err) {
     return true;
 }
 
-static bool resolve_user_save_dir(pid_t pid, char *out_buf, size_t out_cap) {
-    if (!out_buf || out_cap == 0) {
+static bool format_user_dir_from_exe_path(const char *raw_exe_path, char *out_buf, size_t out_cap) {
+    if (!raw_exe_path || !*raw_exe_path || !out_buf || out_cap == 0) {
         return false;
     }
-    out_buf[0] = '\0';
-
-    char exe_link[64];
-    snprintf(exe_link, sizeof(exe_link), "/proc/%ld/exe", (long)pid);
-
     char exe_path[PATH_MAX];
-    ssize_t n = readlink(exe_link, exe_path, sizeof(exe_path) - 1);
-    if (n <= 0) {
-        return false;
-    }
-    exe_path[n] = '\0';
+    snprintf(exe_path, sizeof(exe_path), "%s", raw_exe_path);
 
     char *last_slash = strrchr(exe_path, '/');
     if (!last_slash || last_slash == exe_path) {
@@ -351,6 +460,50 @@ static bool resolve_user_save_dir(pid_t pid, char *out_buf, size_t out_cap) {
     return written > 0 && (size_t)written < out_cap;
 }
 
+static bool resolve_user_save_dir(pid_t pid, char *out_buf, size_t out_cap) {
+    if (!out_buf || out_cap == 0) {
+        return false;
+    }
+    out_buf[0] = '\0';
+
+    /* For Wine/Proton processes, argv[0] may be a Z:\... path pointing to the Linux filesystem. */
+    char cmd_path[64];
+    snprintf(cmd_path, sizeof(cmd_path), "/proc/%ld/cmdline", (long)pid);
+    int fd = open(cmd_path, O_RDONLY | O_CLOEXEC);
+    if (fd >= 0) {
+        char cmd[PATH_MAX];
+        ssize_t cn = read(fd, cmd, sizeof(cmd) - 1);
+        close(fd);
+        if (cn > 0) {
+            cmd[cn] = '\0';
+            if ((cmd[0] == 'Z' || cmd[0] == 'z') && cmd[1] == ':' && (cmd[2] == '\\' || cmd[2] == '/')) {
+                char unix_path[PATH_MAX];
+                size_t j = 0;
+                for (size_t i = 2; cmd[i] != '\0' && j + 1 < sizeof(unix_path); i++) {
+                    unix_path[j++] = (cmd[i] == '\\') ? '/' : cmd[i];
+                }
+                unix_path[j] = '\0';
+                if (format_user_dir_from_exe_path(unix_path, out_buf, out_cap) && access(out_buf, F_OK) == 0) {
+                    return true;
+                }
+                out_buf[0] = '\0';
+            }
+        }
+    }
+
+    char exe_link[64];
+    snprintf(exe_link, sizeof(exe_link), "/proc/%ld/exe", (long)pid);
+
+    char exe_path[PATH_MAX];
+    ssize_t n = readlink(exe_link, exe_path, sizeof(exe_path) - 1);
+    if (n <= 0) {
+        return false;
+    }
+    exe_path[n] = '\0';
+
+    return format_user_dir_from_exe_path(exe_path, out_buf, out_cap);
+}
+
 static bool match_proc_name(pid_t pid, const char **out_emulator) {
     char comm_path[64];
     snprintf(comm_path, sizeof(comm_path), "/proc/%ld/comm", (long)pid);
@@ -362,7 +515,7 @@ static bool match_proc_name(pid_t pid, const char **out_emulator) {
             while (len > 0 && (comm[len - 1] == '\n' || comm[len - 1] == '\r')) {
                 comm[--len] = '\0';
             }
-            const char *emu = classify_target_name(comm);
+            const char *emu = match_normalized_target(comm, true);
             if (emu) {
                 fclose(fp);
                 *out_emulator = emu;
@@ -381,13 +534,24 @@ static bool match_proc_name(pid_t pid, const char **out_emulator) {
         close(fd);
         if (n > 0) {
             cmd[n] = '\0';
-            const char *slash = strrchr(cmd, '/');
-            const char *base = slash ? (slash + 1) : cmd;
-            const char *emu = classify_target_name(base);
+            const char *emu = match_normalized_target(cmd, false);
             if (emu) {
                 *out_emulator = emu;
                 return true;
             }
+        }
+    }
+
+    char exe_link[64];
+    snprintf(exe_link, sizeof(exe_link), "/proc/%ld/exe", (long)pid);
+    char exe_path[PATH_MAX];
+    ssize_t en = readlink(exe_link, exe_path, sizeof(exe_path) - 1);
+    if (en > 0) {
+        exe_path[en] = '\0';
+        const char *emu = match_normalized_target(exe_path, false);
+        if (emu) {
+            *out_emulator = emu;
+            return true;
         }
     }
 
@@ -399,7 +563,7 @@ static bool discover_target(target_state_t *out_state) {
     snprintf(out_state->emulator, sizeof(out_state->emulator), "longshot");
 
     if (g_forced_pid > 0) {
-        if (!is_pid_alive(g_forced_pid)) {
+        if (!is_pid_alive(g_forced_pid, false, 0)) {
             return false;
         }
         int err = 0;
@@ -409,6 +573,7 @@ static bool discover_target(target_state_t *out_state) {
         const char *emu = "longshot";
         match_proc_name(g_forced_pid, &emu);
         out_state->pid = g_forced_pid;
+        out_state->has_starttime = read_proc_stat_info(g_forced_pid, NULL, &out_state->starttime);
         snprintf(out_state->emulator, sizeof(out_state->emulator), "%s", emu);
         out_state->has_save_dir = resolve_user_save_dir(g_forced_pid, out_state->save_dir, sizeof(out_state->save_dir));
         out_state->attached = true;
@@ -455,6 +620,7 @@ static bool discover_target(target_state_t *out_state) {
         }
 
         out_state->pid = pid;
+        out_state->has_starttime = read_proc_stat_info(pid, NULL, &out_state->starttime);
         snprintf(out_state->emulator, sizeof(out_state->emulator), "%s", emu);
         out_state->has_save_dir = resolve_user_save_dir(pid, out_state->save_dir, sizeof(out_state->save_dir));
         out_state->attached = true;
@@ -468,12 +634,14 @@ static bool discover_target(target_state_t *out_state) {
 
 static bool refresh_target_locked(bool allow_discover) {
     if (g_target.attached) {
-        if (is_pid_alive(g_target.pid)) {
+        if (is_pid_alive(g_target.pid, g_target.has_starttime, g_target.starttime)) {
             return true;
         }
         fprintf(stderr, "[longshot-rpc-bridge] Target PID %ld exited.\n", (long)g_target.pid);
         g_target.attached = false;
         g_target.pid = 0;
+        g_target.starttime = 0;
+        g_target.has_starttime = false;
         g_target.save_dir[0] = '\0';
         g_target.has_save_dir = false;
         if (g_once_mode) {

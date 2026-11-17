@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-11-17
+
+### Added
+- **HeyListen Support ([#37](https://github.com/antonioalvromero/Ocarina-Atlas/issues/37)):** Added live read-only memory bridge detection (`HeyListen.exe` / `heylisten`) and `user/save` auto-discovery across Windows, Linux, `README.md`, and `src/lib/lichii-server.ts`.
+- **NX2Saria Support ([#40](https://github.com/antonioalvromero/Ocarina-Atlas/pull/40)):** Added native `NX2Saria` live RPC (`127.0.0.1:6545`) detection, `NX2SARIA_SAVE_DIR` / `profile` save-slot fallback, `NX2Saria` UI/launcher labeling, and dynamic 4 GiB heap floor (`getMinGuestHeapPtr`) courtesy of `@Larbaco`.
+- **15-Language Localization & Browser Auto-Detection ([#39](https://github.com/antonioalvromero/Ocarina-Atlas/issues/39)):** Expanded `src/lib/i18n.ts` from 4 to 15 languages (`en`, `es`, `fr`, `pt`, `zh-CN`, `zh-TW`, `de`, `it`, `ja`, `ko`, `nl`, `ru`, `pl`, `tr`, `uk`) with full UI, place, region, category, and gear labels plus `navigator.language` auto-detection fallback (SSR-safe). *(Translations were produced with AI assistance and may contain minor wording errors; PRs are welcome.)*
+- **Experimental Linux x64 AppImage Desktop Launcher (`OcarinaAtlas-Linux-x64.AppImage`):** Added a self-contained Electron `.AppImage` launcher mirroring the Windows Hyrule Dark UI, with bundled read-only `longshot-rpc-bridge`, Wine/Proton `.exe` & 15-char `comm` matching, expanded Wine/Steam/Flatpak/Bottles/Heroic/Lutris save discovery, PID-reuse protection, and a `kernel.yama.ptrace_scope` helper banner. *(Experimental — not yet 100% tested across all Linux setups; feedback via Issues/PRs is welcome.)*
+
+### Improved
+- **World Map & Mobile/Tablet Rendering Performance:** Replaced full-viewport `blur-2xl` backdrop filtering with a lightweight radial gradient, switched `MapViewport` and `PlayerPin` to GPU-composited `translate3d` transforms, removed heavy SVG drop-shadow / backdrop-blur layers on interactive map surfaces, cached pointer-down bounds, and stabilized marker callbacks for smooth panning and zooming on older/low-RAM devices.
+
 ## [2.3.0-linux.2] - 2026-11-16 (Pre-release / Experimental Linux Support)
 
 > **Experimental Pre-release (`v2.3.0-linux.2`).** Includes the [`v2.2.2`](#222---2026-11-16) Lon Lon Ranch Gold Skulltula fix (`#34`) and [`v2.2.1`](#221---2026-11-16) chest Heart Piece fix (`#33`) alongside the experimental, untested-on-real-hardware Linux x64 bundle (`OcarinaAtlas-Linux-x64.tar.gz`) and Windows x64 bundle (`OcarinaAtlas-Windows-x64.zip`).

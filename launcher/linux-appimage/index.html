@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
+<title>Ocarina Atlas</title>
+<style>
+  :root {
+    --ink-950: #13100C;
+    --ink-900: #1B1712;
+    --ink-800: #252019;
+    --ink-700: #362E24;
+    --ink-600: #4C4233;
+    --parchment-50: #F8F1E0;
+    --parchment-200: #E6D8B8;
+    --parchment-300: #D5C39C;
+    --parchment-400: #C4AD7F;
+    --parchment-600: #93805C;
+    --moss: #86B67E;
+    --gold: #E0B354;
+    --ember: #D9734A;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink-950);
+    color: var(--parchment-200);
+    font-family: "Segoe UI", Inter, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    font-size: 13px;
+    line-height: 1.35;
+    user-select: none;
+    overflow-x: hidden;
+  }
+
+  .app {
+    padding: 0 18px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Zone 0: Header (54px) */
+  .header {
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .title {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--parchment-50);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .version-link {
+    font-size: 11.5px;
+    color: var(--parchment-600);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    transition: color 0.12s ease;
+  }
+  .version-link:hover { color: var(--gold); }
+
+  .update-pill {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    height: 22px;
+    padding: 0 9px;
+    border-radius: 11px;
+    background: #282012;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .update-pill.visible { display: inline-flex; }
+  .update-pill:hover { background: #352A17; }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .status-pill {
+    height: 24px;
+    padding: 0 10px 0 8px;
+    border-radius: 12px;
+    background: var(--ink-900);
+    border: 1px solid var(--ink-700);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--parchment-400);
+    white-space: nowrap;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--parchment-600);
+    flex-shrink: 0;
+  }
+  .dot.moss { background: var(--moss); }
+  .dot.gold { background: var(--gold); }
+  .dot.ember { background: var(--ember); }
+
+  /* Cards */
+  .card {
+    background: var(--ink-900);
+    border: 1px solid var(--ink-700);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  /* Buttons */
+  .btn {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 6px;
+    background: var(--ink-800);
+    border: 1px solid var(--ink-700);
+    color: var(--parchment-200);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
+    white-space: nowrap;
+  }
+  .btn:hover:not(:disabled) { background: var(--ink-700); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-sm { height: 26px; padding: 0 10px; font-size: 11px; }
+  .btn-xs { height: 22px; padding: 0 8px; font-size: 11px; }
+
+  .btn-primary {
+    height: 36px;
+    min-width: 126px;
+    background: var(--moss);
+    border-color: var(--moss);
+    color: var(--ink-950);
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .btn-primary:hover:not(:disabled) { background: #97C68F; border-color: #97C68F; }
+  .btn-primary.stop {
+    background: var(--ink-800);
+    border-color: var(--ember);
+    color: var(--ember);
+  }
+  .btn-primary.stop:hover:not(:disabled) { background: #2D1D16; }
+
+  .btn-hero { height: 36px; min-width: 110px; font-size: 12.5px; font-weight: 700; }
+
+  .btn-gold {
+    color: var(--gold);
+    border-color: var(--gold);
+    font-weight: 700;
+  }
+  .btn-gold:hover:not(:disabled) { background: #2E2516; }
+
+  .btn-toggle.active {
+    background: #202B1E;
+    border-color: var(--moss);
+    color: var(--moss);
+  }
+
+  /* Zone 1: Hero Card */
+  .hero-summary {
+    margin: 0 0 4px;
+    font-size: 12.5px;
+    color: var(--parchment-200);
+  }
+
+  .url-link {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: var(--moss);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    text-align: left;
+  }
+  .url-link:hover { color: var(--parchment-50); text-decoration: underline; }
+  .url-link.hidden { display: none; }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .hero-actions .spacer { flex: 1; }
+
+  .sync-strip {
+    margin-top: 12px;
+    min-height: 32px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--ink-800);
+    border: 1px solid var(--ink-700);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--parchment-400);
+  }
+  .sync-strip.ok { border-color: #466341; color: var(--moss); }
+  .sync-strip.warn { border-color: #7A4B34; color: var(--ember); }
+
+  .sync-strip-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Zone 2: Second Screen (LAN) Card */
+  .lan-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .card-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--parchment-50);
+  }
+  .lan-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .lan-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .lan-url-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .lan-select {
+    width: 100%;
+    height: 28px;
+    background: var(--ink-800);
+    border: 1px solid var(--ink-700);
+    border-radius: 5px;
+    color: var(--parchment-50);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 0 8px;
+    outline: none;
+  }
+
+  .lan-status-text {
+    font-size: 12px;
+    color: var(--parchment-200);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lan-hint {
+    margin: 0;
+    font-size: 11px;
+    color: var(--parchment-400);
+  }
+
+  /* Zone 3: Collapsible Drawer */
+  .drawer-toggle {
+    width: 100%;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 6px;
+    background: var(--ink-800);
+    border: 1px solid var(--ink-700);
+    color: var(--parchment-400);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+  .drawer-toggle:hover { background: var(--ink-700); color: var(--parchment-200); }
+
+  .drawer-panel {
+    display: none;
+    background: var(--ink-900);
+    border: 1px solid var(--ink-700);
+    border-radius: 10px;
+    padding: 12px 14px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .drawer-panel.open { display: flex; }
+
+  .drawer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .tab-bar {
+    display: inline-flex;
+    background: var(--ink-950);
+    border: 1px solid var(--ink-700);
+    border-radius: 6px;
+    padding: 2px;
+  }
+
+  .tab-btn {
+    width: 76px;
+    height: 24px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--parchment-600);
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 400;
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: var(--ink-800);
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  .drawer-top-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .lock-hint {
+    font-size: 11px;
+    font-style: italic;
+    color: var(--parchment-600);
+  }
+
+  .mode-badge {
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 6px;
+    background: var(--ink-800);
+    border: 1px solid var(--ink-700);
+    color: var(--parchment-400);
+    font-size: 10.5px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* Settings Grid */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 18px;
+  }
+
+  .field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--parchment-400);
+    margin-bottom: 4px;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .input {
+    height: 28px;
+    width: 100%;
+    padding: 0 8px;
+    background: var(--ink-800);
+    border: 1px solid var(--ink-700);
+    border-radius: 5px;
+    color: var(--parchment-50);
+    font-family: inherit;
+    font-size: 12px;
+    outline: none;
+  }
+  .input:focus { border-color: var(--gold); }
+  .input:disabled { opacity: 0.55; }
+  .input-port { width: 110px; }
+
+  .checks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 2px;
+  }
+
+  .check-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--parchment-200);
+    cursor: pointer;
+  }
+  .check-label input { accent-color: var(--gold); cursor: pointer; }
+
+  .settings-footer {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--parchment-600);
+  }
+
+  .gold-link {
+    color: var(--gold);
+    font-weight: 700;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+  }
+  .gold-link:hover { color: var(--parchment-50); text-decoration: underline; }
+
+  /* Logs */
+  .log-box {
+    height: 172px;
+    background: var(--ink-950);
+    border: 1px solid var(--ink-700);
+    border-radius: 6px;
+    padding: 8px 10px;
+    overflow-y: auto;
+    font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--parchment-200);
+    user-select: text;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .log-line.warn { color: var(--gold); }
+  .log-line.error { color: var(--ember); }
+
+  /* About */
+  .about-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .about-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 11.5px;
+  }
+  .about-title { font-weight: 700; color: var(--parchment-50); min-width: 92px; }
+  .about-author { color: var(--parchment-300); min-width: 114px; }
+  .about-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+  }
+  .about-link.gold { color: var(--gold); }
+  .about-link.moss { color: var(--moss); }
+  .about-link:hover { text-decoration: underline; }
+
+  .license-box {
+    padding: 10px 12px;
+    background: var(--ink-950);
+    border: 1px solid #5A4722;
+    border-radius: 6px;
+    font-size: 11.5px;
+    color: var(--parchment-200);
+    margin-bottom: 10px;
+  }
+
+  .about-footer {
+    font-size: 11px;
+    color: var(--parchment-600);
+  }
+
+  /* QR Modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 8, 6, 0.78);
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .modal-backdrop.open { display: flex; }
+
+  .modal-card {
+    width: 328px;
+    background: var(--ink-950);
+    border: 1px solid var(--ink-700);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .modal-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--parchment-50);
+  }
+
+  .qr-frame {
+    width: 260px;
+    height: 260px;
+    background: #FFFFFF;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qr-frame svg { width: 100%; height: 100%; shape-rendering: crispEdges; }
+
+  .qr-url {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--moss);
+    text-align: center;
+    word-break: break-all;
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <!-- Zone 0: Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="title">Ocarina Atlas</h1>
+        <button id="versionBtn" class="version-link" title="About Ocarina Atlas, credits &amp; official repository">v2.3.0</button>
+        <button id="updatePill" class="update-pill" title="A newer official release is available">Update</button>
+      </div>
+      <div class="header-right">
+        <div class="status-pill" id="serverPill">
+          <span class="dot" id="serverDot"></span>
+          <span id="serverPillText">Stopped</span>
+        </div>
+        <div class="status-pill" id="emuPill" title="Emulator: Not detected">
+          <span class="dot" id="emuDot"></span>
+          <span id="emuPillText">No Emu</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Zone 1: Hero Card -->
+    <section class="card">
+      <p class="hero-summary" id="heroSummary">Click Start Map to open the interactive Hyrule map in your browser.</p>
+      <button id="localUrlBtn" class="url-link hidden"></button>
+      <div class="hero-actions">
+        <button id="startStopBtn" class="btn btn-primary">Start Map</button>
+        <button id="openMapBtn" class="btn btn-hero" disabled>Open Map</button>
+        <span class="spacer"></span>
+        <button id="setupSyncBtn" class="btn btn-gold" style="height:30px;font-size:11.5px;">1-Click Setup Sync</button>
+      </div>
+      <div id="syncStrip" class="sync-strip">
+        <span id="syncStripText" class="sync-strip-text">Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.</span>
+        <button id="copyPtraceBtn" class="btn btn-xs btn-gold" style="display:none;">Copy sysctl</button>
+      </div>
+    </section>
+
+    <!-- Zone 2: Second Screen (LAN) Card -->
+    <section class="card">
+      <div class="lan-header">
+        <h2 class="card-title">Second Screen (LAN)</h2>
+        <div class="lan-header-actions">
+          <button id="lanModeBtn" class="btn btn-sm btn-toggle active" title="Toggle 0.0.0.0 LAN access vs 127.0.0.1 local-only">LAN Mode: On</button>
+          <button id="refreshLanBtn" class="btn btn-sm" title="Re-scan active Wi-Fi and Ethernet network adapters">Refresh</button>
+        </div>
+      </div>
+      <div class="lan-row">
+        <div class="lan-url-wrap" id="lanUrlContainer">
+          <span id="lanStatusText" class="lan-status-text">Checking network adapters...</span>
+        </div>
+        <button id="copyLanBtn" class="btn btn-sm" disabled>Copy URL</button>
+        <button id="showQrBtn" class="btn btn-sm btn-gold" disabled>Show QR</button>
+      </div>
+      <p class="lan-hint">Open this address or scan the QR code on your tablet, iPad, or phone.</p>
+    </section>
+
+    <!-- Zone 3: Collapsible Drawer -->
+    <button id="drawerToggleBtn" class="drawer-toggle">&#9656; Settings, Logs &amp; About</button>
+    <section id="drawerPanel" class="drawer-panel">
+      <div class="drawer-top">
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="settings">Settings</button>
+          <button class="tab-btn" data-tab="logs">Logs</button>
+          <button class="tab-btn" data-tab="about">About</button>
+        </div>
+        <div class="drawer-top-right">
+          <span id="settingsLockHint" class="lock-hint" style="display:none;">Stop server to edit port or host settings</span>
+          <span id="modeBadge" class="mode-badge" style="display:none;">LAN</span>
+          <button id="copyLogsBtn" class="btn btn-xs" style="display:none;">Copy</button>
+          <button id="clearLogsBtn" class="btn btn-xs" style="display:none;">Clear</button>
+        </div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div id="tab-settings" class="tab-pane active">
+        <div class="settings-grid">
+          <div>
+            <label class="field-label" for="portInput">Map Port</label>
+            <input id="portInput" class="input input-port" type="number" min="1" max="65535" value="3000" />
+          </div>
+          <div>
+            <label class="field-label" for="lichiiHostInput">Emulator RPC Host</label>
+            <input id="lichiiHostInput" class="input" type="text" value="127.0.0.1" />
+          </div>
+          <div>
+            <label class="field-label" for="lichiiPortInput">Emulator RPC Port</label>
+            <div class="input-row">
+              <input id="lichiiPortInput" class="input input-port" type="number" min="1" max="65535" value="6545" />
+              <button id="resetRpcBtn" class="btn btn-sm">Reset</button>
+            </div>
+          </div>
+          <div class="checks">
+            <label class="check-label"><input id="lanCheck" type="checkbox" checked /> Allow LAN access</label>
+            <label class="check-label"><input id="autoOpenCheck" type="checkbox" checked /> Auto-open browser</label>
+            <label class="check-label"><input id="autoStartCheck" type="checkbox" checked /> Auto-start server</label>
+          </div>
+        </div>
+        <div class="settings-footer">
+          <span id="updateStatusText">Version 2.3.0</span>
+          <button id="checkUpdatesBtn" class="gold-link">Check for Updates</button>
+        </div>
+      </div>
+
+      <!-- Logs Tab -->
+      <div id="tab-logs" class="tab-pane">
+        <div id="logBox" class="log-box"></div>
+      </div>
+
+      <!-- About Tab -->
+      <div id="tab-about" class="tab-pane">
+        <div class="about-rows">
+          <div class="about-row">
+            <span class="about-title">Ocarina Atlas</span>
+            <span class="about-author">by antonioalvromero</span>
+            <button class="about-link gold" data-open-url="https://github.com/antonioalvromero/Ocarina-Atlas">github.com/antonioalvromero/Ocarina-Atlas</button>
+          </div>
+          <div class="about-row">
+            <span class="about-title">Original Map</span>
+            <span class="about-author">by lucasriondel</span>
+            <button class="about-link moss" data-open-url="https://github.com/lucasriondel/oot-remake-map">lucasriondel/oot-remake-map</button>
+          </div>
+          <div class="about-row">
+            <span class="about-title">Map Artwork</span>
+            <span class="about-author">by Nintend&uacute;o</span>
+          </div>
+        </div>
+        <div class="license-box">
+          Free &amp; open-source (GNU AGPL-3.0). Official builds: github.com/antonioalvromero/Ocarina-Atlas &mdash; forks must preserve credits and share source.
+        </div>
+        <div id="aboutFooter" class="about-footer">
+          Version 2.3.0 &bull; Verify official releases via SHA-256 or GitHub attestation
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- QR Modal -->
+  <div id="qrModal" class="modal-backdrop">
+    <div class="modal-card">
+      <h3 class="modal-title">Scan QR Code &mdash; Ocarina Atlas</h3>
+      <div id="qrFrame" class="qr-frame"></div>
+      <div id="qrUrlText" class="qr-url"></div>
+      <button id="closeQrBtn" class="btn btn-sm" style="width:96px;">Close</button>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const api = window.ocarinaAtlas
+  let currentState = null
+  let selectedLanUrl = ''
+  let drawerOpen = false
+  let activeTab = 'settings'
+
+  const $ = (id) => document.getElementById(id)
+
+  // --- Minimal Pure-JS Spec-Compliant QR Code SVG Encoder (Byte mode, ECC-L, V1-V6) ---
+  const QR = (() => {
+    const VERSIONS = [
+      null,
+      { size: 21, dataCodewords: 19, ecCodewords: 7, align: [] },
+      { size: 25, dataCodewords: 34, ecCodewords: 10, align: [6, 18] },
+      { size: 29, dataCodewords: 55, ecCodewords: 15, align: [6, 22] },
+      { size: 33, dataCodewords: 80, ecCodewords: 20, align: [6, 26] },
+      { size: 37, dataCodewords: 108, ecCodewords: 26, align: [6, 30] },
+      { size: 41, dataCodewords: 136, ecCodewords: 36, align: [6, 34] }, // 2 blocks of 68+18
+    ]
+
+    const GF_EXP = new Uint8Array(512)
+    const GF_LOG = new Uint8Array(256)
+    let x = 1
+    for (let i = 0; i < 255; i++) {
+      GF_EXP[i] = x
+      GF_LOG[x] = i
+      x <<= 1
+      if (x & 0x100) x ^= 0x11d
+    }
+    for (let i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255]
+
+    function gfMul(a, b) {
+      if (a === 0 || b === 0) return 0
+      return GF_EXP[GF_LOG[a] + GF_LOG[b]]
+    }
+
+    function rsGenerator(degree) {
+      let poly = [1]
+      for (let i = 0; i < degree; i++) {
+        const next = new Array(poly.length + 1).fill(0)
+        const factor = GF_EXP[i]
+        for (let j = 0; j < poly.length; j++) {
+          next[j] ^= poly[j]
+          next[j + 1] ^= gfMul(poly[j], factor)
+        }
+        poly = next
+      }
+      return poly
+    }
+
+    function rsEncode(data, ecLen) {
+      const gen = rsGenerator(ecLen)
+      const res = new Uint8Array(data.length + ecLen)
+      res.set(data, 0)
+      for (let i = 0; i < data.length; i++) {
+        const coef = res[i]
+        if (coef !== 0) {
+          for (let j = 0; j < gen.length; j++) {
+            res[i + j] ^= gfMul(gen[j], coef)
+          }
+        }
+      }
+      return res.slice(data.length)
+    }
+
+    function encodeBytes(text) {
+      const bytes = new TextEncoder().encode(text)
+      let ver = 1
+      while (ver < VERSIONS.length && bytes.length + 2 > VERSIONS[ver].dataCodewords) ver++
+      if (ver >= VERSIONS.length) return null
+
+      const spec = VERSIONS[ver]
+      const bits = []
+      const pushBits = (val, len) => {
+        for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1)
+      }
+
+      pushBits(0b0100, 4) // Byte mode
+      pushBits(bytes.length, 8)
+      for (const b of bytes) pushBits(b, 8)
+
+      const maxBits = spec.dataCodewords * 8
+      pushBits(0, Math.min(4, maxBits - bits.length))
+      while (bits.length % 8 !== 0) bits.push(0)
+
+      const codewords = []
+      for (let i = 0; i < bits.length; i += 8) {
+        let byte = 0
+        for (let j = 0; j < 8; j++) byte = (byte << 1) | bits[i + j]
+        codewords.push(byte)
+      }
+      const pads = [0xec, 0x11]
+      for (let i = 0; codewords.length < spec.dataCodewords; i++) {
+        codewords.push(pads[i % 2])
+      }
+
+      let allBytes
+      if (ver <= 5) {
+        const ec = rsEncode(Uint8Array.from(codewords), spec.ecCodewords)
+        allBytes = [...codewords, ...ec]
+      } else {
+        // Version 6-L uses 2 blocks of 68 data + 18 ec
+        const b1 = codewords.slice(0, 68)
+        const b2 = codewords.slice(68, 136)
+        const ec1 = rsEncode(Uint8Array.from(b1), 18)
+        const ec2 = rsEncode(Uint8Array.from(b2), 18)
+        allBytes = []
+        for (let i = 0; i < 68; i++) { allBytes.push(b1[i], b2[i]) }
+        for (let i = 0; i < 18; i++) { allBytes.push(ec1[i], ec2[i]) }
+      }
+
+      const n = spec.size
+      const grid = Array.from({ length: n }, () => new Int8Array(n).fill(-1))
+      const fixed = Array.from({ length: n }, () => new Uint8Array(n))
+
+      const setFixed = (r, c, v) => {
+        if (r >= 0 && r < n && c >= 0 && c < n) {
+          grid[r][c] = v ? 1 : 0
+          fixed[r][c] = 1
+        }
+      }
+
+      const drawFinder = (r0, c0) => {
+        for (let dr = -1; dr <= 7; dr++) {
+          for (let dc = -1; dc <= 7; dc++) {
+            const r = r0 + dr
+            const c = c0 + dc
+            if (r < 0 || r >= n || c < 0 || c >= n) continue
+            const inOuter = dr >= 0 && dr <= 6 && dc >= 0 && dc <= 6
+            const onBorder = dr === 0 || dr === 6 || dc === 0 || dc === 6
+            const inInner = dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4
+            setFixed(r, c, inOuter && (onBorder || inInner))
+          }
+        }
+      }
+
+      drawFinder(0, 0)
+      drawFinder(0, n - 7)
+      drawFinder(n - 7, 0)
+
+      for (let i = 8; i < n - 8; i++) {
+        setFixed(6, i, i % 2 === 0)
+        setFixed(i, 6, i % 2 === 0)
+      }
+      setFixed(n - 8, 8, 1)
+
+      if (spec.align.length >= 2) {
+        const c = spec.align[1]
+        for (let dr = -2; dr <= 2; dr++) {
+          for (let dc = -2; dc <= 2; dc++) {
+            const dark = Math.abs(dr) === 2 || Math.abs(dc) === 2 || (dr === 0 && dc === 0)
+            setFixed(c + dr, c + dc, dark)
+          }
+        }
+      }
+
+      // Reserve format info cells
+      for (let i = 0; i < 9; i++) {
+        if (!fixed[8][i]) setFixed(8, i, 0)
+        if (!fixed[i][8]) setFixed(i, 8, 0)
+      }
+      for (let i = 0; i < 8; i++) {
+        if (!fixed[8][n - 1 - i]) setFixed(8, n - 1 - i, 0)
+        if (!fixed[n - 1 - i][8]) setFixed(n - 1 - i, 8, 0)
+      }
+
+      // Place data bits with mask 0 ((r + c) % 2 === 0)
+      const dataBits = []
+      for (const b of allBytes) {
+        for (let i = 7; i >= 0; i--) dataBits.push((b >>> i) & 1)
+      }
+
+      let bitIdx = 0
+      let up = true
+      for (let col = n - 1; col >= 1; col -= 2) {
+        if (col === 6) col--
+        for (let step = 0; step < n; step++) {
+          const r = up ? n - 1 - step : step
+          for (const dc of [0, -1]) {
+            const c = col + dc
+            if (fixed[r][c]) continue
+            const bit = bitIdx < dataBits.length ? dataBits[bitIdx++] : 0
+            grid[r][c] = ((r + c) % 2 === 0) ? (bit ^ 1) : bit
+          }
+        }
+        up = !up
+      }
+
+      // Format string for ECC-L (01) + Mask 0 (000) => 0x77C4
+      const fmt = 0x77c4
+      for (let i = 0; i <= 5; i++) {
+        const bit = (fmt >>> (14 - i)) & 1
+        grid[8][i] = bit
+        grid[n - 1 - i][8] = bit
+      }
+      grid[8][7] = (fmt >>> 8) & 1
+      grid[8][8] = (fmt >>> 7) & 1
+      grid[7][8] = (fmt >>> 6) & 1
+      grid[n - 7][8] = (fmt >>> 8) & 1
+      for (let i = 9; i <= 14; i++) {
+        const bit = (fmt >>> (14 - i)) & 1
+        grid[14 - i][8] = bit
+        grid[8][n - 15 + i] = bit
+      }
+
+      return grid
+    }
+
+    function toSvg(text) {
+      const grid = encodeBytes(text)
+      if (!grid) return '<svg viewBox="0 0 10 10"><text x="1" y="6" font-size="3">Too long</text></svg>'
+      const n = grid.length
+      let paths = ''
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          if (grid[r][c] === 1) {
+            paths += `M${c},${r}h1v1h-1z`
+          }
+        }
+      }
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}"><rect width="${n}" height="${n}" fill="#fff"/><path d="${paths}" fill="#000"/></svg>`
+    }
+
+    return { toSvg }
+  })()
+
+  function appendLogLine(entry) {
+    const box = $('logBox')
+    const div = document.createElement('div')
+    div.className = `log-line ${entry.level || 'info'}`
+    div.textContent = entry.line
+    box.appendChild(div)
+    while (box.childNodes.length > 500) {
+      box.removeChild(box.firstChild)
+    }
+    box.scrollTop = box.scrollHeight
+  }
+
+  function selectTab(tab) {
+    activeTab = tab
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.tab === tab)
+    })
+    document.querySelectorAll('.tab-pane').forEach((pane) => {
+      pane.classList.toggle('active', pane.id === `tab-${tab}`)
+    })
+    const isRunning = currentState && currentState.lifecycle !== 'stopped'
+    $('settingsLockHint').style.display = tab === 'settings' && isRunning ? 'inline' : 'none'
+    $('modeBadge').style.display = tab === 'logs' ? 'inline-flex' : 'none'
+    $('copyLogsBtn').style.display = tab === 'logs' ? 'inline-flex' : 'none'
+    $('clearLogsBtn').style.display = tab === 'logs' ? 'inline-flex' : 'none'
+  }
+
+  function setDrawerOpen(open) {
+    drawerOpen = open
+    $('drawerPanel').classList.toggle('open', open)
+    $('drawerToggleBtn').innerHTML = open
+      ? '&#9662; Settings, Logs &amp; About'
+      : '&#9656; Settings, Logs &amp; About'
+    void api.setDrawerOpen(open)
+  }
+
+  function renderState(s) {
+    currentState = s
+    const isRunning = s.lifecycle === 'running'
+    const isStarting = s.lifecycle === 'starting'
+    const isStopped = s.lifecycle === 'stopped'
+
+    $('versionBtn').textContent = `v${s.version}`
+    $('aboutFooter').textContent = `Version ${s.version} • Verify official releases via SHA-256 or GitHub attestation`
+
+    // Update pill
+    $('updatePill').classList.toggle('visible', s.updateInfo?.status === 'update-available')
+    if (s.updateInfo?.status === 'update-available') {
+      $('updateStatusText').textContent = `Update available: v${s.updateInfo.latestVersion}`
+      $('updateStatusText').style.color = 'var(--gold)'
+    } else if (s.updateInfo?.status === 'up-to-date') {
+      $('updateStatusText').textContent = `Up to date (v${s.version})`
+      $('updateStatusText').style.color = 'var(--moss)'
+    } else if (s.updateInfo?.status === 'error') {
+      $('updateStatusText').textContent = `Update check failed`
+      $('updateStatusText').style.color = 'var(--ember)'
+    } else {
+      $('updateStatusText').textContent = `Version ${s.version}`
+      $('updateStatusText').style.color = 'var(--parchment-600)'
+    }
+
+    // Server pill
+    $('serverDot').className = `dot ${isRunning ? 'moss' : isStarting ? 'gold' : ''}`
+    $('serverPillText').textContent = isRunning ? 'Running' : isStarting ? 'Starting' : 'Stopped'
+
+    // Emulator pill
+    const tel = s.telemetry
+    const liveMem = Boolean(tel && tel.connected && tel.emulatorRunning && tel.source === 'memory')
+    const rt = s.runtime
+    if (liveMem) {
+      $('emuDot').className = 'dot moss'
+      $('emuPillText').textContent = rt?.displayName || 'Live Sync'
+      $('emuPill').title = `Live memory sync active (${tel.sceneName || 'Hyrule'})`
+    } else if (rt) {
+      $('emuDot').className = 'dot gold'
+      $('emuPillText').textContent = rt.displayName
+      $('emuPill').title = `${rt.displayName} detected (PID ${rt.pid})`
+    } else {
+      $('emuDot').className = 'dot'
+      $('emuPillText').textContent = 'No Emu'
+      $('emuPill').title = 'Emulator: Not detected'
+    }
+
+    // Hero card
+    if (isRunning && s.localUrl) {
+      $('heroSummary').textContent = 'Map server is running. Open in your browser or connect a second screen.'
+      $('localUrlBtn').textContent = s.localUrl
+      $('localUrlBtn').classList.remove('hidden')
+    } else if (isStarting) {
+      $('heroSummary').textContent = 'Starting Ocarina Atlas server...'
+      $('localUrlBtn').classList.add('hidden')
+    } else {
+      $('heroSummary').textContent = 'Click Start Map to open the interactive Hyrule map in your browser.'
+      $('localUrlBtn').classList.add('hidden')
+    }
+
+    const startBtn = $('startStopBtn')
+    if (isStopped) {
+      startBtn.textContent = 'Start Map'
+      startBtn.classList.remove('stop')
+    } else {
+      startBtn.textContent = 'Stop Map'
+      startBtn.classList.add('stop')
+    }
+    $('openMapBtn').disabled = !isRunning || !s.localUrl
+
+    // Sync strip + ptrace_scope helper
+    const needsPtraceHelp = s.ptraceScope !== null && s.ptraceScope !== 0 && (!rt || rt.needsBridge)
+    const strip = $('syncStrip')
+    if (s.syncMessage) {
+      strip.className = `sync-strip ${s.syncStatus === 'ok' ? 'ok' : s.syncStatus === 'warn' ? 'warn' : ''}`
+      $('syncStripText').textContent = s.syncMessage
+      $('copyPtraceBtn').style.display = needsPtraceHelp ? 'inline-flex' : 'none'
+    } else if (needsPtraceHelp) {
+      strip.className = 'sync-strip warn'
+      $('syncStripText').textContent = `ptrace_scope=${s.ptraceScope}: run "sudo sysctl kernel.yama.ptrace_scope=0" for live recomp sync.`
+      $('copyPtraceBtn').style.display = 'inline-flex'
+    } else {
+      strip.className = 'sync-strip'
+      $('syncStripText').textContent = 'Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.'
+      $('copyPtraceBtn').style.display = 'none'
+    }
+
+    // Second Screen (LAN) Card
+    const isLan = s.host === '0.0.0.0' || s.host === '::'
+    $('lanModeBtn').textContent = isLan ? 'LAN Mode: On' : 'LAN Mode: Off'
+    $('lanModeBtn').classList.toggle('active', isLan)
+    $('modeBadge').textContent = isLan ? 'LAN' : 'Local'
+
+    const container = $('lanUrlContainer')
+    const lanUrls = s.lanUrls || []
+    if (!isLan) {
+      selectedLanUrl = ''
+      container.innerHTML = '<span class="lan-status-text">Local-only mode (127.0.0.1). Enable LAN Mode for tablets/phones.</span>'
+      $('copyLanBtn').disabled = true
+      $('showQrBtn').disabled = true
+    } else if (lanUrls.length === 0) {
+      selectedLanUrl = ''
+      container.innerHTML = '<span class="lan-status-text">No non-virtual IPv4 LAN interface detected.</span>'
+      $('copyLanBtn').disabled = true
+      $('showQrBtn').disabled = true
+    } else if (lanUrls.length === 1) {
+      selectedLanUrl = lanUrls[0].url
+      container.innerHTML = `<button class="url-link" style="margin:0" id="singleLanLink">${selectedLanUrl}</button>`
+      $('singleLanLink').onclick = () => api.openExternal(selectedLanUrl)
+      $('copyLanBtn').disabled = false
+      $('showQrBtn').disabled = false
+    } else {
+      if (!lanUrls.some((u) => u.url === selectedLanUrl)) {
+        selectedLanUrl = lanUrls[0].url
+      }
+      const select = document.createElement('select')
+      select.className = 'lan-select'
+      for (const item of lanUrls) {
+        const opt = document.createElement('option')
+        opt.value = item.url
+        opt.textContent = `${item.url} (${item.interfaceName})`
+        opt.selected = item.url === selectedLanUrl
+        select.appendChild(opt)
+      }
+      select.onchange = () => { selectedLanUrl = select.value }
+      container.innerHTML = ''
+      container.appendChild(select)
+      $('copyLanBtn').disabled = false
+      $('showQrBtn').disabled = false
+    }
+
+    // Settings inputs
+    $('portInput').value = s.port
+    $('lichiiHostInput').value = s.lichiiHost
+    $('lichiiPortInput').value = s.lichiiPort
+    $('lanCheck').checked = isLan
+    $('autoOpenCheck').checked = s.autoOpen
+    $('autoStartCheck').checked = s.autoStart
+
+    const lockFields = !isStopped
+    $('portInput').disabled = lockFields
+    $('lichiiHostInput').disabled = lockFields
+    $('lichiiPortInput').disabled = lockFields
+    $('resetRpcBtn').disabled = lockFields
+    $('settingsLockHint').style.display = activeTab === 'settings' && lockFields ? 'inline' : 'none'
+  }
+
+  // Event bindings
+  $('versionBtn').onclick = () => {
+    setDrawerOpen(true)
+    selectTab('about')
+  }
+
+  $('updatePill').onclick = () => {
+    if (currentState?.updateInfo?.releaseUrl) {
+      void api.openExternal(currentState.updateInfo.releaseUrl)
+    }
+  }
+
+  $('localUrlBtn').onclick = () => void api.openMap()
+  $('openMapBtn').onclick = () => void api.openMap()
+
+  $('startStopBtn').onclick = () => {
+    if (!currentState) return
+    if (currentState.lifecycle === 'stopped') void api.startServer()
+    else void api.stopServer()
+  }
+
+  $('setupSyncBtn').onclick = () => void api.setupSync()
+
+  $('copyPtraceBtn').onclick = async () => {
+    await api.copyText('sudo sysctl kernel.yama.ptrace_scope=0')
+    const btn = $('copyPtraceBtn')
+    btn.textContent = 'Copied!'
+    setTimeout(() => { btn.textContent = 'Copy sysctl' }, 1400)
+  }
+
+  $('lanModeBtn').onclick = () => {
+    if (!currentState) return
+    const isLan = currentState.host === '0.0.0.0' || currentState.host === '::'
+    void api.toggleLanMode(!isLan)
+  }
+
+  $('refreshLanBtn').onclick = () => void api.refreshLan()
+
+  $('copyLanBtn').onclick = async () => {
+    if (!selectedLanUrl) return
+    await api.copyText(selectedLanUrl)
+    const btn = $('copyLanBtn')
+    btn.textContent = 'Copied!'
+    setTimeout(() => { btn.textContent = 'Copy URL' }, 1400)
+  }
+
+  $('showQrBtn').onclick = () => {
+    if (!selectedLanUrl) return
+    $('qrFrame').innerHTML = QR.toSvg(selectedLanUrl)
+    $('qrUrlText').textContent = selectedLanUrl
+    $('qrModal').classList.add('open')
+  }
+
+  $('closeQrBtn').onclick = () => $('qrModal').classList.remove('open')
+  $('qrModal').onclick = (e) => {
+    if (e.target === $('qrModal')) $('qrModal').classList.remove('open')
+  }
+
+  $('drawerToggleBtn').onclick = () => setDrawerOpen(!drawerOpen)
+
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.onclick = () => selectTab(btn.dataset.tab)
+  })
+
+  $('portInput').onchange = () => void api.updateSettings({ port: Number($('portInput').value) })
+  $('lichiiHostInput').onchange = () => void api.updateSettings({ lichiiHost: $('lichiiHostInput').value })
+  $('lichiiPortInput').onchange = () => void api.updateSettings({ lichiiPort: Number($('lichiiPortInput').value) })
+  $('resetRpcBtn').onclick = () => void api.resetRpcDefaults()
+  $('lanCheck').onchange = () => void api.toggleLanMode($('lanCheck').checked)
+  $('autoOpenCheck').onchange = () => void api.updateSettings({ autoOpen: $('autoOpenCheck').checked })
+  $('autoStartCheck').onchange = () => void api.updateSettings({ autoStart: $('autoStartCheck').checked })
+
+  $('checkUpdatesBtn').onclick = async () => {
+    $('updateStatusText').textContent = 'Checking GitHub...'
+    $('updateStatusText').style.color = 'var(--parchment-400)'
+    await api.checkUpdates()
+  }
+
+  $('copyLogsBtn').onclick = async () => {
+    const text = $('logBox').innerText
+    if (text) {
+      await api.copyText(text)
+      $('copyLogsBtn').textContent = 'Copied'
+      setTimeout(() => { $('copyLogsBtn').textContent = 'Copy' }, 1200)
+    }
+  }
+
+  $('clearLogsBtn').onclick = async () => {
+    await api.clearLogs()
+    $('logBox').innerHTML = ''
+  }
+
+  document.querySelectorAll('[data-open-url]').forEach((btn) => {
+    btn.onclick = () => void api.openExternal(btn.dataset.openUrl)
+  })
+
+  api.onState(renderState)
+  api.onLog(appendLogLine)
+
+  void api.getInitialState().then((initial) => {
+    renderState(initial)
+    if (Array.isArray(initial.logs)) {
+      for (const entry of initial.logs) appendLogLine(entry)
+    }
+  })
+})()
+</script>
+</body>
+</html>

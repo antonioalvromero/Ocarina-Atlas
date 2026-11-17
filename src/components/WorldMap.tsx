@@ -286,11 +286,9 @@ export function WorldMap() {
           : 'relative h-dvh overflow-clip bg-ink-950'
       }
     >
-      <img
-        src="/content/maps/hyrule.webp"
-        alt=""
+      <div
         aria-hidden
-        className="absolute inset-0 size-full scale-110 object-cover opacity-35 blur-2xl"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(76,66,51,0.3)_0%,rgba(19,16,12,0.95)_75%)]"
       />
       <MapViewport
         ref={viewport}
@@ -320,7 +318,7 @@ export function WorldMap() {
               role="dialog"
               aria-label={t('world.placeDetails', { name: selectedPlaceName })}
               style={style}
-              className="pointer-events-auto absolute z-50 w-60 rounded-lg border border-ink-600 bg-ink-900/95 p-3 text-parchment-50 shadow-xl backdrop-blur-sm"
+              className="pointer-events-auto absolute z-50 w-60 rounded-lg border border-ink-600 bg-ink-900/95 p-3 text-parchment-50 shadow-xl"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -403,7 +401,7 @@ export function WorldMap() {
             top: 'calc(0.75rem + env(safe-area-inset-top, 0px))',
             right: 'calc(0.75rem + env(safe-area-inset-right, 0px))',
           }}
-          className="absolute top-3 right-3 z-40 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-3 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800"
+          className="absolute top-3 right-3 z-40 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/95 px-3 py-1.5 text-xs font-medium text-parchment-50 shadow-lg transition-colors hover:border-parchment-400 hover:bg-ink-800"
         >
           <Minimize2 size={14} />
           {t('map.exitFullscreen')}

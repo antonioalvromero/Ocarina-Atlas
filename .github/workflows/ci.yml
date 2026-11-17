@@ -157,19 +157,23 @@ jobs:
       - name: Verify C compiler availability
         run: gcc --version
 
-      - name: Build portable Linux release
+      - name: Build Linux x64 AppImage release
         run: npm run build:linux
 
-      - name: Verify release artifacts and smoke-test OcarinaAtlas (Linux)
+      - name: Verify release artifacts and smoke-test OcarinaAtlas AppImage (Linux)
         run: |
           chmod +x scripts/smoke-test-linux.sh
-          ./scripts/smoke-test-linux.sh
+          if command -v xvfb-run >/dev/null 2>&1; then
+            xvfb-run -a ./scripts/smoke-test-linux.sh
+          else
+            ./scripts/smoke-test-linux.sh
+          fi
 
       - name: Upload temporary Linux CI artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: OcarinaAtlas-Linux-x64-ci
-          path: release/OcarinaAtlas-Linux-x64.tar.gz
+          path: release/OcarinaAtlas-Linux-x64.AppImage
           retention-days: 7
           compression-level: 0
           if-no-files-found: error

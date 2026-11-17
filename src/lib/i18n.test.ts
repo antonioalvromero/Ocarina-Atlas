@@ -12,6 +12,7 @@ import {
   REGION_LABELS,
   REQUIREMENT_LABELS,
   getLocale,
+  resolveLocaleFromTag,
   setLocale,
   translate,
   translateCategory,
@@ -26,6 +27,24 @@ import {
   type Locale,
   type TranslationKey,
 } from './i18n'
+
+const ALL_LOCALES: Locale[] = [
+  'en',
+  'es',
+  'fr',
+  'pt',
+  'zh-CN',
+  'zh-TW',
+  'de',
+  'it',
+  'ja',
+  'ko',
+  'nl',
+  'ru',
+  'pl',
+  'tr',
+  'uk',
+]
 
 function fakeWindow(initialEntries: Record<string, string> = {}) {
   const entries = new Map<string, string>(Object.entries(initialEntries))
@@ -59,34 +78,74 @@ describe('i18n', () => {
     expect(getLocale()).toBe('en')
   })
 
-  it('exposes all 4 supported locales in LOCALE_OPTIONS', () => {
-    expect(LOCALE_OPTIONS.map((o) => o.code)).toEqual(['en', 'es', 'fr', 'pt'])
+  it('exposes all 15 supported locales in LOCALE_OPTIONS', () => {
+    expect(LOCALE_OPTIONS.map((o) => o.code)).toEqual(ALL_LOCALES)
+  })
+
+  it('resolves BCP-47 language tags to supported locales', () => {
+    expect(resolveLocaleFromTag('zh-CN')).toBe('zh-CN')
+    expect(resolveLocaleFromTag('zh-Hans')).toBe('zh-CN')
+    expect(resolveLocaleFromTag('zh-Hans-CN')).toBe('zh-CN')
+    expect(resolveLocaleFromTag('zh-SG')).toBe('zh-CN')
+    expect(resolveLocaleFromTag('zh')).toBe('zh-CN')
+
+    expect(resolveLocaleFromTag('zh-TW')).toBe('zh-TW')
+    expect(resolveLocaleFromTag('zh-Hant')).toBe('zh-TW')
+    expect(resolveLocaleFromTag('zh-Hant-TW')).toBe('zh-TW')
+    expect(resolveLocaleFromTag('zh-HK')).toBe('zh-TW')
+    expect(resolveLocaleFromTag('zh-MO')).toBe('zh-TW')
+
+    expect(resolveLocaleFromTag('de-AT')).toBe('de')
+    expect(resolveLocaleFromTag('it-IT')).toBe('it')
+    expect(resolveLocaleFromTag('ja-JP')).toBe('ja')
+    expect(resolveLocaleFromTag('ko-KR')).toBe('ko')
+    expect(resolveLocaleFromTag('nl-BE')).toBe('nl')
+    expect(resolveLocaleFromTag('ru-RU')).toBe('ru')
+    expect(resolveLocaleFromTag('pl-PL')).toBe('pl')
+    expect(resolveLocaleFromTag('tr-TR')).toBe('tr')
+    expect(resolveLocaleFromTag('uk-UA')).toBe('uk')
+
+    expect(resolveLocaleFromTag('xx-YY')).toBeNull()
+    expect(resolveLocaleFromTag('')).toBeNull()
+  })
+
+  it('auto-detects navigator.language when localStorage has no saved locale', () => {
+    vi.stubGlobal('window', fakeWindow())
+    vi.stubGlobal('navigator', { language: 'zh-Hant-HK', languages: ['zh-Hant-HK', 'en-US'] })
+    expect(getLocale()).toBe('zh-TW')
+
+    vi.stubGlobal('navigator', { language: 'de-DE', languages: ['de-DE'] })
+    expect(getLocale()).toBe('de')
+
+    // Saved localStorage preference overrides navigator.language
+    vi.stubGlobal('window', fakeWindow({ [LANG_STORAGE_KEY]: 'ja' }))
+    expect(getLocale()).toBe('ja')
+
+    // Unsupported navigator language falls back to en
+    vi.stubGlobal('window', fakeWindow())
+    vi.stubGlobal('navigator', { language: 'sv-SE', languages: ['sv-SE'] })
+    expect(getLocale()).toBe('en')
   })
 
   it('persists locale changes to localStorage under oot-map:v1:lang', () => {
     const win = fakeWindow()
     vi.stubGlobal('window', win)
 
-    setLocale('es')
-    expect(win.localStorage.getItem(LANG_STORAGE_KEY)).toBe('es')
-    expect(getLocale()).toBe('es')
-
-    setLocale('fr')
-    expect(win.localStorage.getItem(LANG_STORAGE_KEY)).toBe('fr')
-    expect(getLocale()).toBe('fr')
-
-    setLocale('pt')
-    expect(win.localStorage.getItem(LANG_STORAGE_KEY)).toBe('pt')
-    expect(getLocale()).toBe('pt')
+    for (const locale of ALL_LOCALES) {
+      setLocale(locale)
+      expect(win.localStorage.getItem(LANG_STORAGE_KEY)).toBe(locale)
+      expect(getLocale()).toBe(locale)
+    }
   })
 
   it('ignores invalid persisted or requested locales and falls back to en', () => {
-    const win = fakeWindow({ [LANG_STORAGE_KEY]: 'de' })
+    const win = fakeWindow({ [LANG_STORAGE_KEY]: 'xx' })
     vi.stubGlobal('window', win)
+    vi.stubGlobal('navigator', { language: 'en-US', languages: ['en-US'] })
 
     expect(getLocale()).toBe('en')
     setLocale('invalid' as Locale)
-    expect(win.localStorage.getItem(LANG_STORAGE_KEY)).toBe('de')
+    expect(win.localStorage.getItem(LANG_STORAGE_KEY)).toBe('xx')
     expect(getLocale()).toBe('en')
   })
 
@@ -139,24 +198,28 @@ describe('i18n', () => {
     expect(translateRequirement('pt', ['bombs', 'hover-boots'])).toBe('Bombas ou Botas Flutuantes')
   })
 
-  it('has complete, non-empty UI message translations for all 4 locales', () => {
+  it('has complete, non-empty UI message translations with matching placeholders for all 15 locales', () => {
     const enKeys = Object.keys(MESSAGES.en) as TranslationKey[]
-    const locales: Locale[] = ['en', 'es', 'fr', 'pt']
+    const extractPlaceholders = (text: string) =>
+      Array.from(text.matchAll(/\{(\w+)\}/g), (m) => m[1]).sort()
 
-    for (const locale of locales) {
+    for (const locale of ALL_LOCALES) {
       const dict = MESSAGES[locale]
       expect(Object.keys(dict).sort()).toEqual([...enKeys].sort())
       for (const key of enKeys) {
         expect(dict[key], `Missing or empty key "${key}" in locale "${locale}"`).toBeTruthy()
+        expect(
+          extractPlaceholders(dict[key]),
+          `Placeholder mismatch for key "${key}" in locale "${locale}"`,
+        ).toEqual(extractPlaceholders(MESSAGES.en[key]))
       }
     }
   })
 
-  it('covers every category, place, region, and requirement in oot.json for all 4 locales', () => {
-    const locales: Locale[] = ['en', 'es', 'fr', 'pt']
+  it('covers every category, place, region, and requirement in oot.json for all 15 locales', () => {
     const uniqueRegions = Array.from(new Set(dataset.places.map((p) => p.region)))
 
-    for (const locale of locales) {
+    for (const locale of ALL_LOCALES) {
       for (const category of dataset.categories) {
         expect(
           CATEGORY_LABELS[locale][category.key],

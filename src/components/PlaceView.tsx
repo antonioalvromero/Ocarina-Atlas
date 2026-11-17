@@ -198,8 +198,8 @@ function MapSwitcher({
       }
       className={
         inline
-          ? 'pointer-events-auto flex max-w-[calc(100vw-1.5rem)] overflow-x-auto overflow-y-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg backdrop-blur-sm'
-          : 'absolute top-3 left-3 z-30 flex max-w-[calc(100%-8.5rem)] overflow-x-auto overflow-y-hidden rounded-lg border border-ink-600 bg-ink-900/90 shadow-lg'
+          ? 'pointer-events-auto flex max-w-[calc(100vw-1.5rem)] overflow-x-auto overflow-y-hidden rounded-lg border border-ink-600 bg-ink-900/95 shadow-lg'
+          : 'absolute top-3 left-3 z-30 flex max-w-[calc(100%-8.5rem)] overflow-x-auto overflow-y-hidden rounded-lg border border-ink-600 bg-ink-900/95 shadow-lg'
       }
     >
       {allFloors && (
@@ -301,7 +301,7 @@ function PinPopoverFrame({
       aria-label={t('world.placeDetails', { name: title })}
       style={style}
       onWheel={(event) => event.stopPropagation()}
-      className="hyrule-scrollbar pointer-events-auto absolute z-50 max-h-[min(65dvh,360px)] touch-pan-y overflow-y-auto overscroll-contain rounded-lg border border-ink-600 bg-ink-900/95 p-3 text-parchment-50 shadow-xl backdrop-blur-sm"
+      className="hyrule-scrollbar pointer-events-auto absolute z-50 max-h-[min(65dvh,360px)] touch-pan-y overflow-y-auto overscroll-contain rounded-lg border border-ink-600 bg-ink-900/95 p-3 text-parchment-50 shadow-xl"
     >
       {children}
     </div>
@@ -720,6 +720,18 @@ function MappedPlace({
     if (!closing && focus) viewport.current?.centerOn(focus)
   }
 
+  const toggleSelectionRef = useRef(toggleSelection)
+  toggleSelectionRef.current = toggleSelection
+  const itemSelectCallbacksRef = useRef(new Map<string, () => void>())
+  const getItemSelectCallback = useCallback((id: string) => {
+    let cb = itemSelectCallbacksRef.current.get(id)
+    if (!cb) {
+      cb = () => toggleSelectionRef.current({ kind: 'item', id })
+      itemSelectCallbacksRef.current.set(id, cb)
+    }
+    return cb
+  }, [])
+
   function changeMap(id: string) {
     const next = place.maps.find((candidate) => candidate.id === id)
     if (!next) return
@@ -875,7 +887,7 @@ function MappedPlace({
       to="/"
       aria-label={t('map.worldMap')}
       title={t('map.worldMap')}
-      className="grid size-9 place-items-center rounded-lg border border-ink-600 bg-ink-900/90 text-parchment-200 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
+      className="grid size-9 place-items-center rounded-lg border border-ink-600 bg-ink-900/95 text-parchment-200 shadow-lg transition-colors hover:border-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
     >
       <svg
         width="17"
@@ -995,7 +1007,7 @@ function MappedPlace({
                     done={done.has(item.id)}
                     selected={item.id === selectedItem}
                     merge={merge}
-                    onSelect={() => toggleSelection({ kind: 'item', id: item.id })}
+                    onSelect={getItemSelectCallback(item.id)}
                   />
                 ),
             )}
@@ -1057,7 +1069,7 @@ function MappedPlace({
               onClick={() => void exitFullscreen()}
               aria-label={t('map.exitFullscreenAria')}
               title={t('map.exitFullscreenAria')}
-              className="pointer-events-auto inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-3 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800"
+              className="pointer-events-auto inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/95 px-3 py-1.5 text-xs font-medium text-parchment-50 shadow-lg transition-colors hover:border-parchment-400 hover:bg-ink-800"
             >
               <Minimize2 size={14} />
               {t('map.exitFullscreen')}
@@ -1080,7 +1092,7 @@ function MappedPlace({
             onClick={() => void enterFullscreen()}
             aria-label={t('map.enterFullscreen')}
             title={t('map.fullscreenMap')}
-            className="absolute top-3 right-3 z-30 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/90 px-2.5 py-1.5 text-xs font-medium text-parchment-50 shadow-lg backdrop-blur-sm transition-colors hover:border-parchment-400 hover:bg-ink-800 lg:hidden"
+            className="absolute top-3 right-3 z-30 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-900/95 px-2.5 py-1.5 text-xs font-medium text-parchment-50 shadow-lg transition-colors hover:border-parchment-400 hover:bg-ink-800 lg:hidden"
           >
             <Maximize2 size={14} />
             <span className="max-sm:hidden">{t('map.fullscreen')}</span>

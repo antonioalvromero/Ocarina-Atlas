@@ -134,6 +134,7 @@ describe('Lichii environment config helpers', () => {
       path.resolve('E:\\Longshot\\Game\\user'),
       path.resolve(path.join(os.homedir(), 'Games', 'Longshot', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'Hookshot', 'user')),
+      path.resolve(path.join(os.homedir(), 'Games', 'HeyListen', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'ProjectReLink', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'ProjectReLink', 'game', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'ReLink', 'user')),
@@ -370,6 +371,9 @@ describe('Lichii environment config helpers', () => {
         detectEmulatorFromPath(path.join(tmpRoot, 'Games', 'Hookshot', 'user', 'save', uid, 'slot_00')),
       ).toBe('longshot')
       expect(
+        detectEmulatorFromPath(path.join(tmpRoot, 'Games', 'HeyListen', 'user', 'save', uid, 'slot_00')),
+      ).toBe('longshot')
+      expect(
         detectEmulatorFromPath(
           path.join(tmpRoot, 'Games', 'ProjectReLink', 'game', 'user', 'save', uid, 'slot_00'),
         ),
@@ -518,6 +522,256 @@ describe('Lichii environment config helpers', () => {
         }),
       )
       expect(overrideFound?.dir).toBe(customSlot)
+    } finally {
+      homeSpy.mockRestore()
+      fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('discovers HeyListen and Linux Wine, Steam, Flatpak, Bottles, Heroic, and Lutris save paths', () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'linux-containers-save-test-'))
+    const homeSpy = vi.spyOn(os, 'homedir').mockReturnValue(tmpRoot)
+    try {
+      const uid = 'C4D5E6F708192A3B4C5D6E7F8091A2B3'
+      const writeSlotCap = (slotDir: string, mtimeMs: number) => {
+        fs.mkdirSync(slotDir, { recursive: true })
+        const capPath = path.join(slotDir, 'caption.sav')
+        fs.writeFileSync(capPath, Buffer.alloc(0x30))
+        fs.utimesSync(capPath, new Date(mtimeMs), new Date(mtimeMs))
+      }
+
+      // 1. HeyListen native ~/Games/HeyListen/user
+      const heyListenSlot = path.join(tmpRoot, 'Games', 'HeyListen', 'user', 'save', uid, 'slot_00')
+      writeSlotCap(heyListenSlot, 10000)
+
+      // 2. Wine (~/.wine and WINEPREFIX)
+      const wineLichiiSlot = path.join(
+        tmpRoot,
+        '.wine',
+        'drive_c',
+        'users',
+        'player',
+        'AppData',
+        'Roaming',
+        'lichii',
+        'nand',
+        'user',
+        'save',
+        '0000000000000000',
+        '0000000000000001',
+        '0400486024DEC000',
+        'slot_00',
+      )
+      writeSlotCap(wineLichiiSlot, 12000)
+
+      const customWinePrefix = path.join(tmpRoot, 'custom-wine-prefix')
+      const winePrefixHeyListenSlot = path.join(
+        customWinePrefix,
+        'drive_c',
+        'Games',
+        'HeyListen',
+        'user',
+        'save',
+        uid,
+        'slot_00',
+      )
+      writeSlotCap(winePrefixHeyListenSlot, 14000)
+
+      // 3. Steam (libraryfolders.vdf + compatdata/*/pfx)
+      const steamRoot = path.join(tmpRoot, '.local', 'share', 'Steam')
+      const secondarySteamLib = path.join(tmpRoot, 'SteamLibrary')
+      fs.mkdirSync(path.join(steamRoot, 'steamapps'), { recursive: true })
+      fs.writeFileSync(
+        path.join(steamRoot, 'steamapps', 'libraryfolders.vdf'),
+        `"libraryfolders"\n{\n\t"0"\n\t{\n\t\t"path"\t\t"${steamRoot.replace(/\\/g, '\\\\')}"\n\t}\n\t"1"\n\t{\n\t\t"path"\t\t"${secondarySteamLib.replace(/\\/g, '\\\\')}"\n\t}\n}\n`,
+      )
+      const steamProtonSlot = path.join(
+        secondarySteamLib,
+        'steamapps',
+        'compatdata',
+        '987654321',
+        'pfx',
+        'drive_c',
+        'users',
+        'steamuser',
+        'Games',
+        'Longshot',
+        'user',
+        'save',
+        uid,
+        'slot_00',
+      )
+      writeSlotCap(steamProtonSlot, 16000)
+
+      // 4. Flatpak (~/.var/app/*/{data,config})
+      const flatpakEdenSlot = path.join(
+        tmpRoot,
+        '.var',
+        'app',
+        'dev.eden.Eden',
+        'data',
+        'eden',
+        'nand',
+        'user',
+        'save',
+        '0000000000000000',
+        '0000000000000001',
+        '0400486024DEC000',
+        'slot_00',
+      )
+      writeSlotCap(flatpakEdenSlot, 18000)
+
+      // 5. Bottles
+      const bottlesFritchiiSlot = path.join(
+        tmpRoot,
+        '.local',
+        'share',
+        'bottles',
+        'bottles',
+        'Hyrule',
+        'drive_c',
+        'users',
+        'steamuser',
+        'AppData',
+        'Roaming',
+        'fritchii',
+        'nand',
+        'user',
+        'save',
+        '0000000000000000',
+        '0000000000000001',
+        '0400486024DEC000',
+        'slot_00',
+      )
+      writeSlotCap(bottlesFritchiiSlot, 20000)
+
+      // 6. Heroic
+      const heroicSlot = path.join(
+        tmpRoot,
+        'Games',
+        'Heroic',
+        'Prefixes',
+        'Ocarina',
+        'drive_c',
+        'Games',
+        'Triforce',
+        'user',
+        'save',
+        uid,
+        'slot_00',
+      )
+      writeSlotCap(heroicSlot, 22000)
+
+      // 7. Lutris (~/Games/<slug>/user)
+      const lutrisSlot = path.join(tmpRoot, 'Games', 'ocarina-lutris', 'user', 'save', uid, 'slot_00')
+      writeSlotCap(lutrisSlot, 24000)
+
+      const env: NodeJS.ProcessEnv = {
+        APPDATA: path.join(tmpRoot, 'appdata-empty'),
+        WINEPREFIX: customWinePrefix,
+      }
+      const candidates = getCandidateSaveDirs(env)
+      expect(candidates).toContain(path.resolve(path.join(tmpRoot, 'Games', 'HeyListen', 'user')))
+      expect(candidates).toContain(
+        path.resolve(
+          path.join(
+            tmpRoot,
+            '.wine',
+            'drive_c',
+            'users',
+            'player',
+            'AppData',
+            'Roaming',
+            'lichii',
+            'nand',
+            'user',
+            'save',
+            '0000000000000000',
+          ),
+        ),
+      )
+      expect(candidates).toContain(
+        path.resolve(path.join(customWinePrefix, 'drive_c', 'Games', 'HeyListen', 'user')),
+      )
+      expect(candidates).toContain(
+        path.resolve(
+          path.join(
+            secondarySteamLib,
+            'steamapps',
+            'compatdata',
+            '987654321',
+            'pfx',
+            'drive_c',
+            'users',
+            'steamuser',
+            'Games',
+            'Longshot',
+            'user',
+          ),
+        ),
+      )
+      expect(candidates).toContain(
+        path.resolve(
+          path.join(
+            tmpRoot,
+            '.var',
+            'app',
+            'dev.eden.Eden',
+            'data',
+            'eden',
+            'nand',
+            'user',
+            'save',
+            '0000000000000000',
+          ),
+        ),
+      )
+      expect(candidates).toContain(
+        path.resolve(
+          path.join(
+            tmpRoot,
+            '.local',
+            'share',
+            'bottles',
+            'bottles',
+            'Hyrule',
+            'drive_c',
+            'users',
+            'steamuser',
+            'AppData',
+            'Roaming',
+            'fritchii',
+            'nand',
+            'user',
+            'save',
+            '0000000000000000',
+          ),
+        ),
+      )
+      expect(candidates).toContain(
+        path.resolve(
+          path.join(tmpRoot, 'Games', 'Heroic', 'Prefixes', 'Ocarina', 'drive_c', 'Games', 'Triforce', 'user'),
+        ),
+      )
+      expect(candidates).toContain(path.resolve(path.join(tmpRoot, 'Games', 'ocarina-lutris', 'user')))
+
+      // Newest across all Linux containers wins (Lutris at 24000)
+      const latest = findLatestSaveSlotDir(candidates)
+      expect(latest?.dir).toBe(lutrisSlot)
+
+      // If Heroic is touched newer (30000), Heroic wins
+      writeSlotCap(heroicSlot, 30000)
+      const latestAfterHeroic = findLatestSaveSlotDir(candidates)
+      expect(latestAfterHeroic?.dir).toBe(heroicSlot)
+      expect(detectEmulatorFromPath(latestAfterHeroic!.dir)).toBe('triforce')
+
+      // Explicit *_SAVE_DIR still overrides everything
+      const explicitDir = path.join(tmpRoot, 'explicit-override', 'slot_00')
+      writeSlotCap(explicitDir, 500)
+      const explicitFound = findLatestSaveSlotDir(
+        getCandidateSaveDirs({ ...env, LONGSHOT_SAVE_DIR: explicitDir }),
+      )
+      expect(explicitFound?.dir).toBe(explicitDir)
     } finally {
       homeSpy.mockRestore()
       fs.rmSync(tmpRoot, { recursive: true, force: true })

@@ -9,19 +9,43 @@ import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const DEFAULT_HOST = '0.0.0.0'
-const DEFAULT_PORT = 3000
-const DEFAULT_LICHII_HOST = '127.0.0.1'
-const DEFAULT_LICHII_PORT = 6545
-const RECOMP_PROCESS_NAMES = new Set([
+export const DEFAULT_HOST = '0.0.0.0'
+export const DEFAULT_PORT = 3000
+export const DEFAULT_LICHII_HOST = '127.0.0.1'
+export const DEFAULT_LICHII_PORT = 6545
+export const RECOMP_PROCESS_NAMES = new Set([
   'hookshot',
   'longshot',
+  'heylisten',
   'relink-game',
   'relink',
   'triforce',
 ])
 // NX2Saria serves the debug RPC on 127.0.0.1:6545 itself, so only its save folder is detected
-const NX2SARIA_PROCESS_NAMES = new Set(['ocarina', 'nx2saria'])
+export const NX2SARIA_PROCESS_NAMES = new Set(['ocarina', 'nx2saria'])
+export const EMULATOR_PROCESS_NAMES = new Set([
+  'lichii',
+  'fritchii',
+  'cheezyemu',
+  'eden',
+  'ocarina',
+  'nx2saria',
+])
+
+const RUNTIME_DISPLAY_NAMES = {
+  lichii: 'Lichii',
+  fritchii: 'Fritchii',
+  cheezyemu: 'CheezyEmu',
+  eden: 'Eden',
+  ocarina: 'NX2Saria',
+  nx2saria: 'NX2Saria',
+  hookshot: 'Hookshot',
+  longshot: 'Longshot',
+  heylisten: 'HeyListen',
+  'relink-game': 'Project ReLink',
+  relink: 'Project ReLink',
+  triforce: 'Triforce',
+}
 
 const VIRTUAL_ADAPTER_PATTERN =
   /(?:vethernet|hyper-v|wsl|virtualbox|vbox|vmware|docker|veth|utun|wintun|tailscale|zerotier|wireguard|nordlynx|radmin|hamachi|openvpn|bluetooth|loopback|npcap|isatap|teredo|\btap(?:[\s_-]?\d+|\b)|\btun(?:[\s_-]?\d+|\b))/i
@@ -46,6 +70,8 @@ Options:
   --lichii-host <h>   Emulator/Lichii debug RPC host (default: ${DEFAULT_LICHII_HOST})
   --lichii-port <p>   Emulator/Lichii debug RPC port (default: ${DEFAULT_LICHII_PORT})
   --no-browser        Do not auto-open the browser via xdg-open
+  --cli, --no-gui     Force terminal CLI mode even when a display server is available
+  --gui               Force local GUI launcher window
   --setup-sync        Write EDEN_NX2_DEBUG_SERVER=<host>:<port> to existing
                       ~/.config/{lichii,fritchii,cheezyemu}/nx2_switches.txt and
                       ~/.local/share/{lichii,fritchii}/nx2_switches.txt and exit
@@ -53,7 +79,7 @@ Options:
 `)
 }
 
-function parsePort(raw, fallback, allowZero = false) {
+export function parsePort(raw, fallback, allowZero = false) {
   const trimmed = String(raw ?? '').trim()
   if (!/^\d+$/.test(trimmed)) return fallback
   const n = Number.parseInt(trimmed, 10)
@@ -61,13 +87,16 @@ function parsePort(raw, fallback, allowZero = false) {
   return Number.isInteger(n) && n >= min && n <= 65535 ? n : fallback
 }
 
-function parseArgs(argv, env) {
+export function parseArgs(argv, env = process.env) {
   const opts = {
     host: env.HOST?.trim() || DEFAULT_HOST,
     port: parsePort(env.PORT, DEFAULT_PORT, true),
     lichiiHost: env.LICHII_HOST?.trim() || env.FRITCHII_HOST?.trim() || DEFAULT_LICHII_HOST,
     lichiiPort: parsePort(env.LICHII_PORT || env.FRITCHII_PORT, DEFAULT_LICHII_PORT, false),
     noBrowser: false,
+    cli: false,
+    noGui: false,
+    gui: false,
     setupSync: false,
     help: false,
   }
@@ -86,6 +115,12 @@ function parseArgs(argv, env) {
       opts.host = '127.0.0.1'
     } else if (key === '--no-browser') {
       opts.noBrowser = true
+    } else if (key === '--cli') {
+      opts.cli = true
+    } else if (key === '--no-gui') {
+      opts.noGui = true
+    } else if (key === '--gui') {
+      opts.gui = true
     } else if (key === '--setup-sync') {
       opts.setupSync = true
     } else if (key === '--port') {
@@ -116,17 +151,17 @@ function parseArgs(argv, env) {
   return opts
 }
 
-function isLoopbackHost(host) {
+export function isLoopbackHost(host) {
   const normalized = String(host ?? '').trim().toLowerCase()
   return normalized === '127.0.0.1' || normalized === 'localhost' || normalized === '::1'
 }
 
-function isWildcardBindHost(host) {
+export function isWildcardBindHost(host) {
   const normalized = String(host ?? '').trim().toLowerCase()
   return normalized === '0.0.0.0' || normalized === '::' || normalized === '0:0:0:0:0:0:0:0'
 }
 
-function collectLanUrls(port) {
+export function collectLanUrls(port) {
   const urls = []
   const seen = new Set()
   const ifaces = os.networkInterfaces()
@@ -149,7 +184,7 @@ function collectLanUrls(port) {
   return urls
 }
 
-function probeTcpPort(host, port, timeoutMs = 200) {
+export function probeTcpPort(host, port, timeoutMs = 200) {
   return new Promise((resolve) => {
     const socket = new net.Socket()
     let settled = false
@@ -167,7 +202,7 @@ function probeTcpPort(host, port, timeoutMs = 200) {
   })
 }
 
-function updateNx2SwitchFile(configPath, newLine) {
+export function updateNx2SwitchFile(configPath, newLine) {
   const activeSwitchRe = /^\s*EDEN_NX2_DEBUG_SERVER\s*=\s*(.+?)\s*$/
   const outLines = []
 
@@ -205,7 +240,7 @@ function updateNx2SwitchFile(configPath, newLine) {
   fs.writeFileSync(configPath, content, 'utf8')
 }
 
-function runSetupSync(lichiiHost, lichiiPort) {
+export function setupSync(lichiiHost = DEFAULT_LICHII_HOST, lichiiPort = DEFAULT_LICHII_PORT) {
   const home = os.homedir()
   const configHome = process.env.XDG_CONFIG_HOME?.trim() || path.join(home, '.config')
   const dataHome = process.env.XDG_DATA_HOME?.trim() || path.join(home, '.local', 'share')
@@ -229,28 +264,67 @@ function runSetupSync(lichiiHost, lichiiPort) {
     }
   }
 
+  return { updated, checked: candidates, line: newLine, target }
+}
+
+export function runSetupSync(lichiiHost, lichiiPort) {
+  const result = setupSync(lichiiHost, lichiiPort)
+
   printBanner()
-  if (updated.length === 0) {
+  if (result.updated.length === 0) {
     console.log('No existing Lichii, Fritchii, or CheezyEmu profile directory was found.')
     console.log('Checked:')
-    for (const cfgPath of candidates) {
+    for (const cfgPath of result.checked) {
       console.log(`  - ${path.dirname(cfgPath)}`)
     }
     console.log(`Launch your emulator once or create the profile directory, then add:`)
-    console.log(`  ${newLine}`)
-    return
+    console.log(`  ${result.line}`)
+    return result
   }
 
-  console.log(`Configured ${newLine} in:`)
-  for (const cfgPath of updated) {
+  console.log(`Configured ${result.line} in:`)
+  for (const cfgPath of result.updated) {
     console.log(`  - ${cfgPath}`)
   }
   console.log('Restart your emulator for the debug RPC switch to take effect.')
+  return result
+}
+
+function normalizeProcessName(rawName, allowedSet, isComm = false) {
+  if (!rawName) return null
+  const trimmed = String(rawName).trim()
+  if (!trimmed) return null
+  const base = trimmed.split(/[\\/]/).pop() ?? ''
+  if (!base) return null
+
+  let normalized = base.toLowerCase()
+  while (/\.(exe|appimage|x86_64)$/i.test(normalized)) {
+    normalized = normalized.replace(/\.(exe|appimage|x86_64)$/i, '')
+  }
+  if (allowedSet.has(normalized)) {
+    return normalized
+  }
+
+  // Linux /proc/<pid>/comm truncates process names at 15 chars (e.g. "heylisten.appim", "relink-game.x86")
+  if (isComm && base.length >= 15) {
+    const dotIdx = normalized.indexOf('.')
+    if (dotIdx > 0) {
+      const prefix = normalized.slice(0, dotIdx)
+      if (allowedSet.has(prefix)) {
+        return prefix
+      }
+    }
+  }
+  return null
+}
+
+function normalizeRecompProcessName(rawName, isComm = false) {
+  return normalizeProcessName(rawName, RECOMP_PROCESS_NAMES, isComm)
 }
 
 function resolveUserSaveDirFromExe(exePath) {
   if (!exePath) return null
-  let exeDir = path.dirname(exePath)
+  const exeDir = path.dirname(exePath)
   const leaf = path.basename(exeDir).toLowerCase()
   const gameRoot = leaf === 'bin' ? path.dirname(exeDir) : exeDir
   if (!gameRoot) return null
@@ -258,7 +332,17 @@ function resolveUserSaveDirFromExe(exePath) {
   return fs.existsSync(userDir) ? userDir : null
 }
 
-function scanRunningRecompProcess() {
+export function readYamaPtraceScope() {
+  try {
+    const raw = fs.readFileSync('/proc/sys/kernel/yama/ptrace_scope', 'utf8').trim()
+    if (!/^\d+$/.test(raw)) return null
+    return Number.parseInt(raw, 10)
+  } catch {
+    return null
+  }
+}
+
+export function scanRunningRecompProcess() {
   if (process.platform !== 'linux' || !fs.existsSync('/proc')) {
     return null
   }
@@ -275,27 +359,33 @@ function scanRunningRecompProcess() {
     if (pid === process.pid) continue
 
     let matchedName = null
+    let cmdArgv0 = ''
     try {
-      const comm = fs.readFileSync(`/proc/${pid}/comm`, 'utf8').trim().toLowerCase()
-      if (RECOMP_PROCESS_NAMES.has(comm)) {
-        matchedName = comm
-      }
+      const comm = fs.readFileSync(`/proc/${pid}/comm`, 'utf8')
+      matchedName = normalizeRecompProcessName(comm, true)
     } catch {
       // Ignore exited/inaccessible process
     }
 
-    if (!matchedName) {
-      try {
-        const rawCmd = fs.readFileSync(`/proc/${pid}/cmdline`)
-        const nul = rawCmd.indexOf(0)
-        const argv0 = (nul >= 0 ? rawCmd.subarray(0, nul) : rawCmd).toString('utf8')
-        const base = path.basename(argv0).toLowerCase()
-        if (RECOMP_PROCESS_NAMES.has(base)) {
-          matchedName = base
-        }
-      } catch {
-        // Ignore
+    try {
+      const rawCmd = fs.readFileSync(`/proc/${pid}/cmdline`)
+      const nul = rawCmd.indexOf(0)
+      cmdArgv0 = (nul >= 0 ? rawCmd.subarray(0, nul) : rawCmd).toString('utf8')
+      if (!matchedName) {
+        matchedName = normalizeRecompProcessName(cmdArgv0, false)
       }
+    } catch {
+      // Ignore
+    }
+
+    let exePath = ''
+    try {
+      exePath = fs.readlinkSync(`/proc/${pid}/exe`)
+      if (!matchedName) {
+        matchedName = normalizeRecompProcessName(exePath, false)
+      }
+    } catch {
+      // Ignore
     }
 
     if (!matchedName) continue
@@ -318,12 +408,10 @@ function scanRunningRecompProcess() {
       continue
     }
 
-    let saveDir = null
-    try {
-      const exePath = fs.readlinkSync(`/proc/${pid}/exe`)
-      saveDir = resolveUserSaveDirFromExe(exePath)
-    } catch {
-      // Ignore
+    let saveDir = resolveUserSaveDirFromExe(exePath)
+    if (!saveDir && /^[zZ]:[\\/]/.test(cmdArgv0)) {
+      const unixCmdExe = cmdArgv0.slice(2).replace(/\\/g, '/')
+      saveDir = resolveUserSaveDirFromExe(unixCmdExe)
     }
 
     return { pid, name: matchedName, saveDir }
@@ -334,7 +422,7 @@ function scanRunningRecompProcess() {
 
 // Returns the profile folder of a running NX2Saria (saves in <profile>/save/<uid>/slot_*): NX2SARIA_PROFILE_DIR
 // from its environment, resolved against the executable's folder, else the profile folder beside the executable.
-function detectNx2SariaProfileDir() {
+export function detectNx2SariaProfileDir() {
   if (process.platform !== 'linux' || !fs.existsSync('/proc')) {
     return null
   }
@@ -365,7 +453,78 @@ function detectNx2SariaProfileDir() {
   return null
 }
 
-function detectRecompSaveDir(runningTarget) {
+export function detectLinuxRuntime() {
+  if (process.platform !== 'linux' || !fs.existsSync('/proc')) {
+    return null
+  }
+  const recomp = scanRunningRecompProcess()
+  if (recomp) {
+    return {
+      kind: 'recomp',
+      name: recomp.name,
+      displayName: RUNTIME_DISPLAY_NAMES[recomp.name] || recomp.name,
+      pid: recomp.pid,
+      saveDir: recomp.saveDir || detectRecompSaveDir(recomp),
+      needsBridge: true,
+    }
+  }
+
+  let entries
+  try {
+    entries = fs.readdirSync('/proc', { withFileTypes: true })
+  } catch {
+    return null
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory() || !/^\d+$/.test(entry.name)) continue
+    const pid = Number.parseInt(entry.name, 10)
+    if (pid === process.pid) continue
+
+    let matchedName = null
+    try {
+      const comm = fs.readFileSync(`/proc/${pid}/comm`, 'utf8')
+      matchedName = normalizeProcessName(comm, EMULATOR_PROCESS_NAMES, true)
+    } catch {
+      // Ignore
+    }
+
+    if (!matchedName) {
+      try {
+        const rawCmd = fs.readFileSync(`/proc/${pid}/cmdline`)
+        const nul = rawCmd.indexOf(0)
+        const cmdArgv0 = (nul >= 0 ? rawCmd.subarray(0, nul) : rawCmd).toString('utf8')
+        matchedName = normalizeProcessName(cmdArgv0, EMULATOR_PROCESS_NAMES, false)
+      } catch {
+        // Ignore
+      }
+    }
+
+    if (!matchedName) {
+      try {
+        const exePath = fs.readlinkSync(`/proc/${pid}/exe`)
+        matchedName = normalizeProcessName(exePath, EMULATOR_PROCESS_NAMES, false)
+      } catch {
+        // Ignore
+      }
+    }
+
+    if (matchedName) {
+      return {
+        kind: 'emulator',
+        name: matchedName,
+        displayName: RUNTIME_DISPLAY_NAMES[matchedName] || matchedName,
+        pid,
+        saveDir: null,
+        needsBridge: false,
+      }
+    }
+  }
+
+  return null
+}
+
+export function detectRecompSaveDir(runningTarget) {
   if (runningTarget?.saveDir && fs.existsSync(runningTarget.saveDir)) {
     return runningTarget.saveDir
   }
@@ -374,6 +533,7 @@ function detectRecompSaveDir(runningTarget) {
   const candidates = [
     path.join(home, 'Games', 'Longshot', 'user'),
     path.join(home, 'Games', 'Hookshot', 'user'),
+    path.join(home, 'Games', 'HeyListen', 'user'),
     path.join(home, 'Games', 'ProjectReLink', 'user'),
     path.join(home, 'Games', 'ProjectReLink', 'game', 'user'),
     path.join(home, 'Games', 'ReLink', 'user'),
@@ -388,7 +548,7 @@ function detectRecompSaveDir(runningTarget) {
   return null
 }
 
-function resolveRuntimePaths() {
+export function resolveRuntimePaths() {
   const bundleRoot = path.resolve(__dirname, '..')
   const packagedServer = path.join(__dirname, 'standalone-server.mjs')
   const packagedDist = path.join(__dirname, 'dist')
@@ -402,7 +562,7 @@ function resolveRuntimePaths() {
   return { bundleRoot, serverEntry, distDir, bridgeBin }
 }
 
-function openBrowserLinux(url) {
+export function openBrowserLinux(url) {
   try {
     const child = spawn('xdg-open', [url], {
       detached: true,
@@ -415,7 +575,7 @@ function openBrowserLinux(url) {
   }
 }
 
-function terminateChild(child, timeoutMs = 2000) {
+export function terminateChild(child, timeoutMs = 2000) {
   return new Promise((resolve) => {
     if (!child || child.exitCode !== null || child.signalCode !== null) {
       resolve()
@@ -449,6 +609,80 @@ function terminateChild(child, timeoutMs = 2000) {
   })
 }
 
+export async function startBridgeIfNeeded({
+  lichiiHost,
+  lichiiPort,
+  bridgeBin,
+  currentChild = null,
+  onLog = null,
+  onExit = null,
+  warnedState = { warned: false },
+}) {
+  if (!isLoopbackHost(lichiiHost) || !bridgeBin || !fs.existsSync(bridgeBin)) {
+    return currentChild
+  }
+  if (currentChild && currentChild.exitCode === null && currentChild.signalCode === null) {
+    return currentChild
+  }
+
+  const portBusy = await probeTcpPort('127.0.0.1', lichiiPort, 150)
+  if (portBusy) return null
+
+  const target = scanRunningRecompProcess()
+  if (!target) return null
+
+  const emit = (level, msg) => {
+    if (onLog) onLog(level, msg)
+    else if (level === 'warn') console.warn(msg)
+    else if (level === 'error') console.error(msg)
+    else console.log(msg)
+  }
+
+  if (!warnedState.warned) {
+    const ptraceScope = readYamaPtraceScope()
+    if (ptraceScope !== null && ptraceScope !== 0) {
+      warnedState.warned = true
+      emit(
+        'warn',
+        `[bridge] Warning: /proc/sys/kernel/yama/ptrace_scope is ${ptraceScope} while ${target.name} (PID ${target.pid}) is running.`,
+      )
+      emit('warn', '[bridge] Read-only live memory telemetry may fail with EPERM. To allow it:')
+      emit('warn', '[bridge]   sudo sysctl kernel.yama.ptrace_scope=0')
+      emit('warn', `[bridge] Or grant cap_sys_ptrace: sudo setcap cap_sys_ptrace=eip "${bridgeBin}"`)
+    }
+  }
+
+  const child = spawn(bridgeBin, ['--port', String(lichiiPort), '--once'], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  emit(
+    'info',
+    `[bridge] Starting read-only Longshot RPC bridge on 127.0.0.1:${lichiiPort} (PID ${target.pid}, ${target.name}).`,
+  )
+
+  const forwardBridgeStream = (stream, isErr) => {
+    if (!stream) return
+    const rl = readline.createInterface({ input: stream })
+    rl.on('line', (line) => {
+      if (line.trim()) {
+        emit(isErr ? 'error' : 'info', `[bridge] ${line}`)
+      }
+    })
+  }
+  forwardBridgeStream(child.stdout, false)
+  forwardBridgeStream(child.stderr, true)
+
+  child.once('exit', (code, signal) => {
+    if (onExit) onExit(child, code, signal)
+  })
+  child.once('error', (err) => {
+    emit('error', `[bridge] Failed to start: ${err.message}`)
+    if (onExit) onExit(child, 1, null)
+  })
+
+  return child
+}
+
 async function main() {
   let opts
   try {
@@ -467,6 +701,20 @@ async function main() {
   if (opts.setupSync) {
     runSetupSync(opts.lichiiHost, opts.lichiiPort)
     process.exit(0)
+  }
+
+  const hasDisplay = Boolean(process.env.DISPLAY?.trim() || process.env.WAYLAND_DISPLAY?.trim())
+  const shouldLaunchGui =
+    opts.gui ||
+    (hasDisplay && !opts.noBrowser && !opts.cli && !opts.noGui && !opts.setupSync && !opts.help)
+
+  if (shouldLaunchGui) {
+    const guiPath = path.join(__dirname, 'ocarina-atlas-gui.mjs')
+    if (fs.existsSync(guiPath)) {
+      const { startGuiLauncher } = await import('./ocarina-atlas-gui.mjs')
+      await startGuiLauncher(opts)
+      return
+    }
   }
 
   const paths = resolveRuntimePaths()
@@ -489,58 +737,26 @@ async function main() {
   let bridgeChild = null
   let shuttingDown = false
   let bridgePollInFlight = false
+  const warnedState = { warned: false }
 
   async function manageLongshotBridge() {
     if (shuttingDown || bridgePollInFlight) return
-    if (!isLoopbackHost(opts.lichiiHost) || !fs.existsSync(paths.bridgeBin)) return
     bridgePollInFlight = true
     try {
-      if (bridgeChild && bridgeChild.exitCode === null && bridgeChild.signalCode === null) {
-        return
-      }
-      bridgeChild = null
-
-      const portBusy = await probeTcpPort('127.0.0.1', opts.lichiiPort, 150)
-      if (portBusy) return
-
-      const target = scanRunningRecompProcess()
-      if (!target) return
-
-      const child = spawn(paths.bridgeBin, ['--port', String(opts.lichiiPort), '--once'], {
-        stdio: ['ignore', 'pipe', 'pipe'],
-      })
-      bridgeChild = child
-      console.log(
-        `[bridge] Starting read-only Longshot RPC bridge on 127.0.0.1:${opts.lichiiPort} (PID ${target.pid}, ${target.name}).`,
-      )
-
-      const forwardBridgeStream = (stream, isErr) => {
-        if (!stream) return
-        const rl = readline.createInterface({ input: stream })
-        rl.on('line', (line) => {
-          if (line.trim()) {
-            const out = `[bridge] ${line}`
-            if (isErr) console.error(out)
-            else console.log(out)
+      bridgeChild = await startBridgeIfNeeded({
+        lichiiHost: opts.lichiiHost,
+        lichiiPort: opts.lichiiPort,
+        bridgeBin: paths.bridgeBin,
+        currentChild: bridgeChild,
+        warnedState,
+        onExit: (child, code, signal) => {
+          if (bridgeChild === child) {
+            bridgeChild = null
           }
-        })
-      }
-      forwardBridgeStream(child.stdout, false)
-      forwardBridgeStream(child.stderr, true)
-
-      child.once('exit', (code, signal) => {
-        if (bridgeChild === child) {
-          bridgeChild = null
-        }
-        if (!shuttingDown && code !== 0 && code !== null) {
-          console.log(`[bridge] Exited with code ${code}${signal ? ` (${signal})` : ''}.`)
-        }
-      })
-      child.once('error', (err) => {
-        if (bridgeChild === child) {
-          bridgeChild = null
-        }
-        console.error(`[bridge] Failed to start: ${err.message}`)
+          if (!shuttingDown && code !== 0 && code !== null) {
+            console.log(`[bridge] Exited with code ${code}${signal ? ` (${signal})` : ''}.`)
+          }
+        },
       })
     } finally {
       bridgePollInFlight = false
@@ -671,4 +887,15 @@ async function main() {
   })
 }
 
-void main()
+function isDirectEntry() {
+  if (!process.argv[1]) return false
+  try {
+    return fs.realpathSync(process.argv[1]) === fs.realpathSync(__filename)
+  } catch {
+    return path.resolve(process.argv[1]) === __filename
+  }
+}
+
+if (isDirectEntry()) {
+  void main()
+}

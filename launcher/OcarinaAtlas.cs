@@ -24,8 +24,8 @@ using System.Windows.Forms;
 [assembly: AssemblyCompany("antonioalvromero")]
 [assembly: AssemblyProduct("Ocarina Atlas")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 antonioalvromero")]
-[assembly: AssemblyVersion("2.2.2.0")]
-[assembly: AssemblyFileVersion("2.2.2.0")]
+[assembly: AssemblyVersion("2.3.0.0")]
+[assembly: AssemblyFileVersion("2.3.0.0")]
 
 namespace OcarinaAtlasLauncher
 {
@@ -1066,7 +1066,7 @@ namespace OcarinaAtlasLauncher
 
         public static string DetectRunningEmulator()
         {
-            string[] names = new[] { "fritchii", "lichii", "eden", "cheezyemu", "hookshot", "Longshot", "relink-game", "relink", "Triforce" };
+            string[] names = new[] { "fritchii", "lichii", "eden", "cheezyemu", "hookshot", "Longshot", "relink-game", "relink", "Triforce", "HeyListen" };
             string detected = null;
 
             for (int i = 0; i < names.Length; i++)
@@ -1123,6 +1123,11 @@ namespace OcarinaAtlasLauncher
             if (string.Equals(fallbackName, "Triforce", StringComparison.OrdinalIgnoreCase))
             {
                 return "Triforce";
+            }
+
+            if (string.Equals(fallbackName, "HeyListen", StringComparison.OrdinalIgnoreCase))
+            {
+                return "HeyListen";
             }
 
             try
@@ -1205,7 +1210,7 @@ namespace OcarinaAtlasLauncher
         private const uint PageExecuteWriteCopy = 0x80;
         private const uint PageGuard = 0x100;
 
-        private static readonly string[] ProcessNames = new[] { "hookshot", "Longshot", "relink-game", "relink", "Triforce" };
+        private static readonly string[] ProcessNames = new[] { "hookshot", "Longshot", "relink-game", "relink", "Triforce", "HeyListen" };
         private static readonly char[] HexDigits = "0123456789abcdef".ToCharArray();
 
         [StructLayout(LayoutKind.Sequential)]
@@ -1356,7 +1361,9 @@ namespace OcarinaAtlasLauncher
                             ? "relink"
                             : string.Equals(ProcessNames[n], "Triforce", StringComparison.OrdinalIgnoreCase)
                                 ? "triforce"
-                                : "longshot";
+                                : string.Equals(ProcessNames[n], "HeyListen", StringComparison.OrdinalIgnoreCase)
+                                    ? "heylisten"
+                                    : "longshot";
                         keepProc = true;
                         for (int k = i + 1; k < procs.Length; k++)
                         {
@@ -4826,7 +4833,7 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "2.2.2";
+        public const string AppVersion = "2.3.0";
 
         private const int CollapsedClientHeight = 392;
         private const int ExpandedClientHeight = 640;
@@ -7170,6 +7177,7 @@ namespace OcarinaAtlasLauncher
             if (string.Equals(emulatorKind, "relink", StringComparison.OrdinalIgnoreCase)) return "Project ReLink";
             if (string.Equals(emulatorKind, "triforce", StringComparison.OrdinalIgnoreCase)) return "Triforce";
             if (string.Equals(emulatorKind, "nx2saria", StringComparison.OrdinalIgnoreCase)) return "NX2Saria";
+            if (string.Equals(emulatorKind, "heylisten", StringComparison.OrdinalIgnoreCase)) return "HeyListen";
             if (string.Equals(emulatorKind, "fritchii", StringComparison.OrdinalIgnoreCase)) return "Fritchii";
             if (string.Equals(emulatorKind, "cheezyemu", StringComparison.OrdinalIgnoreCase)) return "CheezyEmu";
             if (string.Equals(emulatorKind, "lichii", StringComparison.OrdinalIgnoreCase)) return "Lichii";
@@ -7319,7 +7327,8 @@ namespace OcarinaAtlasLauncher
             {
                 bool isRecomp = string.Equals(snap.RunningEmulator, "Longshot", StringComparison.OrdinalIgnoreCase) ||
                                 string.Equals(snap.RunningEmulator, "Project ReLink", StringComparison.OrdinalIgnoreCase) ||
-                                string.Equals(snap.RunningEmulator, "Triforce", StringComparison.OrdinalIgnoreCase);
+                                string.Equals(snap.RunningEmulator, "Triforce", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(snap.RunningEmulator, "HeyListen", StringComparison.OrdinalIgnoreCase);
                 _heroLichiiDot.DotColor = Theme.Ember;
                 _heroLichiiLabel.Text = isRecomp ? "Waiting" : "RPC Closed";
                 _heroLichiiLabel.ForeColor = Theme.Ember;

@@ -103,6 +103,7 @@ export function MapViewport({
   latestViewRef.current = view
 
   const pointers = useRef(new Map<number, Point>())
+  const containerOrigin = useRef<Point | null>(null)
   const pressStart = useRef<Point>({ x: 0, y: 0 })
   const dragged = useRef(false)
   const pauseUntil = useRef(0)
@@ -215,14 +216,26 @@ export function MapViewport({
     return () => container.removeEventListener('wheel', onWheel)
   }, [size, aspect])
 
+  function refreshContainerOrigin() {
+    const container = containerRef.current
+    if (!container) return null
+    const rect = container.getBoundingClientRect()
+    const origin = { x: rect.left, y: rect.top }
+    containerOrigin.current = origin
+    return origin
+  }
+
   function localPoint(event: { clientX: number; clientY: number }): Point {
-    const rect = containerRef.current!.getBoundingClientRect()
-    return { x: event.clientX - rect.left, y: event.clientY - rect.top }
+    const origin = containerOrigin.current ?? refreshContainerOrigin() ?? { x: 0, y: 0 }
+    return { x: event.clientX - origin.x, y: event.clientY - origin.y }
   }
 
   function onPointerDown(event: PointerEvent) {
     if (event.pointerType === 'mouse' && event.button !== 0) return
     setSmoothPan(false)
+    if (pointers.current.size === 0) {
+      refreshContainerOrigin()
+    }
     const point = localPoint(event)
     if (pointers.current.size === 0) {
       dragged.current = false
@@ -271,8 +284,11 @@ export function MapViewport({
 
   function onPointerEnd(event: PointerEvent) {
     pointers.current.delete(event.pointerId)
-    if (pointers.current.size === 0 && dragged.current) {
-      pauseUntil.current = Date.now() + DRAG_PAUSE_MS
+    if (pointers.current.size === 0) {
+      containerOrigin.current = null
+      if (dragged.current) {
+        pauseUntil.current = Date.now() + DRAG_PAUSE_MS
+      }
     }
   }
 
@@ -327,8 +343,16 @@ export function MapViewport({
   }
 
   // Before measuring, including on the server, CSS alone fits the stage.
+  // Use GPU-composited translate3d instead of left/top to avoid layout thrashing during pan and Camera Follow.
   const stageStyle: CSSProperties = box
-    ? { left: box.left, top: box.top, width: box.width, height: box.height }
+    ? {
+        left: 0,
+        top: 0,
+        width: box.width,
+        height: box.height,
+        transform: `translate3d(${box.left}px, ${box.top}px, 0)`,
+        contain: 'layout style',
+      }
     : {
         left: '50%',
         top: '50%',
@@ -363,10 +387,10 @@ export function MapViewport({
       >
         <div
           ref={stageRef}
-          className={`absolute ${smoothPan ? 'transition-[left,top] duration-150 ease-linear will-change-[left,top]' : ''}`}
+          className={`absolute ${smoothPan ? 'transition-transform duration-150 ease-linear will-change-transform' : ''}`}
           style={stageStyle}
         >
-          {image && <img src={image} alt="" draggable={false} className="absolute inset-0 size-full max-w-none" />}
+          {image && <img src={image} alt="" draggable={false} decoding="async" className="absolute inset-0 size-full max-w-none" />}
           {children}
         </div>
       </div>

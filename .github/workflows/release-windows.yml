@@ -115,7 +115,7 @@ jobs:
           if-no-files-found: error
 
   package-linux:
-    name: Build & Verify Linux x64 Portable Tarball
+    name: Build & Verify Linux x64 AppImage
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -159,31 +159,35 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      - name: Build portable Linux release
+      - name: Build Linux x64 AppImage release
         run: npm run build:linux
 
-      - name: Verify release artifacts and smoke-test OcarinaAtlas (Linux)
+      - name: Verify release artifacts and smoke-test OcarinaAtlas AppImage (Linux)
         run: |
           chmod +x scripts/smoke-test-linux.sh
-          ./scripts/smoke-test-linux.sh
+          if command -v xvfb-run >/dev/null 2>&1; then
+            xvfb-run -a ./scripts/smoke-test-linux.sh
+          else
+            ./scripts/smoke-test-linux.sh
+          fi
 
       - name: Generate Linux SHA-256 checksum file
         run: |
-          (cd release && sha256sum OcarinaAtlas-Linux-x64.tar.gz > OcarinaAtlas-Linux-x64.tar.gz.sha256)
-          cat release/OcarinaAtlas-Linux-x64.tar.gz.sha256
+          (cd release && sha256sum OcarinaAtlas-Linux-x64.AppImage > OcarinaAtlas-Linux-x64.AppImage.sha256)
+          cat release/OcarinaAtlas-Linux-x64.AppImage.sha256
 
       - name: Attest Linux build provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: release/OcarinaAtlas-Linux-x64.tar.gz
+          subject-path: release/OcarinaAtlas-Linux-x64.AppImage
 
       - name: Upload Linux build artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: OcarinaAtlas-Linux-x64
           path: |
-            release/OcarinaAtlas-Linux-x64.tar.gz
-            release/OcarinaAtlas-Linux-x64.tar.gz.sha256
+            release/OcarinaAtlas-Linux-x64.AppImage
+            release/OcarinaAtlas-Linux-x64.AppImage.sha256
           retention-days: 7
           compression-level: 0
           if-no-files-found: error
@@ -324,7 +328,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           COPILOT_NOTES_FILE: ${{ runner.temp }}/copilot-notes.md
           ZIP_PATH: release-artifacts/OcarinaAtlas-Windows-x64.zip
-          LINUX_TAR_PATH: release-artifacts/OcarinaAtlas-Linux-x64.tar.gz
+          LINUX_TAR_PATH: release-artifacts/OcarinaAtlas-Linux-x64.AppImage
           OUT_PATH: release-artifacts/RELEASE_NOTES.md
         run: |
           node scripts/generate-release-notes.mjs
@@ -349,8 +353,8 @@ jobs:
           files: |
             release-artifacts/OcarinaAtlas-Windows-x64.zip
             release-artifacts/OcarinaAtlas-Windows-x64.zip.sha256
-            release-artifacts/OcarinaAtlas-Linux-x64.tar.gz
-            release-artifacts/OcarinaAtlas-Linux-x64.tar.gz.sha256
+            release-artifacts/OcarinaAtlas-Linux-x64.AppImage
+            release-artifacts/OcarinaAtlas-Linux-x64.AppImage.sha256
           body_path: release-artifacts/RELEASE_NOTES.md
           generate_release_notes: false
 

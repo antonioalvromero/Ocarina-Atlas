@@ -8,31 +8,35 @@ const __dirname = path.dirname(__filename)
 const ROOT_DIR = path.resolve(__dirname, '..')
 
 const RELEASE_DIR = path.join(ROOT_DIR, 'release')
-const BUNDLE_FOLDER_NAME = 'OcarinaAtlas-Linux-x64'
-const BUNDLE_DIR = path.join(RELEASE_DIR, BUNDLE_FOLDER_NAME)
-const TAR_NAME = 'OcarinaAtlas-Linux-x64.tar.gz'
-const TAR_PATH = path.join(RELEASE_DIR, TAR_NAME)
+const STAGE_DIR = path.join(ROOT_DIR, 'dist-linux-app')
+const APPIMAGE_NAME = 'OcarinaAtlas-Linux-x64.AppImage'
+const APPIMAGE_PATH = path.join(RELEASE_DIR, APPIMAGE_NAME)
 
 const DIST_DIR = path.join(ROOT_DIR, 'dist')
 const STANDALONE_ENTRY = path.join(ROOT_DIR, 'scripts', 'server-entry.ts')
 const STANDALONE_OUT = path.join(DIST_DIR, 'standalone-server.mjs')
-const LINUX_WRAPPER_SRC = path.join(ROOT_DIR, 'launcher', 'linux', 'OcarinaAtlas')
-const LINUX_CLI_SRC = path.join(ROOT_DIR, 'launcher', 'linux', 'ocarina-atlas-cli.mjs')
+
+const APPIMAGE_SRC_DIR = path.join(ROOT_DIR, 'launcher', 'linux-appimage')
 const BRIDGE_C_SRC = path.join(ROOT_DIR, 'launcher', 'linux', 'longshot_rpc_bridge.c')
+const LINUX_ICON_CANDIDATES = [
+  path.join(ROOT_DIR, 'public', 'icons', 'icon-512.png'),
+  path.join(ROOT_DIR, 'public', 'apple-touch-icon.png'),
+  path.join(ROOT_DIR, 'public', 'icons', 'apple-touch-icon.png'),
+]
 
 function parseBuildArgs(argv) {
   const opts = {
     skipBuild: false,
     skipNative: false,
-    skipTar: false,
+    skipAppImage: false,
   }
   for (const arg of argv) {
     if (arg === '--skip-build') opts.skipBuild = true
     else if (arg === '--skip-native') opts.skipNative = true
-    else if (arg === '--skip-tar') opts.skipTar = true
+    else if (arg === '--skip-appimage') opts.skipAppImage = true
     else if (arg === '--help' || arg === '-h') {
       console.log(
-        'Usage: node scripts/build-linux.mjs [--skip-build] [--skip-native] [--skip-tar]',
+        'Usage: node scripts/build-linux.mjs [--skip-build] [--skip-native] [--skip-appimage]',
       )
       process.exit(0)
     } else {
@@ -74,46 +78,49 @@ function findCommand(cmd) {
   return null
 }
 
-function buildReadmeLinux() {
-  return [
-    'Ocarina Atlas — Linux x64 (Pre-release / Experimental)',
-    '====================================================',
-    '',
-    'Official Repository: https://github.com/antonioalvromero/Ocarina-Atlas',
-    'License: GNU AGPL-3.0 (see LICENSE)',
-    '',
-    'Quick Start',
-    '-----------',
-    '  ./OcarinaAtlas',
-    '',
-    'Common Options',
-    '--------------',
-    '  --port <n>          HTTP port (default: 3000)',
-    '  --local-only        Bind 127.0.0.1 instead of LAN (0.0.0.0)',
-    '  --lichii-host <h>   Debug RPC host (default: 127.0.0.1)',
-    '  --lichii-port <p>   Debug RPC port (default: 6545)',
-    '  --no-browser        Do not auto-open browser via xdg-open',
-    '  --setup-sync        Configure EDEN_NX2_DEBUG_SERVER in existing',
-    '                      Lichii/Fritchii/CheezyEmu nx2_switches.txt profiles',
-    '  --help              Show all CLI options',
-    '',
-    'Longshot / Project ReLink / Triforce Telemetry Permissions',
-    '----------------------------------------------------------',
-    'Ocarina Atlas reads game memory strictly read-only via runtime/longshot-rpc-bridge.',
-    'On Linux distributions with Yama ptrace hardening (kernel.yama.ptrace_scope=1),',
-    'reading memory of an externally launched game may return EPERM. If prompted:',
-    '  - Temporary: sudo sysctl -w kernel.yama.ptrace_scope=0',
-    '  - Or cap   : sudo setcap cap_sys_ptrace=eip ./runtime/longshot-rpc-bridge',
-    '',
-  ].join('\n')
+function normalizeSemver(rawVersion) {
+  const cleaned = String(rawVersion || '').trim().replace(/^v/i, '')
+  const match = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/.exec(cleaned)
+  if (!match) {
+    return '0.0.0'
+  }
+  const base = `${match[1]}.${match[2]}.${match[3]}`
+  if (!match[4]) return base
+  const prerelease = match[4]
+    .split('.')
+    .map((part) => part.replace(/[^0-9A-Za-z-]/g, ''))
+    .filter(Boolean)
+    .join('.')
+  return prerelease ? `${base}-${prerelease}` : base
+}
+
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'))
+}
+
+function copyTextLf(srcPath, destPath) {
+  const content = fs.readFileSync(srcPath, 'utf8').replace(/\r\n/g, '\n')
+  fs.writeFileSync(destPath, content, 'utf8')
 }
 
 function main() {
   const opts = parseBuildArgs(process.argv.slice(2))
 
-  assertExists(LINUX_WRAPPER_SRC, 'Linux wrapper script')
-  assertExists(LINUX_CLI_SRC, 'Linux CLI launcher')
+  const mainSrc = path.join(APPIMAGE_SRC_DIR, 'main.cjs')
+  const preloadSrc = path.join(APPIMAGE_SRC_DIR, 'preload.cjs')
+  const htmlSrc = path.join(APPIMAGE_SRC_DIR, 'index.html')
+
+  assertExists(mainSrc, 'Electron main process entry')
+  assertExists(preloadSrc, 'Electron preload script')
+  assertExists(htmlSrc, 'Electron launcher HTML')
   assertExists(BRIDGE_C_SRC, 'Linux Longshot RPC bridge C source')
+
+  const rootPkg = readJson(path.join(ROOT_DIR, 'package.json'))
+  const electronPkgPath = path.join(ROOT_DIR, 'node_modules', 'electron', 'package.json')
+  assertExists(electronPkgPath, 'installed electron package.json')
+  const electronPkg = readJson(electronPkgPath)
+
+  const normalizedVersion = normalizeSemver(rootPkg.version)
 
   if (!opts.skipBuild) {
     const viteCli = path.join(ROOT_DIR, 'node_modules', 'vite', 'bin', 'vite.js')
@@ -143,55 +150,45 @@ function main() {
   assertExists(path.join(distServer, 'server.js'), 'dist/server/server.js')
   assertExists(path.join(distServer, 'package.json'), 'dist/server/package.json')
 
-  console.log(`\n==> Staging portable Linux release directory: ${BUNDLE_DIR}`)
-  fs.rmSync(BUNDLE_DIR, { recursive: true, force: true })
-  fs.rmSync(TAR_PATH, { force: true })
+  console.log(`\n==> Staging Linux AppImage directory: ${STAGE_DIR}`)
+  fs.rmSync(STAGE_DIR, { recursive: true, force: true })
+  fs.mkdirSync(RELEASE_DIR, { recursive: true })
+  fs.rmSync(APPIMAGE_PATH, { force: true })
 
-  const runtimeDir = path.join(BUNDLE_DIR, 'runtime')
-  const appDir = path.join(BUNDLE_DIR, 'app')
+  const appDir = path.join(STAGE_DIR, 'app')
   const appDistDir = path.join(appDir, 'dist')
+  const binDir = path.join(STAGE_DIR, 'bin')
+  const buildDir = path.join(STAGE_DIR, 'build')
 
-  fs.mkdirSync(runtimeDir, { recursive: true })
   fs.mkdirSync(appDistDir, { recursive: true })
+  fs.mkdirSync(binDir, { recursive: true })
+  fs.mkdirSync(buildDir, { recursive: true })
 
+  // Electron app shell files (CRLF -> LF)
+  copyTextLf(mainSrc, path.join(STAGE_DIR, 'main.cjs'))
+  copyTextLf(preloadSrc, path.join(STAGE_DIR, 'preload.cjs'))
+  copyTextLf(htmlSrc, path.join(STAGE_DIR, 'index.html'))
+
+  // Bundled standalone server & Vite client/SSR artifacts
   fs.copyFileSync(STANDALONE_OUT, path.join(appDir, 'standalone-server.mjs'))
   fs.cpSync(distClient, path.join(appDistDir, 'client'), { recursive: true })
   fs.cpSync(distServer, path.join(appDistDir, 'server'), { recursive: true })
-  fs.copyFileSync(LINUX_CLI_SRC, path.join(appDir, 'ocarina-atlas-cli.mjs'))
 
-  const wrapperDest = path.join(BUNDLE_DIR, 'OcarinaAtlas')
-  fs.copyFileSync(LINUX_WRAPPER_SRC, wrapperDest)
-  fs.chmodSync(wrapperDest, 0o755)
-
-  for (const docName of ['LICENSE', 'README.md']) {
-    const srcDoc = path.join(ROOT_DIR, docName)
-    if (fs.existsSync(srcDoc)) {
-      fs.copyFileSync(srcDoc, path.join(BUNDLE_DIR, docName))
-    }
+  // Icon
+  const iconSrc = LINUX_ICON_CANDIDATES.find((candidate) => fs.existsSync(candidate))
+  if (!iconSrc) {
+    throw new Error('No Linux application icon found in public/icons/icon-512.png or public/apple-touch-icon.png')
   }
-  fs.writeFileSync(path.join(BUNDLE_DIR, 'README-Linux.txt'), buildReadmeLinux(), 'utf8')
+  fs.copyFileSync(iconSrc, path.join(buildDir, 'icon.png'))
 
-  // Bundle Linux Node.js runtime
-  const explicitLinuxNode = process.env.LINUX_NODE_BIN?.trim()
-  const bundledNodePath = path.join(runtimeDir, 'node')
-  if (explicitLinuxNode) {
-    assertExists(explicitLinuxNode, 'LINUX_NODE_BIN')
-    fs.copyFileSync(explicitLinuxNode, bundledNodePath)
-    fs.chmodSync(bundledNodePath, 0o755)
-    console.log(`Copied Linux Node.js runtime from LINUX_NODE_BIN: ${bundledNodePath}`)
-  } else if (process.platform === 'linux' && process.arch === 'x64') {
-    assertExists(process.execPath, 'Linux Node.js runtime binary')
-    fs.copyFileSync(process.execPath, bundledNodePath)
-    fs.chmodSync(bundledNodePath, 0o755)
-    console.log(`Copied Node.js runtime (${process.version}): ${bundledNodePath}`)
-  } else {
-    console.warn(
-      `WARN: Skipping runtime/node bundle on ${process.platform}-${process.arch} (set LINUX_NODE_BIN to a Linux x64 node binary to bundle cross-platform).`,
-    )
+  // License
+  const licenseSrc = path.join(ROOT_DIR, 'LICENSE')
+  if (fs.existsSync(licenseSrc)) {
+    fs.copyFileSync(licenseSrc, path.join(STAGE_DIR, 'LICENSE'))
   }
 
   // Compile longshot-rpc-bridge C utility
-  const bridgeOutPath = path.join(runtimeDir, 'longshot-rpc-bridge')
+  const bridgeOutPath = path.join(binDir, 'longshot-rpc-bridge')
   if (opts.skipNative) {
     console.log('Skipping native longshot-rpc-bridge compilation (--skip-native).')
   } else if (process.platform === 'linux') {
@@ -212,7 +209,7 @@ function main() {
       bridgeOutPath,
       BRIDGE_C_SRC,
     ])
-    assertExists(bridgeOutPath, 'compiled runtime/longshot-rpc-bridge')
+    assertExists(bridgeOutPath, 'compiled bin/longshot-rpc-bridge')
     fs.chmodSync(bridgeOutPath, 0o755)
   } else {
     console.warn(
@@ -220,28 +217,66 @@ function main() {
     )
   }
 
-  if (!opts.skipTar) {
-    runStep(`Creating portable tarball (${TAR_NAME})`, 'tar', [
-      '-czf',
-      TAR_PATH,
-      '-C',
-      RELEASE_DIR,
-      BUNDLE_FOLDER_NAME,
-    ])
-    assertExists(TAR_PATH, 'portable tar.gz archive')
+  // Stage minimal package.json with electron-builder config
+  const stagedPkg = {
+    name: 'ocarina-atlas',
+    version: normalizedVersion,
+    description: 'Interactive Ocarina of Time Remake map & live telemetry launcher',
+    main: 'main.cjs',
+    license: 'AGPL-3.0',
+    author: 'antonioalvromero',
+    build: {
+      appId: 'io.github.antonioalvromero.ocarinaatlas',
+      productName: 'Ocarina Atlas',
+      electronVersion: electronPkg.version,
+      directories: {
+        buildResources: 'build',
+        output: '../release',
+      },
+      files: ['main.cjs', 'preload.cjs', 'index.html', 'package.json'],
+      extraResources: [
+        { from: 'app', to: 'app' },
+        { from: 'bin', to: 'bin' },
+        { from: 'build/icon.png', to: 'build/icon.png' },
+      ],
+      linux: {
+        target: ['AppImage'],
+        category: 'Game',
+        icon: 'build/icon.png',
+        executableName: 'ocarina-atlas',
+        maintainer: 'antonioalvromero',
+        artifactName: APPIMAGE_NAME,
+      },
+      appImage: {
+        artifactName: APPIMAGE_NAME,
+      },
+    },
+  }
+  fs.writeFileSync(
+    path.join(STAGE_DIR, 'package.json'),
+    `${JSON.stringify(stagedPkg, null, 2)}\n`,
+    'utf8',
+  )
+
+  if (!opts.skipAppImage) {
+    const electronBuilderCli = path.join(ROOT_DIR, 'node_modules', 'electron-builder', 'cli.js')
+    assertExists(electronBuilderCli, 'electron-builder CLI')
+    runStep(
+      `Packaging Linux x64 AppImage (${APPIMAGE_NAME})`,
+      process.execPath,
+      [electronBuilderCli, '--linux', 'AppImage', '--x64', '--projectDir', STAGE_DIR],
+    )
+    assertExists(APPIMAGE_PATH, 'Linux x64 AppImage')
+    fs.chmodSync(APPIMAGE_PATH, 0o755)
   }
 
-  console.log('\nLinux build completed:')
-  console.log(`  Launcher : ${wrapperDest}`)
-  console.log(`  CLI Entry: ${path.join(appDir, 'ocarina-atlas-cli.mjs')}`)
-  if (fs.existsSync(bundledNodePath)) {
-    console.log(`  Runtime  : ${bundledNodePath} (${formatMb(fs.statSync(bundledNodePath).size)})`)
-  }
+  console.log('\nLinux AppImage build completed:')
+  console.log(`  Staged   : ${STAGE_DIR} (v${normalizedVersion})`)
   if (fs.existsSync(bridgeOutPath)) {
     console.log(`  Bridge   : ${bridgeOutPath} (${formatMb(fs.statSync(bridgeOutPath).size)})`)
   }
-  if (fs.existsSync(TAR_PATH)) {
-    console.log(`  Archive  : ${TAR_PATH} (${formatMb(fs.statSync(TAR_PATH).size)})`)
+  if (fs.existsSync(APPIMAGE_PATH)) {
+    console.log(`  AppImage : ${APPIMAGE_PATH} (${formatMb(fs.statSync(APPIMAGE_PATH).size)})`)
   }
 }
 

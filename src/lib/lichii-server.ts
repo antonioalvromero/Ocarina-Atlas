@@ -36,18 +36,180 @@ export function getLichiiPort(env: NodeJS.ProcessEnv = process.env): number {
   return parseLichiiPort(raw, DEFAULT_LICHII_PORT)
 }
 
+const RECOMP_USER_SUBDIRS = [
+  ['Longshot', 'user'],
+  ['Hookshot', 'user'],
+  ['HeyListen', 'user'],
+  ['ProjectReLink', 'user'],
+  ['ProjectReLink', 'game', 'user'],
+  ['ReLink', 'user'],
+  ['ReLink', 'game', 'user'],
+  ['Triforce', 'user'],
+] as const
+
 function getDefaultRecompSaveDirs(): string[] {
   const home = os.homedir()
   return [
     'E:\\Longshot\\Game\\user',
-    path.join(home, 'Games', 'Longshot', 'user'),
-    path.join(home, 'Games', 'Hookshot', 'user'),
-    path.join(home, 'Games', 'ProjectReLink', 'user'),
-    path.join(home, 'Games', 'ProjectReLink', 'game', 'user'),
-    path.join(home, 'Games', 'ReLink', 'user'),
-    path.join(home, 'Games', 'ReLink', 'game', 'user'),
-    path.join(home, 'Games', 'Triforce', 'user'),
+    ...RECOMP_USER_SUBDIRS.map((parts) => path.join(home, 'Games', ...parts)),
   ]
+}
+
+function listSubdirsSafe(dirPath: string): string[] {
+  try {
+    return fs
+      .readdirSync(dirPath, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+  } catch {
+    return []
+  }
+}
+
+function parseSteamLibraryFoldersVdf(vdfPath: string): string[] {
+  try {
+    if (!fs.existsSync(vdfPath)) return []
+    const content = fs.readFileSync(vdfPath, 'utf8')
+    const libs: string[] = []
+    const re = /^\s*"path"\s+"([^"]+)"/gm
+    let match: RegExpExecArray | null
+    while ((match = re.exec(content)) !== null) {
+      const libPath = match[1]?.replace(/\\\\/g, '\\').trim()
+      if (libPath) libs.push(libPath)
+    }
+    return libs
+  } catch {
+    return []
+  }
+}
+
+function collectWinePrefixSaveDirs(prefixDir: string, pushUnique: (dir: string) => void): void {
+  const driveC = path.join(prefixDir, 'drive_c')
+  if (!fs.existsSync(driveC)) return
+
+  const usersDir = path.join(driveC, 'users')
+  const skipUsers = new Set(['public', 'default', 'default user', 'all users'])
+  for (const userName of listSubdirsSafe(usersDir)) {
+    if (skipUsers.has(userName.toLowerCase())) continue
+    const userDir = path.join(usersDir, userName)
+    for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
+      const emuSave = path.join(userDir, 'AppData', 'Roaming', emu, 'nand', 'user', 'save', '0000000000000000')
+      if (fs.existsSync(emuSave)) {
+        pushUnique(emuSave)
+      }
+    }
+    for (const parts of RECOMP_USER_SUBDIRS) {
+      const userGamesSave = path.join(userDir, 'Games', ...parts)
+      if (fs.existsSync(userGamesSave)) {
+        pushUnique(userGamesSave)
+      }
+    }
+  }
+
+  for (const parts of RECOMP_USER_SUBDIRS) {
+    const driveCGamesSave = path.join(driveC, 'Games', ...parts)
+    if (fs.existsSync(driveCGamesSave)) {
+      pushUnique(driveCGamesSave)
+    }
+  }
+}
+
+function collectLinuxContainerSaveDirs(
+  env: NodeJS.ProcessEnv,
+  xdgDataHome: string,
+  pushUnique: (dir: string) => void,
+): void {
+  const home = os.homedir()
+  const xdgConfigHome = env.XDG_CONFIG_HOME?.trim() || path.join(home, '.config')
+
+  // 1. Wine prefixes (WINEPREFIX and ~/.wine)
+  const winePrefixes = [env.WINEPREFIX?.trim(), path.join(home, '.wine')].filter(
+    (p): p is string => Boolean(p),
+  )
+  for (const prefixDir of winePrefixes) {
+    collectWinePrefixSaveDirs(prefixDir, pushUnique)
+  }
+
+  // 2. Steam / Proton compatdata prefixes via libraryfolders.vdf
+  const steamRoots = [
+    path.join(xdgDataHome, 'Steam'),
+    path.join(home, '.local', 'share', 'Steam'),
+    path.join(home, '.steam', 'steam'),
+    path.join(home, '.steam', 'debian-installation'),
+    path.join(home, '.var', 'app', 'com.valvesoftware.Steam', '.local', 'share', 'Steam'),
+  ]
+  const steamLibraries = new Set<string>()
+  for (const steamRoot of steamRoots) {
+    if (!fs.existsSync(steamRoot)) continue
+    steamLibraries.add(path.resolve(steamRoot))
+    for (const vdfRel of [
+      path.join('steamapps', 'libraryfolders.vdf'),
+      path.join('config', 'libraryfolders.vdf'),
+    ]) {
+      for (const libPath of parseSteamLibraryFoldersVdf(path.join(steamRoot, vdfRel))) {
+        steamLibraries.add(path.resolve(libPath))
+      }
+    }
+  }
+  for (const libDir of steamLibraries) {
+    const compatDataDir = path.join(libDir, 'steamapps', 'compatdata')
+    for (const appId of listSubdirsSafe(compatDataDir)) {
+      collectWinePrefixSaveDirs(path.join(compatDataDir, appId, 'pfx'), pushUnique)
+    }
+  }
+
+  // 3. Flatpak (~/.var/app/*/{data,config})
+  const flatpakDir = path.join(home, '.var', 'app')
+  for (const appId of listSubdirsSafe(flatpakDir)) {
+    for (const sub of ['data', 'config'] as const) {
+      for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
+        const emuSave = path.join(flatpakDir, appId, sub, emu, 'nand', 'user', 'save', '0000000000000000')
+        if (fs.existsSync(emuSave)) {
+          pushUnique(emuSave)
+        }
+      }
+    }
+  }
+
+  // 4. Bottles
+  const bottlesRoots = [
+    path.join(xdgDataHome, 'bottles', 'bottles'),
+    path.join(home, '.local', 'share', 'bottles', 'bottles'),
+    path.join(home, '.var', 'app', 'com.usebottles.bottles', 'data', 'bottles', 'bottles'),
+  ]
+  for (const bottlesRoot of bottlesRoots) {
+    for (const bottle of listSubdirsSafe(bottlesRoot)) {
+      collectWinePrefixSaveDirs(path.join(bottlesRoot, bottle), pushUnique)
+    }
+  }
+
+  // 5. Heroic
+  const heroicRoots = [
+    path.join(home, 'Games', 'Heroic', 'Prefixes'),
+    path.join(xdgConfigHome, 'heroic', 'Prefixes'),
+    path.join(home, '.config', 'heroic', 'Prefixes'),
+    path.join(home, '.var', 'app', 'com.heroicgameslauncher.hgl', 'config', 'heroic', 'Prefixes'),
+  ]
+  for (const heroicRoot of heroicRoots) {
+    for (const prefix of listSubdirsSafe(heroicRoot)) {
+      const prefixPath = path.join(heroicRoot, prefix)
+      collectWinePrefixSaveDirs(prefixPath, pushUnique)
+      collectWinePrefixSaveDirs(path.join(prefixPath, 'pfx'), pushUnique)
+    }
+  }
+
+  // 6. Lutris and custom ~/Games/* directories
+  const gamesRoot = path.join(home, 'Games')
+  for (const gameDirName of listSubdirsSafe(gamesRoot)) {
+    const gameDir = path.join(gamesRoot, gameDirName)
+    for (const rel of [['user'], ['game', 'user']] as const) {
+      const candidateUserDir = path.join(gameDir, ...rel)
+      if (fs.existsSync(candidateUserDir)) {
+        pushUnique(candidateUserDir)
+      }
+    }
+    collectWinePrefixSaveDirs(gameDir, pushUnique)
+  }
 }
 
 /**
@@ -56,7 +218,8 @@ function getDefaultRecompSaveDirs(): string[] {
  * NX2SARIA_SAVE_DIR overrides first,
  * then default %APPDATA%\{fritchii,lichii,eden,cheezyemu}\nand\user\save\0000000000000000,
  * Linux $XDG_DATA_HOME/{fritchii,lichii,eden,cheezyemu}/nand/user/save/0000000000000000 (or ~/.local/share),
- * and Longshot/Hookshot/ProjectReLink/Triforce user paths.
+ * Longshot/Hookshot/HeyListen/ProjectReLink/Triforce user paths,
+ * and existing Linux Wine, Steam/Proton, Flatpak, Bottles, Heroic, and Lutris ~/Games/* paths.
  */
 export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): string[] {
   const dirs: string[] = []
@@ -96,6 +259,8 @@ export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): stri
   for (const recompUserDir of getDefaultRecompSaveDirs()) {
     pushUnique(recompUserDir)
   }
+
+  collectLinuxContainerSaveDirs(env, xdgDataHome, pushUnique)
 
   return dirs
 }
@@ -1447,7 +1612,7 @@ export function detectEmulatorFromPath(
   if (segments.includes('triforce')) {
     return 'triforce'
   }
-  if (segments.includes('longshot') || segments.includes('hookshot')) {
+  if (segments.includes('longshot') || segments.includes('hookshot') || segments.includes('heylisten')) {
     return 'longshot'
   }
   return undefined
@@ -1462,7 +1627,20 @@ function isDefaultEmulatorSaveDir(dir: string): boolean {
   ) {
     return true
   }
-  return getDefaultRecompSaveDirs().some((d) => normalized === path.resolve(d).toLowerCase())
+  if (getDefaultRecompSaveDirs().some((d) => normalized === path.resolve(d).toLowerCase())) {
+    return true
+  }
+  const gamesPrefix = `${path.resolve(path.join(os.homedir(), 'Games')).toLowerCase()}${path.sep}`
+  if (normalized.startsWith(gamesPrefix)) {
+    return true
+  }
+  return (
+    normalized.includes(`${path.sep}drive_c${path.sep}`) ||
+    normalized.includes(`${path.sep}compatdata${path.sep}`) ||
+    normalized.includes(`${path.sep}.var${path.sep}app${path.sep}`) ||
+    normalized.includes(`${path.sep}bottles${path.sep}`) ||
+    normalized.includes(`${path.sep}heroic${path.sep}`)
+  )
 }
 
 function findBestSlotInRoot(

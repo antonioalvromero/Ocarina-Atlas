@@ -4,7 +4,7 @@
 
 # Ocarina Atlas
 
-Interactive Hyrule field atlas and dungeon floor tracker for *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`),<br>featuring live [Lichii](https://github.com/zortos293/Lichii), Fritchii, CheezyEmu, [Longshot](https://git.magicbean.dev/MagicBeanDev/Longshot), [Project ReLink](https://github.com/pixl27/ProjectReLink) &amp; Triforce memory telemetry, 100% (184/184) automatic collectible tracking, and a portable Windows launcher.
+Interactive Hyrule field atlas and dungeon floor tracker for *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`),<br>featuring live [Lichii](https://github.com/zortos293/Lichii), Fritchii, CheezyEmu, [Longshot](https://git.magicbean.dev/MagicBeanDev/Longshot), [Project ReLink](https://github.com/pixl27/ProjectReLink), Triforce &amp; [HeyListen](https://github.com/Sacrappy/HeyListen) memory telemetry, 100% (184/184) automatic collectible tracking, and a portable Windows launcher.
 
 [![Windows x64](https://img.shields.io/badge/Platform-Windows%20x64-0078D6?logo=windows)](https://github.com/antonioalvromero/Ocarina-Atlas/releases)
 [![Linux x64 (Experimental)](https://img.shields.io/badge/Platform-Linux%20x64%20(Experimental)-FCC624?logo=linux&logoColor=black)](https://github.com/antonioalvromero/Ocarina-Atlas/releases)
@@ -30,8 +30,8 @@ Run the live tracker on Windows without installing Node.js or editing code:
    - Open the extracted folder and double-click **`OcarinaAtlas.exe`**.
    - *(If Windows SmartScreen shows "Windows protected your PC" for an unsigned open-source binary, click **More info** -> **Run anyway**.)*
 
-3. **Live Sync Setup (Longshot / Project ReLink / Triforce / NX2Saria / Lichii / Fritchii / CheezyEmu)**
-   - **Longshot, Project ReLink & Triforce (Native PC Recomp — Zero Config):** Simply launch `longshot.exe` / `hookshot.exe`, `relink-game.exe` / `ReLink.exe`, or `Triforce.exe` and load a save. `OcarinaAtlas.exe` automatically attaches a read-only `LongshotRpcBridge` on `:6545` whenever an emulator is not using the port—no switches or game modifications needed.
+3. **Live Sync Setup (Longshot / Project ReLink / Triforce / HeyListen / NX2Saria / Lichii / Fritchii / CheezyEmu)**
+   - **Longshot, Project ReLink, Triforce & HeyListen (Native PC Recomp — Zero Config):** Simply launch `longshot.exe` / `hookshot.exe`, `relink-game.exe` / `ReLink.exe`, `Triforce.exe`, or `HeyListen.exe` and load a save. `OcarinaAtlas.exe` automatically attaches a read-only `LongshotRpcBridge` on `:6545` whenever an emulator is not using the port—no switches or game modifications needed.
    - **NX2Saria (Native PC Port):** Set `tracker_api = 1` under `[tracker]` in `nx2saria.ini` (or `NX2SARIA_TRACKER_API=1`), then start the game and load a save. NX2Saria serves the read-only debug RPC on `127.0.0.1:6545` itself, so no bridge or `nx2_switches.txt` is needed; `logs/nx2saria.log` shows a `tracker api:` line when the map connects. For the **Save only** fallback, start the game before the map (**Start Map** on Windows, `./OcarinaAtlas` on Linux) so the launcher can pass its `profile` folder (beside the `ocarina` / `nx2saria` executable) to the map server, or set `NX2SARIA_SAVE_DIR`.
    - **Lichii / Fritchii / CheezyEmu (1-Click Setup):** In the main control card, click **1-Click Setup Sync** (shown as **Configured ↻** once active so you can re-apply anytime).
      - This creates or updates `nx2_switches.txt` in your detected emulator profile folder(s) (`%APPDATA%\fritchii\nx2_switches.txt`, `%APPDATA%\lichii\nx2_switches.txt`, and/or `%APPDATA%\cheezyemu\nx2_switches.txt`) with `EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545` while preserving your existing switches.
@@ -53,40 +53,40 @@ Run the live tracker on Windows without installing Node.js or editing code:
    - In the **Second Screen (LAN)** card, click **Allow LAN Access** once and approve the Administrator prompt if your tablet cannot reach the page yet (creates an inbound Windows Defender Firewall rule scoped strictly to **Private** networks).
    - If your PC has multiple active networks (such as Ethernet + Mesh Wi-Fi), choose the matching adapter from the LAN URL selector, click **Copy URL** or **QR Code** to scan from a phone/tablet, and open that `http://` address in your browser. *(Live Link coordinates, collectibles, and pins sync automatically across devices.)*
 
-6. **Play in Longshot, Project ReLink, Triforce, Lichii, Fritchii, or CheezyEmu**
+6. **Play in Longshot, Project ReLink, Triforce, HeyListen, Lichii, Fritchii, or CheezyEmu**
    - Boot *Ocarina of Time* Remake (`0400486024DEC000`) in any supported recomp or emulator and load a save slot.
    - Confirm the launcher telemetry strip shows your live scene/age/Skulltula count and the bottom-left Gold Skulltula medallion pulses green. Hover (or tap on touch devices) over the medallion to expand the tracker card.
 
-### Linux x64 Quick Start (Experimental / Pre-release)
+### Linux x64 Quick Start (Experimental)
 
 > [!WARNING]
-> **`OcarinaAtlas-Linux-x64.tar.gz` is an experimental pre-release build (untested on real Linux hardware).** It is published alongside the Windows bundle on pre-release tags such as `v2.3.0-linux.1`. Verify downloads with the companion `.sha256` file before running.
+> **Linux support (`OcarinaAtlas-Linux-x64.AppImage`) is experimental and has not been 100% tested across all distributions, desktop environments, Wine/Proton setups, or native recomps.** If you run into any issues, UI quirks, or compatibility gaps, please **[open an Issue](https://github.com/antonioalvromero/Ocarina-Atlas/issues)** or **[submit a Pull Request](https://github.com/antonioalvromero/Ocarina-Atlas/pulls)** with your feedback! Verify downloads with the companion `.sha256` file before running.
 
-1. **Download & Extract**
-   - Download `OcarinaAtlas-Linux-x64.tar.gz` (and optionally `OcarinaAtlas-Linux-x64.tar.gz.sha256`) from **[GitHub Releases](https://github.com/antonioalvromero/Ocarina-Atlas/releases)**.
-   - Extract and enter the folder:
+1. **Download & Run**
+   - Download `OcarinaAtlas-Linux-x64.AppImage` (and optionally `OcarinaAtlas-Linux-x64.AppImage.sha256`) from **[GitHub Releases](https://github.com/antonioalvromero/Ocarina-Atlas/releases)**.
+   - Make it executable and launch the desktop GUI:
      ```sh
-     tar -xzf OcarinaAtlas-Linux-x64.tar.gz
-     cd OcarinaAtlas-Linux-x64
+     chmod +x OcarinaAtlas-Linux-x64.AppImage
+     ./OcarinaAtlas-Linux-x64.AppImage
      ```
+     *(If your Linux environment blocks unprivileged Electron sandboxing, run `./OcarinaAtlas-Linux-x64.AppImage --no-sandbox`.)*
 2. **Configure Emulator Sync (Lichii / Fritchii / CheezyEmu)**
-   - Run `./OcarinaAtlas --setup-sync` to automatically add `EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545` to existing `~/.config/{lichii,fritchii,cheezyemu}/nx2_switches.txt` and `~/.local/share/{lichii,fritchii}/nx2_switches.txt` profiles while preserving existing switches. Restart the emulator afterward.
-   - Save-slot fallback automatically checks `$XDG_DATA_HOME/{fritchii,lichii,eden,cheezyemu}/nand/user/save/0000000000000000` (default `~/.local/share/...`) and `~/Games/{Longshot,Hookshot,ProjectReLink,ReLink,Triforce}/...`.
-3. **Native Linux Recomps (`longshot` / `hookshot` / `relink-game` / `relink` / `triforce`) & `yama.ptrace_scope`**
-   - The bundled read-only `runtime/longshot-rpc-bridge` reads guest memory (`0x100000000000`) via `process_vm_readv()` (with read-only `/proc/<pid>/mem` fallback).
-   - Most Linux distributions enable `kernel.yama.ptrace_scope = 1` by default, which blocks `process_vm_readv()` between unrelated processes (`EPERM`). If the bridge cannot attach to an already-running recomp, choose one of:
+   - Click **`1-Click Setup Sync`** inside the launcher GUI (or run `./OcarinaAtlas-Linux-x64.AppImage --setup-sync`) to automatically add `EDEN_NX2_DEBUG_SERVER=127.0.0.1:6545` to existing `~/.config/{lichii,fritchii,cheezyemu}/nx2_switches.txt` and `~/.local/share/{lichii,fritchii}/nx2_switches.txt` profiles while preserving existing switches. Restart the emulator afterward.
+   - Save-slot fallback automatically checks `$XDG_DATA_HOME/{fritchii,lichii,eden,cheezyemu}/nand/user/save/0000000000000000` (default `~/.local/share/...`), `~/Games/{Longshot,Hookshot,ProjectReLink,ReLink,Triforce,HeyListen}/...`, plus Wine (`~/.wine`), Steam/Proton (`compatdata/*/pfx`), Flatpak, Bottles, Heroic, and Lutris directories.
+3. **Native Linux & Wine/Proton Recomps (`longshot` / `hookshot` / `relink-game` / `relink` / `triforce` / `heylisten`) & `yama.ptrace_scope`**
+   - The bundled read-only `longshot-rpc-bridge` reads guest memory (`0x100000000000`) via `process_vm_readv()` (with read-only `/proc/<pid>/mem` fallback), supporting both native Linux binaries and Windows `.exe` recomps running under Wine/Proton.
+   - Most Linux distributions enable `kernel.yama.ptrace_scope = 1` by default, which blocks `process_vm_readv()` between unrelated processes (`EPERM`). If the bridge cannot attach to an already-running recomp, the launcher shows a banner with a 1-click copy command:
      - Temporarily relax ptrace scope until reboot: `sudo sysctl -w kernel.yama.ptrace_scope=0`
-     - Grant `CAP_SYS_PTRACE` to the read-only bridge binary: `sudo setcap cap_sys_ptrace=eip ./runtime/longshot-rpc-bridge`
      - Or launch the recomp from the same parent shell/process tree if applicable.
-4. **Launch Ocarina Atlas**
-   - Run `./OcarinaAtlas` (bundles `runtime/node` and `runtime/longshot-rpc-bridge`; zero system Node.js installation required).
-   - Use `--no-browser`, `--local-only`, `--lan` (default `0.0.0.0`), `--port <number>`, `--lichii-host <host>`, or `--lichii-port <number>` as needed (`./OcarinaAtlas --help`).
+   - *(Note: `Lichii`, `Fritchii`, `CheezyEmu`, and `NX2Saria` communicate over local TCP `127.0.0.1:6545` and do **not** require changing `ptrace_scope`.)*
+4. **Headless / CLI Mode**
+   - Pass `--cli`, `--no-browser`, `--local-only`, `--lan`, `--port <number>`, `--lichii-host <host>`, or `--lichii-port <number>` if you prefer running without the desktop window (`./OcarinaAtlas-Linux-x64.AppImage --help`).
 
 ### Connection States
 
 | Map Tracker Status | Launcher Status | Meaning |
 | --- | --- | --- |
-| **Longshot / ReLink / Triforce / Lichii · Live** (pulsing green) | **Emulator: Live** | Connected to a native recomp (via read-only `LongshotRpcBridge`) or Lichii/Fritchii/CheezyEmu `:6545`, streaming live coordinates, floor, and 184/184 collectible flags. |
+| **Longshot / ReLink / Triforce / HeyListen / Lichii · Live** (pulsing green) | **Emulator: Live** | Connected to a native recomp (via read-only `LongshotRpcBridge`) or Lichii/Fritchii/CheezyEmu `:6545`, streaming live coordinates, floor, and 184/184 collectible flags. |
 | **Waiting for game** (amber) | **Emulator: Waiting** | RPC bridge/port `:6545` is open, but Link is not in an active gameplay scene yet (title/boot screen). Displays save fallback data if available. |
 | **Save only** (static amber) | **Emulator: Closed** | Live RPC `:6545` is unavailable; displaying the latest local `caption.sav` / `progress.sav` snapshot (`(Saved)`). Live movement and Auto Tracking are paused. |
 | **Disconnected** (muted) | **Emulator: Closed** | Neither live RPC nor a local save directory was found (or the local server stopped). Click **Retry** once ready. |
@@ -135,9 +135,9 @@ Run the live tracker on Windows without installing Node.js or editing code:
 
 ## Features
 
-### Live Game Telemetry (Lichii, Fritchii, CheezyEmu, Longshot, Project ReLink & Triforce)
+### Live Game Telemetry (Lichii, Fritchii, CheezyEmu, Longshot, Project ReLink, Triforce & HeyListen)
 - **Real-Time `PlayerPin`:** Displays Link's live position, compass heading cone (`yaw`), current floor badge (`1F`–`5F`, `B1`–`B4`), and 3D `(X, Y, Z)` hover coordinates across the Hyrule World Map, zone/dungeon maps, and All-Floors grid view.
-- **ASLR-Safe `MOD0` Reader & Zero-Config Recomp Bridge:** Dynamically resolves the Switch `MOD0` main NSO base and `.bss` singletons over Lichii / Fritchii / CheezyEmu JSON-RPC (`127.0.0.1:6545`) or `OcarinaAtlas.exe`'s read-only `LongshotRpcBridge` (`ReadProcessMemory` on `longshot.exe` / `hookshot.exe` / `relink-game.exe` / `relink.exe` / `Triforce.exe` guest memory), recovering cleanly across restarts.
+- **ASLR-Safe `MOD0` Reader & Zero-Config Recomp Bridge:** Dynamically resolves the Switch `MOD0` main NSO base and `.bss` singletons over Lichii / Fritchii / CheezyEmu JSON-RPC (`127.0.0.1:6545`) or `OcarinaAtlas.exe`'s read-only `LongshotRpcBridge` (`ReadProcessMemory` on `longshot.exe` / `hookshot.exe` / `relink-game.exe` / `relink.exe` / `Triforce.exe` / `HeyListen.exe` guest memory), recovering cleanly across restarts.
 - **100% Automatic Collectible Tracking (`184 / 184`):** Reads exact collected actor ID hashes (`masterTable` / `0xa3db7114`), `PouchData.Item_Token_Gold.StockNum`, and live `GameDataMgr` `Bool` / `Int` flags in RAM (including all 6 `Obj_TBox` chest Heart Pieces and Child-age Fairy Thought flags) to mark, reveal, and reconcile all 7 categories automatically, plus optional live equipment/song sync (`ownedRequirements`) for the gear prerequisite filter.
 - **Follow Link & Camera Follow:** Toggle **Follow Link** to switch zones and dungeon floors automatically as Link moves and keep Link centered on screen even when zoomed in (pauses briefly while dragging manually), or click **Go to Link** anytime.
 - **Read-Only Save Fallback:** When RPC `:6545` is closed, reads the newest local save slot (`caption.sav` / `progress.sav`) in read-only mode and labels the state **Save only** (`(Saved)`).
@@ -163,8 +163,8 @@ Run the live tracker on Windows without installing Node.js or editing code:
 
 ## Compatibility & Issue Reporting
 
-- **Windows 10 / 11 (x64):** Fully supported for `OcarinaAtlas.exe` and live Lichii, Fritchii, CheezyEmu, Longshot, Project ReLink, and Triforce telemetry.
-- **Linux (x64, Experimental Pre-release):** `OcarinaAtlas-Linux-x64.tar.gz` provides `./OcarinaAtlas`, bundled Node.js 24, `$XDG_DATA_HOME` save-slot discovery, and the read-only `longshot-rpc-bridge` binary (untested on real Linux hardware; see the `kernel.yama.ptrace_scope` note above for native recomps).
+- **Windows 10 / 11 (x64):** Fully supported for `OcarinaAtlas.exe` and live Lichii, Fritchii, CheezyEmu, Longshot, Project ReLink, Triforce, and HeyListen telemetry.
+- **Linux (x64, Experimental):** `OcarinaAtlas-Linux-x64.AppImage` provides the Electron desktop launcher GUI, bundled read-only `longshot-rpc-bridge` (supporting native + Wine/Proton recomps), `$XDG_DATA_HOME` / Wine / Steam / Flatpak save-slot discovery, and CLI mode (`--cli` / `--no-browser`). Linux support is experimental and not 100% tested across all setups — please open an **[Issue](https://github.com/antonioalvromero/Ocarina-Atlas/issues)** or **[Pull Request](https://github.com/antonioalvromero/Ocarina-Atlas/pulls)** with any feedback or fixes.
 - **Supported Game Build:** *The Legend of Zelda: Ocarina of Time* Remake (`0400486024DEC000`).
 - **Web-Only (macOS / Docker / Source):** The interactive web map UI runs on any OS via Node.js or the included [`Dockerfile`](Dockerfile) (`oven/bun:1.4`).
 - **Reporting Bugs:** Open an issue with your **Ocarina Atlas** release version, OS, emulator/recomp version, and relevant output copied from the **`Logs`** drawer in `OcarinaAtlas.exe` or terminal output from `./OcarinaAtlas`. Please **never** attach ROMs, decryption keys, NAND dumps, or personal save archives.
@@ -176,7 +176,7 @@ Run the live tracker on Windows without installing Node.js or editing code:
 ### Prerequisites
 - **Node.js `22.12+` or `24.x`** and **npm** (or **Bun**, matching `bun.lock`)
 - **Windows 10 / 11 (x64)** with **.NET Framework 4.x** (`%WINDIR%\Microsoft.NET\Framework64\v4*\csc.exe`, preinstalled on Windows) to compile `OcarinaAtlas.exe`
-- **Linux (x64)** with **`gcc`** (C99 + pthreads) and `tar` to compile `launcher/linux/longshot_rpc_bridge.c` and package `OcarinaAtlas-Linux-x64.tar.gz`
+- **Linux (x64)** with **`gcc`** (C99 + pthreads) to compile `launcher/linux/longshot_rpc_bridge.c` and package `OcarinaAtlas-Linux-x64.AppImage` via `electron-builder`
 
 ### Commands
 
@@ -189,14 +189,14 @@ npm run build         # Vite client + standalone SSR bundle (dist/)
 npm run start         # Preview the production Vite build
 npm run server:build  # Bundle zero-node_modules server (dist/standalone-server.mjs)
 npm run build:win     # Build portable Windows bundle + release/OcarinaAtlas-Windows-x64.zip
-npm run build:linux   # Build portable Linux bundle + release/OcarinaAtlas-Linux-x64.tar.gz
+npm run build:linux   # Build Linux x64 AppImage + release/OcarinaAtlas-Linux-x64.AppImage
 ```
 
 <details>
 <summary>Architecture &amp; Repository Layout</summary>
 
 ```text
-Lichii / Fritchii / CheezyEmu (:6545)  or  Longshot / ReLink / Triforce (via LongshotRpcBridge)  or  Local Save Slots
+Lichii / Fritchii / CheezyEmu (:6545)  or  Longshot / ReLink / Triforce / HeyListen (via LongshotRpcBridge)  or  Local Save Slots
         │
         ▼
 Telemetry Bridge (src/lib/lichii-server.ts)
@@ -216,7 +216,7 @@ Windows Launcher (launcher/OcarinaAtlas.cs -> OcarinaAtlas.exe)
 | `src/components/` | `MapViewport.tsx` (persistent zoom + Camera Follow), `WorldMap.tsx`, `PlaceView.tsx`, `FloorGrid.tsx`, `GlobalStatsDrawer.tsx`, `GearChecklistModal.tsx`, `CreditsModal.tsx`, `PlayerPin.tsx`, and `LichiiStatusPanel.tsx`. |
 | `src/lib/` | Dataset helpers (`data.ts`), gear prerequisites (`prerequisites.ts`), projection math (`coords.ts`), pin merging (`merge.ts`), `localStorage` persistence (`storage.ts`), Lichii telemetry (`lichii-server.ts`, `lichii-types.ts`), client polling (`useLichiiTracker.ts`), and `*.test.ts` Vitest suites. |
 | `src/data/oot.json` | Atlas dataset (32 places, 184 official items, categories, requirements). |
-| `launcher/` | Native C# WinForms Windows launcher (`OcarinaAtlas.cs`, `OcarinaAtlas.ico`) and experimental Linux launcher/bridge (`linux/OcarinaAtlas`, `linux/ocarina-atlas-cli.mjs`, `linux/longshot_rpc_bridge.c`). |
+| `launcher/` | Native C# WinForms Windows launcher (`OcarinaAtlas.cs`, `OcarinaAtlas.ico`) and experimental Linux AppImage GUI + CLI/bridge (`linux-appimage/*`, `linux/ocarina-atlas-cli.mjs`, `linux/longshot_rpc_bridge.c`). |
 | `scripts/` | Standalone Node HTTP server (`server-entry.ts`), Windows & Linux packagers (`build-win.mjs`, `build-linux.mjs`), smoke tests (`smoke-test-win.ps1`, `smoke-test-linux.sh`), and release notes generator (`generate-release-notes.mjs`). |
 | `.github/` | CI (`ci.yml`), Windows & Linux release workflow (`release-windows.yml`), templates, and release config. |
 | `AGENTS.md` | Architecture notes, engineering invariants, and verification checklist for AI coding agents. |
@@ -231,7 +231,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md), [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT
 
 - **Ocarina Atlas:** Live telemetry, desktop launcher, and auto-tracking by [`antonioalvromero`](https://github.com/antonioalvromero/Ocarina-Atlas).
 - **Original Map Tracker:** Built upon [`lucasriondel/oot-remake-map`](https://github.com/lucasriondel/oot-remake-map) (Field Atlas).
-- **Emulator & Recomp Integration:** Built for [`zortos293/Lichii`](https://github.com/zortos293/Lichii), Fritchii, CheezyEmu, [`MagicBeanDev/Longshot`](https://git.magicbean.dev/MagicBeanDev/Longshot), [`pixl27/ProjectReLink`](https://github.com/pixl27/ProjectReLink), and Triforce.
+- **Emulator & Recomp Integration:** Built for [`zortos293/Lichii`](https://github.com/zortos293/Lichii), Fritchii, CheezyEmu, [`MagicBeanDev/Longshot`](https://git.magicbean.dev/MagicBeanDev/Longshot), [`pixl27/ProjectReLink`](https://github.com/pixl27/ProjectReLink), Triforce, and [`Sacrappy/HeyListen`](https://github.com/Sacrappy/HeyListen).
 - **Map Assets & Item Data:** Map images and location data originate from [Nintendúo](https://nintenduo.com/juegos/the-legend-of-zelda-ocarina-of-time/mapa/en/) and belong to their respective owner.
 - **Documentation Co-Authorship:** Repository documentation was co-authored with **Antigravity AI** (Google DeepMind).
 - **Disclaimer:** Non-commercial fan project, not affiliated with Nintendo.

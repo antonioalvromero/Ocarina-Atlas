@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TAR_PATH="release/OcarinaAtlas-Linux-x64.tar.gz"
+APPIMAGE_PATH="release/OcarinaAtlas-Linux-x64.AppImage"
 PORT=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --tar)
-      TAR_PATH="$2"
+    --appimage)
+      APPIMAGE_PATH="$2"
       shift 2
       ;;
     --port)
@@ -15,7 +15,7 @@ while [ "$#" -gt 0 ]; do
       shift 2
       ;;
     --help|-h)
-      echo "Usage: $0 [--tar <path>] [--port <port>]"
+      echo "Usage: $0 [--appimage <path>] [--port <port>]"
       exit 0
       ;;
     *)
@@ -25,12 +25,13 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-if [ ! -f "$TAR_PATH" ]; then
-  echo "ERROR: Missing Linux release tarball: $TAR_PATH" >&2
+if [ ! -f "$APPIMAGE_PATH" ]; then
+  echo "ERROR: Missing Linux AppImage: $APPIMAGE_PATH" >&2
   exit 1
 fi
 
-ABS_TAR_PATH="$(cd "$(dirname "$TAR_PATH")" && pwd)/$(basename "$TAR_PATH")"
+chmod +x "$APPIMAGE_PATH"
+ABS_APPIMAGE_PATH="$(cd "$(dirname "$APPIMAGE_PATH")" && pwd)/$(basename "$APPIMAGE_PATH")"
 WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/ocarina-atlas-linux-smoke.XXXXXX")"
 
 LAUNCHER_PID=""
@@ -48,43 +49,36 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "Extracting $ABS_TAR_PATH into $WORK_DIR ..."
-tar -xzf "$ABS_TAR_PATH" -C "$WORK_DIR"
+NODE_BIN="$(command -v node || true)"
+if [ -z "$NODE_BIN" ]; then
+  echo "ERROR: node is required on PATH to run smoke test checks." >&2
+  exit 1
+fi
 
-BUNDLE_DIR="$WORK_DIR/OcarinaAtlas-Linux-x64"
+echo "Extracting $ABS_APPIMAGE_PATH into $WORK_DIR to inspect bundled resources ..."
+(cd "$WORK_DIR" && "$ABS_APPIMAGE_PATH" --appimage-extract >/dev/null)
+
+RESOURCES_DIR="$WORK_DIR/squashfs-root/resources"
 for req_file in \
-  "$BUNDLE_DIR/OcarinaAtlas" \
-  "$BUNDLE_DIR/runtime/node" \
-  "$BUNDLE_DIR/runtime/longshot-rpc-bridge" \
-  "$BUNDLE_DIR/app/standalone-server.mjs" \
-  "$BUNDLE_DIR/app/ocarina-atlas-cli.mjs" \
-  "$BUNDLE_DIR/app/dist/server/server.js" \
-  "$BUNDLE_DIR/LICENSE" \
-  "$BUNDLE_DIR/README-Linux.txt"; do
+  "$RESOURCES_DIR/app/standalone-server.mjs" \
+  "$RESOURCES_DIR/app/dist/server/server.js" \
+  "$RESOURCES_DIR/bin/longshot-rpc-bridge"; do
   if [ ! -f "$req_file" ]; then
-    echo "ERROR: Missing expected file in tarball: $req_file" >&2
+    echo "ERROR: Missing expected file in AppImage resources: $req_file" >&2
     exit 1
   fi
 done
 
-for req_dir in "$BUNDLE_DIR/app/dist/client"; do
-  if [ ! -d "$req_dir" ]; then
-    echo "ERROR: Missing expected directory in tarball: $req_dir" >&2
-    exit 1
-  fi
-done
+if [ ! -d "$RESOURCES_DIR/app/dist/client" ]; then
+  echo "ERROR: Missing expected directory in AppImage resources: $RESOURCES_DIR/app/dist/client" >&2
+  exit 1
+fi
 
-for exec_file in \
-  "$BUNDLE_DIR/OcarinaAtlas" \
-  "$BUNDLE_DIR/runtime/node" \
-  "$BUNDLE_DIR/runtime/longshot-rpc-bridge"; do
-  if [ ! -x "$exec_file" ]; then
-    echo "ERROR: Expected executable permission on: $exec_file" >&2
-    exit 1
-  fi
-done
-
-NODE_BIN="$BUNDLE_DIR/runtime/node"
+BRIDGE_BIN="$RESOURCES_DIR/bin/longshot-rpc-bridge"
+if [ ! -x "$BRIDGE_BIN" ]; then
+  echo "ERROR: Expected executable permission on: $BRIDGE_BIN" >&2
+  exit 1
+fi
 
 pick_free_port() {
   "$NODE_BIN" -e "
@@ -102,8 +96,8 @@ if [ -z "$PORT" ]; then
   PORT="$(pick_free_port)"
 fi
 
-echo "Starting ./OcarinaAtlas --port $PORT --no-browser ..."
-"$BUNDLE_DIR/OcarinaAtlas" --port "$PORT" --no-browser >"$WORK_DIR/launcher.log" 2>&1 &
+echo "Starting $ABS_APPIMAGE_PATH --appimage-extract-and-run --port $PORT --no-browser ..."
+"$ABS_APPIMAGE_PATH" --appimage-extract-and-run --no-sandbox --port "$PORT" --no-browser >"$WORK_DIR/launcher.log" 2>&1 &
 LAUNCHER_PID=$!
 
 if ! "$NODE_BIN" - "$PORT" "$LAUNCHER_PID" <<'EOF'
@@ -121,7 +115,7 @@ async function run() {
     try {
       process.kill(pid, 0);
     } catch {
-      throw new Error(`OcarinaAtlas launcher (PID ${pid}) exited prematurely`);
+      throw new Error(`OcarinaAtlas AppImage (PID ${pid}) exited prematurely`);
     }
     try {
       const [rootRes, apiRes] = await Promise.all([
@@ -157,7 +151,7 @@ then
   exit 1
 fi
 
-echo "Sending SIGTERM to OcarinaAtlas (PID $LAUNCHER_PID) ..."
+echo "Sending SIGTERM to OcarinaAtlas AppImage (PID $LAUNCHER_PID) ..."
 kill -TERM "$LAUNCHER_PID"
 wait "$LAUNCHER_PID" || true
 LAUNCHER_PID=""
@@ -192,7 +186,7 @@ function isOpen() {
 EOF
 
 echo "Running longshot-rpc-bridge --self-test ..."
-"$BUNDLE_DIR/runtime/longshot-rpc-bridge" --self-test
+"$BRIDGE_BIN" --self-test
 
 if command -v gcc >/dev/null 2>&1; then
   cat >"$WORK_DIR/dummy_guest.c" <<'CEOF'
@@ -248,7 +242,7 @@ CEOF
   if grep -q "READY" "$WORK_DIR/dummy.out" 2>/dev/null; then
     BRIDGE_PORT="$(pick_free_port)"
     echo "Testing longshot-rpc-bridge against dummy guest PID $DUMMY_PID on port $BRIDGE_PORT ..."
-    "$BUNDLE_DIR/runtime/longshot-rpc-bridge" --pid "$DUMMY_PID" --port "$BRIDGE_PORT" --once >"$WORK_DIR/bridge.log" 2>&1 &
+    "$BRIDGE_BIN" --pid "$DUMMY_PID" --port "$BRIDGE_PORT" --once >"$WORK_DIR/bridge.log" 2>&1 &
     BRIDGE_PID=$!
 
     "$NODE_BIN" - "$BRIDGE_PORT" <<'EOF'

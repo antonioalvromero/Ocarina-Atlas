@@ -1,5 +1,4 @@
 import { memo, useCallback, useEffect, useId, useState } from 'react'
-import { pinPosition } from '../lib/coords'
 import type { Fraction } from '../lib/types'
 import { useLichiiPosition } from '../lib/useLichiiTracker'
 
@@ -46,50 +45,49 @@ export const PlayerPin = memo(function PlayerPin({
 
   return (
     <div
-      data-pin
-      data-player-pin
-      className="absolute z-40 size-0 transition-[left,top] duration-150 ease-linear will-change-[left,top]"
-      style={pinPosition(at)}
+      className="pointer-events-none absolute inset-0 z-40 transition-transform duration-150 ease-linear will-change-transform"
+      style={{ transform: `translate3d(${at.x * 100}%, ${at.y * 100}%, 0)` }}
     >
-      <div
-        onClick={(e) => {
-          if (onClick) {
-            e.stopPropagation()
-            onClick()
-          }
-        }}
-        role={onClick ? 'button' : undefined}
-        tabIndex={onClick ? 0 : undefined}
-        onKeyDown={(e) => {
-          if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-            e.preventDefault()
-            e.stopPropagation()
-            onClick()
-          }
-        }}
-        title={baseTitle}
-        aria-label={ariaLabel}
-        className={`group relative -top-5 -left-5 flex size-10 items-center justify-center ${
-          onClick ? 'cursor-pointer' : 'pointer-events-auto'
-        }`}
-      >
-        {/* Outer sonar pulse (only when streaming live RAM) */}
-        {live && (
-          <span
-            className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-moss/50 opacity-75"
-            style={{ animationDuration: '2s' }}
-            aria-hidden
-          />
-        )}
+      <div data-pin data-player-pin className="pointer-events-auto absolute top-0 left-0 size-0">
+        <div
+          onClick={(e) => {
+            if (onClick) {
+              e.stopPropagation()
+              onClick()
+            }
+          }}
+          role={onClick ? 'button' : undefined}
+          tabIndex={onClick ? 0 : undefined}
+          onKeyDown={(e) => {
+            if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+              e.preventDefault()
+              e.stopPropagation()
+              onClick()
+            }
+          }}
+          title={baseTitle}
+          aria-label={ariaLabel}
+          className={`group relative -top-5 -left-5 flex size-10 items-center justify-center ${
+            onClick ? 'cursor-pointer' : 'pointer-events-auto'
+          }`}
+        >
+          {/* Outer sonar pulse (only when streaming live RAM) */}
+          {live && (
+            <span
+              className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-moss/50 opacity-75 motion-reduce:animate-none"
+              style={{ animationDuration: '2s' }}
+              aria-hidden
+            />
+          )}
 
-        {/* Directional view cone & heading arrow */}
-        {rotationDeg !== null && (
-          <svg
-            viewBox="0 0 64 64"
-            className="pointer-events-none absolute -inset-3 size-16 drop-shadow-[0_2px_4px_rgb(0_0_0/0.8)] transition-transform duration-150 ease-linear"
-            style={{ transform: `rotate(${rotationDeg}deg)` }}
-            aria-hidden
-          >
+          {/* Directional view cone & heading arrow */}
+          {rotationDeg !== null && (
+            <svg
+              viewBox="0 0 64 64"
+              className="pointer-events-none absolute -inset-3 size-16 transition-transform duration-150 ease-linear"
+              style={{ transform: `rotate(${rotationDeg}deg)` }}
+              aria-hidden
+            >
             <defs>
               <linearGradient id={coneGradId} x1="0" y1="1" x2="0" y2="0">
                 <stop
@@ -117,7 +115,7 @@ export const PlayerPin = memo(function PlayerPin({
         <span
           className={`relative grid size-6 place-items-center rounded-full border-2 border-ink-950 text-ink-950 transition-transform group-hover:scale-120 ${
             live
-              ? 'bg-moss shadow-[0_0_12px_rgba(134,182,126,0.9)]'
+              ? 'bg-moss ring-2 ring-moss/50 shadow-md'
               : 'bg-ember/85 opacity-90 shadow-md'
           }`}
         >
@@ -143,6 +141,7 @@ export const PlayerPin = memo(function PlayerPin({
               X:{position3d.x.toFixed(1)} Y:{position3d.y.toFixed(1)} Z:{position3d.z.toFixed(1)}
             </span>
           )}
+        </div>
         </div>
       </div>
     </div>

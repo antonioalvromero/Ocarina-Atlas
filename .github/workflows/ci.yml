@@ -123,17 +123,68 @@ jobs:
           compression-level: 0
           if-no-files-found: error
 
+  build-linux:
+    name: Linux Build & Smoke Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+
+      - name: Cache node_modules
+        id: deps-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json', 'bun.lock', 'package.json') }}
+
+      - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Verify C compiler availability
+        run: gcc --version
+
+      - name: Build portable Linux release
+        run: npm run build:linux
+
+      - name: Verify release artifacts and smoke-test OcarinaAtlas (Linux)
+        run: |
+          chmod +x scripts/smoke-test-linux.sh
+          ./scripts/smoke-test-linux.sh
+
+      - name: Upload temporary Linux CI artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: OcarinaAtlas-Linux-x64-ci
+          path: release/OcarinaAtlas-Linux-x64.tar.gz
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
   ci-gate:
     name: CI Gate
     runs-on: ubuntu-latest
-    needs: [verify, build-windows]
+    needs: [verify, build-windows, build-linux]
     if: always()
     steps:
       - name: Check required jobs succeeded
         shell: bash
         run: |
-          if [ "${{ needs.verify.result }}" != "success" ] || [ "${{ needs.build-windows.result }}" != "success" ]; then
-            echo "CI Gate failed: verify=${{ needs.verify.result }}, build-windows=${{ needs.build-windows.result }}"
+          if [ "${{ needs.verify.result }}" != "success" ] || [ "${{ needs.build-windows.result }}" != "success" ] || [ "${{ needs.build-linux.result }}" != "success" ]; then
+            echo "CI Gate failed: verify=${{ needs.verify.result }}, build-windows=${{ needs.build-windows.result }}, build-linux=${{ needs.build-linux.result }}"
             exit 1
           fi
           echo "All CI verification jobs succeeded."

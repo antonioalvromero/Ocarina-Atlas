@@ -108,17 +108,26 @@ describe('Lichii environment config helpers', () => {
     expect(getLichiiPort({ LICHII_PORT: 'invalid' })).toBe(6545)
   })
 
-  it('checks LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR / TRIFORCE_SAVE_DIR before default APPDATA and recomp save directories', () => {
+  it('checks LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / CHEEZYEMU_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR / TRIFORCE_SAVE_DIR before default APPDATA, XDG_DATA_HOME, and recomp save directories', () => {
     const appData = path.join(os.tmpdir(), 'fake-appdata')
+    const xdgDataHome = path.join(os.tmpdir(), 'fake-xdg-data')
+    const fallbackXdgDataHome = path.join(os.homedir(), '.local', 'share')
     const explicit = path.join(os.tmpdir(), 'custom-lichii-saves')
     const explicitFritchii = path.join(os.tmpdir(), 'custom-fritchii-saves')
+    const explicitCheezy = path.join(os.tmpdir(), 'custom-cheezy-saves')
     const explicitLongshot = path.join(os.tmpdir(), 'custom-longshot-saves')
     const explicitRelink = path.join(os.tmpdir(), 'custom-relink-saves')
     const explicitTriforce = path.join(os.tmpdir(), 'custom-triforce-saves')
-    const fritchiiDefault = path.join(appData, 'fritchii', 'nand', 'user', 'save', '0000000000000000')
-    const lichiiDefault = path.join(appData, 'lichii', 'nand', 'user', 'save', '0000000000000000')
-    const edenDefault = path.join(appData, 'eden', 'nand', 'user', 'save', '0000000000000000')
-    const cheezyemuDefault = path.join(appData, 'cheezyemu', 'nand', 'user', 'save', '0000000000000000')
+    const emulators = ['fritchii', 'lichii', 'eden', 'cheezyemu'] as const
+    const appDataDefaults = emulators.map((emu) =>
+      path.resolve(appData, emu, 'nand', 'user', 'save', '0000000000000000'),
+    )
+    const fallbackXdgDefaults = emulators.map((emu) =>
+      path.resolve(fallbackXdgDataHome, emu, 'nand', 'user', 'save', '0000000000000000'),
+    )
+    const customXdgDefaults = emulators.map((emu) =>
+      path.resolve(xdgDataHome, emu, 'nand', 'user', 'save', '0000000000000000'),
+    )
     const recompDefaults = [
       path.resolve('E:\\Longshot\\Game\\user'),
       path.resolve(path.join(os.homedir(), 'Games', 'Longshot', 'user')),
@@ -129,15 +138,26 @@ describe('Lichii environment config helpers', () => {
       path.resolve(path.join(os.homedir(), 'Games', 'ReLink', 'game', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'Triforce', 'user')),
     ]
-    const defaultDirs = [fritchiiDefault, lichiiDefault, edenDefault, cheezyemuDefault, ...recompDefaults]
+    const defaultDirs = [...appDataDefaults, ...fallbackXdgDefaults, ...recompDefaults]
+    const customXdgDirs = [...appDataDefaults, ...customXdgDefaults, ...recompDefaults]
 
     expect(getCandidateSaveDirs({ APPDATA: appData })).toEqual(defaultDirs)
-    expect(getCandidateSaveDirs({ APPDATA: appData, LICHII_SAVE_DIR: '   ' })).toEqual(defaultDirs)
+    expect(getCandidateSaveDirs({ APPDATA: appData, XDG_DATA_HOME: '   ', LICHII_SAVE_DIR: '   ' })).toEqual(
+      defaultDirs,
+    )
+    expect(getCandidateSaveDirs({ APPDATA: appData, XDG_DATA_HOME: xdgDataHome })).toEqual(customXdgDirs)
+    // Deduplicates when APPDATA and XDG_DATA_HOME resolve to the same directory
+    expect(getCandidateSaveDirs({ APPDATA: appData, XDG_DATA_HOME: `${appData}${path.sep}` })).toEqual([
+      ...appDataDefaults,
+      ...recompDefaults,
+    ])
     expect(
       getCandidateSaveDirs({
         APPDATA: appData,
+        XDG_DATA_HOME: xdgDataHome,
         LICHII_SAVE_DIR: explicit,
         FRITCHII_SAVE_DIR: explicitFritchii,
+        CHEEZYEMU_SAVE_DIR: explicitCheezy,
         LONGSHOT_SAVE_DIR: explicitLongshot,
         RELINK_SAVE_DIR: explicitRelink,
         TRIFORCE_SAVE_DIR: explicitTriforce,
@@ -145,10 +165,11 @@ describe('Lichii environment config helpers', () => {
     ).toEqual([
       path.resolve(explicit),
       path.resolve(explicitFritchii),
+      path.resolve(explicitCheezy),
       path.resolve(explicitLongshot),
       path.resolve(explicitRelink),
       path.resolve(explicitTriforce),
-      ...defaultDirs,
+      ...customXdgDirs,
     ])
   })
 
@@ -355,6 +376,103 @@ describe('Lichii environment config helpers', () => {
       expect(
         detectEmulatorFromPath(path.join(tmpRoot, 'Games', 'Triforce', 'user', 'save', uid, 'slot_00')),
       ).toBe('triforce')
+    } finally {
+      homeSpy.mockRestore()
+      fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('discovers Linux XDG_DATA_HOME and ~/.local/share save slots while honoring explicit *_SAVE_DIR overrides', () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'linux-xdg-save-test-'))
+    const homeSpy = vi.spyOn(os, 'homedir').mockReturnValue(tmpRoot)
+    try {
+      const appDataDir = path.join(tmpRoot, 'appdata')
+      const xdgDataDir = path.join(tmpRoot, 'xdg-data')
+
+      // 1. Default ~/.local/share/<emu>/nand/user/save/0000000000000000 discovery
+      const localShareCheezySlot = path.join(
+        tmpRoot,
+        '.local',
+        'share',
+        'cheezyemu',
+        'nand',
+        'user',
+        'save',
+        '0000000000000000',
+        '0000000000000001',
+        '0400486024DEC000',
+        'slot_00',
+      )
+      fs.mkdirSync(localShareCheezySlot, { recursive: true })
+      const localShareCap = path.join(localShareCheezySlot, 'caption.sav')
+      fs.writeFileSync(localShareCap, Buffer.alloc(0x30))
+      fs.utimesSync(localShareCap, new Date(4000), new Date(4000))
+
+      const fallbackFound = findLatestSaveSlotDir(getCandidateSaveDirs({ APPDATA: appDataDir }))
+      expect(fallbackFound?.dir).toBe(localShareCheezySlot)
+      expect(detectEmulatorFromPath(fallbackFound!.dir)).toBe('cheezyemu')
+
+      // 2. Explicit XDG_DATA_HOME compares mtime cleanly across Linux XDG and Windows APPDATA defaults
+      const xdgEdenSlot = path.join(
+        xdgDataDir,
+        'eden',
+        'nand',
+        'user',
+        'save',
+        '0000000000000000',
+        '0000000000000001',
+        '0400486024DEC000',
+        'slot_00',
+      )
+      const appDataLichiiSlot = path.join(
+        appDataDir,
+        'lichii',
+        'nand',
+        'user',
+        'save',
+        '0000000000000000',
+        '0000000000000001',
+        '0400486024DEC000',
+        'slot_00',
+      )
+      fs.mkdirSync(xdgEdenSlot, { recursive: true })
+      fs.mkdirSync(appDataLichiiSlot, { recursive: true })
+      const xdgEdenCap = path.join(xdgEdenSlot, 'caption.sav')
+      const appDataLichiiCap = path.join(appDataLichiiSlot, 'caption.sav')
+      fs.writeFileSync(xdgEdenCap, Buffer.alloc(0x30))
+      fs.writeFileSync(appDataLichiiCap, Buffer.alloc(0x30))
+
+      fs.utimesSync(appDataLichiiCap, new Date(2000), new Date(2000))
+      fs.utimesSync(xdgEdenCap, new Date(8000), new Date(8000))
+      const newerXdgEden = findLatestSaveSlotDir(
+        getCandidateSaveDirs({ APPDATA: appDataDir, XDG_DATA_HOME: xdgDataDir }),
+      )
+      expect(newerXdgEden?.dir).toBe(xdgEdenSlot)
+      expect(detectEmulatorFromPath(newerXdgEden!.dir)).toBe('eden')
+
+      // Newer APPDATA default wins over older XDG_DATA_HOME default (no shadowing)
+      fs.utimesSync(appDataLichiiCap, new Date(12000), new Date(12000))
+      const newerAppDataLichii = findLatestSaveSlotDir(
+        getCandidateSaveDirs({ APPDATA: appDataDir, XDG_DATA_HOME: xdgDataDir }),
+      )
+      expect(newerAppDataLichii?.dir).toBe(appDataLichiiSlot)
+      expect(detectEmulatorFromPath(newerAppDataLichii!.dir)).toBe('lichii')
+
+      // 3. Explicit *_SAVE_DIR override beats both newer Windows APPDATA and Linux XDG_DATA_HOME saves
+      const customSlot = path.join(tmpRoot, 'portable-fritchii', 'slot_01')
+      fs.mkdirSync(customSlot, { recursive: true })
+      const customCap = path.join(customSlot, 'caption.sav')
+      fs.writeFileSync(customCap, Buffer.alloc(0x30))
+      fs.utimesSync(customCap, new Date(1000), new Date(1000))
+
+      const overrideFound = findLatestSaveSlotDir(
+        getCandidateSaveDirs({
+          APPDATA: appDataDir,
+          XDG_DATA_HOME: xdgDataDir,
+          FRITCHII_SAVE_DIR: customSlot,
+        }),
+      )
+      expect(overrideFound?.dir).toBe(customSlot)
     } finally {
       homeSpy.mockRestore()
       fs.rmSync(tmpRoot, { recursive: true, force: true })

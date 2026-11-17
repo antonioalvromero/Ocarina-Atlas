@@ -254,12 +254,17 @@ describe('composeReleaseBody', () => {
     const prompt = buildReleasePrompt({
       version: 'v2.3.0-linux.1',
       previousTag: 'v2.2.1',
+      zipAssetName: 'OcarinaAtlas-Windows-x64.zip',
+      linuxAssetName: 'OcarinaAtlas-Linux-x64.tar.gz',
       instructions: '',
       commits: [{ sha: 'cccc333', subject: 'feat(linux): add portable tarball build' }],
       changelogSection: '',
       githubGeneratedNotes: '',
     })
     expect(prompt.userPrompt).toContain('Release Channel: Pre-release')
+    expect(prompt.userPrompt).toContain(
+      'Distribution Bundles: Windows x64 (`OcarinaAtlas-Windows-x64.zip`) + experimental/untested Linux x64 (`OcarinaAtlas-Linux-x64.tar.gz`)',
+    )
 
     const body = composeReleaseBody({
       version: 'v2.3.0-linux.1',
@@ -272,10 +277,53 @@ describe('composeReleaseBody', () => {
       githubGeneratedNotes: '',
       zipAssetName: 'OcarinaAtlas-Windows-x64.zip',
       zipSha256: 'abc123',
+      linuxAssetName: 'OcarinaAtlas-Linux-x64.tar.gz',
+      linuxSha256: 'def456',
     })
     expect(body).toContain('**Pre-release build (`v2.3.0-linux.1`).**')
+    expect(body).toContain('experimental/untested Linux x64')
     expect(body).toContain('## Changes since v2.2.1')
     expect(body).toContain('## Downloads')
+    expect(body).toContain('## Windows')
+    expect(body).toContain(
+      '| amd64 / x86_64 | [zip](https://github.com/antonioalvromero/Ocarina-Atlas/releases/download/v2.3.0-linux.1/OcarinaAtlas-Windows-x64.zip) | `abc123` |',
+    )
+    expect(body).toContain('## Linux')
+    expect(body).toContain(
+      '| amd64 / x86_64 | [tar.gz](https://github.com/antonioalvromero/Ocarina-Atlas/releases/download/v2.3.0-linux.1/OcarinaAtlas-Linux-x64.tar.gz) | `def456` |',
+    )
+    expect(body).toContain('kernel.yama.ptrace_scope')
+  })
+
+  it('strips trailing ## Linux sections from AI summaries and handles missing Linux SHA-256', () => {
+    const normalized = normalizeAiSummary([
+      '> **Headline.** Dual-platform pre-release.',
+      '',
+      '### New features',
+      '- **Linux:** Added tarball build.',
+      '',
+      '## Linux',
+      'Hallucinated Linux download table',
+    ].join('\n'))
+    expect(normalized).not.toContain('## Linux')
+
+    const body = composeReleaseBody({
+      version: 'v2.3.0-linux.1',
+      previousTag: 'v2.2.1',
+      repoSlug: 'antonioalvromero/Ocarina-Atlas',
+      aiSummary: null,
+      aiProviderLabel: null,
+      changelogSection: '',
+      commits: [{ sha: 'cccc333', subject: 'feat(linux): add portable tarball build' }],
+      githubGeneratedNotes: '',
+      zipAssetName: 'OcarinaAtlas-Windows-x64.zip',
+      zipSha256: '1111aaaa',
+      linuxAssetName: 'OcarinaAtlas-Linux-x64.tar.gz',
+      linuxSha256: null,
+    })
+    expect(body).toContain(
+      '| amd64 / x86_64 | [tar.gz](https://github.com/antonioalvromero/Ocarina-Atlas/releases/download/v2.3.0-linux.1/OcarinaAtlas-Linux-x64.tar.gz) | Unavailable |',
+    )
   })
 })
 

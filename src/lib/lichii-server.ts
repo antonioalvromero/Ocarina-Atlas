@@ -36,13 +36,39 @@ export function getLichiiPort(env: NodeJS.ProcessEnv = process.env): number {
   return parseLichiiPort(raw, DEFAULT_LICHII_PORT)
 }
 
+function getDefaultRecompSaveDirs(): string[] {
+  const home = os.homedir()
+  return [
+    'E:\\Longshot\\Game\\user',
+    path.join(home, 'Games', 'Longshot', 'user'),
+    path.join(home, 'Games', 'Hookshot', 'user'),
+    path.join(home, 'Games', 'ProjectReLink', 'user'),
+    path.join(home, 'Games', 'ProjectReLink', 'game', 'user'),
+    path.join(home, 'Games', 'ReLink', 'user'),
+    path.join(home, 'Games', 'ReLink', 'game', 'user'),
+    path.join(home, 'Games', 'Triforce', 'user'),
+  ]
+}
+
 /**
  * Returns candidate emulator save root directories in priority order:
- * explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR / TRIFORCE_SAVE_DIR overrides first, then default
- * %APPDATA%\{fritchii,lichii,eden}\nand\user\save\0000000000000000 and Longshot/Hookshot/ProjectReLink/Triforce user paths.
+ * explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / CHEEZYEMU_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR / TRIFORCE_SAVE_DIR overrides first,
+ * then default %APPDATA%\{fritchii,lichii,eden,cheezyemu}\nand\user\save\0000000000000000,
+ * Linux $XDG_DATA_HOME/{fritchii,lichii,eden,cheezyemu}/nand/user/save/0000000000000000 (or ~/.local/share),
+ * and Longshot/Hookshot/ProjectReLink/Triforce user paths.
  */
 export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): string[] {
   const dirs: string[] = []
+  const seen = new Set<string>()
+  const pushUnique = (candidatePath: string) => {
+    const resolved = path.resolve(candidatePath)
+    const dedupeKey = process.platform === 'win32' ? resolved.toLowerCase() : resolved
+    if (!seen.has(dedupeKey)) {
+      seen.add(dedupeKey)
+      dirs.push(resolved)
+    }
+  }
+
   for (const explicitRaw of [
     env.LICHII_SAVE_DIR,
     env.FRITCHII_SAVE_DIR,
@@ -53,34 +79,22 @@ export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): stri
   ]) {
     const explicit = explicitRaw?.trim()
     if (explicit) {
-      const resolved = path.resolve(explicit)
-      if (!dirs.includes(resolved)) {
-        dirs.push(resolved)
-      }
+      pushUnique(explicit)
     }
   }
+
   const appData = env.APPDATA?.trim() || path.join(os.homedir(), 'AppData', 'Roaming')
-  for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
-    const defaultBase = path.join(appData, emu, 'nand', 'user', 'save', '0000000000000000')
-    if (!dirs.includes(defaultBase)) {
-      dirs.push(defaultBase)
+  const xdgDataHome = env.XDG_DATA_HOME?.trim() || path.join(os.homedir(), '.local', 'share')
+  for (const dataRoot of [appData, xdgDataHome]) {
+    for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
+      pushUnique(path.join(dataRoot, emu, 'nand', 'user', 'save', '0000000000000000'))
     }
   }
-  for (const recompUserDir of [
-    'E:\\Longshot\\Game\\user',
-    path.join(os.homedir(), 'Games', 'Longshot', 'user'),
-    path.join(os.homedir(), 'Games', 'Hookshot', 'user'),
-    path.join(os.homedir(), 'Games', 'ProjectReLink', 'user'),
-    path.join(os.homedir(), 'Games', 'ProjectReLink', 'game', 'user'),
-    path.join(os.homedir(), 'Games', 'ReLink', 'user'),
-    path.join(os.homedir(), 'Games', 'ReLink', 'game', 'user'),
-    path.join(os.homedir(), 'Games', 'Triforce', 'user'),
-  ]) {
-    const resolved = path.resolve(recompUserDir)
-    if (!dirs.includes(resolved)) {
-      dirs.push(resolved)
-    }
+
+  for (const recompUserDir of getDefaultRecompSaveDirs()) {
+    pushUnique(recompUserDir)
   }
+
   return dirs
 }
 
@@ -1428,22 +1442,12 @@ function isDefaultEmulatorSaveDir(dir: string): boolean {
   const normalized = path.resolve(dir).toLowerCase()
   if (
     DEFAULT_EMULATOR_SAVE_ROOTS.some((emu) =>
-      normalized.endsWith(path.join(emu, 'nand', 'user', 'save', '0000000000000000').toLowerCase()),
+      normalized.endsWith(`${path.sep}${path.join(emu, 'nand', 'user', 'save', '0000000000000000')}`.toLowerCase()),
     )
   ) {
     return true
   }
-  const defaultRecompDirs = [
-    'E:\\Longshot\\Game\\user',
-    path.join(os.homedir(), 'Games', 'Longshot', 'user'),
-    path.join(os.homedir(), 'Games', 'Hookshot', 'user'),
-    path.join(os.homedir(), 'Games', 'ProjectReLink', 'user'),
-    path.join(os.homedir(), 'Games', 'ProjectReLink', 'game', 'user'),
-    path.join(os.homedir(), 'Games', 'ReLink', 'user'),
-    path.join(os.homedir(), 'Games', 'ReLink', 'game', 'user'),
-    path.join(os.homedir(), 'Games', 'Triforce', 'user'),
-  ]
-  return defaultRecompDirs.some((d) => normalized === path.resolve(d).toLowerCase())
+  return getDefaultRecompSaveDirs().some((d) => normalized === path.resolve(d).toLowerCase())
 }
 
 function findBestSlotInRoot(
@@ -1479,9 +1483,9 @@ function findBestSlotInRoot(
 
 /**
  * Finds the most recently modified save slot directory across candidate save roots.
- * Explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR overrides take priority over default
- * %APPDATA%\{fritchii,lichii,eden} roots; among default roots, the most recently
- * modified save slot wins across all installed emulators.
+ * Explicit *_SAVE_DIR overrides take priority over default %APPDATA%, $XDG_DATA_HOME,
+ * and ~/Games recomp roots; among default roots, the most recently modified save slot
+ * wins across all installed emulators.
  */
 export function findLatestSaveSlotDir(
   candidateDirs: string[] = getCandidateSaveDirs(),

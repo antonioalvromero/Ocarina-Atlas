@@ -1,6 +1,6 @@
 {
   "name": "oot-remake-map",
-  "version": "2.2.1",
+  "version": "2.3.0-linux.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,7 @@
     "start": "vite preview",
     "server:build": "vite build && node node_modules/rolldown/bin/cli.mjs scripts/server-entry.ts --platform node --format esm --minify -o dist/standalone-server.mjs",
     "build:win": "node scripts/build-win.mjs",
+    "build:linux": "node scripts/build-linux.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

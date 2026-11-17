@@ -1,4 +1,4 @@
-name: Release Windows Portable
+name: Release Portable Bundles
 
 on:
   push:
@@ -114,11 +114,83 @@ jobs:
           compression-level: 0
           if-no-files-found: error
 
-  # Optional Linux packaging job (e.g. package-linux for v2.3.0-linux.1+) can be added
-  # alongside package-windows and listed in publish-release.needs.
+  package-linux:
+    name: Build & Verify Linux x64 Portable Tarball
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+
+      - name: Cache node_modules
+        id: deps-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json', 'bun.lock', 'package.json') }}
+
+      - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Verify C compiler availability
+        run: gcc --version
+
+      - name: Run TypeScript typecheck
+        run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build portable Linux release
+        run: npm run build:linux
+
+      - name: Verify release artifacts and smoke-test OcarinaAtlas (Linux)
+        run: |
+          chmod +x scripts/smoke-test-linux.sh
+          ./scripts/smoke-test-linux.sh
+
+      - name: Generate Linux SHA-256 checksum file
+        run: |
+          (cd release && sha256sum OcarinaAtlas-Linux-x64.tar.gz > OcarinaAtlas-Linux-x64.tar.gz.sha256)
+          cat release/OcarinaAtlas-Linux-x64.tar.gz.sha256
+
+      - name: Attest Linux build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: release/OcarinaAtlas-Linux-x64.tar.gz
+
+      - name: Upload Linux build artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: OcarinaAtlas-Linux-x64
+          path: |
+            release/OcarinaAtlas-Linux-x64.tar.gz
+            release/OcarinaAtlas-Linux-x64.tar.gz.sha256
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
   publish-release:
     name: Publish GitHub Release
-    needs: [package-windows]
+    needs: [package-windows, package-linux]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
@@ -141,6 +213,12 @@ jobs:
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: OcarinaAtlas-Windows-x64
+          path: release-artifacts
+
+      - name: Download Linux portable artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: OcarinaAtlas-Linux-x64
           path: release-artifacts
 
       - name: Detect release refs, pre-release state & AI summary provider
@@ -246,6 +324,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           COPILOT_NOTES_FILE: ${{ runner.temp }}/copilot-notes.md
           ZIP_PATH: release-artifacts/OcarinaAtlas-Windows-x64.zip
+          LINUX_TAR_PATH: release-artifacts/OcarinaAtlas-Linux-x64.tar.gz
           OUT_PATH: release-artifacts/RELEASE_NOTES.md
         run: |
           node scripts/generate-release-notes.mjs
@@ -270,6 +349,8 @@ jobs:
           files: |
             release-artifacts/OcarinaAtlas-Windows-x64.zip
             release-artifacts/OcarinaAtlas-Windows-x64.zip.sha256
+            release-artifacts/OcarinaAtlas-Linux-x64.tar.gz
+            release-artifacts/OcarinaAtlas-Linux-x64.tar.gz.sha256
           body_path: release-artifacts/RELEASE_NOTES.md
           generate_release_notes: false
 
@@ -287,5 +368,10 @@ jobs:
           actual_prerelease="$(echo "$release_json" | jq -r '.isPrerelease')"
           if [ "$actual_prerelease" != "$EXPECTED_PRERELEASE" ]; then
             echo "ERROR: Expected isPrerelease=$EXPECTED_PRERELEASE for tag $RELEASE_TAG, got $actual_prerelease" >&2
+            exit 1
+          fi
+          asset_count="$(echo "$release_json" | jq -r '.assets | length')"
+          if [ "$asset_count" -ne 4 ]; then
+            echo "ERROR: Expected 4 release assets, got $asset_count" >&2
             exit 1
           fi

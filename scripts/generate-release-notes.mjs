@@ -219,6 +219,11 @@ async function main() {
     : extractGitHubRepoSlugFromRemote(runGit(['remote', 'get-url', 'origin'])) ?? ''
   const githubToken = (process.env.GITHUB_TOKEN ?? '').trim()
   const zipPath = process.env.ZIP_PATH || 'release/OcarinaAtlas-Windows-x64.zip'
+  const explicitLinuxTarPath = (process.env.LINUX_TAR_PATH ?? '').trim()
+  const defaultLinuxTarPath = 'release/OcarinaAtlas-Linux-x64.tar.gz'
+  const linuxTarPath = explicitLinuxTarPath || (fs.existsSync(defaultLinuxTarPath) ? defaultLinuxTarPath : '')
+  const zipAssetName = path.basename(zipPath)
+  const linuxAssetName = linuxTarPath ? path.basename(linuxTarPath) : null
   const outPath = process.env.OUT_PATH || 'release/RELEASE_NOTES.md'
 
   const commits = collectCommits(previousTag, resolvedHeadRef)
@@ -241,6 +246,8 @@ async function main() {
     version: tagName,
     previousTag,
     isPrerelease,
+    zipAssetName,
+    linuxAssetName,
     instructions,
     commits,
     changelogSection,
@@ -288,6 +295,7 @@ async function main() {
   }
 
   const zipSha256 = (process.env.ZIP_SHA256 ?? '').trim() || computeFileSha256(zipPath)
+  const linuxSha256 = (process.env.LINUX_SHA256 ?? '').trim() || computeFileSha256(linuxTarPath)
   const body = composeReleaseBody({
     version: tagName,
     previousTag,
@@ -301,8 +309,10 @@ async function main() {
     changelogSection,
     commits,
     githubGeneratedNotes,
-    zipAssetName: path.basename(zipPath),
+    zipAssetName,
     zipSha256,
+    linuxAssetName,
+    linuxSha256,
   })
 
   fs.mkdirSync(path.dirname(outPath), { recursive: true })

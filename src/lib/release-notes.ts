@@ -23,6 +23,8 @@ export interface ReleasePromptContext {
   version: string
   previousTag: string | null
   isPrerelease?: boolean
+  zipAssetName?: string | null
+  linuxAssetName?: string | null
   instructions: string
   commits: readonly CommitEntry[]
   changelogSection: string
@@ -46,6 +48,8 @@ export interface ComposeReleaseBodyInput {
   githubGeneratedNotes: string
   zipAssetName: string
   zipSha256: string | null
+  linuxAssetName?: string | null
+  linuxSha256?: string | null
 }
 
 const REPO_SLUG_REGEX = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/
@@ -564,7 +568,7 @@ export function normalizeAiSummary(aiSummary: string): string {
       continue
     }
 
-    if (/^##\s+(?:Downloads|Windows|What's\s+Changed|Changelog)\b/i.test(trimmed)) {
+    if (/^##\s+(?:Downloads|Windows|Linux|What's\s+Changed|Changelog)\b/i.test(trimmed)) {
       skippingTrailingDownloads = true
       continue
     }
@@ -586,7 +590,7 @@ export function buildReleasePrompt(ctx: ReleasePromptContext): {
   const systemPrompt = [
     ctx.instructions.trim() ||
       'Summarize the repository changes cleanly and accurately in English without inventing details.',
-    'Format requirements: start with one `> **Headline.** ...` callout blockquote, then use H3 category headings (`### New features`, `### Bug fixes`, `### Telemetry & Map Tracking`, `### Windows Launcher`, `### Stability, docs & CI`) with bold-led plain-language bullets (`- **Topic:** detail`). Do not output `#`, `## Changes since`, `Built from`, or `## Downloads` / `## Windows` sections.',
+    'Format requirements: start with one `> **Headline.** ...` callout blockquote, then use H3 category headings (`### New features`, `### Bug fixes`, `### Telemetry & Map Tracking`, `### Windows Launcher`, `### Stability, docs & CI`) with bold-led plain-language bullets (`- **Topic:** detail`). Do not output `#`, `## Changes since`, `Built from`, or `## Downloads` / `## Windows` / `## Linux` sections.',
   ].join('\n\n')
 
   const commitLines =
@@ -598,10 +602,24 @@ export function buildReleasePrompt(ctx: ReleasePromptContext): {
       : '- (No commit messages supplied)'
 
   const prerelease = ctx.isPrerelease ?? isPrereleaseTag(ctx.version)
+  const zipName = (ctx.zipAssetName ?? '').trim()
+  const linuxName = (ctx.linuxAssetName ?? '').trim()
+  const bundleLines: string[] = []
+  if (zipName && linuxName) {
+    bundleLines.push(
+      `Distribution Bundles: Windows x64 (\`${zipName}\`) + experimental/untested Linux x64 (\`${linuxName}\`)`,
+    )
+  } else if (linuxName) {
+    bundleLines.push(`Distribution Bundles: experimental/untested Linux x64 (\`${linuxName}\`)`)
+  } else if (zipName) {
+    bundleLines.push(`Distribution Bundles: Windows x64 (\`${zipName}\`)`)
+  }
+
   const userParts: string[] = [
     `Target Release Version: ${ctx.version}`,
     `Previous Tag: ${ctx.previousTag ?? 'None (initial release)'}`,
     ...(prerelease ? ['Release Channel: Pre-release'] : []),
+    ...bundleLines,
     `Commits:\n${commitLines}`,
   ]
 
@@ -645,19 +663,39 @@ function buildSpanMetadataLine(input: ComposeReleaseBodyInput, commitCount: numb
   return parts.join(' ')
 }
 
+function formatAssetDownloadCell(
+  repoSlug: string,
+  version: string,
+  assetName: string,
+  linkLabel: string,
+): string {
+  if (!repoSlug) return `\`${assetName}\``
+  return `[${linkLabel}](https://github.com/${repoSlug}/releases/download/${encodeURIComponent(version)}/${encodeURIComponent(assetName)})`
+}
+
+function formatAssetShaCell(sha256: string | null | undefined): string {
+  const trimmed = (sha256 ?? '').trim()
+  return trimmed ? `\`${trimmed}\`` : 'Unavailable'
+}
+
 /**
  * Composes a Lichii-style GitHub Release body with `## Changes since <prevTag>`,
  * commit span lead, blockquote highlight, category sections, `## Downloads` metadata,
- * and a `## Windows` portable ZIP checksum table.
+ * and portable Windows / optional Linux archive checksum tables.
  */
 export function composeReleaseBody(input: ComposeReleaseBodyInput): string {
   const safeRepoSlug = parseSafeRepoSlug(input.repoSlug) ?? ''
   const prerelease = input.isPrerelease ?? isPrereleaseTag(input.version)
+  const linuxAssetName = (input.linuxAssetName ?? '').trim()
   const changeSections: string[] = []
 
   if (prerelease) {
+    const includesLinux = Boolean(linuxAssetName) || /-linux/i.test(input.version)
+    const prereleaseNote = includesLinux
+      ? 'Includes **experimental/untested Linux x64** support alongside the portable Windows x64 bundle; intended for testing and early feedback (automatic stable updater channels skip pre-releases).'
+      : 'Intended for testing and early feedback; automatic stable updater channels skip pre-releases.'
     changeSections.push(
-      `> [!WARNING]\n> **Pre-release build (\`${input.version}\`).** Intended for testing and early feedback; automatic stable updater channels skip pre-releases.`,
+      `> [!WARNING]\n> **Pre-release build (\`${input.version}\`).** ${prereleaseNote}`,
     )
   }
 
@@ -734,10 +772,8 @@ export function composeReleaseBody(input: ComposeReleaseBodyInput): string {
     ? `Automatic build of \`${buildRefLabel}\` at ${fullSha}.`
     : `Release build for \`${buildRefLabel}\`.`
 
-  const downloadCell = safeRepoSlug
-    ? `[zip](https://github.com/${safeRepoSlug}/releases/download/${encodeURIComponent(input.version)}/${encodeURIComponent(input.zipAssetName)})`
-    : `\`${input.zipAssetName}\``
-  const shaCell = input.zipSha256 ? `\`${input.zipSha256}\`` : 'Unavailable'
+  const downloadCell = formatAssetDownloadCell(safeRepoSlug, input.version, input.zipAssetName, 'zip')
+  const shaCell = formatAssetShaCell(input.zipSha256)
 
   const windowsTable = [
     '| Build Type | Standard | SHA-256 | Notes |',
@@ -745,13 +781,32 @@ export function composeReleaseBody(input: ComposeReleaseBodyInput): string {
     `| amd64 / x86_64 | ${downloadCell} | ${shaCell} | Self-contained portable Windows x64 bundle (no Node.js install required) |`,
   ].join('\n')
 
+  const linuxSections: string[] = []
+  if (linuxAssetName) {
+    const linuxDownloadCell = formatAssetDownloadCell(safeRepoSlug, input.version, linuxAssetName, 'tar.gz')
+    const linuxShaCell = formatAssetShaCell(input.linuxSha256)
+    const linuxTable = [
+      '| Build Type | Standard | SHA-256 | Notes |',
+      '| --- | --- | --- | --- |',
+      `| amd64 / x86_64 | ${linuxDownloadCell} | ${linuxShaCell} | Experimental / untested portable Linux x64 bundle (bundles Node 24 + read-only \`longshot-rpc-bridge\`; no system Node.js required) |`,
+    ].join('\n')
+
+    linuxSections.push(
+      '## Linux',
+      '> [!NOTE]\n> Linux x64 support is **experimental and untested on real Linux hardware** in this pre-release. See `README.md` for `kernel.yama.ptrace_scope` notes when attaching to native Linux recomps.',
+      `Linux packages are portable tarballs: extract (\`tar -xzf ${linuxAssetName}\`) and run \`./OcarinaAtlas\` (\`./OcarinaAtlas --setup-sync\` to configure emulator sync).`,
+      linuxTable,
+    )
+  }
+
   const downloadsBlock = [
     '## Downloads',
     downloadsMeta,
     '## Windows',
     'Windows packages are in-place zip files: extract and run `OcarinaAtlas.exe`.',
     windowsTable,
-    'Quick start: extract the ZIP anywhere on Windows 10/11 x64, launch `OcarinaAtlas.exe`, click **1-Click Setup Lichii** if needed, and click **Start Map** to open Ocarina Atlas for *Ocarina of Time* Remake (`0400486024DEC000`).',
+    'Quick start: extract the ZIP anywhere on Windows 10/11 x64, launch `OcarinaAtlas.exe`, click **1-Click Setup Sync** if needed, and click **Start Map** to open Ocarina Atlas for *Ocarina of Time* Remake (`0400486024DEC000`).',
+    ...linuxSections,
   ].join('\n\n')
 
   return `${changeSections.join('\n\n')}\n\n${downloadsBlock}\n`

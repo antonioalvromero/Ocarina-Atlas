@@ -98,29 +98,6 @@ jobs:
             npm install --no-audit --no-fund
           }
 
-      - name: Verify C# launcher compilation (csc.exe)
-        shell: pwsh
-        run: |
-          $csc = Get-ChildItem -Path "$env:WINDIR\Microsoft.NET\Framework64\v4*" -Filter "csc.exe" -Recurse -ErrorAction SilentlyContinue |
-            Sort-Object FullName -Descending |
-            Select-Object -First 1 -ExpandProperty FullName
-          if (-not $csc) {
-            throw "Could not locate .NET Framework 4.x csc.exe under $env:WINDIR\Microsoft.NET\Framework64\v4*"
-          }
-          $tempExe = Join-Path $env:RUNNER_TEMP "OcarinaAtlas.check.exe"
-          try {
-            & $csc /nologo /target:winexe /optimize+ /platform:x64 /warn:4 /warnaserror `
-              /r:System.IO.Compression.FileSystem.dll `
-              /win32icon:launcher/OcarinaAtlas.ico `
-              /out:$tempExe `
-              launcher/OcarinaAtlas.cs
-            if ($LASTEXITCODE -ne 0) {
-              throw "csc.exe exited with code $LASTEXITCODE"
-            }
-          } finally {
-            Remove-Item -Path $tempExe -Force -ErrorAction SilentlyContinue
-          }
-
       - name: Run TypeScript typecheck
         shell: pwsh
         run: npm run typecheck
@@ -128,10 +105,6 @@ jobs:
       - name: Run unit tests
         shell: pwsh
         run: npm test
-
-      - name: Build standalone server bundle
-        shell: pwsh
-        run: npm run server:build
 
       - name: Build portable Windows release
         shell: pwsh

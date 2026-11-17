@@ -111,6 +111,11 @@ describe('i18n', () => {
     expect(translate('es', 'world.itemsCompleted', { done: 3, total: 10 })).toBe('3 / 10 objetos completados')
     expect(translate('fr', 'world.itemsCompleted', { done: 3, total: 10 })).toBe('3 / 10 objets complétés')
     expect(translate('pt', 'world.itemsCompleted', { done: 3, total: 10 })).toBe('3 / 10 itens concluídos')
+
+    expect(translate('en', 'filter.reachableCount', { count: 12 })).toBe('12 reachable')
+    expect(translate('es', 'filter.reachableCount', { count: 12 })).toBe('12 alcanzables')
+    expect(translate('fr', 'filter.reachableCount', { count: 12 })).toBe('12 accessibles')
+    expect(translate('pt', 'filter.reachableCount', { count: 12 })).toBe('12 alcançáveis')
   })
 
   it('translates categories, places, regions, and requirements across all locales', () => {

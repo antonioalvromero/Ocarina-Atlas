@@ -1,11 +1,13 @@
-import { Check, ChevronDown, EyeOff, Trash2 } from 'lucide-react'
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { Check, ChevronDown, EyeOff, Trash2, Wrench } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import {
   ageFilterSlot,
   hiddenCategoriesSlot,
   officialDoneSlot,
   officialRevealedSlot,
   officialVisibleSlot,
+  ownedPrereqsSlot,
+  prereqFilterEnabledSlot,
   removePin,
   setInList,
   toggleInList,
@@ -17,8 +19,15 @@ import {
 import { dataset } from '../lib/data'
 import { useI18n, type TranslationKey } from '../lib/i18n'
 import { PIN_TYPES, pinTypeLabel } from '../lib/pinTypes'
+import {
+  ALL_PREREQUISITE_KEYS,
+  expandOwnedRequirements,
+  meetsItemRequirements,
+  type RequirementEvalOptions,
+} from '../lib/prerequisites'
 import type { AgeFilter, Item } from '../lib/types'
 import { categoryStyle } from './categories'
+import { GearChecklistModal } from './GearChecklistModal'
 import { ItemDetail } from './ItemDetail'
 
 export function Section({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) {
@@ -217,11 +226,15 @@ function ItemRow({
   done,
   selected,
   onSelect,
+  ownedExpanded,
+  evalOptions,
 }: {
   item: Item
   done: boolean
   selected: boolean
   onSelect: () => void
+  ownedExpanded?: ReadonlySet<string>
+  evalOptions?: Pick<RequirementEvalOptions, 'collectedBeanIds' | 'beanAutoSynced'>
 }) {
   const { t, tItemName } = useI18n()
   const ref = useRevealWhen(selected)
@@ -245,7 +258,7 @@ function ItemRow({
           <ChevronDown size={14} className={`shrink-0 text-parchment-600 ${selected ? 'rotate-180' : ''}`} />
         </button>
       </div>
-      {selected && <ItemDetail item={item} />}
+      {selected && <ItemDetail item={item} ownedExpanded={ownedExpanded} evalOptions={evalOptions} />}
       {selected && revealed && (
         <div className="flex justify-end px-2 pb-2">
           <button
@@ -266,11 +279,15 @@ function ItemList({
   done,
   selectedId,
   onSelect,
+  ownedExpanded,
+  evalOptions,
 }: {
   items: Item[]
   done: Set<string>
   selectedId: string | null
   onSelect: (item: Item) => void
+  ownedExpanded?: ReadonlySet<string>
+  evalOptions?: Pick<RequirementEvalOptions, 'collectedBeanIds' | 'beanAutoSynced'>
 }) {
   return (
     <ul className="-mx-2 space-y-0.5">
@@ -281,6 +298,8 @@ function ItemList({
           done={done.has(item.id)}
           selected={item.id === selectedId}
           onSelect={() => onSelect(item)}
+          ownedExpanded={ownedExpanded}
+          evalOptions={evalOptions}
         />
       ))}
     </ul>
@@ -369,14 +388,27 @@ export function RevealedList({
   done,
   selectedId,
   onSelect,
+  ownedExpanded,
+  evalOptions,
 }: {
   items: Item[]
   done: Set<string>
   selectedId: string | null
   onSelect: (item: Item) => void
+  ownedExpanded?: ReadonlySet<string>
+  evalOptions?: Pick<RequirementEvalOptions, 'collectedBeanIds' | 'beanAutoSynced'>
 }) {
   if (items.length === 0) return null
-  return <ItemList items={items} done={done} selectedId={selectedId} onSelect={onSelect} />
+  return (
+    <ItemList
+      items={items}
+      done={done}
+      selectedId={selectedId}
+      onSelect={onSelect}
+      ownedExpanded={ownedExpanded}
+      evalOptions={evalOptions}
+    />
+  )
 }
 
 export function OfficialList({
@@ -387,6 +419,7 @@ export function OfficialList({
   done,
   selectedId,
   onSelect,
+  evalOptions,
 }: {
   onMap: Item[]
   unplaced: Item[]
@@ -395,29 +428,102 @@ export function OfficialList({
   done: Set<string>
   selectedId: string | null
   onSelect: (item: Item) => void
+  evalOptions?: Pick<RequirementEvalOptions, 'collectedBeanIds' | 'beanAutoSynced'>
 }) {
   const { t } = useI18n()
-  const shown = (items: Item[]) => items.filter((item) => !hidden.includes(item.cat))
+  const prereqFilterEnabled = useStored(prereqFilterEnabledSlot)
+  const ownedPrereqs = useStored(ownedPrereqsSlot)
+  const [gearOpen, setGearOpen] = useState(false)
+
+  const ownedCount = useMemo(() => {
+    const ownedSet = new Set(ownedPrereqs)
+    return ALL_PREREQUISITE_KEYS.filter((key) => ownedSet.has(key)).length
+  }, [ownedPrereqs])
+  const ownedExpanded = useMemo(() => expandOwnedRequirements(ownedPrereqs), [ownedPrereqs])
+  const detailOwnedExpanded =
+    prereqFilterEnabled || ownedPrereqs.length > 0 ? ownedExpanded : undefined
+
+  const shown = (items: Item[]) =>
+    items.filter(
+      (item) =>
+        !hidden.includes(item.cat) &&
+        (!prereqFilterEnabled || meetsItemRequirements(item, ownedExpanded, evalOptions)),
+    )
   const mapped = shown(onMap)
   const listed = shown(unplaced)
   return (
     <>
       <AgeSelector age={age} />
       <CategoryFilter items={[...onMap, ...unplaced]} hidden={hidden} />
+      <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={prereqFilterEnabled}
+          onClick={() => write(prereqFilterEnabledSlot, !prereqFilterEnabled)}
+          className="flex cursor-pointer items-center gap-2 text-xs text-parchment-200"
+        >
+          <span>{t('filter.prereqOnly')}</span>
+          <span
+            className={`relative h-4.5 w-8 rounded-full transition-colors ${
+              prereqFilterEnabled ? 'bg-moss' : 'bg-ink-600'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-parchment-50 transition-transform ${
+                prereqFilterEnabled ? 'translate-x-3.5' : ''
+              }`}
+            />
+          </span>
+        </button>
+        <div className="flex items-center gap-2">
+          {prereqFilterEnabled && onMap.length + unplaced.length > 0 && (
+            <span className="text-[11px] text-[#f3d473] tabular-nums">
+              {t('filter.reachableCount', { count: mapped.length + listed.length })}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => setGearOpen(true)}
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-ink-600 bg-ink-800 px-2 py-1 text-[11px] font-medium text-parchment-200 transition-colors hover:border-[#e8c04a]/70 hover:text-parchment-50"
+          >
+            <Wrench size={11} className="text-[#e8c04a]" aria-hidden />
+            <span>{t('filter.gearButton')}</span>
+            <span className="text-parchment-400 tabular-nums">
+              ({ownedCount}/{ALL_PREREQUISITE_KEYS.length})
+            </span>
+          </button>
+        </div>
+      </div>
       {mapped.length > 0 && (
-        <ItemList items={mapped} done={done} selectedId={selectedId} onSelect={onSelect} />
+        <ItemList
+          items={mapped}
+          done={done}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          ownedExpanded={detailOwnedExpanded}
+          evalOptions={evalOptions}
+        />
       )}
       {listed.length > 0 && (
         <>
           <h3 className="mt-3 mb-1 text-[11px] font-medium tracking-wide text-parchment-400 uppercase">
             {t('panel.notOnMap')}
           </h3>
-          <ItemList items={listed} done={done} selectedId={selectedId} onSelect={onSelect} />
+          <ItemList
+            items={listed}
+            done={done}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            ownedExpanded={detailOwnedExpanded}
+            evalOptions={evalOptions}
+          />
         </>
       )}
       {mapped.length === 0 && listed.length === 0 && (
         <p className="text-sm text-parchment-400">{t('panel.nothingToShow')}</p>
       )}
+      <GearChecklistModal open={gearOpen} onClose={() => setGearOpen(false)} />
     </>
   )
 }

@@ -1,6 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { LichiiTelemetryState } from './lichii-types'
-import { officialDoneSlot, officialRevealedSlot, read, resetSyncForTests, write } from './storage'
+import {
+  officialDoneSlot,
+  officialRevealedSlot,
+  ownedPrereqsSlot,
+  prereqAutoSyncSlot,
+  read,
+  resetSyncForTests,
+  write,
+} from './storage'
 import {
   TRACKED_BEAN_IDS,
   TRACKED_BOTTLE_IDS,
@@ -11,6 +19,7 @@ import {
   applyTelemetryState,
   getLichiiPositionSnapshot,
   getTrackerSnapshotForTests,
+  mergeOwnedRequirements,
   reconcileBeanLists,
   reconcileBottleLists,
   reconcileFairyLists,
@@ -358,5 +367,63 @@ describe('position snapshot and short-circuiting', () => {
     expect(secondPos).not.toBe(firstPos)
     expect(secondPos.position).toEqual({ x: 15, y: 20, z: 35, yaw: 180 })
     expect(read(officialDoneSlot)).toEqual(['espiritu-gs-04'])
+  })
+})
+
+describe('applyTelemetryState prerequisite auto-sync', () => {
+  it('merges live ownedRequirements into ownedPrereqsSlot while preserving manual entries', () => {
+    write(ownedPrereqsSlot, ['bugs'])
+
+    applyTelemetryState(
+      makeTelemetry({
+        ownedRequirements: ['bombs', 'hookshot'],
+      }),
+    )
+    expect(read(ownedPrereqsSlot)).toEqual(['bugs', 'bombs', 'hookshot'])
+
+    // Manual uncheck of 'bombs' is not immediately overwritten while signature is unchanged
+    write(ownedPrereqsSlot, ['bugs', 'hookshot'])
+    applyTelemetryState(
+      makeTelemetry({
+        ownedRequirements: ['bombs', 'hookshot'],
+      }),
+    )
+    expect(read(ownedPrereqsSlot)).toEqual(['bugs', 'hookshot'])
+
+    // Picking up a new item updates signature and merges the new item cleanly
+    applyTelemetryState(
+      makeTelemetry({
+        ownedRequirements: ['bombs', 'hookshot', 'zeldas-lullaby'],
+      }),
+    )
+    expect(read(ownedPrereqsSlot)).toEqual(['bugs', 'hookshot', 'bombs', 'zeldas-lullaby'])
+  })
+
+  it('skips auto-sync when prereqAutoSyncSlot is false or telemetry is not live memory', () => {
+    write(ownedPrereqsSlot, ['ocarina'])
+    write(prereqAutoSyncSlot, false)
+
+    applyTelemetryState(
+      makeTelemetry({
+        ownedRequirements: ['bombs', 'bow'],
+      }),
+    )
+    expect(read(ownedPrereqsSlot)).toEqual(['ocarina'])
+
+    write(prereqAutoSyncSlot, true)
+    applyTelemetryState(
+      makeTelemetry({
+        source: 'save',
+        connected: false,
+        emulatorRunning: false,
+        ownedRequirements: ['bombs', 'bow'],
+      }),
+    )
+    expect(read(ownedPrereqsSlot)).toEqual(['ocarina'])
+
+    expect(mergeOwnedRequirements(['ocarina'], ['ocarina'])).toEqual({
+      next: ['ocarina'],
+      changed: false,
+    })
   })
 })

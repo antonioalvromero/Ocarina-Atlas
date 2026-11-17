@@ -12,7 +12,10 @@ import {
   officialDoneSlot,
   officialRevealedSlot,
   officialVisibleSlot,
+  ownedPrereqsSlot,
   pinsSlot,
+  prereqAutoSyncSlot,
+  prereqFilterEnabledSlot,
   read,
   removePin,
   resetSyncForTests,
@@ -22,6 +25,7 @@ import {
   useStored,
   viewSlot,
   write,
+  zoomSlot,
 } from './storage'
 
 function fakeWindow() {
@@ -180,6 +184,36 @@ describe('saved views', () => {
     write(viewSlot('bad') as never, stored as never)
     expect(read(viewSlot('bad'))).toEqual(INITIAL_VIEW)
   })
+
+  it('stores shared zoomSlot clamped to [0.5, 10] and falls back to 1 on invalid values', () => {
+    expect(read(zoomSlot)).toBe(1)
+    write(zoomSlot, 2.5)
+    expect(read(zoomSlot)).toBe(2.5)
+    write(zoomSlot, 0.1)
+    expect(read(zoomSlot)).toBe(0.5)
+    write(zoomSlot, 42)
+    expect(read(zoomSlot)).toBe(10)
+    window.localStorage.setItem('oot-map:v1:view-zoom', '"bad"')
+    expect(read(zoomSlot)).toBe(1)
+    window.localStorage.setItem('oot-map:v1:view-zoom', 'null')
+    expect(read(zoomSlot)).toBe(1)
+  })
+
+  it('stores prerequisite slots with expected defaults and validation', () => {
+    expect(read(prereqFilterEnabledSlot)).toBe(false)
+    write(prereqFilterEnabledSlot, true)
+    expect(read(prereqFilterEnabledSlot)).toBe(true)
+
+    expect(read(prereqAutoSyncSlot)).toBe(true)
+    write(prereqAutoSyncSlot, false)
+    expect(read(prereqAutoSyncSlot)).toBe(false)
+    window.localStorage.setItem('oot-map:v1:prereq-auto-sync', '"invalid"')
+    expect(read(prereqAutoSyncSlot)).toBe(true)
+
+    expect(read(ownedPrereqsSlot)).toEqual([])
+    window.localStorage.setItem('oot-map:v1:owned-prereqs', JSON.stringify(['bombs', 42, null, 'bow']))
+    expect(read(ownedPrereqsSlot)).toEqual(['bombs', 'bow'])
+  })
 })
 
 describe('PC↔tablet remote sync', () => {
@@ -196,9 +230,14 @@ describe('PC↔tablet remote sync', () => {
     expect(isSyncableKey('item-count-visible')).toBe(true)
     expect(isSyncableKey('age-filter')).toBe(true)
     expect(isSyncableKey('age')).toBe(true)
+    expect(isSyncableKey('prereq-filter-enabled')).toBe(true)
+    expect(isSyncableKey('owned-prereqs')).toBe(true)
+    expect(isSyncableKey('prereq-auto-sync')).toBe(true)
     expect(isSyncableKey('pins:kokiri:principal')).toBe(true)
     expect(isSyncableKey('oot-map:v1:pins:deku:1F')).toBe(true)
 
+    expect(isSyncableKey('view-zoom')).toBe(false)
+    expect(isSyncableKey('oot-map:v1:view-zoom')).toBe(false)
     expect(isSyncableKey('view:world')).toBe(false)
     expect(isSyncableKey('oot-map:v1:view:forest:1F')).toBe(false)
     expect(isSyncableKey('lichii-follow')).toBe(false)

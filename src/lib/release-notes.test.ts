@@ -9,6 +9,7 @@ import {
   formatSafeHttpError,
   groupCommitsForLichii,
   groupCommitSubjects,
+  isPrereleaseTag,
   isSafeGitRef,
   normalizeAiSummary,
   normalizeTagVersion,
@@ -24,6 +25,14 @@ describe('normalizeTagVersion', () => {
     expect(normalizeTagVersion('refs/tags/v1.0.1')).toBe('1.0.1')
     expect(normalizeTagVersion('V2.3.0')).toBe('2.3.0')
     expect(normalizeTagVersion('1.0.0')).toBe('1.0.0')
+  })
+
+  it('detects pre-release tags containing a hyphen suffix', () => {
+    expect(isPrereleaseTag('v2.3.0-linux.1')).toBe(true)
+    expect(isPrereleaseTag('v2.3.0-rc.1')).toBe(true)
+    expect(isPrereleaseTag('refs/tags/v2.3.0-beta.1')).toBe(true)
+    expect(isPrereleaseTag('v2.2.1')).toBe(false)
+    expect(isPrereleaseTag('2.3.0')).toBe(false)
   })
 })
 
@@ -239,6 +248,34 @@ describe('composeReleaseBody', () => {
     expect(body).toContain('### Bug fixes')
     expect(body).toContain('- **Prevent stale floor badge** (`bbbb222`).')
     expect(body).not.toMatch(/\b(feat|fix)\(/i)
+  })
+
+  it('adds pre-release context to prompts and warning banner to pre-release bodies', () => {
+    const prompt = buildReleasePrompt({
+      version: 'v2.3.0-linux.1',
+      previousTag: 'v2.2.1',
+      instructions: '',
+      commits: [{ sha: 'cccc333', subject: 'feat(linux): add portable tarball build' }],
+      changelogSection: '',
+      githubGeneratedNotes: '',
+    })
+    expect(prompt.userPrompt).toContain('Release Channel: Pre-release')
+
+    const body = composeReleaseBody({
+      version: 'v2.3.0-linux.1',
+      previousTag: 'v2.2.1',
+      repoSlug: 'antonioalvromero/Ocarina-Atlas',
+      aiSummary: null,
+      aiProviderLabel: null,
+      changelogSection: '',
+      commits: [{ sha: 'cccc333', subject: 'feat(linux): add portable tarball build' }],
+      githubGeneratedNotes: '',
+      zipAssetName: 'OcarinaAtlas-Windows-x64.zip',
+      zipSha256: 'abc123',
+    })
+    expect(body).toContain('**Pre-release build (`v2.3.0-linux.1`).**')
+    expect(body).toContain('## Changes since v2.2.1')
+    expect(body).toContain('## Downloads')
   })
 })
 

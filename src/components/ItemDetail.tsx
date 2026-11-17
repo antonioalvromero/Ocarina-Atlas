@@ -1,7 +1,8 @@
-import { Moon } from 'lucide-react'
+import { Check, Moon } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { categoryName } from '../lib/data'
 import { useI18n, type TranslationKey } from '../lib/i18n'
+import { isRequirementClauseMet, type RequirementEvalOptions } from '../lib/prerequisites'
 import type { Item } from '../lib/types'
 import { RichText } from './RichText'
 
@@ -11,9 +12,20 @@ const ageLabelKeys: Record<string, TranslationKey> = {
   both: 'panel.ageChildOrAdult',
 }
 
-function Chip({ children }: { children: ReactNode }) {
+type ChipTone = 'neutral' | 'met' | 'missing'
+
+const CHIP_TONE_CLASS: Record<ChipTone, string> = {
+  neutral: 'border-ink-600 bg-ink-800 text-parchment-200',
+  met: 'border-moss/55 bg-moss/15 text-moss',
+  missing: 'border-ember/60 bg-ember/10 text-ember',
+}
+
+function Chip({ children, tone = 'neutral', title }: { children: ReactNode; tone?: ChipTone; title?: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded border border-ink-600 bg-ink-800 px-1.5 py-0.5 text-[11px] text-parchment-200">
+    <span
+      title={title}
+      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] ${CHIP_TONE_CLASS[tone]}`}
+    >
       {children}
     </span>
   )
@@ -33,10 +45,19 @@ function Photo({ src, alt }: { src: string; alt: string }) {
   )
 }
 
-export function ItemDetail({ item }: { item: Item }) {
+export function ItemDetail({
+  item,
+  ownedExpanded,
+  evalOptions,
+}: {
+  item: Item
+  ownedExpanded?: ReadonlySet<string>
+  evalOptions?: Pick<RequirementEvalOptions, 'collectedBeanIds' | 'beanAutoSynced'>
+}) {
   const { t, tCategory, tRequirement, tItemName, tItemDesc, tItemHint } = useI18n()
   const itemName = tItemName(item.id, item.name)
   const ageKey = item.age ? ageLabelKeys[item.age] : undefined
+  const requirementOptions = evalOptions ? { ...evalOptions, item } : { item }
   return (
     <div className="space-y-3 px-2 pt-1 pb-3 text-sm leading-relaxed text-parchment-200">
       <div className="flex flex-wrap gap-1">
@@ -59,11 +80,22 @@ export function ItemDetail({ item }: { item: Item }) {
         <div>
           <p className="mb-1 text-[11px] font-medium tracking-wide text-parchment-400 uppercase">{t('item.requires')}</p>
           <ul className="flex flex-wrap gap-1">
-            {item.requires.map((requirement, index) => (
-              <li key={index}>
-                <Chip>{tRequirement(requirement)}</Chip>
-              </li>
-            ))}
+            {item.requires.map((requirement, index) => {
+              const met = ownedExpanded
+                ? isRequirementClauseMet(requirement, ownedExpanded, requirementOptions)
+                : null
+              return (
+                <li key={index}>
+                  <Chip
+                    tone={met === true ? 'met' : met === false ? 'missing' : 'neutral'}
+                    title={met === false ? t('filter.missingReqs') : undefined}
+                  >
+                    {met === true && <Check size={10} strokeWidth={3} aria-hidden />}
+                    {tRequirement(requirement)}
+                  </Chip>
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}

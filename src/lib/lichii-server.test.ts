@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { dataset, formatFloorLabel } from './data'
 import {
   classifyGdmCollectibles,
+  classifyGdmRequirements,
   closeLichiiRpc,
   deriveConnectionStatus,
   deriveDynamicVtables,
@@ -26,6 +27,7 @@ import {
   KNOWN_HEART_CONTAINER_HASH_MAP,
   KNOWN_HEART_PIECE_BOOL_HASH_MAP,
   KNOWN_HEART_PIECE_HASH_MAP,
+  KNOWN_REQUIREMENT_BOOL_HASH_MAP,
   KNOWN_SKULLTULA_HASH_MAP,
   KNOWN_THOUGHT_BOOL_HASH_MAP,
   LichiiRpcClient,
@@ -106,15 +108,17 @@ describe('Lichii environment config helpers', () => {
     expect(getLichiiPort({ LICHII_PORT: 'invalid' })).toBe(6545)
   })
 
-  it('checks LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR before default APPDATA and recomp save directories', () => {
+  it('checks LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR / TRIFORCE_SAVE_DIR before default APPDATA and recomp save directories', () => {
     const appData = path.join(os.tmpdir(), 'fake-appdata')
     const explicit = path.join(os.tmpdir(), 'custom-lichii-saves')
     const explicitFritchii = path.join(os.tmpdir(), 'custom-fritchii-saves')
     const explicitLongshot = path.join(os.tmpdir(), 'custom-longshot-saves')
     const explicitRelink = path.join(os.tmpdir(), 'custom-relink-saves')
+    const explicitTriforce = path.join(os.tmpdir(), 'custom-triforce-saves')
     const fritchiiDefault = path.join(appData, 'fritchii', 'nand', 'user', 'save', '0000000000000000')
     const lichiiDefault = path.join(appData, 'lichii', 'nand', 'user', 'save', '0000000000000000')
     const edenDefault = path.join(appData, 'eden', 'nand', 'user', 'save', '0000000000000000')
+    const cheezyemuDefault = path.join(appData, 'cheezyemu', 'nand', 'user', 'save', '0000000000000000')
     const recompDefaults = [
       path.resolve('E:\\Longshot\\Game\\user'),
       path.resolve(path.join(os.homedir(), 'Games', 'Longshot', 'user')),
@@ -123,8 +127,9 @@ describe('Lichii environment config helpers', () => {
       path.resolve(path.join(os.homedir(), 'Games', 'ProjectReLink', 'game', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'ReLink', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'ReLink', 'game', 'user')),
+      path.resolve(path.join(os.homedir(), 'Games', 'Triforce', 'user')),
     ]
-    const defaultDirs = [fritchiiDefault, lichiiDefault, edenDefault, ...recompDefaults]
+    const defaultDirs = [fritchiiDefault, lichiiDefault, edenDefault, cheezyemuDefault, ...recompDefaults]
 
     expect(getCandidateSaveDirs({ APPDATA: appData })).toEqual(defaultDirs)
     expect(getCandidateSaveDirs({ APPDATA: appData, LICHII_SAVE_DIR: '   ' })).toEqual(defaultDirs)
@@ -135,12 +140,14 @@ describe('Lichii environment config helpers', () => {
         FRITCHII_SAVE_DIR: explicitFritchii,
         LONGSHOT_SAVE_DIR: explicitLongshot,
         RELINK_SAVE_DIR: explicitRelink,
+        TRIFORCE_SAVE_DIR: explicitTriforce,
       }),
     ).toEqual([
       path.resolve(explicit),
       path.resolve(explicitFritchii),
       path.resolve(explicitLongshot),
       path.resolve(explicitRelink),
+      path.resolve(explicitTriforce),
       ...defaultDirs,
     ])
   })
@@ -345,6 +352,9 @@ describe('Lichii environment config helpers', () => {
       expect(
         detectEmulatorFromPath(path.join(tmpRoot, 'Games', 'ReLink', 'user', 'save', uid, 'slot_00')),
       ).toBe('relink')
+      expect(
+        detectEmulatorFromPath(path.join(tmpRoot, 'Games', 'Triforce', 'user', 'save', uid, 'slot_00')),
+      ).toBe('triforce')
     } finally {
       homeSpy.mockRestore()
       fs.rmSync(tmpRoot, { recursive: true, force: true })
@@ -503,10 +513,10 @@ describe('parseMasterFlagTableBuffer', () => {
     expect(parsedUncollected?.collectedHeartContainerIds).toEqual([])
   })
 
-  it('detects all 20 Type 0/1 Heart Pieces when 0x100000000n is set and omits when unset', () => {
-    expect(KNOWN_HEART_PIECE_HASH_MAP).toHaveLength(20)
+  it('detects all 14 Type 0 freestanding Heart Pieces when 0x100000000n is set and omits when unset', () => {
+    expect(KNOWN_HEART_PIECE_HASH_MAP).toHaveLength(14)
     const allHpIds = KNOWN_HEART_PIECE_HASH_MAP.flatMap((e) => e.itemIds)
-    expect(new Set(allHpIds).size).toBe(20)
+    expect(new Set(allHpIds).size).toBe(14)
 
     const heartItems = new Set(
       dataset.items.filter((i) => i.cat === 'heart').map((i) => i.id),
@@ -544,13 +554,19 @@ describe('parseMasterFlagTableBuffer', () => {
   })
 })
 
-describe('Type 2 SaveBuf Sec 1 Heart Piece bools', () => {
-  it('covers all 16 remaining Heart Pieces in dataset with no overlap with Master Flag Table', () => {
-    expect(KNOWN_HEART_PIECE_BOOL_HASH_MAP).toHaveLength(16)
+describe('Type 1/2 SaveBuf Sec 1 Heart Piece bools', () => {
+  it('covers all 22 remaining Heart Pieces in dataset (including Dampe race & Gerudo bridge chests) with no overlap with Master Flag Table', () => {
+    expect(KNOWN_HEART_PIECE_BOOL_HASH_MAP).toHaveLength(22)
     const boolIds = KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.itemId)
     const boolHashes = KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.hash >>> 0)
-    expect(new Set(boolIds).size).toBe(16)
-    expect(new Set(boolHashes).size).toBe(16)
+    expect(new Set(boolIds).size).toBe(22)
+    expect(new Set(boolHashes).size).toBe(22)
+    expect(KNOWN_HEART_PIECE_BOOL_HASH_MAP).toEqual(
+      expect.arrayContaining([
+        { hash: 0x8331e107, itemId: 'cementerio-heart-02' },
+        { hash: 0x7001f17c, itemId: 'valle-heart-02' },
+      ]),
+    )
 
     const masterHpIds = new Set(KNOWN_HEART_PIECE_HASH_MAP.flatMap((e) => e.itemIds))
     for (const id of boolIds) {
@@ -645,7 +661,7 @@ describe('SaveBuf Sec 1 & Sec 3 Beans, Great Fairies, and Bottles', () => {
     expect(KNOWN_BEAN_BOOL_HASH_MAP).toHaveLength(10)
     expect(KNOWN_FAIRY_BOOL_HASH_MAP).toHaveLength(6)
     expect(KNOWN_BOTTLE_BOOL_HASH_MAP).toHaveLength(4)
-    expect(KNOWN_THOUGHT_BOOL_HASH_MAP).toHaveLength(19)
+    expect(KNOWN_THOUGHT_BOOL_HASH_MAP).toHaveLength(22)
 
     const allSec1Entries = [
       ...KNOWN_HEART_PIECE_BOOL_HASH_MAP,
@@ -654,7 +670,7 @@ describe('SaveBuf Sec 1 & Sec 3 Beans, Great Fairies, and Bottles', () => {
       ...KNOWN_BOTTLE_BOOL_HASH_MAP,
       ...KNOWN_THOUGHT_BOOL_HASH_MAP,
     ]
-    expect(new Set(allSec1Entries.map((e) => e.hash >>> 0)).size).toBe(55)
+    expect(new Set(allSec1Entries.map((e) => e.hash >>> 0)).size).toBe(64)
     expect(new Set(allSec1Entries.map((e) => e.hash >>> 0)).has(GHOST_SHOP_COUPON_NUM_HASH >>> 0)).toBe(
       false,
     )
@@ -685,7 +701,9 @@ describe('SaveBuf Sec 1 & Sec 3 Beans, Great Fairies, and Bottles', () => {
       GHOST_SHOP_COUPON_BOTTLE_ITEM_ID,
     ].sort()
     expect(mappedBottleIds).toEqual([...bottleItems].sort())
-    expect(KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.itemId).sort()).toEqual([...thoughtItems].sort())
+    expect(Array.from(new Set(KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.itemId))).sort()).toEqual(
+      [...thoughtItems].sort(),
+    )
     expect(KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => [e.hash >>> 0, e.itemId])).toEqual([
       [0x2e9d02ca, 'cementerio-thought-01'],
       [0x444057da, 'cementerio-thought-02'],
@@ -695,6 +713,9 @@ describe('SaveBuf Sec 1 & Sec 3 Beans, Great Fairies, and Bottles', () => {
       [0xea520731, 'llanura-thought-01'],
       [0x668de3c8, 'llanura-thought-02'],
       [0x74f0b017, 'llanura-thought-03'],
+      [0x8199eea2, 'llanura-thought-03'],
+      [0xda186a0e, 'llanura-thought-03'],
+      [0x61b1d5c1, 'llanura-thought-03'],
       [0x8e8f3ae5, 'llanura-thought-04'],
       [0x00f5171f, 'llanura-thought-05'],
       [0x151ed981, 'llanura-thought-06'],
@@ -740,7 +761,7 @@ describe('SaveBuf Sec 1 & Sec 3 Beans, Great Fairies, and Bottles', () => {
       KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
     )
     expect(belowThreshold?.thoughtIds).toEqual(
-      KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
+      Array.from(new Set(KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.itemId))).sort(),
     )
 
     // Set GhostShop_CouponNum to 500 -> ciudadela-bottle-01 is awarded
@@ -808,7 +829,7 @@ describe('SaveBuf Sec 1 & Sec 3 Beans, Great Fairies, and Bottles', () => {
         KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
       )
       expect(parsed499?.savedThoughtIds).toEqual(
-        KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.itemId).sort(),
+        Array.from(new Set(KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.itemId))).sort(),
       )
 
       fs.writeFileSync(path.join(slotDir, 'progress.sav'), buildProgress(500))
@@ -1137,7 +1158,7 @@ describe('Live GameDataMgr +0x170 Bool & +0x230 Int containers', () => {
       entriesPtr,
       0x18n,
     )
-    expect(boolAddrs.size).toBe(55)
+    expect(boolAddrs.size).toBe(64)
     expect(boolAddrs.get(0x2a1c58ce)).toBe(entriesPtr + 9240n * 0x18n)
     expect(boolAddrs.has(0x8e8f3ae5)).toBe(true)
 
@@ -1221,6 +1242,50 @@ describe('Live GameDataMgr +0x170 Bool & +0x230 Int containers', () => {
     expect(classifyGdmCollectibles(boolValues, null)).toBeNull()
     boolValues.delete(0x2a1c58ce)
     expect(classifyGdmCollectibles(boolValues, 500)).toBeNull()
+  })
+
+  it('detects llanura-thought-03 from Child-age Note12_1 (0x8199eea2) alone and deduplicates multiple Note12* flags', () => {
+    const makeAllFalse = () => {
+      const m = new Map<number, boolean>()
+      for (const e of KNOWN_HEART_PIECE_BOOL_HASH_MAP) m.set(e.hash >>> 0, false)
+      for (const e of KNOWN_BEAN_BOOL_HASH_MAP) m.set(e.hash >>> 0, false)
+      for (const e of KNOWN_FAIRY_BOOL_HASH_MAP) m.set(e.hash >>> 0, false)
+      for (const e of KNOWN_BOTTLE_BOOL_HASH_MAP) m.set(e.hash >>> 0, false)
+      for (const e of KNOWN_THOUGHT_BOOL_HASH_MAP) m.set(e.hash >>> 0, false)
+      return m
+    }
+
+    const childOnly = makeAllFalse()
+    childOnly.set(0x8199eea2, true) // HaveReadHrlField_Note12_1
+    expect(classifyGdmCollectibles(childOnly, 0)?.thoughtIds).toEqual(['llanura-thought-03'])
+
+    const both = makeAllFalse()
+    both.set(0x74f0b017, true) // HaveReadHrlField_Note12
+    both.set(0x8199eea2, true) // HaveReadHrlField_Note12_1
+    expect(classifyGdmCollectibles(both, 0)?.thoughtIds).toEqual(['llanura-thought-03'])
+
+    // Also verify parseSaveBufCollectibleRange deduplicates when both flags are set
+    const allHashes = [
+      ...KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_BEAN_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_FAIRY_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      GHOST_SHOP_COUPON_NUM_HASH >>> 0,
+    ]
+    const minOff = 0x100
+    const offsets = new Map<number, number>()
+    const rangeBuf = Buffer.alloc(allHashes.length * 8)
+    allHashes.forEach((h, idx) => {
+      const rel = idx * 8
+      offsets.set(h, minOff + rel)
+      rangeBuf.writeUInt32LE(h, rel)
+      const val = h === 0x74f0b017 || h === 0x8199eea2 ? 1 : 0
+      rangeBuf.writeUInt32LE(val, rel + 4)
+    })
+    expect(parseSaveBufCollectibleRange(rangeBuf, minOff, offsets)?.thoughtIds).toEqual([
+      'llanura-thought-03',
+    ])
   })
 })
 
@@ -2007,5 +2072,107 @@ describe('projectToPlaceMap', () => {
       x: 0.8516,
       y: 0.22,
     })
+  })
+})
+
+describe('owned requirement detection (GDM + progress.sav)', () => {
+  it('classifyGdmRequirements maps equipment, dual hashes, and planted beans', () => {
+    expect(KNOWN_REQUIREMENT_BOOL_HASH_MAP).toHaveLength(34)
+
+    const boolValues = new Map<number, boolean>([
+      [0x2bb00768, true], // bombs (Item_Bomb)
+      [0x1da2c511, true], // ocarina (Item_Ocarina_Time)
+      [0x38aea3bb, true], // longshot
+      [0x01c20002, true], // zeldas-lullaby
+      [0xff98ed58, false], // hookshot false
+    ])
+
+    expect(classifyGdmRequirements(boolValues, [])).toEqual([
+      'bombs',
+      'longshot',
+      'ocarina',
+      'zeldas-lullaby',
+    ])
+
+    expect(classifyGdmRequirements(boolValues, ['lago-bean-01'])).toEqual([
+      'bombs',
+      'longshot',
+      'ocarina',
+      'planted-bean',
+      'zeldas-lullaby',
+    ])
+  })
+
+  it('parseSaveSlot reads owned requirement flags from progress.sav Sec 1 optionally', () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'oot-req-sav-'))
+    try {
+      const slotDir = path.join(tmpRoot, 'slot_00')
+      fs.mkdirSync(slotDir, { recursive: true })
+
+      // Build minimal progress.sav with Sec 1 requirement flags + 1 planted bean
+      const entries: Array<{ h: number; v: number }> = [
+        { h: 0x0ec22ee1, v: 1 }, // slingshot
+        { h: 0x7f4ce38d, v: 1 }, // boomerang
+        { h: 0x42bd296f, v: 1 }, // ocarina (Fairy)
+        { h: 0x64dc5440, v: 1 }, // epona
+        { h: 0xff98ed58, v: 0 }, // hookshot (false)
+        { h: 0x2a1c58ce, v: 1 }, // coloso-bean-01 -> also triggers planted-bean
+      ]
+      const dataOff = 0x28 + entries.length * 8
+      const prog = Buffer.alloc(dataOff)
+      prog.writeUInt32LE(dataOff, 8)
+      entries.forEach((e, idx) => {
+        const off = 0x28 + idx * 8
+        prog.writeUInt32LE(e.h >>> 0, off)
+        prog.writeUInt32LE(e.v >>> 0, off + 4)
+      })
+      fs.writeFileSync(path.join(slotDir, 'progress.sav'), prog)
+
+      const parsed = parseSaveSlot({ dir: slotDir, key: `req-${Date.now()}`, mtimeMs: Date.now() })
+      expect(parsed).not.toBeNull()
+      expect(parsed!.savedBeanIds).toEqual(['coloso-bean-01'])
+      expect(parsed!.savedRequirementKeys).toEqual([
+        'boomerang',
+        'epona',
+        'ocarina',
+        'planted-bean',
+        'slingshot',
+      ])
+    } finally {
+      fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('scanGdmContainerHashTableBuffer + classifyGdmCollectibles remain compatible when optional requirement hashes are mixed in', () => {
+    const reqHashes = [0x2bb00768, 0x38aea3bb, 0x01c20002] // bombs, longshot, zeldas-lullaby
+    const collectibleHashes = [
+      ...KNOWN_HEART_PIECE_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_BEAN_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_FAIRY_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_BOTTLE_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+      ...KNOWN_THOUGHT_BOOL_HASH_MAP.map((e) => e.hash >>> 0),
+    ]
+    const boolValues = new Map<number, boolean>()
+    for (const h of collectibleHashes) boolValues.set(h, false)
+    for (const h of reqHashes) boolValues.set(h, true)
+    boolValues.set(0x7a7961c3, true) // kakariko-bottle-01
+
+    expect(classifyGdmCollectibles(boolValues, 0)).toEqual({
+      heartPieceIds: [],
+      beanIds: [],
+      fairyIds: [],
+      bottleIds: ['kakariko-bottle-01'],
+      thoughtIds: [],
+    })
+    expect(classifyGdmRequirements(boolValues, [])).toEqual([
+      'bombs',
+      'longshot',
+      'zeldas-lullaby',
+    ])
+
+    // Removing a required collectible hash still causes classifyGdmCollectibles to return null
+    // even though total map size exceeds 64 due to optional requirement hashes.
+    boolValues.delete(0x7a7961c3)
+    expect(classifyGdmCollectibles(boolValues, 0)).toBeNull()
   })
 })

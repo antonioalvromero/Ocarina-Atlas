@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
   group: release-windows-${{ github.ref }}
   cancel-in-progress: false
@@ -19,76 +22,36 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read
-      pull-requests: read
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
 
-      - name: Detect release refs and configured AI summary provider
-        id: release-meta
-        shell: pwsh
-        env:
-          HAS_COPILOT: ${{ secrets.COPILOT_GITHUB_TOKEN != '' }}
-          HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
-          HAS_OPENAI: ${{ secrets.OPENAI_API_KEY != '' }}
-          REF_NAME_INPUT: ${{ github.ref_name }}
-        run: |
-          function Assert-SafeGitRef([string]$Value, [string]$Label) {
-            if ([string]::IsNullOrWhiteSpace($Value)) {
-              return ""
-            }
-            $trimmed = $Value.Trim()
-            if ($trimmed -match '[\r\n\t\x00-\x1f\x7f]' -or $trimmed.StartsWith('-') -or $trimmed.Contains('..') -or $trimmed.Contains('@{') -or $trimmed -notmatch '^[A-Za-z0-9._/+-]+$') {
-              throw "Unsafe characters in $Label."
-            }
-            return $trimmed
-          }
-
-          $rawHeadRef = if ([string]::IsNullOrWhiteSpace($env:REF_NAME_INPUT)) { "HEAD" } else { $env:REF_NAME_INPUT }
-          $headRef = Assert-SafeGitRef -Value $rawHeadRef -Label "head_ref"
-
-          $prevTagRaw = git describe --tags --abbrev=0 --match "v*" "$headRef^" 2>$null
-          $prevTag = ""
-          if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($prevTagRaw)) {
-            $prevTag = Assert-SafeGitRef -Value $prevTagRaw -Label "prev_tag"
-          }
-
-          $copilotBase = $prevTag
-          if ([string]::IsNullOrWhiteSpace($copilotBase)) {
-            $firstCommit = (git rev-list --max-parents=0 HEAD | Select-Object -First 1)
-            $copilotBase = Assert-SafeGitRef -Value $firstCommit -Label "copilot_base_ref"
-          }
-
-          $provider = "none"
-          if ($env:HAS_COPILOT -eq "true") {
-            $provider = "copilot"
-          } elseif ($env:HAS_GEMINI -eq "true") {
-            $provider = "gemini"
-          } elseif ($env:HAS_OPENAI -eq "true") {
-            $provider = "openai"
-          }
-
-          "head_ref=$headRef" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "prev_tag=$prevTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "copilot_base_ref=$copilotBase" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "provider=$provider" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+      - name: Cache node_modules
+        id: deps-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json', 'bun.lock', 'package.json') }}
 
       - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           if (Test-Path package-lock.json) {
-            npm ci
+            npm ci --no-audit --no-fund
           } else {
-            npm install
+            npm install --no-audit --no-fund
           }
 
       - name: Run TypeScript typecheck
@@ -107,6 +70,145 @@ jobs:
         shell: pwsh
         run: ./scripts/smoke-test-win.ps1 -Port 34568
 
+      - name: Generate SHA-256 checksum file
+        shell: pwsh
+        run: |
+          $zipPath = "release/OcarinaAtlas-Windows-x64.zip"
+          $hash = (Get-FileHash -Path $zipPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          $line = "$hash  OcarinaAtlas-Windows-x64.zip"
+          $shaPath = Join-Path (Resolve-Path "release").Path "OcarinaAtlas-Windows-x64.zip.sha256"
+          [System.IO.File]::WriteAllText($shaPath, "$line`n", (New-Object System.Text.UTF8Encoding $false))
+          Write-Host $line
+
+      - name: Attest Windows build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: release/OcarinaAtlas-Windows-x64.zip
+
+      - name: Preview release notes (workflow_dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          HEAD_REF: ${{ github.ref_name }}
+          BUILD_REF: ${{ github.ref_name }}
+          IS_PRERELEASE: ${{ contains(github.ref_name, '-') }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ZIP_PATH: release/OcarinaAtlas-Windows-x64.zip
+          OUT_PATH: release/RELEASE_NOTES.md
+        run: |
+          node scripts/generate-release-notes.mjs
+          if (Test-Path release/RELEASE_NOTES.md) {
+            Get-Content release/RELEASE_NOTES.md | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+
+      - name: Upload Windows build artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: OcarinaAtlas-Windows-x64
+          path: |
+            release/OcarinaAtlas-Windows-x64.zip
+            release/OcarinaAtlas-Windows-x64.zip.sha256
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
+  # Optional Linux packaging job (e.g. package-linux for v2.3.0-linux.1+) can be added
+  # alongside package-windows and listed in publish-release.needs.
+  publish-release:
+    name: Publish GitHub Release
+    needs: [package-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+
+      - name: Download Windows portable artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: OcarinaAtlas-Windows-x64
+          path: release-artifacts
+
+      - name: Detect release refs, pre-release state & AI summary provider
+        id: release-meta
+        shell: bash
+        env:
+          HAS_COPILOT: ${{ secrets.COPILOT_GITHUB_TOKEN != '' }}
+          HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+          HAS_OPENAI: ${{ secrets.OPENAI_API_KEY != '' }}
+          REF_NAME_INPUT: ${{ github.ref_name }}
+          IS_PRERELEASE_INPUT: ${{ contains(github.ref_name, '-') }}
+        run: |
+          set -euo pipefail
+
+          trim_str() {
+            local s="$1"
+            s="${s#"${s%%[![:space:]]*}"}"
+            s="${s%"${s##*[![:space:]]}"}"
+            printf '%s' "$s"
+          }
+
+          assert_safe_git_ref() {
+            local value
+            value="$(trim_str "$1")"
+            local label="$2"
+            if [ -z "$value" ]; then
+              printf ''
+              return 0
+            fi
+            if [[ "$value" == -* ]] || [[ "$value" == *".."* ]] || [[ "$value" == *"@{"* ]] || [[ ! "$value" =~ ^[A-Za-z0-9._/+-]+$ ]]; then
+              echo "Unsafe characters in $label." >&2
+              exit 1
+            fi
+            printf '%s' "$value"
+          }
+
+          raw_head_ref="${REF_NAME_INPUT:-HEAD}"
+          head_ref="$(assert_safe_git_ref "$raw_head_ref" "head_ref")"
+
+          prev_tag=""
+          if prev_tag_raw="$(git describe --tags --abbrev=0 --match "v*" "${head_ref}^" 2>/dev/null)"; then
+            prev_tag="$(assert_safe_git_ref "$prev_tag_raw" "prev_tag")"
+          fi
+
+          copilot_base="$prev_tag"
+          if [ -z "$copilot_base" ]; then
+            first_commit="$(git rev-list --max-parents=0 HEAD | head -n 1)"
+            copilot_base="$(assert_safe_git_ref "$first_commit" "copilot_base_ref")"
+          fi
+
+          provider="none"
+          if [ "$HAS_COPILOT" = "true" ]; then
+            provider="copilot"
+          elif [ "$HAS_GEMINI" = "true" ]; then
+            provider="gemini"
+          elif [ "$HAS_OPENAI" = "true" ]; then
+            provider="openai"
+          fi
+
+          {
+            echo "head_ref=$head_ref"
+            echo "prev_tag=$prev_tag"
+            echo "copilot_base_ref=$copilot_base"
+            echo "provider=$provider"
+            echo "is_prerelease=$IS_PRERELEASE_INPUT"
+          } >> "$GITHUB_OUTPUT"
+
+      # Run Copilot CLI on Linux (ubuntu-latest) to avoid Windows .cmd spawn EINVAL.
       - name: Generate AI release notes with GitHub Copilot (optional)
         id: copilot-notes
         if: steps.release-meta.outputs.provider == 'copilot' && steps.release-meta.outputs.copilot_base_ref != '' && steps.release-meta.outputs.copilot_base_ref != steps.release-meta.outputs.head_ref
@@ -122,19 +224,19 @@ jobs:
 
       - name: Save Copilot output for release body composer
         if: steps.copilot-notes.outcome == 'success'
-        shell: pwsh
+        shell: bash
         env:
           COPILOT_OUTPUT: ${{ steps.copilot-notes.outputs.release-notes }}
         run: |
-          $copilotPath = Join-Path $env:RUNNER_TEMP "copilot-notes.md"
-          if (-not [string]::IsNullOrWhiteSpace($env:COPILOT_OUTPUT)) {
-            $env:COPILOT_OUTPUT | Out-File -FilePath $copilotPath -Encoding utf8
-          }
+          if [ -n "${COPILOT_OUTPUT// }" ]; then
+            printf '%s\n' "$COPILOT_OUTPUT" > "${RUNNER_TEMP}/copilot-notes.md"
+          fi
 
       - name: Compose release notes & checksum
-        shell: pwsh
+        shell: bash
         env:
           RELEASE_TAG: ${{ github.ref_name }}
+          IS_PRERELEASE: ${{ steps.release-meta.outputs.is_prerelease }}
           HEAD_REF: ${{ steps.release-meta.outputs.head_ref }}
           PREVIOUS_TAG: ${{ steps.release-meta.outputs.prev_tag }}
           BUILD_REF: ${{ github.ref_name }}
@@ -143,55 +245,31 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           COPILOT_NOTES_FILE: ${{ runner.temp }}/copilot-notes.md
-          ZIP_PATH: release/OcarinaAtlas-Windows-x64.zip
-          OUT_PATH: release/RELEASE_NOTES.md
+          ZIP_PATH: release-artifacts/OcarinaAtlas-Windows-x64.zip
+          OUT_PATH: release-artifacts/RELEASE_NOTES.md
         run: |
           node scripts/generate-release-notes.mjs
-          if (Test-Path release/RELEASE_NOTES.md) {
-            Get-Content release/RELEASE_NOTES.md | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-          }
-
-      - name: Upload Windows build artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: OcarinaAtlas-Windows-x64
-          path: release/OcarinaAtlas-Windows-x64.zip
-          if-no-files-found: error
+          if [ -f release-artifacts/RELEASE_NOTES.md ]; then
+            cat release-artifacts/RELEASE_NOTES.md >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload composed release notes artifact
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-notes
-          path: release/RELEASE_NOTES.md
+          path: release-artifacts/RELEASE_NOTES.md
+          retention-days: 7
           if-no-files-found: error
 
-  publish-release:
-    name: Publish GitHub Release
-    needs: package-windows
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download Windows portable artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: OcarinaAtlas-Windows-x64
-          path: release-artifacts
-
-      - name: Download release notes artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: release-notes
-          path: release-artifacts
-
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           name: Ocarina Atlas ${{ github.ref_name }}
-          files: release-artifacts/OcarinaAtlas-Windows-x64.zip
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          make_latest: ${{ contains(github.ref_name, '-') && 'false' || 'true' }}
+          files: |
+            release-artifacts/OcarinaAtlas-Windows-x64.zip
+            release-artifacts/OcarinaAtlas-Windows-x64.zip.sha256
           body_path: release-artifacts/RELEASE_NOTES.md
           generate_release_notes: false
 
@@ -201,6 +279,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ github.ref_name }}
           GITHUB_REPO: ${{ github.repository }}
+          EXPECTED_PRERELEASE: ${{ contains(github.ref_name, '-') }}
         run: |
           set -euo pipefail
-          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPO" --json tagName,name,assets --jq '{tagName, name, assetCount: (.assets | length)}'
+          release_json="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPO" --json tagName,name,isPrerelease,assets)"
+          echo "$release_json" | jq '{tagName, name, isPrerelease, assetCount: (.assets | length)}'
+          actual_prerelease="$(echo "$release_json" | jq -r '.isPrerelease')"
+          if [ "$actual_prerelease" != "$EXPECTED_PRERELEASE" ]; then
+            echo "ERROR: Expected isPrerelease=$EXPECTED_PRERELEASE for tag $RELEASE_TAG, got $actual_prerelease" >&2
+            exit 1
+          fi

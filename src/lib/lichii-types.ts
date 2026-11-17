@@ -1,4 +1,4 @@
-export type EmulatorKind = 'lichii' | 'fritchii' | 'eden' | 'longshot' | 'relink'
+export type EmulatorKind = 'lichii' | 'fritchii' | 'eden' | 'cheezyemu' | 'longshot' | 'relink' | 'triforce'
 
 export type LichiiTelemetryState = {
   connected: boolean
@@ -50,6 +50,8 @@ export type LichiiTelemetryState = {
   collectedThoughtIds?: string[]
   /** True when collectedThoughtIds reflects the complete active save/live flag state in RAM */
   authoritativeThoughts?: boolean
+  /** List of prerequisite equipment/song keys detected as owned from live RAM or save data */
+  ownedRequirements?: string[]
   /** Most recently collected Gold Skulltula item ID if just picked up */
   lastCollectedSkulltulaId: string | null
   lastPickedItem: string | null

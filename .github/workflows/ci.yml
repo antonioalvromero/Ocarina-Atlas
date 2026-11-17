@@ -14,9 +14,12 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
@@ -29,19 +32,29 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Cache node_modules
+        id: deps-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('package-lock.json', 'bun.lock', 'package.json') }}
+
       - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
         run: |
           if [ -f package-lock.json ]; then
-            npm ci
+            npm ci --no-audit --no-fund
           else
-            npm install
+            npm install --no-audit --no-fund
           fi
 
       - name: Run TypeScript typecheck
@@ -59,20 +72,53 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
 
+      - name: Cache node_modules
+        id: deps-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json', 'bun.lock', 'package.json') }}
+
       - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           if (Test-Path package-lock.json) {
-            npm ci
+            npm ci --no-audit --no-fund
           } else {
-            npm install
+            npm install --no-audit --no-fund
+          }
+
+      - name: Verify C# launcher compilation (csc.exe)
+        shell: pwsh
+        run: |
+          $csc = Get-ChildItem -Path "$env:WINDIR\Microsoft.NET\Framework64\v4*" -Filter "csc.exe" -Recurse -ErrorAction SilentlyContinue |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1 -ExpandProperty FullName
+          if (-not $csc) {
+            throw "Could not locate .NET Framework 4.x csc.exe under $env:WINDIR\Microsoft.NET\Framework64\v4*"
+          }
+          $tempExe = Join-Path $env:RUNNER_TEMP "OcarinaAtlas.check.exe"
+          try {
+            & $csc /nologo /target:winexe /optimize+ /platform:x64 /warn:4 /warnaserror `
+              /r:System.IO.Compression.FileSystem.dll `
+              /win32icon:launcher/OcarinaAtlas.ico `
+              /out:$tempExe `
+              launcher/OcarinaAtlas.cs
+            if ($LASTEXITCODE -ne 0) {
+              throw "csc.exe exited with code $LASTEXITCODE"
+            }
+          } finally {
+            Remove-Item -Path $tempExe -Force -ErrorAction SilentlyContinue
           }
 
       - name: Run TypeScript typecheck
@@ -83,6 +129,10 @@ jobs:
         shell: pwsh
         run: npm test
 
+      - name: Build standalone server bundle
+        shell: pwsh
+        run: npm run server:build
+
       - name: Build portable Windows release
         shell: pwsh
         run: npm run build:win
@@ -90,6 +140,15 @@ jobs:
       - name: Verify release artifacts and smoke-test OcarinaAtlas.exe
         shell: pwsh
         run: ./scripts/smoke-test-win.ps1 -Port 34567
+
+      - name: Upload temporary Windows CI artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: OcarinaAtlas-Windows-x64-ci
+          path: release/OcarinaAtlas-Windows-x64.zip
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
 
   ci-gate:
     name: CI Gate

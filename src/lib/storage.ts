@@ -13,6 +13,9 @@ const SYNCABLE_EXACT_KEYS = new Set([
   'item-count-visible',
   'age-filter',
   'age',
+  'prereq-filter-enabled',
+  'owned-prereqs',
+  'prereq-auto-sync',
 ])
 
 export type SyncStatePayload = {
@@ -113,8 +116,39 @@ export const ageFilterSlot: Slot<AgeFilter> = {
   parse: (raw) => (raw === 'child' || raw === 'adult' ? raw : 'both'),
 }
 
+export const prereqFilterEnabledSlot: Slot<boolean> = {
+  key: 'prereq-filter-enabled',
+  empty: false,
+  parse: (raw) => raw === true,
+}
+
+export const ownedPrereqsSlot: Slot<string[]> = {
+  key: 'owned-prereqs',
+  empty: NO_STRINGS,
+  parse: parseStrings,
+}
+
+export const prereqAutoSyncSlot: Slot<boolean> = {
+  key: 'prereq-auto-sync',
+  empty: true,
+  parse: (raw) => (typeof raw === 'boolean' ? raw : true),
+}
+
 export function pinsSlot(placeId: string, mapId: string): Slot<CustomPin[]> {
   return { key: `pins:${placeId}:${mapId}`, empty: NO_PINS, parse: parsePins }
+}
+
+const ZOOM_SLOT_MIN = 0.5
+const ZOOM_SLOT_MAX = 10
+
+/** Shared map zoom level across views, kept per-device (non-syncable). */
+export const zoomSlot: Slot<number> = {
+  key: 'view-zoom',
+  empty: 1,
+  parse: (raw) =>
+    typeof raw === 'number' && Number.isFinite(raw)
+      ? Math.min(ZOOM_SLOT_MAX, Math.max(ZOOM_SLOT_MIN, raw))
+      : 1,
 }
 
 /** Zoom and position of one map, so each map reopens where it was left. */

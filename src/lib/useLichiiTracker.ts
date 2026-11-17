@@ -6,6 +6,8 @@ import {
   initRemoteSync,
   officialDoneSlot,
   officialRevealedSlot,
+  ownedPrereqsSlot,
+  prereqAutoSyncSlot,
   read,
   useStored,
   write,
@@ -203,7 +205,8 @@ function hasMetaChanged(prev: StoreState, next: StoreState): boolean {
     !sameOptionalStringArray(a.collectedBeanIds, b.collectedBeanIds) ||
     !sameOptionalStringArray(a.collectedFairyIds, b.collectedFairyIds) ||
     !sameOptionalStringArray(a.collectedBottleIds, b.collectedBottleIds) ||
-    !sameOptionalStringArray(a.collectedThoughtIds, b.collectedThoughtIds)
+    !sameOptionalStringArray(a.collectedThoughtIds, b.collectedThoughtIds) ||
+    !sameOptionalStringArray(a.ownedRequirements, b.ownedRequirements)
   )
 }
 
@@ -230,6 +233,7 @@ function resetCategorySyncState(state: CategorySyncState, clearAnnounced: boolea
 }
 
 let activeSubscribers = 0
+let lastPrereqSyncSignature: string | null = null
 const gsSyncState = createCategorySyncState()
 const heartSyncState = createCategorySyncState()
 const heartPieceSyncState = createCategorySyncState()
@@ -717,9 +721,47 @@ function processAutoThoughts(next: LichiiTelemetryState) {
   })
 }
 
+export function mergeOwnedRequirements(
+  currentOwned: readonly string[],
+  detectedRequirements: readonly string[],
+): { next: string[]; changed: boolean } {
+  if (detectedRequirements.length === 0) {
+    return { next: currentOwned as string[], changed: false }
+  }
+  const existing = new Set(currentOwned)
+  const additions: string[] = []
+  for (const key of detectedRequirements) {
+    if (!existing.has(key)) {
+      existing.add(key)
+      additions.push(key)
+    }
+  }
+  if (additions.length === 0) {
+    return { next: currentOwned as string[], changed: false }
+  }
+  return { next: [...currentOwned, ...additions], changed: true }
+}
+
+function processAutoPrerequisites(next: LichiiTelemetryState): void {
+  if (!isLiveMemoryState(next) || !read(prereqAutoSyncSlot)) {
+    lastPrereqSyncSignature = null
+    return
+  }
+  const detected = next.ownedRequirements
+  if (!detected) return
+  const signature = detected.join(',')
+  if (signature === lastPrereqSyncSignature) return
+  lastPrereqSyncSignature = signature
+  const { next: merged, changed } = mergeOwnedRequirements(read(ownedPrereqsSlot), detected)
+  if (changed) {
+    write(ownedPrereqsSlot, merged)
+  }
+}
+
 export function applyTelemetryState(data: LichiiTelemetryState) {
   if (!isLiveMemoryState(data)) {
     resetAllCategorySyncStates(true)
+    lastPrereqSyncSignature = null
   } else {
     processAutoSkulltulas(data)
     processAutoHeartContainers(data)
@@ -728,6 +770,7 @@ export function applyTelemetryState(data: LichiiTelemetryState) {
     processAutoFairies(data)
     processAutoBottles(data)
     processAutoThoughts(data)
+    processAutoPrerequisites(data)
   }
   commitStoreState({
     ...storeState,
@@ -738,6 +781,7 @@ export function applyTelemetryState(data: LichiiTelemetryState) {
 
 export function resetTrackerForTests() {
   resetAllCategorySyncStates(true)
+  lastPrereqSyncSignature = null
   storeState = {
     telemetry: INITIAL_TELEMETRY,
     toasts: [],
@@ -774,6 +818,7 @@ async function pollOnce() {
     applyTelemetryState(data)
   } catch (err) {
     resetAllCategorySyncStates(true)
+    lastPrereqSyncSignature = null
     commitStoreState({
       ...storeState,
       telemetry: {
@@ -962,6 +1007,7 @@ export function useLichiiTracker(options?: { trackPosition?: boolean }) {
   )
   const followPlayer = useStored(lichiiFollowSlot)
   const autoMarkSkulltulas = useStored(lichiiAutoSkulltulaSlot)
+  const prereqAutoSync = useStored(prereqAutoSyncSlot)
 
   // Auto-dismiss toasts after 7 seconds
   useEffect(() => {
@@ -983,6 +1029,26 @@ export function useLichiiTracker(options?: { trackPosition?: boolean }) {
     () => write(lichiiAutoSkulltulaSlot, !autoMarkSkulltulas),
     [autoMarkSkulltulas],
   )
+  const setPrereqAutoSync = useCallback((next: boolean) => {
+    write(prereqAutoSyncSlot, next)
+    if (next) {
+      lastPrereqSyncSignature = null
+      processAutoPrerequisites(storeState.telemetry)
+    }
+  }, [])
+  const togglePrereqAutoSync = useCallback(
+    () => setPrereqAutoSync(!prereqAutoSync),
+    [prereqAutoSync, setPrereqAutoSync],
+  )
+  const syncPrereqsFromGame = useCallback((): boolean => {
+    const detected = storeState.telemetry.ownedRequirements
+    if (!detected) return false
+    const { next: merged, changed } = mergeOwnedRequirements(read(ownedPrereqsSlot), detected)
+    if (changed) {
+      write(ownedPrereqsSlot, merged)
+    }
+    return true
+  }, [])
 
   return {
     state: snapshot.telemetry,
@@ -995,6 +1061,10 @@ export function useLichiiTracker(options?: { trackPosition?: boolean }) {
     autoMarkSkulltulas,
     setAutoMarkSkulltulas,
     toggleAutoMarkSkulltulas,
+    prereqAutoSync,
+    setPrereqAutoSync,
+    togglePrereqAutoSync,
+    syncPrereqsFromGame,
     dismissToast: dismissSkulltulaToast,
     refresh: pollOnce,
   }

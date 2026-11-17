@@ -11,6 +11,7 @@ import {
   type PointerEvent,
   type ReactNode,
   type Ref,
+  type SetStateAction,
 } from 'react'
 import {
   boxToFraction,
@@ -27,7 +28,7 @@ import {
   type Size,
 } from '../lib/coords'
 import { useI18n } from '../lib/i18n'
-import { read, viewSlot, write } from '../lib/storage'
+import { read, viewSlot, write, zoomSlot } from '../lib/storage'
 import type { Fraction } from '../lib/types'
 
 const DRAG_THRESHOLD = 4
@@ -96,11 +97,39 @@ export function MapViewport({
   sizeRef.current = size
   const aspectRef = useRef(aspect)
   aspectRef.current = aspect
+  const viewIdRef = useRef(viewId)
+  viewIdRef.current = viewId
+  const latestViewRef = useRef(view)
+  latestViewRef.current = view
 
   const pointers = useRef(new Map<number, Point>())
   const pressStart = useRef<Point>({ x: 0, y: 0 })
   const dragged = useRef(false)
   const pauseUntil = useRef(0)
+  const dirtyRef = useRef(false)
+
+  function flushView(targetViewId: string) {
+    if (!dirtyRef.current) return
+    dirtyRef.current = false
+    const current = latestViewRef.current
+    write(viewSlot(targetViewId), current)
+    write(zoomSlot, current.zoom)
+  }
+
+  function mutateView(updater: SetStateAction<typeof INITIAL_VIEW>) {
+    dirtyRef.current = true
+    setView(updater)
+  }
+
+  function applyResetView() {
+    pauseUntil.current = 0
+    setSmoothPan(false)
+    dirtyRef.current = false
+    latestViewRef.current = INITIAL_VIEW
+    setView(INITIAL_VIEW)
+    write(zoomSlot, INITIAL_VIEW.zoom)
+    write(viewSlot(viewIdRef.current), INITIAL_VIEW)
+  }
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -114,10 +143,24 @@ export function MapViewport({
   }, [])
 
   // After mount, so hydration matches the server, which has no saved view.
-  useLayoutEffect(() => setView(read(viewSlot(viewId))), [viewId])
+  useLayoutEffect(() => {
+    pauseUntil.current = 0
+    setSmoothPan(false)
+    pointers.current.clear()
+    dragged.current = false
+    const saved = read(viewSlot(viewId))
+    const loaded = { ...saved, zoom: read(zoomSlot) }
+    dirtyRef.current = false
+    latestViewRef.current = loaded
+    setView(loaded)
+    return () => {
+      flushView(viewId)
+    }
+  }, [viewId])
 
   useEffect(() => {
-    const timer = setTimeout(() => write(viewSlot(viewId), view), SAVE_DELAY)
+    if (!dirtyRef.current) return
+    const timer = setTimeout(() => flushView(viewId), SAVE_DELAY)
     return () => clearTimeout(timer)
   }, [viewId, view])
 
@@ -131,13 +174,13 @@ export function MapViewport({
         if (!Number.isFinite(x) || !Number.isFinite(y)) return
         pauseUntil.current = 0
         setSmoothPan(false)
-        setView((v) => ({ ...v, cx: x, cy: y }))
+        mutateView((v) => ({ ...v, cx: x, cy: y }))
       },
       panToFraction: (x, y) => {
         if (!Number.isFinite(x) || !Number.isFinite(y)) return
         if (pointers.current.size > 0 || Date.now() < pauseUntil.current) return
         setSmoothPan(true)
-        setView((v) => {
+        mutateView((v) => {
           const currentSize = sizeRef.current
           if (!currentSize) {
             return v.cx === x && v.cy === y ? v : { ...v, cx: x, cy: y }
@@ -148,9 +191,7 @@ export function MapViewport({
         })
       },
       resetView: () => {
-        pauseUntil.current = 0
-        setSmoothPan(false)
-        setView(INITIAL_VIEW)
+        applyResetView()
       },
     }),
     [],
@@ -168,7 +209,7 @@ export function MapViewport({
       const speed = event.ctrlKey ? 0.01 : 0.002
       const factor = Math.exp(-event.deltaY * lines * speed)
       setSmoothPan(false)
-      setView((v) => zoomViewAt(clampView(v, size, aspect), anchor, factor, size, aspect))
+      mutateView((v) => zoomViewAt(clampView(v, size, aspect), anchor, factor, size, aspect))
     }
     container.addEventListener('wheel', onWheel, { passive: false })
     return () => container.removeEventListener('wheel', onWheel)
@@ -214,7 +255,7 @@ export function MapViewport({
     const other = [...pointers.current].find(([id]) => id !== event.pointerId)?.[1]
     pointers.current.set(event.pointerId, point)
 
-    setView((current) => {
+    mutateView((current) => {
       const v = clampView(current, size, aspect)
       if (!other) {
         const delta = { x: point.x - previous.x, y: point.y - previous.y }
@@ -259,7 +300,7 @@ export function MapViewport({
     if (!size) return
     const middle = { x: size.width / 2, y: size.height / 2 }
     setSmoothPan(false)
-    setView((v) => zoomViewAt(clampView(v, size, aspect), middle, factor, size, aspect))
+    mutateView((v) => zoomViewAt(clampView(v, size, aspect), middle, factor, size, aspect))
   }
 
   function onKeyDown(event: KeyboardEvent) {
@@ -267,7 +308,7 @@ export function MapViewport({
     const pan = (x: number, y: number) => {
       pauseUntil.current = Date.now() + DRAG_PAUSE_MS
       setSmoothPan(false)
-      setView((v) => panView(clampView(v, size, aspect), { x, y }, size, aspect))
+      mutateView((v) => panView(clampView(v, size, aspect), { x, y }, size, aspect))
     }
     const actions: Record<string, () => void> = {
       ArrowLeft: () => pan(KEY_PAN, 0),
@@ -277,10 +318,7 @@ export function MapViewport({
       '+': () => zoomBy(BUTTON_ZOOM),
       '=': () => zoomBy(BUTTON_ZOOM),
       '-': () => zoomBy(1 / BUTTON_ZOOM),
-      '0': () => {
-        setSmoothPan(false)
-        setView(INITIAL_VIEW)
-      },
+      '0': applyResetView,
     }
     const action = actions[event.key]
     if (!action) return
@@ -360,10 +398,7 @@ export function MapViewport({
             type="button"
             aria-label={t('map.resetView')}
             className={control}
-            onClick={() => {
-              setSmoothPan(false)
-              setView(INITIAL_VIEW)
-            }}
+            onClick={applyResetView}
           >
             <Scan size={16} />
           </button>

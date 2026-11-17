@@ -1,11 +1,16 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Check, EyeOff, Maximize2, Minimize2, Trash2, X } from 'lucide-react'
+import { ArrowLeft, Check, EyeOff, Info, Maximize2, Minimize2, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { dataset, formatFloorLabel, isUnplaced, itemsOfPlace, matchesAge, startMapOf } from '../lib/data'
 import { floorToGrid, gridPoint, layoutFloors } from '../lib/floorGrid'
 import { useI18n, type TranslationKey } from '../lib/i18n'
 import { findMerge, type Merge } from '../lib/merge'
 import { OTHER_PIN, PIN_TYPES, pinTypeLabel } from '../lib/pinTypes'
+import {
+  expandOwnedRequirements,
+  meetsItemRequirements,
+  type RequirementEvalOptions,
+} from '../lib/prerequisites'
 import {
   addPin,
   ageFilterSlot,
@@ -14,7 +19,9 @@ import {
   officialDoneSlot,
   officialRevealedSlot,
   officialVisibleSlot,
+  ownedPrereqsSlot,
   pinsSlot,
+  prereqFilterEnabledSlot,
   removePin,
   setInList,
   toggleInList,
@@ -32,6 +39,7 @@ import {
   useLichiiTracker,
 } from '../lib/useLichiiTracker'
 import { categoryStyle } from './categories'
+import { CreditsModal } from './CreditsModal'
 import { FloorGrid, type FloorDraft } from './FloorGrid'
 import { ItemDetail } from './ItemDetail'
 import { LanguageSelector } from './LanguageSelector'
@@ -100,6 +108,7 @@ function Sidebar({
   children: ReactNode
 }) {
   const { t, tPlace, tRegion, tPlaceIntro } = useI18n()
+  const [creditsOpen, setCreditsOpen] = useState(false)
   return (
     <aside className="hyrule-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto border-ink-700 bg-ink-900 max-lg:border-t max-lg:landscape:w-72 max-lg:landscape:flex-none max-lg:landscape:border-t-0 max-lg:landscape:border-l lg:w-96 lg:flex-none lg:border-l">
       <header className="px-4 pt-3 pb-3">
@@ -139,6 +148,18 @@ function Sidebar({
         </details>
       </header>
       {children}
+      <footer className="mt-auto border-t border-ink-700 px-4 py-2.5">
+        <button
+          type="button"
+          onClick={() => setCreditsOpen(true)}
+          aria-label={t('credits.title')}
+          className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-parchment-400 transition-colors hover:text-parchment-50"
+        >
+          <Info size={13} className="text-[#e8c04a]" aria-hidden />
+          <span>{t('credits.button')}</span>
+        </button>
+      </footer>
+      <CreditsModal open={creditsOpen} onClose={() => setCreditsOpen(false)} />
     </aside>
   )
 }
@@ -293,6 +314,8 @@ function ItemPinPopover({
   projection,
   done,
   revealed,
+  ownedExpanded,
+  evalOptions,
   onClose,
 }: {
   item: Item
@@ -300,6 +323,8 @@ function ItemPinPopover({
   projection: Projection
   done: boolean
   revealed: boolean
+  ownedExpanded?: ReadonlySet<string>
+  evalOptions?: Pick<RequirementEvalOptions, 'collectedBeanIds' | 'beanAutoSynced'>
   onClose: () => void
 }) {
   const { t, tItemName } = useI18n()
@@ -350,7 +375,7 @@ function ItemPinPopover({
         )}
       </div>
       <div className="mt-2 -mx-2">
-        <ItemDetail item={item} />
+        <ItemDetail item={item} ownedExpanded={ownedExpanded} evalOptions={evalOptions} />
       </div>
     </PinPopoverFrame>
   )
@@ -563,8 +588,22 @@ function MappedPlace({
   const showOfficial = useStored(officialVisibleSlot)
   const hidden = useStored(hiddenCategoriesSlot)
   const age = useStored(ageFilterSlot)
+  const prereqFilterEnabled = useStored(prereqFilterEnabledSlot)
+  const ownedPrereqs = useStored(ownedPrereqsSlot)
   const revealedIds = useStored(officialRevealedSlot)
   const revealed = useMemo(() => new Set(revealedIds), [revealedIds])
+  const [mergeDisabledPrereq, setMergeDisabledPrereq] = useState(false)
+
+  const ownedExpanded = useMemo(() => expandOwnedRequirements(ownedPrereqs), [ownedPrereqs])
+  const detailOwnedExpanded =
+    prereqFilterEnabled || ownedPrereqs.length > 0 ? ownedExpanded : undefined
+  const beanEvalOptions = useMemo(
+    () =>
+      tracker.prereqAutoSync && tracker.state.authoritativeBeans && tracker.state.collectedBeanIds
+        ? { beanAutoSynced: true, collectedBeanIds: new Set(tracker.state.collectedBeanIds) }
+        : undefined,
+    [tracker.prereqAutoSync, tracker.state.authoritativeBeans, tracker.state.collectedBeanIds],
+  )
 
   const { done, count } = useOfficialProgress(items)
   const grid = useMemo(() => layoutFloors(place.maps), [place.maps])
@@ -580,8 +619,12 @@ function MappedPlace({
   // With official pins off, only reveals count, and no filter can hide those.
   const isShown = useCallback(
     (item: Item) =>
-      showOfficial ? matchesAge(item, age) && !hidden.includes(item.cat) : revealed.has(item.id),
-    [showOfficial, age, hidden, revealed],
+      showOfficial
+        ? matchesAge(item, age) &&
+          !hidden.includes(item.cat) &&
+          (!prereqFilterEnabled || meetsItemRequirements(item, ownedExpanded, beanEvalOptions))
+        : revealed.has(item.id),
+    [showOfficial, age, hidden, prereqFilterEnabled, ownedExpanded, beanEvalOptions, revealed],
   )
   const shownOnMap = useMemo(() => inView.filter(isShown), [inView, isShown])
 
@@ -685,6 +728,7 @@ function MappedPlace({
     setSelection(null)
     setDraft(null)
     setMerge(null)
+    setMergeDisabledPrereq(false)
   }
 
   function showGrid() {
@@ -692,11 +736,16 @@ function MappedPlace({
     setSelection(null)
     setDraft(null)
     setMerge(null)
+    setMergeDisabledPrereq(false)
   }
 
   function mergeInto(item: Item, to: Fraction, type: string, name: string, from: FloorDraft) {
     const unhid = showOfficial && hidden.includes(item.cat)
     const previousAge = showOfficial && !matchesAge(item, age) ? age : null
+    const disabledPrereq =
+      showOfficial &&
+      prereqFilterEnabled &&
+      !meetsItemRequirements(item, ownedExpanded, beanEvalOptions)
     setMerge({
       id: Date.now(),
       item,
@@ -710,9 +759,11 @@ function MappedPlace({
       unhid,
       previousAge,
     })
+    setMergeDisabledPrereq(disabledPrereq)
     setInList(officialRevealedSlot, item.id, true)
     if (unhid) setInList(hiddenCategoriesSlot, item.cat, false)
     if (previousAge) write(ageFilterSlot, 'both')
+    if (disabledPrereq) write(prereqFilterEnabledSlot, false)
     setDraft(null)
     setSelection(null)
   }
@@ -738,6 +789,8 @@ function MappedPlace({
     if (merge.revealed) setInList(officialRevealedSlot, merge.item.id, false)
     if (merge.unhid) setInList(hiddenCategoriesSlot, merge.item.cat, true)
     if (merge.previousAge) write(ageFilterSlot, merge.previousAge)
+    if (mergeDisabledPrereq) write(prereqFilterEnabledSlot, true)
+    setMergeDisabledPrereq(false)
     const pin = addPin(place.id, merge.mapId, merge.name, merge.from, merge.type)
     setMerge(null)
     setSelection({ kind: 'custom', id: pin.id, mapId: merge.mapId })
@@ -795,6 +848,8 @@ function MappedPlace({
           projection={projection}
           done={done.has(item.id)}
           revealed={revealed.has(item.id)}
+          ownedExpanded={detailOwnedExpanded}
+          evalOptions={beanEvalOptions}
           onClose={() => setSelection(null)}
         />
       )
@@ -893,7 +948,6 @@ function MappedPlace({
           />
         ) : (
           <MapViewport
-            key={map.id}
             ref={viewport}
             viewId={`${place.id}:${map.id}`}
             image={map.image}
@@ -984,7 +1038,10 @@ function MappedPlace({
             done={done.has(merge.item.id)}
             onComplete={() => setInList(officialDoneSlot, merge.item.id, true)}
             onUndo={undoMerge}
-            onDismiss={() => setMerge(null)}
+            onDismiss={() => {
+              setMerge(null)
+              setMergeDisabledPrereq(false)
+            }}
           />
         )}
         {isFullscreen ? (
@@ -1085,9 +1142,17 @@ function MappedPlace({
                 done={done}
                 selectedId={selectedItem}
                 onSelect={selectOfficial}
+                evalOptions={beanEvalOptions}
               />
             ) : (
-              <RevealedList items={shownOnMap} done={done} selectedId={selectedItem} onSelect={selectOfficial} />
+              <RevealedList
+                items={shownOnMap}
+                done={done}
+                selectedId={selectedItem}
+                onSelect={selectOfficial}
+                ownedExpanded={detailOwnedExpanded}
+                evalOptions={beanEvalOptions}
+              />
             )}
           </Section>
         </Sidebar>
@@ -1109,6 +1174,13 @@ function MaplessPlace({ place, initialItemId }: { place: Place; initialItemId?: 
   const age = useStored(ageFilterSlot)
   const showOfficial = useStored(officialVisibleSlot)
   const { done, count } = useOfficialProgress(items)
+  const beanEvalOptions = useMemo(
+    () =>
+      tracker.prereqAutoSync && tracker.state.authoritativeBeans && tracker.state.collectedBeanIds
+        ? { beanAutoSynced: true, collectedBeanIds: new Set(tracker.state.collectedBeanIds) }
+        : undefined,
+    [tracker.prereqAutoSync, tracker.state.authoritativeBeans, tracker.state.collectedBeanIds],
+  )
 
   const targetPlace = useMemo(
     () =>
@@ -1176,6 +1248,7 @@ function MaplessPlace({ place, initialItemId }: { place: Place; initialItemId?: 
                 done={done}
                 selectedId={selected}
                 onSelect={(item) => setSelected((id) => (id === item.id ? null : item.id))}
+                evalOptions={beanEvalOptions}
               />
             )}
           </Section>

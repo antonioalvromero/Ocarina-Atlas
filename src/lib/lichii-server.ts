@@ -14,7 +14,7 @@ const DEFAULT_LICHII_PORT = 6545
 const OOT_REMAKE_TITLE_ID = '0400486024DEC000'
 const placesById = new Map<string, Place>(dataset.places.map((p) => [p.id, p]))
 
-const DEFAULT_EMULATOR_SAVE_ROOTS = ['fritchii', 'lichii', 'eden'] as const
+const DEFAULT_EMULATOR_SAVE_ROOTS = ['fritchii', 'lichii', 'eden', 'cheezyemu'] as const
 
 /** Resolves the Lichii/Fritchii TCP debug host from LICHII_HOST or FRITCHII_HOST (default '127.0.0.1'). */
 export function getLichiiHost(env: NodeJS.ProcessEnv = process.env): string {
@@ -38,16 +38,18 @@ export function getLichiiPort(env: NodeJS.ProcessEnv = process.env): number {
 
 /**
  * Returns candidate emulator save root directories in priority order:
- * explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR overrides first, then default
- * %APPDATA%\{fritchii,lichii,eden}\nand\user\save\0000000000000000 and Longshot/Hookshot/ProjectReLink user paths.
+ * explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR / TRIFORCE_SAVE_DIR overrides first, then default
+ * %APPDATA%\{fritchii,lichii,eden}\nand\user\save\0000000000000000 and Longshot/Hookshot/ProjectReLink/Triforce user paths.
  */
 export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): string[] {
   const dirs: string[] = []
   for (const explicitRaw of [
     env.LICHII_SAVE_DIR,
     env.FRITCHII_SAVE_DIR,
+    env.CHEEZYEMU_SAVE_DIR,
     env.LONGSHOT_SAVE_DIR,
     env.RELINK_SAVE_DIR,
+    env.TRIFORCE_SAVE_DIR,
   ]) {
     const explicit = explicitRaw?.trim()
     if (explicit) {
@@ -72,6 +74,7 @@ export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): stri
     path.join(os.homedir(), 'Games', 'ProjectReLink', 'game', 'user'),
     path.join(os.homedir(), 'Games', 'ReLink', 'user'),
     path.join(os.homedir(), 'Games', 'ReLink', 'game', 'user'),
+    path.join(os.homedir(), 'Games', 'Triforce', 'user'),
   ]) {
     const resolved = path.resolve(recompUserDir)
     if (!dirs.includes(resolved)) {
@@ -897,20 +900,22 @@ export const KNOWN_HEART_PIECE_HASH_MAP: Array<{ hashes: bigint[]; itemIds: stri
   { hashes: [0xbaec91d6ed8dd96bn], itemIds: ['lago-heart-02'] },
   { hashes: [0xdfd66c63357cdea7n], itemIds: ['valle-heart-01'] },
   { hashes: [0x92feab9a9810c619n], itemIds: ['coloso-heart-01'] },
-  // Type 1 (6 Obj_TBox_A_02 chest Heart Pieces)
-  { hashes: [0x292e3ed6acacbe44n], itemIds: ['llanura-heart-02'] },
-  { hashes: [0x4ccffbd5778b67e2n], itemIds: ['cementerio-heart-02'] },
-  { hashes: [0x8588aaeeac14eed7n], itemIds: ['cementerio-heart-03'] },
-  { hashes: [0xdc0cbd0ac9f0b18an], itemIds: ['valle-heart-02'] },
-  { hashes: [0xab4dd26b0113ac53n], itemIds: ['fortaleza-heart-02'] },
-  { hashes: [0x2b702a67d25f1421n], itemIds: ['dominio-heart-01'] },
 ]
 
 /**
- * Known Type 2 (NPC/minigame/event) Heart Piece 32-bit MurmurHash3_32 bool hashes
- * stored in SaveBuf Section 1 (and progress.sav) mapped to oot.json item IDs.
+ * Known Type 1 (`IsTreasureBoxOpen.<decimal_u64_ActorHash>` chest) and Type 2 (NPC/minigame/event)
+ * Heart Piece 32-bit MurmurHash3_32 bool hashes stored in GameDataMgr + 0x170 (`Data.Bool`),
+ * SaveBuf Section 1, and progress.sav Section 1 mapped to oot.json item IDs.
  */
 export const KNOWN_HEART_PIECE_BOOL_HASH_MAP: Array<{ hash: number; itemId: string }> = [
+  // Type 1 (6 Obj_TBox_A_02 / Obj_TBox_A_01_memo11 chest Heart Pieces via IsTreasureBoxOpen.<decimal_u64_ActorHash>)
+  { hash: 0xda9dff2c, itemId: 'llanura-heart-02' },
+  { hash: 0x8331e107, itemId: 'cementerio-heart-02' },
+  { hash: 0x9c89c565, itemId: 'cementerio-heart-03' },
+  { hash: 0x7001f17c, itemId: 'valle-heart-02' },
+  { hash: 0x689cebe8, itemId: 'fortaleza-heart-02' },
+  { hash: 0xa1678ed9, itemId: 'dominio-heart-01' },
+  // Type 2 (16 NPC/minigame/event Heart Pieces)
   { hash: 0x5ff7aa30, itemId: 'perdido-heart-01' },
   { hash: 0x1657d7d8, itemId: 'perdido-heart-02' },
   { hash: 0xe41e1597, itemId: 'llanura-heart-01' },
@@ -998,7 +1003,10 @@ export const KNOWN_THOUGHT_BOOL_HASH_MAP: Array<{ hash: number; itemId: string }
   { hash: 0x8b8f3a34, itemId: 'lago-thought-01' },
   { hash: 0xea520731, itemId: 'llanura-thought-01' },
   { hash: 0x668de3c8, itemId: 'llanura-thought-02' },
-  { hash: 0x74f0b017, itemId: 'llanura-thought-03' },
+  { hash: 0x74f0b017, itemId: 'llanura-thought-03' }, // HaveReadHrlField_Note12 (Adult)
+  { hash: 0x8199eea2, itemId: 'llanura-thought-03' }, // HaveReadHrlField_Note12_1 (Child)
+  { hash: 0xda186a0e, itemId: 'llanura-thought-03' }, // HaveReadHrlField_Note12_2
+  { hash: 0x61b1d5c1, itemId: 'llanura-thought-03' }, // HaveReadHrlField_Note12_3
   { hash: 0x8e8f3ae5, itemId: 'llanura-thought-04' },
   { hash: 0x00f5171f, itemId: 'llanura-thought-05' },
   { hash: 0x151ed981, itemId: 'llanura-thought-06' },
@@ -1030,6 +1038,54 @@ const ALL_SAVEBUF_SEC1_BOOL_HASHES = new Set<number>([
 ])
 
 const EXPECTED_SAVEBUF_COLLECTIBLE_HASH_COUNT = ALL_SAVEBUF_SEC1_BOOL_HASHES.size + 1
+
+/**
+ * Verified SaveBuf Section 1 / GameDataMgr + 0x170 Data.Bool MurmurHash3_32 hashes
+ * for owned equipment, upgrades, songs, and situational unlocks.
+ * Scanned optionally so mock saves with only collectible flags remain valid.
+ */
+export const KNOWN_REQUIREMENT_BOOL_HASH_MAP: Array<{ hash: number; requirementKey: string }> = [
+  { hash: 0x2bb00768, requirementKey: 'bombs' },
+  { hash: 0xa63f1e2d, requirementKey: 'bombs' },
+  { hash: 0x5ab49c8e, requirementKey: 'bombchus' },
+  { hash: 0x7f4ce38d, requirementKey: 'boomerang' },
+  { hash: 0x0ec22ee1, requirementKey: 'slingshot' },
+  { hash: 0x69ec28be, requirementKey: 'bow' },
+  { hash: 0xff98ed58, requirementKey: 'hookshot' },
+  { hash: 0x38aea3bb, requirementKey: 'longshot' },
+  { hash: 0x7227efd8, requirementKey: 'megaton-hammer' },
+  { hash: 0x5fa190e6, requirementKey: 'iron-boots' },
+  { hash: 0x7fe2a5b2, requirementKey: 'lens-of-truth' },
+  { hash: 0x1208fb3e, requirementKey: 'silver-scale' },
+  { hash: 0xccc1909a, requirementKey: 'golden-scale' },
+  { hash: 0x9880707e, requirementKey: 'goron-bracelet' },
+  { hash: 0x87e58de3, requirementKey: 'silver-gauntlets' },
+  { hash: 0x3ef15ec4, requirementKey: 'golden-gauntlets' },
+  { hash: 0x75e94e42, requirementKey: 'mirror-shield' },
+  { hash: 0x4f5a929c, requirementKey: 'zora-tunic' },
+  { hash: 0xc4e21ac2, requirementKey: 'deku-sticks' },
+  { hash: 0xfa04e611, requirementKey: 'dins-fire' },
+  { hash: 0x42bd296f, requirementKey: 'ocarina' },
+  { hash: 0x1da2c511, requirementKey: 'ocarina' },
+  { hash: 0x0e6264c7, requirementKey: 'gerudo-card' },
+  { hash: 0xcf2d3db4, requirementKey: 'bugs' },
+  { hash: 0x53db16a6, requirementKey: 'blue-fire' },
+  { hash: 0x01c20002, requirementKey: 'zeldas-lullaby' },
+  { hash: 0xb492ac33, requirementKey: 'eponas-song' },
+  { hash: 0xd3f8bfcc, requirementKey: 'sarias-song' },
+  { hash: 0x165dd1ad, requirementKey: 'suns-song' },
+  { hash: 0x03b3450e, requirementKey: 'song-of-time' },
+  { hash: 0x2b39dd4f, requirementKey: 'song-of-storms' },
+  { hash: 0x49041ab9, requirementKey: 'bolero-of-fire' },
+  { hash: 0x5e86fb4d, requirementKey: 'scarecrows-song' },
+  { hash: 0x64dc5440, requirementKey: 'epona' },
+]
+
+const KNOWN_REQUIREMENT_BOOL_HASH_TO_KEY = new Map<number, string>(
+  KNOWN_REQUIREMENT_BOOL_HASH_MAP.map((entry) => [entry.hash >>> 0, entry.requirementKey]),
+)
+
+const KNOWN_REQUIREMENT_BOOL_HASHES = new Set<number>(KNOWN_REQUIREMENT_BOOL_HASH_TO_KEY.keys())
 
 type ViewBox = { vx: number; vy: number; vw: number; vh: number }
 const svgViewBoxCache = new Map<string, ViewBox>()
@@ -1262,6 +1318,7 @@ type ParsedSaveSlot = {
   savedFairyIds: string[]
   savedBottleIds: string[]
   savedThoughtIds: string[]
+  savedRequirementKeys: string[]
 }
 
 let cachedSaveSlot: ParsedSaveSlot | null = null
@@ -1358,6 +1415,9 @@ export function detectEmulatorFromPath(dirPath: string): EmulatorKind | undefine
   if (segments.includes('projectrelink') || segments.includes('relink')) {
     return 'relink'
   }
+  if (segments.includes('triforce')) {
+    return 'triforce'
+  }
   if (segments.includes('longshot') || segments.includes('hookshot')) {
     return 'longshot'
   }
@@ -1381,6 +1441,7 @@ function isDefaultEmulatorSaveDir(dir: string): boolean {
     path.join(os.homedir(), 'Games', 'ProjectReLink', 'game', 'user'),
     path.join(os.homedir(), 'Games', 'ReLink', 'user'),
     path.join(os.homedir(), 'Games', 'ReLink', 'game', 'user'),
+    path.join(os.homedir(), 'Games', 'Triforce', 'user'),
   ]
   return defaultRecompDirs.some((d) => normalized === path.resolve(d).toLowerCase())
 }
@@ -1472,6 +1533,7 @@ export function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: num
   const savedFairyIds = new Set<string>()
   const savedBottleIds = new Set<string>()
   const savedThoughtIds = new Set<string>()
+  const savedRequirementKeys = new Set<string>()
 
   try {
     if (fs.existsSync(capPath)) {
@@ -1530,6 +1592,8 @@ export function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: num
               if (bottleId) savedBottleIds.add(bottleId)
               const thoughtId = KNOWN_THOUGHT_BOOL_HASH_TO_ITEM_ID.get(h)
               if (thoughtId) savedThoughtIds.add(thoughtId)
+              const reqKey = KNOWN_REQUIREMENT_BOOL_HASH_TO_KEY.get(h)
+              if (reqKey) savedRequirementKeys.add(reqKey)
             } else if (sec === 3 && h === GHOST_SHOP_COUPON_NUM_HASH) {
               if (prog.readInt32LE(off + 4) >= GHOST_SHOP_COUPON_THRESHOLD) {
                 savedBottleIds.add(GHOST_SHOP_COUPON_BOTTLE_ITEM_ID)
@@ -1569,6 +1633,10 @@ export function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: num
     return null
   }
 
+  if (savedBeanIds.size > 0) {
+    savedRequirementKeys.add('planted-bean')
+  }
+
   const normYaw = ((yaw % 360) + 360) % 360
   const parsed: ParsedSaveSlot = {
     slotName: path.basename(slotInfo.dir),
@@ -1584,6 +1652,7 @@ export function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: num
     savedFairyIds: Array.from(savedFairyIds).sort(),
     savedBottleIds: Array.from(savedBottleIds).sort(),
     savedThoughtIds: Array.from(savedThoughtIds).sort(),
+    savedRequirementKeys: Array.from(savedRequirementKeys).sort(),
   }
   cachedSaveKey = slotInfo.key
   cachedSaveSlot = parsed
@@ -2014,6 +2083,7 @@ let cachedMasterCollectedIds: string[] | null = null
 let cachedMasterHeartContainerIds: string[] | null = null
 let cachedMasterHeartPieceIds: string[] | null = null
 let cachedSaveBufCollectibles: SaveBufCollectibles | null = null
+let cachedOwnedRequirements: string[] | null = null
 let lastHashesReadTime = 0
 let lastMasterReadTime = 0
 let lastSaveBufCollectibleReadTime = 0
@@ -2519,6 +2589,9 @@ export function classifyGdmCollectibles(
   if (boolValues.size < ALL_SAVEBUF_SEC1_BOOL_HASHES.size || couponCount === null) {
     return null
   }
+  for (const requiredHash of ALL_SAVEBUF_SEC1_BOOL_HASHES) {
+    if (!boolValues.has(requiredHash)) return null
+  }
   const heartPieceIds: string[] = []
   const beanIds: string[] = []
   const fairyIds: string[] = []
@@ -2562,8 +2635,25 @@ export function classifyGdmCollectibles(
     beanIds: beanIds.sort(),
     fairyIds: fairyIds.sort(),
     bottleIds: bottleIds.sort(),
-    thoughtIds: thoughtIds.sort(),
+    thoughtIds: Array.from(new Set(thoughtIds)).sort(),
   }
+}
+
+/** Extracts sorted owned prerequisite keys from `gdm + 0x170` Bool values and planted bean IDs. */
+export function classifyGdmRequirements(
+  boolValues: ReadonlyMap<number, boolean>,
+  beanIds: readonly string[],
+): string[] {
+  const owned = new Set<string>()
+  for (const [hash, value] of boolValues) {
+    if (!value) continue
+    const key = KNOWN_REQUIREMENT_BOOL_HASH_TO_KEY.get(hash)
+    if (key) owned.add(key)
+  }
+  if (beanIds.length > 0) {
+    owned.add('planted-bean')
+  }
+  return Array.from(owned).sort()
 }
 
 /** Validates a GameDataMgr container StockNum entry (vtable gdmStockVt, tag 0x20) and returns its 0..100 count. */
@@ -2639,6 +2729,7 @@ type LiveMemoryTelemetry = {
   masterHeartContainerIds: string[] | null
   masterHeartPieceIds: string[] | null
   saveBufCollectibles: SaveBufCollectibles | null
+  ownedRequirements: string[] | null
   liveSavedHashes: Set<bigint>
   liveSkulltulaCount: number | null
   readFailed: boolean
@@ -2653,6 +2744,7 @@ function emptyLiveMemoryTelemetry(readFailed = false): LiveMemoryTelemetry {
     masterHeartContainerIds: null,
     masterHeartPieceIds: null,
     saveBufCollectibles: null,
+    ownedRequirements: null,
     liveSavedHashes: new Set<bigint>(),
     liveSkulltulaCount: null,
     readFailed,
@@ -2805,15 +2897,21 @@ async function resolveGdmContainerEntryAddrs(
   stride: bigint,
   maxCnt = 65536,
   maxCap = 131072,
+  optionalTargetHashes?: ReadonlySet<number>,
 ): Promise<Map<number, bigint> | null> {
   if (containerAddr === 0n || !lichiiRpc.isConnected()) return null
   const hdrBuf = await readMemoryBuffer(bigintToHex(containerAddr), 0x28, 400)
   const hdr = parseGdmContainerHeader(hdrBuf, maxCnt, maxCap)
   if (!hdr) return null
 
+  const combinedTargets =
+    optionalTargetHashes && optionalTargetHashes.size > 0
+      ? new Set<number>([...targetHashes, ...optionalTargetHashes])
+      : targetHashes
+
   const totalBytes = hdr.cap * 8
   const found = new Map<number, bigint>()
-  for (let off = 0; off < totalBytes && found.size < targetHashes.size; off += MASTER_FLAG_READ_CHUNK) {
+  for (let off = 0; off < totalBytes && found.size < combinedTargets.size; off += MASTER_FLAG_READ_CHUNK) {
     const readSize = Math.min(MASTER_FLAG_READ_CHUNK, totalBytes - off)
     const chunk = await readMemoryBuffer(
       bigintToHex(hdr.hashTablePtr + BigInt(off)),
@@ -2821,10 +2919,13 @@ async function resolveGdmContainerEntryAddrs(
       800,
     )
     if (!chunk || chunk.length < 8) return null
-    scanGdmContainerHashTableBuffer(chunk, hdr.cnt, targetHashes, hdr.entriesPtr, stride, found)
+    scanGdmContainerHashTableBuffer(chunk, hdr.cnt, combinedTargets, hdr.entriesPtr, stride, found)
   }
 
-  return found.size >= targetHashes.size ? found : null
+  for (const requiredHash of targetHashes) {
+    if (!found.has(requiredHash)) return null
+  }
+  return found
 }
 
 function buildGdmBoolWindows(boolAddrs: Map<number, bigint>): GdmBoolWindowDescriptor[] {
@@ -2871,6 +2972,9 @@ async function resolveGdmLiveCollectibleAddrs(
     gdm + GDM_BOOL_CONTAINER_OFFSET,
     ALL_SAVEBUF_SEC1_BOOL_HASHES,
     GDM_BOOL_ENTRY_STRIDE,
+    65536,
+    131072,
+    KNOWN_REQUIREMENT_BOOL_HASHES,
   )
   if (!boolAddrs) return false
 
@@ -2912,7 +3016,10 @@ async function readGdmCollectiblesFromCache(
   const couponCount = parseGdmIntEntryBuffer(couponBuf, vtables.gdmStockVt)
   if (couponCount === null) return null
 
-  return classifyGdmCollectibles(boolValues, couponCount)
+  const collectibles = classifyGdmCollectibles(boolValues, couponCount)
+  if (!collectibles) return null
+  cachedOwnedRequirements = classifyGdmRequirements(boolValues, collectibles.beanIds)
+  return collectibles
 }
 
 async function readLiveGdmCollectibles(
@@ -3024,7 +3131,7 @@ export function parseSaveBufCollectibleRange(
     beanIds: beanIds.sort(),
     fairyIds: fairyIds.sort(),
     bottleIds: bottleIds.sort(),
-    thoughtIds: thoughtIds.sort(),
+    thoughtIds: Array.from(new Set(thoughtIds)).sort(),
   }
 }
 
@@ -3051,6 +3158,29 @@ export function parseSaveBufHeartPieceBoolRange(
   return collected.sort()
 }
 
+function parseSaveBufRequirementRange(
+  rangeBuf: Buffer,
+  minOff: number,
+  offsets: ReadonlyMap<number, number>,
+  beanIds: readonly string[],
+): string[] {
+  const owned = new Set<string>()
+  for (const [hash, dirOff] of offsets) {
+    const reqKey = KNOWN_REQUIREMENT_BOOL_HASH_TO_KEY.get(hash)
+    if (!reqKey) continue
+    const rel = dirOff - minOff
+    if (rel < 0 || rel + 8 > rangeBuf.length) continue
+    if (rangeBuf.readUInt32LE(rel) !== hash) continue
+    if (rangeBuf.readUInt32LE(rel + 4) !== 0) {
+      owned.add(reqKey)
+    }
+  }
+  if (beanIds.length > 0) {
+    owned.add('planted-bean')
+  }
+  return Array.from(owned).sort()
+}
+
 async function resolveSaveBufCollectibleOffsets(
   mainBase: bigint,
   vtables: DynamicVtables,
@@ -3065,6 +3195,7 @@ async function resolveSaveBufCollectibleOffsets(
   if (dataOff <= 0x28 || dataOff > 0x40000) return false
 
   const offsets = new Map<number, number>()
+  let requiredFoundCount = 0
   let minOff = Number.MAX_SAFE_INTEGER
   let maxEnd = 0
   let sec = 1
@@ -3081,11 +3212,15 @@ async function resolveSaveBufCollectibleOffsets(
         if (sec > 3) break
         continue
       }
-      const isTarget =
+      const isRequiredTarget =
         (sec === 1 && ALL_SAVEBUF_SEC1_BOOL_HASHES.has(h)) ||
         (sec === 3 && h === GHOST_SHOP_COUPON_NUM_HASH)
-      if (isTarget) {
+      const isOptionalRequirement = sec === 1 && KNOWN_REQUIREMENT_BOOL_HASHES.has(h)
+      if (isRequiredTarget || isOptionalRequirement) {
         const dirOff = off + pos
+        if (!offsets.has(h) && isRequiredTarget) {
+          requiredFoundCount++
+        }
         offsets.set(h, dirOff)
         if (dirOff < minOff) minOff = dirOff
         if (dirOff + 8 > maxEnd) maxEnd = dirOff + 8
@@ -3093,7 +3228,7 @@ async function resolveSaveBufCollectibleOffsets(
     }
   }
 
-  if (offsets.size < EXPECTED_SAVEBUF_COLLECTIBLE_HASH_COUNT || maxEnd <= minOff) {
+  if (requiredFoundCount < EXPECTED_SAVEBUF_COLLECTIBLE_HASH_COUNT || maxEnd <= minOff) {
     return false
   }
   cachedSaveBufPtr = saveBufPtr
@@ -3120,11 +3255,20 @@ async function readSaveBufCollectibleRangeFromCache(): Promise<SaveBufCollectibl
     chunks.push(chunk)
   }
 
-  return parseSaveBufCollectibleRange(
-    Buffer.concat(chunks),
+  const rangeBuf = Buffer.concat(chunks)
+  const collectibles = parseSaveBufCollectibleRange(
+    rangeBuf,
     cachedSaveBufCollectibleMinOff,
     cachedSaveBufCollectibleOffsets,
   )
+  if (!collectibles) return null
+  cachedOwnedRequirements = parseSaveBufRequirementRange(
+    rangeBuf,
+    cachedSaveBufCollectibleMinOff,
+    cachedSaveBufCollectibleOffsets,
+    collectibles.beanIds,
+  )
+  return collectibles
 }
 
 async function readLiveSaveBufCollectibles(
@@ -3135,6 +3279,7 @@ async function readLiveSaveBufCollectibles(
     const resolved = await resolveSaveBufCollectibleOffsets(mainBase, vtables)
     if (!resolved) {
       cachedSaveBufCollectibles = null
+      cachedOwnedRequirements = null
       return null
     }
   }
@@ -3152,6 +3297,9 @@ async function readLiveSaveBufCollectibles(
   }
 
   cachedSaveBufCollectibles = parsed
+  if (!parsed) {
+    cachedOwnedRequirements = null
+  }
   return parsed
 }
 
@@ -3488,6 +3636,7 @@ async function readLiveTelemetryFromMemory(): Promise<LiveMemoryTelemetry> {
     masterHeartContainerIds,
     masterHeartPieceIds,
     saveBufCollectibles,
+    ownedRequirements: cachedOwnedRequirements,
     liveSavedHashes: cachedLiveSavedHashes,
     liveSkulltulaCount,
     readFailed: false,
@@ -3540,6 +3689,7 @@ function clearPlayerAndGdmSessionCaches() {
   cachedMasterHeartContainerIds = null
   cachedMasterHeartPieceIds = null
   cachedSaveBufCollectibles = null
+  cachedOwnedRequirements = null
   prevMasterReadCount = null
   prevMasterCollectedSet = null
   stickyLastCollectedId = null
@@ -3808,6 +3958,8 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
   const rpcEmulator =
     cachedStatusRes?.emulator === 'longshot' ||
     cachedStatusRes?.emulator === 'relink' ||
+    cachedStatusRes?.emulator === 'triforce' ||
+    cachedStatusRes?.emulator === 'cheezyemu' ||
     cachedStatusRes?.emulator === 'fritchii' ||
     cachedStatusRes?.emulator === 'lichii' ||
     cachedStatusRes?.emulator === 'eden'
@@ -3815,6 +3967,13 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
       : undefined
   const emulator =
     rpcEmulator ?? (cachedLatestSlotInfo ? detectEmulatorFromPath(cachedLatestSlotInfo.dir) : undefined)
+
+  const ownedRequirements =
+    source === 'memory'
+      ? (liveState.ownedRequirements ?? undefined)
+      : source === 'save'
+        ? saveState?.savedRequirementKeys
+        : undefined
 
   return {
     connected,
@@ -3845,6 +4004,7 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
     authoritativeBottles,
     collectedThoughtIds,
     authoritativeThoughts,
+    ...(ownedRequirements !== undefined ? { ownedRequirements } : {}),
     lastCollectedSkulltulaId: stickyLastCollectedId,
     lastPickedItem,
     source,

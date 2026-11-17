@@ -11,11 +11,21 @@ using System.IO.Compression;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+
+[assembly: AssemblyTitle("Ocarina Atlas")]
+[assembly: AssemblyDescription("Interactive live companion atlas for OoT Remake")]
+[assembly: AssemblyCompany("antonioalvromero")]
+[assembly: AssemblyProduct("Ocarina Atlas")]
+[assembly: AssemblyCopyright("Copyright (c) 2026 antonioalvromero")]
+[assembly: AssemblyVersion("2.2.1.0")]
+[assembly: AssemblyFileVersion("2.2.1.0")]
 
 namespace OcarinaAtlasLauncher
 {
@@ -58,6 +68,23 @@ namespace OcarinaAtlasLauncher
         public bool StartMinimized = false;
         public bool AutoStart = false;
         public string UpdateFeedUrl = null;
+        public string RejectedUpdateFeedUrl = null;
+
+        private static void SetValidatedUpdateFeed(LaunchOptions opts, string rawUrl)
+        {
+            string trimmed = (rawUrl ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(trimmed)) return;
+            if (UpdateManager.IsAllowedUpdateFeedUrl(trimmed))
+            {
+                opts.UpdateFeedUrl = trimmed;
+                opts.RejectedUpdateFeedUrl = null;
+            }
+            else
+            {
+                opts.UpdateFeedUrl = null;
+                opts.RejectedUpdateFeedUrl = trimmed;
+            }
+        }
 
         public static LaunchOptions Parse(string[] args)
         {
@@ -65,7 +92,7 @@ namespace OcarinaAtlasLauncher
             string envUpdateFeed = Environment.GetEnvironmentVariable("OCARINA_ATLAS_UPDATE_URL");
             if (!string.IsNullOrEmpty(envUpdateFeed))
             {
-                opts.UpdateFeedUrl = envUpdateFeed.Trim();
+                SetValidatedUpdateFeed(opts, envUpdateFeed);
             }
 
             if (args == null) return opts;
@@ -146,7 +173,7 @@ namespace OcarinaAtlasLauncher
                     string raw = value ?? (i + 1 < args.Length ? args[++i] : null);
                     if (!string.IsNullOrEmpty(raw))
                     {
-                        opts.UpdateFeedUrl = raw.Trim();
+                        SetValidatedUpdateFeed(opts, raw);
                     }
                 }
             }
@@ -842,7 +869,7 @@ namespace OcarinaAtlasLauncher
 
     internal static class LichiiConfigManager
     {
-        private static readonly string[] ProfileDirNames = new[] { "fritchii", "lichii" };
+        private static readonly string[] ProfileDirNames = new[] { "fritchii", "lichii", "cheezyemu" };
 
         private static readonly Regex ActiveSwitchRegex = new Regex(
             @"^\s*EDEN_NX2_DEBUG_SERVER\s*=\s*(.+?)\s*$",
@@ -1039,7 +1066,7 @@ namespace OcarinaAtlasLauncher
 
         public static string DetectRunningEmulator()
         {
-            string[] names = new[] { "fritchii", "lichii", "eden", "hookshot", "Longshot", "relink-game", "relink" };
+            string[] names = new[] { "fritchii", "lichii", "eden", "cheezyemu", "hookshot", "Longshot", "relink-game", "relink", "Triforce" };
             string detected = null;
 
             for (int i = 0; i < names.Length; i++)
@@ -1076,6 +1103,11 @@ namespace OcarinaAtlasLauncher
                 return "Fritchii";
             }
 
+            if (string.Equals(fallbackName, "cheezyemu", StringComparison.OrdinalIgnoreCase))
+            {
+                return "CheezyEmu";
+            }
+
             if (string.Equals(fallbackName, "hookshot", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(fallbackName, "Longshot", StringComparison.OrdinalIgnoreCase))
             {
@@ -1086,6 +1118,11 @@ namespace OcarinaAtlasLauncher
                 string.Equals(fallbackName, "relink", StringComparison.OrdinalIgnoreCase))
             {
                 return "Project ReLink";
+            }
+
+            if (string.Equals(fallbackName, "Triforce", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Triforce";
             }
 
             try
@@ -1168,7 +1205,7 @@ namespace OcarinaAtlasLauncher
         private const uint PageExecuteWriteCopy = 0x80;
         private const uint PageGuard = 0x100;
 
-        private static readonly string[] ProcessNames = new[] { "hookshot", "Longshot", "relink-game", "relink" };
+        private static readonly string[] ProcessNames = new[] { "hookshot", "Longshot", "relink-game", "relink", "Triforce" };
         private static readonly char[] HexDigits = "0123456789abcdef".ToCharArray();
 
         [StructLayout(LayoutKind.Sequential)]
@@ -1317,7 +1354,9 @@ namespace OcarinaAtlasLauncher
                         string userSaveDir = ResolveUserSaveDir(proc);
                         string emulatorKind = ProcessNames[n].StartsWith("relink", StringComparison.OrdinalIgnoreCase)
                             ? "relink"
-                            : "longshot";
+                            : string.Equals(ProcessNames[n], "Triforce", StringComparison.OrdinalIgnoreCase)
+                                ? "triforce"
+                                : "longshot";
                         keepProc = true;
                         for (int k = i + 1; k < procs.Length; k++)
                         {
@@ -3233,44 +3272,270 @@ namespace OcarinaAtlasLauncher
         public string ReleaseNotes = string.Empty;
         public string HtmlUrl = UpdateManager.DefaultReleaseFallbackUrl;
         public string ZipDownloadUrl = string.Empty;
+        public string Sha256DownloadUrl = string.Empty;
+        public string ExpectedSha256 = string.Empty;
+        public bool RequireSha256 = false;
         public Version ParsedVersion;
     }
 
     internal static class UpdateManager
     {
+        public const string OfficialRepoUrl = "https://github.com/antonioalvromero/Ocarina-Atlas";
+        public const string OriginalRepoUrl = "https://github.com/lucasriondel/oot-remake-map";
         public const string DefaultReleaseApiUrl = "https://api.github.com/repos/antonioalvromero/Ocarina-Atlas/releases/latest";
-        public const string DefaultReleaseFallbackUrl = "https://github.com/antonioalvromero/Ocarina-Atlas/releases/latest";
+        public const string DefaultReleaseFallbackUrl = OfficialRepoUrl + "/releases/latest";
+
+        private const string OfficialGithubPathPrefix = "/antonioalvromero/Ocarina-Atlas";
+        private const string OfficialApiPathPrefix = "/repos/antonioalvromero/Ocarina-Atlas";
+        private static readonly Regex Sha256TokenRegex = new Regex(@"\b([0-9a-fA-F]{64})\b", RegexOptions.Compiled);
 
         public static string ResolveFeedUrl(string overrideUrl)
         {
-            if (!string.IsNullOrEmpty(overrideUrl) && IsAllowedUpdateUrl(overrideUrl))
+            if (!string.IsNullOrEmpty(overrideUrl) && IsAllowedUpdateFeedUrl(overrideUrl))
             {
                 return overrideUrl.Trim();
             }
             return DefaultReleaseApiUrl;
         }
 
+        public static bool IsLoopbackUrl(string rawUrl)
+        {
+            if (string.IsNullOrEmpty(rawUrl)) return false;
+            Uri uri;
+            if (!Uri.TryCreate(rawUrl.Trim(), UriKind.Absolute, out uri)) return false;
+            return IsLoopbackUri(uri);
+        }
+
+        private static bool IsLoopbackUri(Uri uri)
+        {
+            if (uri == null) return false;
+            if (!string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+            string host = uri.Host ?? string.Empty;
+            return string.Equals(host, "127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool HasExactPathOrPrefix(string absolutePath, string prefix)
+        {
+            if (string.IsNullOrEmpty(absolutePath) || string.IsNullOrEmpty(prefix)) return false;
+            if (absolutePath.IndexOf("..", StringComparison.Ordinal) >= 0) return false;
+            return string.Equals(absolutePath, prefix, StringComparison.OrdinalIgnoreCase) ||
+                   absolutePath.StartsWith(prefix + "/", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsOfficialRepoUri(Uri uri)
+        {
+            if (uri == null || !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+            if (!string.IsNullOrEmpty(uri.UserInfo)) return false;
+
+            string host = uri.Host ?? string.Empty;
+            string path = uri.AbsolutePath ?? string.Empty;
+
+            if (string.Equals(host, "github.com", StringComparison.OrdinalIgnoreCase))
+            {
+                return HasExactPathOrPrefix(path, OfficialGithubPathPrefix);
+            }
+            if (string.Equals(host, "api.github.com", StringComparison.OrdinalIgnoreCase))
+            {
+                return HasExactPathOrPrefix(path, OfficialApiPathPrefix);
+            }
+            return false;
+        }
+
+        private static bool IsAllowedGitHubUri(Uri uri)
+        {
+            if (uri == null || !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+            if (!string.IsNullOrEmpty(uri.UserInfo)) return false;
+
+            string host = uri.Host ?? string.Empty;
+            return string.Equals(host, "github.com", StringComparison.OrdinalIgnoreCase) ||
+                   host.EndsWith(".github.com", StringComparison.OrdinalIgnoreCase) ||
+                   host.EndsWith(".githubusercontent.com", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsAllowedUpdateFeedUrl(string rawUrl)
+        {
+            if (string.IsNullOrEmpty(rawUrl)) return false;
+            Uri uri;
+            if (!Uri.TryCreate(rawUrl.Trim(), UriKind.Absolute, out uri)) return false;
+            return IsLoopbackUri(uri) || IsAllowedGitHubUri(uri);
+        }
+
         public static bool IsAllowedUpdateUrl(string rawUrl)
         {
             if (string.IsNullOrEmpty(rawUrl)) return false;
-            string trimmed = rawUrl.Trim();
             Uri uri;
-            if (!Uri.TryCreate(trimmed, UriKind.Absolute, out uri)) return false;
+            if (!Uri.TryCreate(rawUrl.Trim(), UriKind.Absolute, out uri)) return false;
+            return IsLoopbackUri(uri) || IsAllowedGitHubUri(uri);
+        }
 
-            if (string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase))
+        public static string ParseSha256DigestText(string content)
+        {
+            if (string.IsNullOrEmpty(content)) return string.Empty;
+            string[] lines = content.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+            for (int i = 0; i < lines.Length; i++)
             {
-                return uri.IsLoopback;
+                string trimmed = lines[i].Trim();
+                if (trimmed.Length == 0) continue;
+                Match match = Sha256TokenRegex.Match(trimmed);
+                if (match.Success)
+                {
+                    return match.Groups[1].Value.ToLowerInvariant();
+                }
+            }
+            return string.Empty;
+        }
+
+        public static string TryExtractSha256FromReleaseBody(string rawBody)
+        {
+            if (string.IsNullOrEmpty(rawBody)) return string.Empty;
+            string[] lines = rawBody.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+            int shaSectionWindow = 0;
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                bool mentionsChecksum =
+                    line.IndexOf("SHA-256", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    line.IndexOf("SHA256", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    line.IndexOf("OcarinaAtlas-Windows-x64.zip", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    line.IndexOf("amd64", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                if (mentionsChecksum)
+                {
+                    shaSectionWindow = 5;
+                }
+
+                if (mentionsChecksum || shaSectionWindow > 0)
+                {
+                    Match match = Sha256TokenRegex.Match(line);
+                    if (match.Success)
+                    {
+                        return match.Groups[1].Value.ToLowerInvariant();
+                    }
+                    if (shaSectionWindow > 0)
+                    {
+                        shaSectionWindow--;
+                    }
+                }
+            }
+            return string.Empty;
+        }
+
+        public static string ComputeFileSha256(string filePath)
+        {
+            using (SHA256 sha = SHA256.Create())
+            using (FileStream fs = File.OpenRead(filePath))
+            {
+                byte[] hash = sha.ComputeHash(fs);
+                StringBuilder sb = new StringBuilder(hash.Length * 2);
+                for (int i = 0; i < hash.Length; i++)
+                {
+                    sb.Append(hash[i].ToString("x2", CultureInfo.InvariantCulture));
+                }
+                return sb.ToString();
+            }
+        }
+
+        public static string FetchExpectedSha256(string sha256Url, string userAgent)
+        {
+            if (!IsAllowedUpdateUrl(sha256Url))
+            {
+                throw new InvalidOperationException("Blocked untrusted SHA-256 checksum URL.");
+            }
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(sha256Url);
+            req.Method = "GET";
+            req.Timeout = 10000;
+            req.ReadWriteTimeout = 10000;
+            req.UserAgent = userAgent;
+
+            using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
+            {
+                if (resp.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new InvalidOperationException("Checksum download failed with HTTP " + (int)resp.StatusCode);
+                }
+                if (resp.ResponseUri == null || !IsAllowedUpdateUrl(resp.ResponseUri.AbsoluteUri))
+                {
+                    throw new InvalidOperationException("Checksum redirect pointed to an untrusted host.");
+                }
+                using (Stream stream = resp.GetResponseStream())
+                {
+                    if (stream == null)
+                    {
+                        throw new InvalidOperationException("Empty checksum response stream.");
+                    }
+                    using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+                    {
+                        string body = reader.ReadToEnd();
+                        string parsed = ParseSha256DigestText(body);
+                        if (string.IsNullOrEmpty(parsed))
+                        {
+                            throw new InvalidOperationException("Invalid SHA-256 checksum format in release asset.");
+                        }
+                        return parsed;
+                    }
+                }
+            }
+        }
+
+        public static void VerifyDownloadedArchiveSha256(UpdateInfo info, string zipPath, string userAgent)
+        {
+            if (info == null)
+            {
+                throw new InvalidOperationException("Missing update metadata.");
+            }
+            if (string.IsNullOrEmpty(zipPath) || !File.Exists(zipPath))
+            {
+                throw new FileNotFoundException("Downloaded update archive not found.", zipPath);
             }
 
-            if (string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            string assetSha256 = string.Empty;
+            if (!string.IsNullOrEmpty(info.Sha256DownloadUrl))
             {
-                string host = uri.Host ?? string.Empty;
-                return string.Equals(host, "github.com", StringComparison.OrdinalIgnoreCase) ||
-                       host.EndsWith(".github.com", StringComparison.OrdinalIgnoreCase) ||
-                       host.EndsWith(".githubusercontent.com", StringComparison.OrdinalIgnoreCase);
+                assetSha256 = FetchExpectedSha256(info.Sha256DownloadUrl, userAgent);
             }
 
-            return false;
+            string notesSha256 = info.ExpectedSha256 ?? string.Empty;
+            if (!string.IsNullOrEmpty(assetSha256) &&
+                !string.IsNullOrEmpty(notesSha256) &&
+                !string.Equals(assetSha256, notesSha256, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    "SHA-256 mismatch between release checksum file and release notes. Download official releases from " + OfficialRepoUrl);
+            }
+
+            string expectedSha256 = !string.IsNullOrEmpty(assetSha256) ? assetSha256 : notesSha256;
+            if (string.IsNullOrEmpty(expectedSha256))
+            {
+                if (info.RequireSha256)
+                {
+                    throw new InvalidOperationException(
+                        "Missing official SHA-256 checksum. Download official releases from " + OfficialRepoUrl);
+                }
+                AppendUpdateLog("Update source provided no SHA-256 digest; skipping checksum verification.");
+                return;
+            }
+
+            string actualSha256 = ComputeFileSha256(zipPath);
+            if (!string.Equals(actualSha256, expectedSha256, StringComparison.OrdinalIgnoreCase))
+            {
+                AppendUpdateLog("SHA-256 verification failed! Expected=" + expectedSha256 + " Actual=" + actualSha256);
+                throw new InvalidOperationException(
+                    "SHA-256 verification failed! Update aborted. Download official releases from " + OfficialRepoUrl);
+            }
+
+            AppendUpdateLog("SHA-256 verified: " + actualSha256);
         }
 
         public static Version ParseComparableVersion(string raw)
@@ -3301,8 +3566,18 @@ namespace OcarinaAtlasLauncher
 
         public static UpdateInfo ParseReleaseJson(string json, string currentAppVersion)
         {
+            return ParseReleaseJson(json, currentAppVersion, null);
+        }
+
+        public static UpdateInfo ParseReleaseJson(string json, string currentAppVersion, string feedUrl)
+        {
             Dictionary<string, object> obj = SimpleJsonParser.ParseObject(json);
             if (obj == null) return null;
+
+            if (SimpleJsonParser.GetBool(obj, "prerelease") || SimpleJsonParser.GetBool(obj, "draft"))
+            {
+                return null;
+            }
 
             string tagName = SimpleJsonParser.GetString(obj, "tag_name");
             Version latestVer = ParseComparableVersion(tagName);
@@ -3339,7 +3614,11 @@ namespace OcarinaAtlasLauncher
             }
 
             string zipUrl = string.Empty;
+            string zipAssetName = string.Empty;
             string fallbackZipUrl = string.Empty;
+            string fallbackZipAssetName = string.Empty;
+            Dictionary<string, string> sha256Assets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
             List<object> assets = SimpleJsonParser.GetArray(obj, "assets");
             if (assets != null)
             {
@@ -3353,15 +3632,21 @@ namespace OcarinaAtlasLauncher
                     if (string.IsNullOrEmpty(assetName) || string.IsNullOrEmpty(downloadUrl)) continue;
                     if (!IsAllowedUpdateUrl(downloadUrl)) continue;
 
+                    string trimmedUrl = downloadUrl.Trim();
                     if (string.Equals(assetName, "OcarinaAtlas-Windows-x64.zip", StringComparison.OrdinalIgnoreCase))
                     {
-                        zipUrl = downloadUrl.Trim();
-                        break;
+                        zipUrl = trimmedUrl;
+                        zipAssetName = assetName.Trim();
                     }
-                    if (string.IsNullOrEmpty(fallbackZipUrl) &&
-                        assetName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                    else if (string.IsNullOrEmpty(fallbackZipUrl) &&
+                             assetName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
                     {
-                        fallbackZipUrl = downloadUrl.Trim();
+                        fallbackZipUrl = trimmedUrl;
+                        fallbackZipAssetName = assetName.Trim();
+                    }
+                    else if (assetName.EndsWith(".sha256", StringComparison.OrdinalIgnoreCase))
+                    {
+                        sha256Assets[assetName.Trim()] = trimmedUrl;
                     }
                 }
             }
@@ -3369,7 +3654,35 @@ namespace OcarinaAtlasLauncher
             if (string.IsNullOrEmpty(zipUrl))
             {
                 zipUrl = fallbackZipUrl;
+                zipAssetName = fallbackZipAssetName;
             }
+
+            string sha256DownloadUrl = string.Empty;
+            if (!string.IsNullOrEmpty(zipAssetName))
+            {
+                string directMatch;
+                if (sha256Assets.TryGetValue(zipAssetName + ".sha256", out directMatch))
+                {
+                    sha256DownloadUrl = directMatch;
+                }
+            }
+            if (string.IsNullOrEmpty(sha256DownloadUrl))
+            {
+                string preferredSha256;
+                if (sha256Assets.TryGetValue("OcarinaAtlas-Windows-x64.zip.sha256", out preferredSha256))
+                {
+                    sha256DownloadUrl = preferredSha256;
+                }
+            }
+
+            string expectedSha256 = TryExtractSha256FromReleaseBody(rawBody);
+            Uri feedUri;
+            bool isOfficialFeed = string.IsNullOrEmpty(feedUrl) ||
+                (Uri.TryCreate(feedUrl.Trim(), UriKind.Absolute, out feedUri) && IsOfficialRepoUri(feedUri));
+            Uri zipUri;
+            bool isOfficialZip = !string.IsNullOrEmpty(zipUrl) &&
+                Uri.TryCreate(zipUrl, UriKind.Absolute, out zipUri) &&
+                IsOfficialRepoUri(zipUri);
 
             UpdateInfo info = new UpdateInfo();
             info.DisplayTag = displayTag;
@@ -3377,6 +3690,9 @@ namespace OcarinaAtlasLauncher
             info.ReleaseNotes = cleanNotes;
             info.HtmlUrl = targetHtmlUrl;
             info.ZipDownloadUrl = zipUrl;
+            info.Sha256DownloadUrl = sha256DownloadUrl;
+            info.ExpectedSha256 = expectedSha256;
+            info.RequireSha256 = isOfficialFeed && isOfficialZip;
             info.ParsedVersion = latestVer;
             return info;
         }
@@ -4329,11 +4645,20 @@ namespace OcarinaAtlasLauncher
                 return;
             }
 
+            if (!UpdateManager.IsAllowedUpdateUrl(_info.ZipDownloadUrl))
+            {
+                FailUpdate(
+                    "Blocked untrusted update URL. Download official releases from " + UpdateManager.OfficialRepoUrl,
+                    null);
+                return;
+            }
+
             _isUpdating = true;
             _updateNowButton.Enabled = false;
             _skipButton.Enabled = false;
             _closeButton.Enabled = false;
 
+            _statusLabel.Size = new Size(480, 20);
             _statusLabel.ForeColor = Theme.Parchment400;
             _statusLabel.Text = "Downloading " + _info.DisplayTag + "...";
             _statusLabel.Visible = true;
@@ -4392,12 +4717,28 @@ namespace OcarinaAtlasLauncher
                     }
 
                     _progressBar.Style = ProgressBarStyle.Marquee;
-                    _statusLabel.Text = "Extracting update archive...";
+                    _statusLabel.Text = "Verifying SHA-256 checksum...";
 
                     Thread extractThread = new Thread(delegate()
                     {
                         try
                         {
+                            UpdateManager.VerifyDownloadedArchiveSha256(
+                                _info,
+                                zipPath,
+                                "OcarinaAtlas/" + MainForm.AppVersion);
+
+                            if (!IsDisposed && IsHandleCreated)
+                            {
+                                BeginInvoke((MethodInvoker)delegate()
+                                {
+                                    if (!IsDisposed)
+                                    {
+                                        _statusLabel.Text = "Extracting update archive...";
+                                    }
+                                });
+                            }
+
                             ZipFile.ExtractToDirectory(zipPath, extractDir);
                             string sourceRoot = UpdateManager.FindExtractedSourceRoot(extractDir);
                             string targetDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(
@@ -4439,7 +4780,7 @@ namespace OcarinaAtlasLauncher
                             {
                                 BeginInvoke((MethodInvoker)delegate()
                                 {
-                                    FailUpdate("Extraction failed: " + ex.Message, tempDir);
+                                    FailUpdate("Update verification/extraction failed: " + ex.Message, tempDir);
                                 });
                             }
                         }
@@ -4461,8 +4802,10 @@ namespace OcarinaAtlasLauncher
             UpdateManager.AppendUpdateLog("Update failed: " + message);
             _isUpdating = false;
             _progressBar.Visible = false;
+            _statusLabel.Size = new Size(480, 42);
             _statusLabel.ForeColor = Theme.Ember;
             _statusLabel.Text = message + " (See update.log)";
+            _statusLabel.Visible = true;
             _updateNowButton.Enabled = true;
             _skipButton.Enabled = true;
             _closeButton.Enabled = true;
@@ -4483,7 +4826,7 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "2.2.0";
+        public const string AppVersion = "2.2.1";
 
         private const int CollapsedClientHeight = 392;
         private const int ExpandedClientHeight = 640;
@@ -4532,6 +4875,7 @@ namespace OcarinaAtlasLauncher
         private BorderedPanel _advancedDrawerPanel;
         private Panel _settingsTabPanel;
         private Panel _logsTabPanel;
+        private Panel _aboutTabPanel;
         private BorderedPanel _logContainer;
 
         // Header controls
@@ -4564,6 +4908,7 @@ namespace OcarinaAtlasLauncher
         private Button _advancedToggleButton;
         private Button _settingsTabButton;
         private Button _logsTabButton;
+        private Button _aboutTabButton;
         private Label _settingsLockHintLabel;
         private BorderedPanel _modeBadgePanel;
         private Label _modeBadgeLabel;
@@ -4584,7 +4929,7 @@ namespace OcarinaAtlasLauncher
         private ToolStripMenuItem _trayOpenBrowserItem;
 
         private bool _advancedExpanded = false;
-        private int _activeDrawerTab = 0; // 0 = Settings, 1 = Logs
+        private int _activeDrawerTab = 0; // 0 = Settings, 1 = Logs, 2 = About
         private bool _trayHintShown = false;
 
         public MainForm(LaunchOptions options)
@@ -4648,7 +4993,12 @@ namespace OcarinaAtlasLauncher
             _versionLabel.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
             _versionLabel.ForeColor = Theme.Parchment600;
             _versionLabel.AutoSize = true;
+            _versionLabel.Cursor = Cursors.Hand;
             _versionLabel.Location = new Point(titleLabel.Right + 8, 21);
+            _versionLabel.Click += OnVersionLabelClick;
+            _versionLabel.MouseEnter += delegate { _versionLabel.ForeColor = Theme.Gold; };
+            _versionLabel.MouseLeave += delegate { _versionLabel.ForeColor = Theme.Parchment600; };
+            _toolTip.SetToolTip(_versionLabel, "About Ocarina Atlas, credits & official repository");
             Controls.Add(_versionLabel);
 
             _updatePill = new BorderedPanel();
@@ -4897,8 +5247,8 @@ namespace OcarinaAtlasLauncher
             _lanHintLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _step2Card.Controls.Add(_lanHintLabel);
 
-            // 3. Collapsible Drawer Toggle + Tabbed Drawer (Settings | Logs)
-            _advancedToggleButton = CreateButton("\u25B8 Settings & Logs", 18, 346, 504, 30, true);
+            // 3. Collapsible Drawer Toggle + Tabbed Drawer (Settings | Logs | About)
+            _advancedToggleButton = CreateButton("\u25B8 Settings, Logs & About", 18, 346, 504, 30, true);
             _advancedToggleButton.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _advancedToggleButton.TextAlign = ContentAlignment.MiddleLeft;
             _advancedToggleButton.Padding = new Padding(10, 0, 0, 0);
@@ -4919,7 +5269,7 @@ namespace OcarinaAtlasLauncher
 
             BorderedPanel tabBarPanel = new BorderedPanel();
             tabBarPanel.Location = new Point(14, 12);
-            tabBarPanel.Size = new Size(176, 28);
+            tabBarPanel.Size = new Size(232, 28);
             tabBarPanel.FillColor = Theme.Ink950;
             tabBarPanel.BorderColor = Theme.Ink700;
             tabBarPanel.CornerRadius = 6;
@@ -4928,7 +5278,7 @@ namespace OcarinaAtlasLauncher
             _settingsTabButton = new Button();
             _settingsTabButton.Text = "Settings";
             _settingsTabButton.Location = new Point(2, 2);
-            _settingsTabButton.Size = new Size(86, 24);
+            _settingsTabButton.Size = new Size(76, 24);
             _settingsTabButton.FlatStyle = FlatStyle.Flat;
             _settingsTabButton.FlatAppearance.BorderSize = 0;
             _settingsTabButton.Cursor = Cursors.Hand;
@@ -4938,8 +5288,8 @@ namespace OcarinaAtlasLauncher
 
             _logsTabButton = new Button();
             _logsTabButton.Text = "Logs";
-            _logsTabButton.Location = new Point(88, 2);
-            _logsTabButton.Size = new Size(86, 24);
+            _logsTabButton.Location = new Point(78, 2);
+            _logsTabButton.Size = new Size(76, 24);
             _logsTabButton.FlatStyle = FlatStyle.Flat;
             _logsTabButton.FlatAppearance.BorderSize = 0;
             _logsTabButton.Cursor = Cursors.Hand;
@@ -4947,14 +5297,25 @@ namespace OcarinaAtlasLauncher
             _logsTabButton.Click += delegate { SelectDrawerTab(1); };
             tabBarPanel.Controls.Add(_logsTabButton);
 
+            _aboutTabButton = new Button();
+            _aboutTabButton.Text = "About";
+            _aboutTabButton.Location = new Point(154, 2);
+            _aboutTabButton.Size = new Size(76, 24);
+            _aboutTabButton.FlatStyle = FlatStyle.Flat;
+            _aboutTabButton.FlatAppearance.BorderSize = 0;
+            _aboutTabButton.Cursor = Cursors.Hand;
+            _aboutTabButton.UseVisualStyleBackColor = false;
+            _aboutTabButton.Click += delegate { SelectDrawerTab(2); };
+            tabBarPanel.Controls.Add(_aboutTabButton);
+
             _settingsLockHintLabel = new Label();
             _settingsLockHintLabel.Text = "Stop server to edit port or host settings";
             _settingsLockHintLabel.Font = new Font("Segoe UI", 8f, FontStyle.Italic);
             _settingsLockHintLabel.ForeColor = Theme.Parchment600;
             _settingsLockHintLabel.AutoSize = false;
             _settingsLockHintLabel.TextAlign = ContentAlignment.MiddleRight;
-            _settingsLockHintLabel.Location = new Point(200, 16);
-            _settingsLockHintLabel.Size = new Size(288, 20);
+            _settingsLockHintLabel.Location = new Point(254, 16);
+            _settingsLockHintLabel.Size = new Size(234, 20);
             _settingsLockHintLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _settingsLockHintLabel.Visible = false;
             _advancedDrawerPanel.Controls.Add(_settingsLockHintLabel);
@@ -5136,6 +5497,116 @@ namespace OcarinaAtlasLauncher
             _logTextBox.Font = new Font("Consolas", 8.25f, FontStyle.Regular);
             _logContainer.Controls.Add(_logTextBox);
 
+            // About Tab Panel
+            _aboutTabPanel = new Panel();
+            _aboutTabPanel.Location = new Point(14, 48);
+            _aboutTabPanel.Size = new Size(476, 182);
+            _aboutTabPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            _aboutTabPanel.BackColor = Theme.Ink900;
+            _aboutTabPanel.Visible = false;
+            _advancedDrawerPanel.Controls.Add(_aboutTabPanel);
+
+            Label atlasCreditTitle = new Label();
+            atlasCreditTitle.Text = "Ocarina Atlas";
+            atlasCreditTitle.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
+            atlasCreditTitle.ForeColor = Theme.Parchment50;
+            atlasCreditTitle.AutoSize = true;
+            atlasCreditTitle.Location = new Point(0, 4);
+            _aboutTabPanel.Controls.Add(atlasCreditTitle);
+
+            Label atlasCreditAuthor = new Label();
+            atlasCreditAuthor.Text = "by antonioalvromero";
+            atlasCreditAuthor.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            atlasCreditAuthor.ForeColor = Theme.Parchment300;
+            atlasCreditAuthor.AutoSize = true;
+            atlasCreditAuthor.Location = new Point(atlasCreditTitle.Right + 6, 4);
+            _aboutTabPanel.Controls.Add(atlasCreditAuthor);
+
+            LinkLabel officialRepoLink = new LinkLabel();
+            officialRepoLink.Text = "github.com/antonioalvromero/Ocarina-Atlas";
+            officialRepoLink.LinkColor = Theme.Gold;
+            officialRepoLink.ActiveLinkColor = Theme.Parchment50;
+            officialRepoLink.VisitedLinkColor = Theme.Gold;
+            officialRepoLink.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            officialRepoLink.AutoSize = true;
+            officialRepoLink.Location = new Point(Math.Max(214, atlasCreditAuthor.Right + 10), 4);
+            officialRepoLink.LinkClicked += delegate { OpenUrlInBrowser(UpdateManager.OfficialRepoUrl); };
+            _toolTip.SetToolTip(officialRepoLink, UpdateManager.OfficialRepoUrl);
+            _aboutTabPanel.Controls.Add(officialRepoLink);
+
+            Label originalCreditTitle = new Label();
+            originalCreditTitle.Text = "Original Map";
+            originalCreditTitle.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
+            originalCreditTitle.ForeColor = Theme.Parchment200;
+            originalCreditTitle.AutoSize = true;
+            originalCreditTitle.Location = new Point(0, 28);
+            _aboutTabPanel.Controls.Add(originalCreditTitle);
+
+            Label originalCreditAuthor = new Label();
+            originalCreditAuthor.Text = "by lucasriondel";
+            originalCreditAuthor.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            originalCreditAuthor.ForeColor = Theme.Parchment400;
+            originalCreditAuthor.AutoSize = true;
+            originalCreditAuthor.Location = new Point(originalCreditTitle.Right + 6, 28);
+            _aboutTabPanel.Controls.Add(originalCreditAuthor);
+
+            LinkLabel originalRepoLink = new LinkLabel();
+            originalRepoLink.Text = "lucasriondel/oot-remake-map";
+            originalRepoLink.LinkColor = Theme.Moss;
+            originalRepoLink.ActiveLinkColor = Theme.Parchment50;
+            originalRepoLink.VisitedLinkColor = Theme.Moss;
+            originalRepoLink.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            originalRepoLink.AutoSize = true;
+            originalRepoLink.Location = new Point(Math.Max(214, originalCreditAuthor.Right + 10), 28);
+            originalRepoLink.LinkClicked += delegate { OpenUrlInBrowser(UpdateManager.OriginalRepoUrl); };
+            _toolTip.SetToolTip(originalRepoLink, UpdateManager.OriginalRepoUrl);
+            _aboutTabPanel.Controls.Add(originalRepoLink);
+
+            Label artworkCreditTitle = new Label();
+            artworkCreditTitle.Text = "Map Artwork";
+            artworkCreditTitle.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
+            artworkCreditTitle.ForeColor = Theme.Parchment200;
+            artworkCreditTitle.AutoSize = true;
+            artworkCreditTitle.Location = new Point(0, 52);
+            _aboutTabPanel.Controls.Add(artworkCreditTitle);
+
+            Label artworkCreditAuthor = new Label();
+            artworkCreditAuthor.Text = "by Nintend\u00FAo";
+            artworkCreditAuthor.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            artworkCreditAuthor.ForeColor = Theme.Parchment400;
+            artworkCreditAuthor.AutoSize = true;
+            artworkCreditAuthor.Location = new Point(artworkCreditTitle.Right + 6, 52);
+            _aboutTabPanel.Controls.Add(artworkCreditAuthor);
+
+            BorderedPanel securityNoticePanel = new BorderedPanel();
+            securityNoticePanel.Location = new Point(0, 80);
+            securityNoticePanel.Size = new Size(476, 60);
+            securityNoticePanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            securityNoticePanel.FillColor = Theme.Ink950;
+            securityNoticePanel.BorderColor = Color.FromArgb(0x5A, 0x47, 0x22);
+            securityNoticePanel.CornerRadius = 6;
+            _aboutTabPanel.Controls.Add(securityNoticePanel);
+
+            Label securityNoticeLabel = new Label();
+            securityNoticeLabel.Text = "Free & open-source (GNU AGPL-3.0). Official builds: github.com/antonioalvromero/Ocarina-Atlas \u2014 forks must preserve credits and share source.";
+            securityNoticeLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
+            securityNoticeLabel.ForeColor = Theme.Parchment200;
+            securityNoticeLabel.BackColor = Theme.Ink950;
+            securityNoticeLabel.Dock = DockStyle.Fill;
+            securityNoticeLabel.Padding = new Padding(10, 8, 10, 8);
+            securityNoticeLabel.TextAlign = ContentAlignment.MiddleLeft;
+            securityNoticePanel.Controls.Add(securityNoticeLabel);
+
+            Label aboutFooterLabel = new Label();
+            aboutFooterLabel.Text = "Version " + AppVersion + "  \u2022  Verify official releases via SHA-256 or GitHub attestation";
+            aboutFooterLabel.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+            aboutFooterLabel.ForeColor = Theme.Parchment600;
+            aboutFooterLabel.AutoSize = false;
+            aboutFooterLabel.Location = new Point(0, 150);
+            aboutFooterLabel.Size = new Size(476, 20);
+            aboutFooterLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            _aboutTabPanel.Controls.Add(aboutFooterLabel);
+
             SelectDrawerTab(0);
         }
 
@@ -5155,24 +5626,31 @@ namespace OcarinaAtlasLauncher
 
         private void SelectDrawerTab(int tabIndex)
         {
-            _activeDrawerTab = tabIndex == 1 ? 1 : 0;
+            _activeDrawerTab = (tabIndex >= 0 && tabIndex <= 2) ? tabIndex : 0;
             bool isSettings = _activeDrawerTab == 0;
+            bool isLogs = _activeDrawerTab == 1;
+            bool isAbout = _activeDrawerTab == 2;
 
             _settingsTabPanel.Visible = isSettings;
-            _logsTabPanel.Visible = !isSettings;
+            _logsTabPanel.Visible = isLogs;
+            _aboutTabPanel.Visible = isAbout;
 
             _settingsTabButton.BackColor = isSettings ? Theme.Ink800 : Theme.Ink950;
             _settingsTabButton.ForeColor = isSettings ? Theme.Gold : Theme.Parchment600;
             _settingsTabButton.Font = new Font("Segoe UI", 8.25f, isSettings ? FontStyle.Bold : FontStyle.Regular);
 
-            _logsTabButton.BackColor = !isSettings ? Theme.Ink800 : Theme.Ink950;
-            _logsTabButton.ForeColor = !isSettings ? Theme.Gold : Theme.Parchment600;
-            _logsTabButton.Font = new Font("Segoe UI", 8.25f, !isSettings ? FontStyle.Bold : FontStyle.Regular);
+            _logsTabButton.BackColor = isLogs ? Theme.Ink800 : Theme.Ink950;
+            _logsTabButton.ForeColor = isLogs ? Theme.Gold : Theme.Parchment600;
+            _logsTabButton.Font = new Font("Segoe UI", 8.25f, isLogs ? FontStyle.Bold : FontStyle.Regular);
+
+            _aboutTabButton.BackColor = isAbout ? Theme.Ink800 : Theme.Ink950;
+            _aboutTabButton.ForeColor = isAbout ? Theme.Gold : Theme.Parchment600;
+            _aboutTabButton.Font = new Font("Segoe UI", 8.25f, isAbout ? FontStyle.Bold : FontStyle.Regular);
 
             _settingsLockHintLabel.Visible = isSettings && _lifecycle != ServerLifecycle.Stopped;
-            _modeBadgePanel.Visible = !isSettings;
-            _copyLogButton.Visible = !isSettings;
-            _clearLogButton.Visible = !isSettings;
+            _modeBadgePanel.Visible = isLogs;
+            _copyLogButton.Visible = isLogs;
+            _clearLogButton.Visible = isLogs;
         }
 
         private Button CreateButton(string text, int x, int y, int width, int height, bool bold)
@@ -5248,8 +5726,8 @@ namespace OcarinaAtlasLauncher
         private void ReflowLayout()
         {
             _advancedToggleButton.Text = _advancedExpanded
-                ? "\u25BE Settings & Logs"
-                : "\u25B8 Settings & Logs";
+                ? "\u25BE Settings, Logs & About"
+                : "\u25B8 Settings, Logs & About";
 
             int nonClientW = Size.Width - ClientSize.Width;
             int nonClientH = Size.Height - ClientSize.Height;
@@ -5273,9 +5751,32 @@ namespace OcarinaAtlasLauncher
             }
         }
 
+        private void OnVersionLabelClick(object sender, EventArgs e)
+        {
+            if (!_advancedExpanded)
+            {
+                _advancedExpanded = true;
+                SelectDrawerTab(2);
+                ReflowLayout();
+            }
+            else if (_activeDrawerTab != 2)
+            {
+                SelectDrawerTab(2);
+            }
+            else
+            {
+                _advancedExpanded = false;
+                ReflowLayout();
+            }
+        }
+
         private void OnFormLoad(object sender, EventArgs e)
         {
             AppendLog("Launcher ready. Checking runtime and Lichii status...");
+            if (!string.IsNullOrEmpty(_options.RejectedUpdateFeedUrl))
+            {
+                AppendLog("Security warning: ignored untrusted update feed URL (" + _options.RejectedUpdateFeedUrl + "). Official builds: " + UpdateManager.OfficialRepoUrl);
+            }
             RefreshLanDisplays();
             TriggerFirewallStatusCheck();
             TriggerPollNow();
@@ -6326,7 +6827,7 @@ namespace OcarinaAtlasLauncher
                     _serverStatusLabel.Text = "Error";
                     _serverStatusLabel.ForeColor = Theme.Ember;
                     _serverStatusPill.BorderColor = Theme.Ember;
-                    _heroSummaryLabel.Text = "Could not start the map server. Check Settings & Logs for details.";
+                    _heroSummaryLabel.Text = "Could not start the map server. Check Settings, Logs & About for details.";
                 }
                 else
                 {
@@ -6605,7 +7106,9 @@ namespace OcarinaAtlasLauncher
         {
             if (string.Equals(emulatorKind, "longshot", StringComparison.OrdinalIgnoreCase)) return "Longshot";
             if (string.Equals(emulatorKind, "relink", StringComparison.OrdinalIgnoreCase)) return "Project ReLink";
+            if (string.Equals(emulatorKind, "triforce", StringComparison.OrdinalIgnoreCase)) return "Triforce";
             if (string.Equals(emulatorKind, "fritchii", StringComparison.OrdinalIgnoreCase)) return "Fritchii";
+            if (string.Equals(emulatorKind, "cheezyemu", StringComparison.OrdinalIgnoreCase)) return "CheezyEmu";
             if (string.Equals(emulatorKind, "lichii", StringComparison.OrdinalIgnoreCase)) return "Lichii";
             if (string.Equals(emulatorKind, "eden", StringComparison.OrdinalIgnoreCase)) return "Eden";
             return emulatorKind;
@@ -6751,25 +7254,27 @@ namespace OcarinaAtlasLauncher
             }
             else if (!string.IsNullOrEmpty(snap.RunningEmulator))
             {
-                bool isLongshot = string.Equals(snap.RunningEmulator, "Longshot", StringComparison.OrdinalIgnoreCase);
+                bool isRecomp = string.Equals(snap.RunningEmulator, "Longshot", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(snap.RunningEmulator, "Project ReLink", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(snap.RunningEmulator, "Triforce", StringComparison.OrdinalIgnoreCase);
                 _heroLichiiDot.DotColor = Theme.Ember;
-                _heroLichiiLabel.Text = isLongshot ? "Waiting" : "RPC Closed";
+                _heroLichiiLabel.Text = isRecomp ? "Waiting" : "RPC Closed";
                 _heroLichiiLabel.ForeColor = Theme.Ember;
                 _emulatorStatusPill.BorderColor = Theme.Ember;
-                string fullEmuTip = isLongshot ? "Longshot: Waiting for game" : (snap.RunningEmulator + ": RPC closed");
+                string fullEmuTip = isRecomp ? (snap.RunningEmulator + ": Waiting for game") : (snap.RunningEmulator + ": RPC closed");
                 _toolTip.SetToolTip(_emulatorStatusPill, fullEmuTip);
                 _toolTip.SetToolTip(_heroLichiiLabel, fullEmuTip);
 
                 if (_syncFeedbackTicks == 0)
                 {
-                    if (isLongshot)
+                    if (isRecomp)
                     {
                         string currentHost = _lifecycle == ServerLifecycle.Stopped
                             ? ((_lichiiHostInput.Text ?? string.Empty).Trim())
                             : _activeLichiiHost;
                         _lichiiStepDetailLabel.Text = IsBridgeLoopbackHost(currentHost)
-                            ? "Longshot detected \u2014 load Ocarina of Time to start the read-only live sync bridge."
-                            : "Longshot detected \u2014 set Emulator RPC Host to 127.0.0.1 for automatic live sync.";
+                            ? (snap.RunningEmulator + " detected \u2014 load Ocarina of Time to start the read-only live sync bridge.")
+                            : (snap.RunningEmulator + " detected \u2014 set Emulator RPC Host to 127.0.0.1 for automatic live sync.");
                     }
                     else if (_lichiiConfigured)
                     {
@@ -6945,6 +7450,10 @@ namespace OcarinaAtlasLauncher
                         {
                             throw new InvalidOperationException("HTTP " + (int)resp.StatusCode);
                         }
+                        if (resp.ResponseUri == null || !UpdateManager.IsAllowedUpdateFeedUrl(resp.ResponseUri.AbsoluteUri))
+                        {
+                            throw new InvalidOperationException("Update feed redirect pointed to an untrusted URL.");
+                        }
                         using (Stream stream = resp.GetResponseStream())
                         {
                             if (stream == null)
@@ -6958,7 +7467,7 @@ namespace OcarinaAtlasLauncher
                         }
                     }
 
-                    UpdateInfo info = UpdateManager.ParseReleaseJson(body, AppVersion);
+                    UpdateInfo info = UpdateManager.ParseReleaseJson(body, AppVersion, feedUrl);
                     if (info == null)
                     {
                         BeginInvokeSafe(delegate()

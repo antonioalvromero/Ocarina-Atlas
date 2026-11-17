@@ -22,6 +22,7 @@ export interface LichiiGroupedCommits {
 export interface ReleasePromptContext {
   version: string
   previousTag: string | null
+  isPrerelease?: boolean
   instructions: string
   commits: readonly CommitEntry[]
   changelogSection: string
@@ -31,6 +32,7 @@ export interface ReleasePromptContext {
 export interface ComposeReleaseBodyInput {
   version: string
   previousTag: string | null
+  isPrerelease?: boolean
   repoSlug: string
   headBranch?: string | null
   headSha?: string | null
@@ -261,6 +263,15 @@ export function normalizeTagVersion(tagOrRef: string): string {
   const trimmed = tagOrRef.trim()
   const withoutRefs = trimmed.replace(/^refs\/tags\//, '')
   return withoutRefs.replace(/^v/i, '')
+}
+
+/**
+ * Returns `true` when a release tag or version carries a pre-release suffix
+ * (any `-` segment such as `v2.3.0-linux.1`, `v2.3.0-rc.1`, or `v2.3.0-beta.1`).
+ */
+export function isPrereleaseTag(tagOrVersion: string): boolean {
+  const normalized = normalizeTagVersion(tagOrVersion)
+  return normalized.includes('-')
 }
 
 /**
@@ -586,9 +597,11 @@ export function buildReleasePrompt(ctx: ReleasePromptContext): {
           .join('\n')
       : '- (No commit messages supplied)'
 
+  const prerelease = ctx.isPrerelease ?? isPrereleaseTag(ctx.version)
   const userParts: string[] = [
     `Target Release Version: ${ctx.version}`,
     `Previous Tag: ${ctx.previousTag ?? 'None (initial release)'}`,
+    ...(prerelease ? ['Release Channel: Pre-release'] : []),
     `Commits:\n${commitLines}`,
   ]
 
@@ -639,7 +652,14 @@ function buildSpanMetadataLine(input: ComposeReleaseBodyInput, commitCount: numb
  */
 export function composeReleaseBody(input: ComposeReleaseBodyInput): string {
   const safeRepoSlug = parseSafeRepoSlug(input.repoSlug) ?? ''
+  const prerelease = input.isPrerelease ?? isPrereleaseTag(input.version)
   const changeSections: string[] = []
+
+  if (prerelease) {
+    changeSections.push(
+      `> [!WARNING]\n> **Pre-release build (\`${input.version}\`).** Intended for testing and early feedback; automatic stable updater channels skip pre-releases.`,
+    )
+  }
 
   const changesHeading = input.previousTag
     ? `## Changes since ${input.previousTag}`

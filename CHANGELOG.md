@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-11-16
+
+### Added
+- **Triforce & CheezyEmu Support (`launcher/OcarinaAtlas.cs`, `src/lib/lichii-server.ts`, `src/lib/lichii-types.ts`, `src/components/LichiiStatusPanel.tsx`):** Added zero-config read-only `LongshotRpcBridge` support and `TRIFORCE_SAVE_DIR` auto-discovery for **Triforce** (`Triforce.exe`), plus **CheezyEmu** (`cheezyemu.exe`) support with 1-click `%APPDATA%\cheezyemu\nx2_switches.txt` sync configuration and `CHEEZYEMU_SAVE_DIR` save-slot discovery.
+- **Optional Gear Prerequisite Filter & Live Auto-Sync (`src/lib/prerequisites.ts`, `src/components/GearChecklistModal.tsx`, `src/components/Panels.tsx`, `src/lib/lichii-server.ts`, `src/lib/useLichiiTracker.ts`):** Added an **Only reachable** toggle and **My Gear (`N/33`)** checklist modal covering all 33 equipment, gear, song, and situational prerequisites (ignoring day/night requirements), with tier implications (`longshot` -> `hookshot`, `golden-scale` -> `silver-scale`, `golden-gauntlets` -> `silver-gauntlets` -> `goron-bracelet`), per-spot planted Magic Bean matching, and optional live RAM / save auto-sync.
+- **Credits & About Sections (`src/components/CreditsModal.tsx`, `launcher/OcarinaAtlas.cs`, `src/components/WorldMap.tsx`, `src/components/PlaceView.tsx`):** Added attribution for `antonioalvromero`, `lucasriondel`, `Nintendúo`, and the official GitHub repository link (`https://github.com/antonioalvromero/Ocarina-Atlas`) in both the Web Map **Credits** modal and `OcarinaAtlas.exe`'s new **About** tab.
+
+### Fixed & Improved
+- **Persistent Map Zoom (`src/components/MapViewport.tsx`, `src/lib/storage.ts`):** Preserved the active map zoom scale (`zoomSlot`) across floor switches and zone changes while keeping **Reset View** (and compact-viewport fullscreen exit) resetting zoom cleanly.
+- **Auto-Tracking Fixes (`src/lib/lichii-server.ts`):** Fixed tracking for all 6 `Obj_TBox` chest Pieces of Heart via `IsTreasureBoxOpen.*` flags (including Dampé's race and the Gerudo bridge chest) and added Child-age `HaveReadHrlField_Note12_1..3` flag support for `llanura-thought-03`.
+
+### Security & Licensing
+- **GNU AGPL-3.0, PE Assembly Metadata & Updater Integrity (`LICENSE`, `launcher/OcarinaAtlas.cs`, `.github/workflows/release-windows.yml`, `README.md`):** Relicensed newly authored Ocarina Atlas components under **GNU AGPL-3.0**, added PE assembly metadata attributes (`AssemblyTitle`, `AssemblyCompany`, `AssemblyProduct`, `AssemblyCopyright`, `AssemblyVersion`, `AssemblyFileVersion`) to `OcarinaAtlas.exe`, enforced official GitHub release hosts and `.sha256` archive verification with CI build provenance attestation (`actions/attest-build-provenance`), and rejected `prerelease` / `draft` payloads in `UpdateManager.ParseReleaseJson()`.
+
 ## [2.2.0] - 2026-11-16
 
 ### Added

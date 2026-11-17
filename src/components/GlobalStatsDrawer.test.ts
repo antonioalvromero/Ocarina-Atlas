@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { expandOwnedRequirements } from '../lib/prerequisites'
 import type { Dataset } from '../lib/types'
 import { getCategoryDrawerItems } from './GlobalStatsDrawer'
 
@@ -45,7 +46,7 @@ const MOCK_DATASET: Dataset = {
       hint: null,
       age: 'adult',
       night: false,
-      requires: [],
+      requires: ['longshot'],
       images: [],
     },
     {
@@ -106,5 +107,19 @@ describe('getCategoryDrawerItems', () => {
     expect(entries).toHaveLength(1)
     expect(entries[0]?.mapId).toBeNull()
     expect(entries[0]?.floorLabel).toBeNull()
+  })
+
+  it('filters items by owned prerequisites when onlyReachable is enabled', () => {
+    const withoutGear = getCategoryDrawerItems('gs', [], 'remaining', MOCK_DATASET, {
+      onlyReachable: true,
+      ownedExpanded: expandOwnedRequirements([]),
+    })
+    expect(withoutGear.map((e) => e.item.id)).toEqual(['kokiri-gs-01'])
+
+    const withLongshot = getCategoryDrawerItems('gs', [], 'remaining', MOCK_DATASET, {
+      onlyReachable: true,
+      ownedExpanded: expandOwnedRequirements(['longshot']),
+    })
+    expect(withLongshot.map((e) => e.item.id)).toEqual(['espiritu-gs-01', 'kokiri-gs-01'])
   })
 })

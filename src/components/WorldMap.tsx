@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { BarChart3, Check, Compass, Maximize2, Minimize2, X } from 'lucide-react'
+import { BarChart3, Check, Compass, Info, Maximize2, Minimize2, X } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { pinPosition } from '../lib/coords'
 import { dataset, formatFloorLabel } from '../lib/data'
@@ -14,6 +14,7 @@ import {
   subscribeLichiiPosition,
   useLichiiTracker,
 } from '../lib/useLichiiTracker'
+import { CreditsModal } from './CreditsModal'
 import { GlobalStatsDrawer } from './GlobalStatsDrawer'
 import { LanguageSelector } from './LanguageSelector'
 import { LichiiStatusPanel } from './LichiiStatusPanel'
@@ -129,6 +130,7 @@ export function WorldMap() {
   const countsShown = useStored(itemCountVisibleSlot)
   const tracker = useLichiiTracker({ trackPosition: false })
   const [statsOpen, setStatsOpen] = useState(false)
+  const [creditsOpen, setCreditsOpen] = useState(false)
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
   const [isCoarsePointer, setIsCoarsePointer] = useState(false)
   const [isCompactViewport, setIsCompactViewport] = useState(false)
@@ -251,6 +253,7 @@ export function WorldMap() {
   }, [])
 
   const closeStats = useCallback(() => setStatsOpen(false), [])
+  const closeCredits = useCallback(() => setCreditsOpen(false), [])
   const dismissSelectedPlace = useCallback(() => setSelectedPlaceId(null), [])
 
   const playerSublabel = useMemo(
@@ -423,6 +426,16 @@ export function WorldMap() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setCreditsOpen(true)}
+                  aria-label={t('credits.title')}
+                  title={t('credits.button')}
+                  className="pointer-events-auto inline-flex cursor-pointer items-center gap-1 rounded-md border border-ink-600 bg-ink-800/90 px-2 py-1 text-xs font-medium text-parchment-50 transition-colors hover:border-parchment-400 hover:bg-ink-700"
+                >
+                  <Info size={13} className="text-[#e8c04a]" aria-hidden />
+                  <span className="max-sm:hidden">{t('credits.button')}</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => void enterFullscreen()}
                   aria-label={t('map.enterFullscreen')}
                   title={t('map.fullscreenMap')}
@@ -468,6 +481,7 @@ export function WorldMap() {
             </ul>
           </header>
           <GlobalStatsDrawer open={statsOpen} onClose={closeStats} summary={summary} doneIds={doneIds} />
+          <CreditsModal open={creditsOpen} onClose={closeCredits} />
         </>
       )}
       <LichiiStatusPanel

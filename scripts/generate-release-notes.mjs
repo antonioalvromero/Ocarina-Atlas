@@ -8,6 +8,7 @@ import {
   extractChangelogSection,
   extractGitHubRepoSlugFromRemote,
   formatSafeHttpError,
+  isPrereleaseTag,
   isSafeGitRef,
   normalizeTagVersion,
   parseSafeRepoSlug,
@@ -199,6 +200,9 @@ async function main() {
     runGit(['describe', '--tags', '--exact-match']) ||
     'v1.0.1'
   const tagName = validateGitRef(rawTag, 'RELEASE_TAG')
+  const envPrerelease = (process.env.IS_PRERELEASE ?? '').trim().toLowerCase()
+  const isPrerelease =
+    envPrerelease === 'true' ? true : envPrerelease === 'false' ? false : isPrereleaseTag(tagName)
 
   const rawHeadRef = process.env.HEAD_REF || tagName || 'HEAD'
   const candidateHeadRef = validateGitRef(rawHeadRef, 'HEAD_REF')
@@ -236,6 +240,7 @@ async function main() {
   const { systemPrompt, userPrompt } = buildReleasePrompt({
     version: tagName,
     previousTag,
+    isPrerelease,
     instructions,
     commits,
     changelogSection,
@@ -282,10 +287,11 @@ async function main() {
     }
   }
 
-  const zipSha256 = computeFileSha256(zipPath)
+  const zipSha256 = (process.env.ZIP_SHA256 ?? '').trim() || computeFileSha256(zipPath)
   const body = composeReleaseBody({
     version: tagName,
     previousTag,
+    isPrerelease,
     repoSlug,
     headBranch,
     headSha,

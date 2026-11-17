@@ -1,11 +1,26 @@
 import { Link } from '@tanstack/react-router'
-import { Check, ChevronRight, X } from 'lucide-react'
+import { Check, ChevronRight, Info, Wrench, X } from 'lucide-react'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { dataset, formatFloorLabel } from '../lib/data'
 import { useI18n, type TranslationKey } from '../lib/i18n'
+import {
+  ALL_PREREQUISITE_KEYS,
+  expandOwnedRequirements,
+  meetsItemRequirements,
+  type RequirementEvalOptions,
+} from '../lib/prerequisites'
 import type { GlobalProgressSummary } from '../lib/progress-stats'
+import {
+  ownedPrereqsSlot,
+  prereqFilterEnabledSlot,
+  useStored,
+  write,
+} from '../lib/storage'
 import type { Dataset, Item } from '../lib/types'
+import { useLichiiTracker } from '../lib/useLichiiTracker'
 import { categoryStyle } from './categories'
+import { CreditsModal } from './CreditsModal'
+import { GearChecklistModal } from './GearChecklistModal'
 
 type LocationFilter = 'all' | 'incomplete' | 'zones' | 'dungeons'
 type CategoryItemFilter = 'remaining' | 'all'
@@ -19,11 +34,18 @@ export type CategoryDrawerItem = {
   done: boolean
 }
 
+export type CategoryDrawerFilterOptions = {
+  onlyReachable?: boolean
+  ownedExpanded?: ReadonlySet<string>
+  beanEvalOptions?: Pick<RequirementEvalOptions, 'collectedBeanIds' | 'beanAutoSynced'>
+}
+
 export function getCategoryDrawerItems(
   categoryKey: string,
   doneIds: readonly string[],
   filter: CategoryItemFilter,
   sourceDataset: Dataset = dataset,
+  options?: CategoryDrawerFilterOptions,
 ): CategoryDrawerItem[] {
   const doneSet = new Set(doneIds)
   const placeById = new Map(sourceDataset.places.map((place) => [place.id, place]))
@@ -33,6 +55,13 @@ export function getCategoryDrawerItems(
     if (item.cat !== categoryKey) continue
     const done = doneSet.has(item.id)
     if (filter === 'remaining' && done) continue
+    if (
+      options?.onlyReachable &&
+      options.ownedExpanded &&
+      !meetsItemRequirements(item, options.ownedExpanded, options.beanEvalOptions)
+    ) {
+      continue
+    }
     const place = placeById.get(item.place)
     if (!place) continue
 
@@ -66,25 +95,42 @@ export type GlobalStatsDrawerProps = {
   doneIds?: readonly string[]
 }
 
-export const GlobalStatsDrawer = memo(function GlobalStatsDrawer({
-  open,
+function GlobalStatsDrawerContent({
   onClose,
   summary,
   doneIds = [],
-}: GlobalStatsDrawerProps) {
+}: Omit<GlobalStatsDrawerProps, 'open'>) {
   const { t, tCategory, tPlace, tRegion, tItemName } = useI18n()
   const [filter, setFilter] = useState<LocationFilter>('all')
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<string | null>(null)
   const [categoryItemFilter, setCategoryItemFilter] = useState<CategoryItemFilter>('remaining')
+  const [gearOpen, setGearOpen] = useState(false)
+  const [creditsOpen, setCreditsOpen] = useState(false)
+
+  const prereqFilterEnabled = useStored(prereqFilterEnabledSlot)
+  const ownedPrereqs = useStored(ownedPrereqsSlot)
+  const tracker = useLichiiTracker({ trackPosition: false })
+
+  const ownedCount = useMemo(() => {
+    const ownedSet = new Set(ownedPrereqs)
+    return ALL_PREREQUISITE_KEYS.filter((key) => ownedSet.has(key)).length
+  }, [ownedPrereqs])
+  const ownedExpanded = useMemo(() => expandOwnedRequirements(ownedPrereqs), [ownedPrereqs])
+  const beanEvalOptions = useMemo(
+    () =>
+      tracker.prereqAutoSync && tracker.state.authoritativeBeans && tracker.state.collectedBeanIds
+        ? { beanAutoSynced: true, collectedBeanIds: new Set(tracker.state.collectedBeanIds) }
+        : undefined,
+    [tracker.prereqAutoSync, tracker.state.authoritativeBeans, tracker.state.collectedBeanIds],
+  )
 
   useEffect(() => {
-    if (!open) return
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape' && !gearOpen && !creditsOpen) onClose()
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [open, onClose])
+  }, [onClose, gearOpen, creditsOpen])
 
   const filteredPlaces = useMemo(() => {
     switch (filter) {
@@ -111,12 +157,14 @@ export const GlobalStatsDrawer = memo(function GlobalStatsDrawer({
   const categoryItems = useMemo(
     () =>
       selectedCategoryKey
-        ? getCategoryDrawerItems(selectedCategoryKey, doneIds, categoryItemFilter)
+        ? getCategoryDrawerItems(selectedCategoryKey, doneIds, categoryItemFilter, dataset, {
+            onlyReachable: prereqFilterEnabled,
+            ownedExpanded,
+            beanEvalOptions,
+          })
         : [],
-    [selectedCategoryKey, doneIds, categoryItemFilter],
+    [selectedCategoryKey, doneIds, categoryItemFilter, prereqFilterEnabled, ownedExpanded, beanEvalOptions],
   )
-
-  if (!open) return null
 
   const allComplete = summary.totalItems > 0 && summary.totalDone === summary.totalItems
 
@@ -134,23 +182,58 @@ export const GlobalStatsDrawer = memo(function GlobalStatsDrawer({
         className="flex h-full w-full max-w-md flex-col border-r border-ink-600 bg-ink-900 text-parchment-200 shadow-2xl"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-ink-700 px-5 py-4">
-          <div>
-            <h2 id="global-stats-title" className="font-serif text-xl text-parchment-50">
-              {t('stats.title')}
-            </h2>
-            <p className="mt-0.5 text-xs text-parchment-400">
-              {t('stats.subtitle')}
-            </p>
+        <div className="border-b border-ink-700 px-5 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 id="global-stats-title" className="font-serif text-xl text-parchment-50">
+                {t('stats.title')}
+              </h2>
+              <p className="mt-0.5 text-xs text-parchment-400">
+                {t('stats.subtitle')}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={t('stats.close')}
+              className="grid size-8 cursor-pointer place-items-center rounded-md border border-ink-700 bg-ink-800/80 text-parchment-200 transition-colors hover:border-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
+            >
+              <X size={16} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t('stats.close')}
-            className="grid size-8 cursor-pointer place-items-center rounded-md border border-ink-700 bg-ink-800/80 text-parchment-200 transition-colors hover:border-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
-          >
-            <X size={16} />
-          </button>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ink-700/80 pt-2.5">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={prereqFilterEnabled}
+              onClick={() => write(prereqFilterEnabledSlot, !prereqFilterEnabled)}
+              className="flex cursor-pointer items-center gap-2 text-xs text-parchment-200"
+            >
+              <span>{t('filter.prereqOnly')}</span>
+              <span
+                className={`relative h-4.5 w-8 rounded-full transition-colors ${
+                  prereqFilterEnabled ? 'bg-moss' : 'bg-ink-600'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-parchment-50 transition-transform ${
+                    prereqFilterEnabled ? 'translate-x-3.5' : ''
+                  }`}
+                />
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setGearOpen(true)}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-ink-600 bg-ink-800 px-2 py-1 text-[11px] font-medium text-parchment-200 transition-colors hover:border-[#e8c04a]/70 hover:text-parchment-50"
+            >
+              <Wrench size={11} className="text-[#e8c04a]" aria-hidden />
+              <span>{t('filter.gearButton')}</span>
+              <span className="text-parchment-400 tabular-nums">
+                ({ownedCount}/{ALL_PREREQUISITE_KEYS.length})
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Scrollable body */}
@@ -261,7 +344,9 @@ export const GlobalStatsDrawer = memo(function GlobalStatsDrawer({
                         {selectedCategoryLabel}
                       </h4>
                       <span className="shrink-0 text-[11px] text-parchment-400 tabular-nums">
-                        {t('stats.remainingCount', { count: remainingCount })}
+                        {prereqFilterEnabled
+                          ? t('filter.reachableCount', { count: categoryItems.length })
+                          : t('stats.remainingCount', { count: remainingCount })}
                       </span>
                     </div>
                     <div className="flex shrink-0 items-center gap-1.5">
@@ -308,9 +393,12 @@ export const GlobalStatsDrawer = memo(function GlobalStatsDrawer({
 
                   {categoryItems.length === 0 ? (
                     <p className="mt-2.5 rounded border border-ink-700/70 bg-ink-900/50 px-3 py-4 text-center text-xs text-parchment-400">
-                      {categoryItemFilter === 'remaining' && selectedCategory.total > 0
-                        ? t('stats.allCollected', { category: selectedCategoryLabel })
-                        : t('stats.noItemsInCategory')}
+                      {prereqFilterEnabled &&
+                      (categoryItemFilter === 'all' ? selectedCategory.total > 0 : remainingCount > 0)
+                        ? `${t('filter.prereqNotice')} (${t('filter.reachableCount', { count: 0 })})`
+                        : categoryItemFilter === 'remaining' && selectedCategory.total > 0
+                          ? t('stats.allCollected', { category: selectedCategoryLabel })
+                          : t('stats.noItemsInCategory')}
                     </p>
                   ) : (
                     <ul className="mt-2.5 flex max-h-72 flex-col gap-1 overflow-y-auto pr-1">
@@ -486,7 +574,33 @@ export const GlobalStatsDrawer = memo(function GlobalStatsDrawer({
             )}
           </section>
         </div>
+
+        {/* Credits footer */}
+        <footer className="flex items-center justify-between gap-2 border-t border-ink-700 bg-ink-950/60 px-5 py-2.5 text-[11px] text-parchment-400">
+          <span className="truncate">Ocarina Atlas · antonioalvromero · Nintendúo</span>
+          <button
+            type="button"
+            onClick={() => setCreditsOpen(true)}
+            aria-label={t('credits.title')}
+            className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded border border-ink-600 bg-ink-800/90 px-2 py-1 text-[11px] font-medium text-parchment-200 transition-colors hover:border-[#e8c04a]/70 hover:text-parchment-50"
+          >
+            <Info size={12} className="text-[#e8c04a]" aria-hidden />
+            <span>{t('credits.button')}</span>
+          </button>
+        </footer>
       </aside>
+      <GearChecklistModal open={gearOpen} onClose={() => setGearOpen(false)} />
+      <CreditsModal open={creditsOpen} onClose={() => setCreditsOpen(false)} />
     </div>
   )
+}
+
+export const GlobalStatsDrawer = memo(function GlobalStatsDrawer({
+  open,
+  onClose,
+  summary,
+  doneIds = [],
+}: GlobalStatsDrawerProps) {
+  if (!open) return null
+  return <GlobalStatsDrawerContent onClose={onClose} summary={summary} doneIds={doneIds} />
 })

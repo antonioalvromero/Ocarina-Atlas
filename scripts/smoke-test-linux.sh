@@ -97,7 +97,11 @@ if [ -z "$PORT" ]; then
 fi
 
 echo "Starting $ABS_APPIMAGE_PATH --appimage-extract-and-run --port $PORT --no-browser ..."
-"$ABS_APPIMAGE_PATH" --appimage-extract-and-run --no-sandbox --port "$PORT" --no-browser >"$WORK_DIR/launcher.log" 2>&1 &
+if command -v setsid >/dev/null 2>&1; then
+  setsid "$ABS_APPIMAGE_PATH" --appimage-extract-and-run --no-sandbox --port "$PORT" --no-browser >"$WORK_DIR/launcher.log" 2>&1 &
+else
+  "$ABS_APPIMAGE_PATH" --appimage-extract-and-run --no-sandbox --port "$PORT" --no-browser >"$WORK_DIR/launcher.log" 2>&1 &
+fi
 LAUNCHER_PID=$!
 
 if ! "$NODE_BIN" - "$PORT" "$LAUNCHER_PID" <<'EOF'
@@ -152,8 +156,8 @@ then
 fi
 
 echo "Sending SIGTERM to OcarinaAtlas AppImage (PID $LAUNCHER_PID) ..."
-kill -TERM "$LAUNCHER_PID"
-wait "$LAUNCHER_PID" || true
+kill -TERM -"$LAUNCHER_PID" 2>/dev/null || kill -TERM "$LAUNCHER_PID" 2>/dev/null || true
+wait "$LAUNCHER_PID" 2>/dev/null || true
 LAUNCHER_PID=""
 
 # Verify port closed cleanly (no orphan node server)

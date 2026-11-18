@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Check, ChevronRight, Info, Wrench, X } from 'lucide-react'
+import { Check, ChevronRight, Eye, EyeOff, Info, Wrench, X } from 'lucide-react'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { dataset, formatFloorLabel } from '../lib/data'
 import { useI18n, type TranslationKey } from '../lib/i18n'
@@ -11,6 +11,8 @@ import {
 } from '../lib/prerequisites'
 import type { GlobalProgressSummary } from '../lib/progress-stats'
 import {
+  hideDoneSlot,
+  officialVisibleSlot,
   ownedPrereqsSlot,
   prereqFilterEnabledSlot,
   useStored,
@@ -24,6 +26,32 @@ import { GearChecklistModal } from './GearChecklistModal'
 
 type LocationFilter = 'all' | 'incomplete' | 'zones' | 'dungeons'
 type CategoryItemFilter = 'remaining' | 'all'
+
+export function filterPlacesForDrawer(
+  places: GlobalProgressSummary['places'],
+  filter: LocationFilter,
+  hideDone: boolean,
+): GlobalProgressSummary['places'] {
+  let base: GlobalProgressSummary['places']
+  switch (filter) {
+    case 'incomplete':
+      base = places.filter((place) => place.done < place.total)
+      break
+    case 'zones':
+      base = places.filter((place) => place.kind === 'zone')
+      break
+    case 'dungeons':
+      base = places.filter((place) => place.kind === 'dungeon')
+      break
+    case 'all':
+    default:
+      base = places
+  }
+  if (hideDone) {
+    return base.filter((place) => !(place.done === place.total && place.total > 0))
+  }
+  return base
+}
 
 export type CategoryDrawerItem = {
   item: Item
@@ -107,6 +135,8 @@ function GlobalStatsDrawerContent({
   const [gearOpen, setGearOpen] = useState(false)
   const [creditsOpen, setCreditsOpen] = useState(false)
 
+  const showOfficial = useStored(officialVisibleSlot)
+  const hideDone = useStored(hideDoneSlot)
   const prereqFilterEnabled = useStored(prereqFilterEnabledSlot)
   const ownedPrereqs = useStored(ownedPrereqsSlot)
   const tracker = useLichiiTracker({ trackPosition: false })
@@ -132,19 +162,10 @@ function GlobalStatsDrawerContent({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose, gearOpen, creditsOpen])
 
-  const filteredPlaces = useMemo(() => {
-    switch (filter) {
-      case 'incomplete':
-        return summary.places.filter((place) => place.done < place.total)
-      case 'zones':
-        return summary.places.filter((place) => place.kind === 'zone')
-      case 'dungeons':
-        return summary.places.filter((place) => place.kind === 'dungeon')
-      case 'all':
-      default:
-        return summary.places
-    }
-  }, [filter, summary.places])
+  const filteredPlaces = useMemo(
+    () => filterPlacesForDrawer(summary.places, filter, hideDone),
+    [filter, summary.places, hideDone],
+  )
 
   const selectedCategory = useMemo(
     () =>
@@ -201,38 +222,89 @@ function GlobalStatsDrawerContent({
               <X size={16} />
             </button>
           </div>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ink-700/80 pt-2.5">
+          <div className="mt-3 flex flex-col gap-2 border-t border-ink-700/80 pt-2.5">
             <button
               type="button"
               role="switch"
-              aria-checked={prereqFilterEnabled}
-              onClick={() => write(prereqFilterEnabledSlot, !prereqFilterEnabled)}
-              className="flex cursor-pointer items-center gap-2 text-xs text-parchment-200"
+              aria-checked={showOfficial}
+              onClick={() => write(officialVisibleSlot, !showOfficial)}
+              className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border border-ink-700 bg-ink-800/60 px-2.5 py-1.5 text-xs text-parchment-200 transition-colors hover:border-ink-600 hover:text-parchment-50"
             >
-              <span>{t('filter.prereqOnly')}</span>
+              <span className="flex items-center gap-2">
+                {showOfficial ? (
+                  <Eye size={13} className="text-moss" aria-hidden />
+                ) : (
+                  <EyeOff size={13} className="text-parchment-400" aria-hidden />
+                )}
+                <span>{t('panel.showOfficialPins')}</span>
+              </span>
               <span
-                className={`relative h-4.5 w-8 rounded-full transition-colors ${
-                  prereqFilterEnabled ? 'bg-moss' : 'bg-ink-600'
+                className={`relative h-4.5 w-8 shrink-0 rounded-full transition-colors ${
+                  showOfficial ? 'bg-moss' : 'bg-ink-600'
                 }`}
               >
                 <span
                   className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-parchment-50 transition-transform ${
-                    prereqFilterEnabled ? 'translate-x-3.5' : ''
+                    showOfficial ? 'translate-x-3.5' : ''
                   }`}
                 />
               </span>
             </button>
-            <button
-              type="button"
-              onClick={() => setGearOpen(true)}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-ink-600 bg-ink-800 px-2 py-1 text-[11px] font-medium text-parchment-200 transition-colors hover:border-[#e8c04a]/70 hover:text-parchment-50"
-            >
-              <Wrench size={11} className="text-[#e8c04a]" aria-hidden />
-              <span>{t('filter.gearButton')}</span>
-              <span className="text-parchment-400 tabular-nums">
-                ({ownedCount}/{ALL_PREREQUISITE_KEYS.length})
-              </span>
-            </button>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={prereqFilterEnabled}
+                  onClick={() => write(prereqFilterEnabledSlot, !prereqFilterEnabled)}
+                  className="flex cursor-pointer items-center gap-2 text-xs text-parchment-200"
+                >
+                  <span>{t('filter.prereqOnly')}</span>
+                  <span
+                    className={`relative h-4.5 w-8 rounded-full transition-colors ${
+                      prereqFilterEnabled ? 'bg-moss' : 'bg-ink-600'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-parchment-50 transition-transform ${
+                        prereqFilterEnabled ? 'translate-x-3.5' : ''
+                      }`}
+                    />
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={hideDone}
+                  onClick={() => write(hideDoneSlot, !hideDone)}
+                  className="flex cursor-pointer items-center gap-2 text-xs text-parchment-200"
+                >
+                  <span>{t('filter.hideCompleted')}</span>
+                  <span
+                    className={`relative h-4.5 w-8 rounded-full transition-colors ${
+                      hideDone ? 'bg-moss' : 'bg-ink-600'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-parchment-50 transition-transform ${
+                        hideDone ? 'translate-x-3.5' : ''
+                      }`}
+                    />
+                  </span>
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGearOpen(true)}
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-ink-600 bg-ink-800 px-2 py-1 text-[11px] font-medium text-parchment-200 transition-colors hover:border-[#e8c04a]/70 hover:text-parchment-50"
+              >
+                <Wrench size={11} className="text-[#e8c04a]" aria-hidden />
+                <span>{t('filter.gearButton')}</span>
+                <span className="text-parchment-400 tabular-nums">
+                  ({ownedCount}/{ALL_PREREQUISITE_KEYS.length})
+                </span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -502,7 +574,10 @@ function GlobalStatsDrawerContent({
             {/* Location list */}
             {filteredPlaces.length === 0 ? (
               <p className="rounded-md border border-ink-700/70 bg-ink-950/40 px-3 py-6 text-center text-xs text-parchment-400">
-                {filter === 'incomplete'
+                {filter === 'incomplete' ||
+                (hideDone &&
+                  summary.places.length > 0 &&
+                  summary.places.every((place) => place.done === place.total && place.total > 0))
                   ? t('stats.allLocationsComplete')
                   : t('stats.noLocationsMatch')}
               </p>

@@ -6,6 +6,7 @@ import {
   addPin,
   ageFilterSlot,
   applyRemoteSyncState,
+  hideDoneSlot,
   initRemoteSync,
   isSyncableKey,
   itemCountVisibleSlot,
@@ -126,6 +127,15 @@ describe('with localStorage', () => {
     expect(read(itemCountVisibleSlot)).toEqual([])
   })
 
+  it('stores hideDoneSlot with default false and strict boolean parsing', () => {
+    expect(read(hideDoneSlot)).toBe(false)
+    write(hideDoneSlot, true)
+    expect(win.localStorage.getItem('oot-map:v1:hide-done')).toBe('true')
+    expect(read(hideDoneSlot)).toBe(true)
+    win.localStorage.setItem('oot-map:v1:hide-done', '"yes"')
+    expect(read(hideDoneSlot)).toBe(false)
+  })
+
   it('survives a storage that refuses writes', () => {
     win.localStorage.setItem = () => {
       throw new Error('quota')
@@ -227,6 +237,7 @@ describe('PC↔tablet remote sync', () => {
     expect(isSyncableKey('official-done')).toBe(true)
     expect(isSyncableKey('official-revealed')).toBe(true)
     expect(isSyncableKey('hidden-categories')).toBe(true)
+    expect(isSyncableKey('hide-done')).toBe(true)
     expect(isSyncableKey('item-count-visible')).toBe(true)
     expect(isSyncableKey('age-filter')).toBe(true)
     expect(isSyncableKey('age')).toBe(true)

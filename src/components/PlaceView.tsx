@@ -15,6 +15,7 @@ import {
   addPin,
   ageFilterSlot,
   hiddenCategoriesSlot,
+  hideDoneSlot,
   itemCountVisibleSlot,
   officialDoneSlot,
   officialRevealedSlot,
@@ -74,6 +75,24 @@ function useOfficialProgress(items: Item[]) {
   const doneIds = useStored(officialDoneSlot)
   const done = useMemo(() => new Set(doneIds), [doneIds])
   return { done, count: items.filter((item) => done.has(item.id)).length }
+}
+
+function HideDoneToggle({ on }: { on: boolean }) {
+  const { t } = useI18n()
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      onClick={() => write(hideDoneSlot, !on)}
+      className="mb-2.5 flex cursor-pointer items-center gap-2 text-xs text-parchment-200"
+    >
+      <span>{t('filter.hideCompleted')}</span>
+      <span className={`relative h-4.5 w-8 rounded-full transition-colors ${on ? 'bg-moss' : 'bg-ink-600'}`}>
+        <span className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-parchment-50 transition-transform ${on ? 'translate-x-3.5' : ''}`} />
+      </span>
+    </button>
+  )
 }
 
 function ItemCount({ placeId, progress, total }: { placeId: string; progress: number; total: number }) {
@@ -586,6 +605,7 @@ function MappedPlace({
 
   const pins = useStored(pinsSlot(place.id, map.id))
   const showOfficial = useStored(officialVisibleSlot)
+  const hideDone = useStored(hideDoneSlot)
   const hidden = useStored(hiddenCategoriesSlot)
   const age = useStored(ageFilterSlot)
   const prereqFilterEnabled = useStored(prereqFilterEnabledSlot)
@@ -605,31 +625,55 @@ function MappedPlace({
     [tracker.prereqAutoSync, tracker.state.authoritativeBeans, tracker.state.collectedBeanIds],
   )
 
+  const selectedCustom = selection?.kind === 'custom' ? selection.id : null
+  const selectedItem = selection?.kind === 'item' ? selection.id : null
+
   const { done, count } = useOfficialProgress(items)
   const grid = useMemo(() => layoutFloors(place.maps), [place.maps])
   const inView = useMemo(
     () => items.filter((item) => (allFloors ? item.at : item.at?.map === map.id)),
     [items, allFloors, map.id],
   )
-  const onMap = useMemo(() => inView.filter((item) => matchesAge(item, age)), [inView, age])
+  const onMap = useMemo(
+    () =>
+      inView.filter(
+        (item) => matchesAge(item, age) && (!hideDone || !done.has(item.id) || item.id === selectedItem),
+      ),
+    [inView, age, hideDone, done, selectedItem],
+  )
   const unplaced = useMemo(
-    () => items.filter((item) => matchesAge(item, age) && isUnplaced(item, place)),
-    [items, age, place],
+    () =>
+      items.filter(
+        (item) =>
+          matchesAge(item, age) &&
+          isUnplaced(item, place) &&
+          (!hideDone || !done.has(item.id) || item.id === selectedItem),
+      ),
+    [items, age, place, hideDone, done, selectedItem],
   )
   // With official pins off, only reveals count, and no filter can hide those.
   const isShown = useCallback(
     (item: Item) =>
-      showOfficial
+      (showOfficial
         ? matchesAge(item, age) &&
           !hidden.includes(item.cat) &&
           (!prereqFilterEnabled || meetsItemRequirements(item, ownedExpanded, beanEvalOptions))
-        : revealed.has(item.id),
-    [showOfficial, age, hidden, prereqFilterEnabled, ownedExpanded, beanEvalOptions, revealed],
+        : revealed.has(item.id)) &&
+      (!hideDone || !done.has(item.id) || item.id === selectedItem),
+    [
+      showOfficial,
+      age,
+      hidden,
+      prereqFilterEnabled,
+      ownedExpanded,
+      beanEvalOptions,
+      revealed,
+      hideDone,
+      done,
+      selectedItem,
+    ],
   )
   const shownOnMap = useMemo(() => inView.filter(isShown), [inView, isShown])
-
-  const selectedCustom = selection?.kind === 'custom' ? selection.id : null
-  const selectedItem = selection?.kind === 'item' ? selection.id : null
 
   const targetPlace = useMemo(
     () =>
@@ -1145,6 +1189,7 @@ function MappedPlace({
             />
           )}
           <Section title={t('place.officialPins')} aside={<OfficialToggle on={showOfficial} />}>
+            <HideDoneToggle on={hideDone} />
             {showOfficial ? (
               <OfficialList
                 onMap={onMap}
@@ -1185,6 +1230,7 @@ function MaplessPlace({ place, initialItemId }: { place: Place; initialItemId?: 
   const hidden = useStored(hiddenCategoriesSlot)
   const age = useStored(ageFilterSlot)
   const showOfficial = useStored(officialVisibleSlot)
+  const hideDone = useStored(hideDoneSlot)
   const { done, count } = useOfficialProgress(items)
   const beanEvalOptions = useMemo(
     () =>
@@ -1251,10 +1297,13 @@ function MaplessPlace({ place, initialItemId }: { place: Place; initialItemId?: 
       <Sidebar place={place} progress={count} total={items.length}>
         {items.length > 0 && (
           <Section title={t('place.officialPins')} aside={<OfficialToggle on={showOfficial} />}>
+            <HideDoneToggle on={hideDone} />
             {showOfficial && (
               <OfficialList
                 onMap={[]}
-                unplaced={items.filter((item) => matchesAge(item, age))}
+                unplaced={items.filter(
+                  (item) => matchesAge(item, age) && (!hideDone || !done.has(item.id) || item.id === selected),
+                )}
                 age={age}
                 hidden={hidden}
                 done={done}

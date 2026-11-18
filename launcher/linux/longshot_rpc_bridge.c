@@ -33,6 +33,10 @@
 #define LONGSHOT_HEAP_BASE 0x1000000000ULL
 #define LONGSHOT_HEAP_END 0x2000000000ULL
 #define STANDARD_HEAP_THRESHOLD 0x2000000000ULL
+#define DIRECT_HOST_ADDR_MIN 0x100000000ULL
+#define DIRECT_HOST_ADDR_MAX 0x8000000000ULL
+#define DIRECT_HOST_CODE_START 0x7000000000ULL
+#define DIRECT_HOST_CODE_END 0x8000000000ULL
 
 #define MAX_READ_MEMORY_SIZE 262144
 #define SEARCH_CHUNK_SIZE 1048576
@@ -49,6 +53,7 @@ typedef struct {
     char save_dir[PATH_MAX];
     bool has_save_dir;
     bool attached;
+    bool is_direct_host_va;
 } target_state_t;
 
 typedef struct {
@@ -77,7 +82,7 @@ typedef struct client_node {
 
 static volatile sig_atomic_t g_stop = 0;
 static pthread_mutex_t g_target_mutex = PTHREAD_MUTEX_INITIALIZER;
-static target_state_t g_target = {0, 0, false, "longshot", "", false, false};
+static target_state_t g_target = {0, 0, false, "longshot", "", false, false, false};
 static pid_t g_forced_pid = 0;
 static bool g_yama_warned = false;
 static pthread_mutex_t g_diag_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -114,7 +119,14 @@ static const char *classify_target_name(const char *name) {
     if (strcasecmp(name, "triforce") == 0) {
         return "triforce";
     }
+    if (strcasecmp(name, "ocarina") == 0 || strcasecmp(name, "nx2navi") == 0) {
+        return "ootpc";
+    }
     return NULL;
+}
+
+static bool is_direct_host_va_emulator(const char *emu) {
+    return emu && strcasecmp(emu, "ootpc") == 0;
 }
 
 static bool ends_with_ignore_case(const char *str, size_t len, const char *suffix) {
@@ -384,7 +396,7 @@ static bool parse_maps_line(const char *line, uint64_t *out_start, uint64_t *out
     return true;
 }
 
-static bool verify_guest_code_mapped(pid_t pid, int *out_err) {
+static bool verify_guest_code_mapped(pid_t pid, bool is_direct_host_va, int *out_err) {
     if (out_err) {
         *out_err = 0;
     }
@@ -396,7 +408,9 @@ static bool verify_guest_code_mapped(pid_t pid, int *out_err) {
         return false;
     }
 
-    const uint64_t probe_addr = GUEST_WINDOW_BASE + GUEST_CODE_BASE;
+    uint64_t probe_addr = is_direct_host_va
+        ? DIRECT_HOST_CODE_START
+        : (GUEST_WINDOW_BASE + GUEST_CODE_BASE);
     bool found_mapping = false;
     char line[4096];
     while (fgets(line, sizeof(line), fp) != NULL) {
@@ -409,10 +423,20 @@ static bool verify_guest_code_mapped(pid_t pid, int *out_err) {
         uint64_t start = 0;
         uint64_t end = 0;
         bool readable = false;
-        if (!parse_maps_line(line, &start, &end, &readable)) {
+        if (!parse_maps_line(line, &start, &end, &readable) || !readable) {
             continue;
         }
-        if (readable && start <= probe_addr && end >= probe_addr + 8ULL) {
+        if (is_direct_host_va) {
+            if (end > DIRECT_HOST_CODE_START && start < DIRECT_HOST_CODE_END) {
+                uint64_t ov_start = start > DIRECT_HOST_CODE_START ? start : DIRECT_HOST_CODE_START;
+                uint64_t ov_end = end < DIRECT_HOST_CODE_END ? end : DIRECT_HOST_CODE_END;
+                if (ov_end - ov_start >= 8ULL) {
+                    probe_addr = ov_start;
+                    found_mapping = true;
+                    break;
+                }
+            }
+        } else if (start <= probe_addr && end >= probe_addr + 8ULL) {
             found_mapping = true;
             break;
         }
@@ -566,17 +590,19 @@ static bool discover_target(target_state_t *out_state) {
         if (!is_pid_alive(g_forced_pid, false, 0)) {
             return false;
         }
-        int err = 0;
-        if (!verify_guest_code_mapped(g_forced_pid, &err)) {
-            return false;
-        }
         const char *emu = "longshot";
         match_proc_name(g_forced_pid, &emu);
+        bool direct_host_va = is_direct_host_va_emulator(emu);
+        int err = 0;
+        if (!verify_guest_code_mapped(g_forced_pid, direct_host_va, &err)) {
+            return false;
+        }
         out_state->pid = g_forced_pid;
         out_state->has_starttime = read_proc_stat_info(g_forced_pid, NULL, &out_state->starttime);
         snprintf(out_state->emulator, sizeof(out_state->emulator), "%s", emu);
         out_state->has_save_dir = resolve_user_save_dir(g_forced_pid, out_state->save_dir, sizeof(out_state->save_dir));
         out_state->attached = true;
+        out_state->is_direct_host_va = direct_host_va;
         return true;
     }
 
@@ -614,8 +640,9 @@ static bool discover_target(target_state_t *out_state) {
             continue;
         }
 
+        bool direct_host_va = is_direct_host_va_emulator(emu);
         int verify_err = 0;
-        if (!verify_guest_code_mapped(pid, &verify_err)) {
+        if (!verify_guest_code_mapped(pid, direct_host_va, &verify_err)) {
             continue;
         }
 
@@ -624,6 +651,7 @@ static bool discover_target(target_state_t *out_state) {
         snprintf(out_state->emulator, sizeof(out_state->emulator), "%s", emu);
         out_state->has_save_dir = resolve_user_save_dir(pid, out_state->save_dir, sizeof(out_state->save_dir));
         out_state->attached = true;
+        out_state->is_direct_host_va = direct_host_va;
         closedir(proc_dir);
         return true;
     }
@@ -639,6 +667,7 @@ static bool refresh_target_locked(bool allow_discover) {
         }
         fprintf(stderr, "[longshot-rpc-bridge] Target PID %ld exited.\n", (long)g_target.pid);
         g_target.attached = false;
+        g_target.is_direct_host_va = false;
         g_target.pid = 0;
         g_target.starttime = 0;
         g_target.has_starttime = false;
@@ -753,6 +782,7 @@ static void match_buffer(
     const uint8_t *buf,
     size_t buf_len,
     uint64_t base_host_addr,
+    uint64_t guest_base,
     const uint8_t *pattern_bytes,
     const uint8_t *pattern_mask,
     size_t pattern_len,
@@ -767,7 +797,7 @@ static void match_buffer(
 
     if (anchor_idx < 0) {
         for (size_t i = 0; i <= max_start && hits->count < max_hits; i++) {
-            uint64_t guest_addr = (base_host_addr + (uint64_t)i) - GUEST_WINDOW_BASE;
+            uint64_t guest_addr = (base_host_addr + (uint64_t)i) - guest_base;
             if (!add_hit(hits, guest_addr)) {
                 break;
             }
@@ -798,7 +828,7 @@ static void match_buffer(
             }
         }
         if (matched) {
-            uint64_t guest_addr = (base_host_addr + (uint64_t)start) - GUEST_WINDOW_BASE;
+            uint64_t guest_addr = (base_host_addr + (uint64_t)start) - guest_base;
             if (!add_hit(hits, guest_addr)) {
                 break;
             }
@@ -812,6 +842,7 @@ static void search_host_range(
     pid_t pid,
     uint64_t range_start_host,
     uint64_t range_end_host,
+    uint64_t guest_base,
     const uint8_t *pattern_bytes,
     const uint8_t *pattern_mask,
     size_t pattern_len,
@@ -861,6 +892,7 @@ static void search_host_range(
                 scan_buf,
                 to_read,
                 cursor,
+                guest_base,
                 pattern_bytes,
                 pattern_mask,
                 pattern_len,
@@ -1549,7 +1581,17 @@ static void handle_rpc_line(int fd, const char *line) {
             rpc_request_free(&req);
             return;
         }
-        if (req.address >= GUEST_WINDOW_SIZE || (uint64_t)req.size > GUEST_WINDOW_SIZE - req.address) {
+
+        pthread_mutex_lock(&g_target_mutex);
+        bool alive = refresh_target_locked(true);
+        pid_t pid = alive ? g_target.pid : 0;
+        bool is_direct_host_va = alive && g_target.is_direct_host_va;
+        pthread_mutex_unlock(&g_target_mutex);
+
+        uint64_t guest_base = is_direct_host_va ? 0ULL : GUEST_WINDOW_BASE;
+        uint64_t addr_min = is_direct_host_va ? DIRECT_HOST_ADDR_MIN : 0ULL;
+        uint64_t addr_max = is_direct_host_va ? DIRECT_HOST_ADDR_MAX : GUEST_WINDOW_SIZE;
+        if (req.address < addr_min || req.address >= addr_max || (uint64_t)req.size > addr_max - req.address) {
             send_json_error(fd, req.id_json, -32602, "Address out of guest window");
             rpc_request_free(&req);
             return;
@@ -1563,13 +1605,8 @@ static void handle_rpc_line(int fd, const char *line) {
             return;
         }
 
-        pthread_mutex_lock(&g_target_mutex);
-        bool alive = refresh_target_locked(true);
-        pid_t pid = alive ? g_target.pid : 0;
-        pthread_mutex_unlock(&g_target_mutex);
-
         int read_err = 0;
-        if (pid <= 0 || !read_remote_memory(pid, GUEST_WINDOW_BASE + req.address, raw, sz, &read_err)) {
+        if (pid <= 0 || !read_remote_memory(pid, guest_base + req.address, raw, sz, &read_err)) {
             free(raw);
             send_json_error(fd, req.id_json, -32000, "read_memory failed");
             rpc_request_free(&req);
@@ -1614,10 +1651,6 @@ static void handle_rpc_line(int fd, const char *line) {
         }
 
         bool is_heap = req.has_regions && strcasecmp(req.regions, "heap") == 0;
-        uint64_t guest_start = req.has_start ? req.start : (is_heap ? STANDARD_HEAP_THRESHOLD : 0ULL);
-        uint64_t guest_end = req.has_end ? req.end : GUEST_WINDOW_SIZE;
-        if (guest_start > GUEST_WINDOW_SIZE) guest_start = GUEST_WINDOW_SIZE;
-        if (guest_end > GUEST_WINDOW_SIZE) guest_end = GUEST_WINDOW_SIZE;
 
         size_t max_hits = DEFAULT_MAX_HITS;
         if (req.has_max_hits) {
@@ -1660,7 +1693,19 @@ static void handle_rpc_line(int fd, const char *line) {
         pthread_mutex_lock(&g_target_mutex);
         bool alive = refresh_target_locked(true);
         pid_t pid = alive ? g_target.pid : 0;
+        bool is_direct_host_va = alive && g_target.is_direct_host_va;
         pthread_mutex_unlock(&g_target_mutex);
+
+        uint64_t guest_base = is_direct_host_va ? 0ULL : GUEST_WINDOW_BASE;
+        uint64_t addr_min = is_direct_host_va ? DIRECT_HOST_ADDR_MIN : 0ULL;
+        uint64_t addr_max = is_direct_host_va ? DIRECT_HOST_ADDR_MAX : GUEST_WINDOW_SIZE;
+        uint64_t default_heap_start = is_direct_host_va ? DIRECT_HOST_ADDR_MIN : STANDARD_HEAP_THRESHOLD;
+        uint64_t guest_start = req.has_start ? req.start : (is_heap ? default_heap_start : addr_min);
+        uint64_t guest_end = req.has_end ? req.end : addr_max;
+        if (guest_start < addr_min) guest_start = addr_min;
+        if (guest_start > addr_max) guest_start = addr_max;
+        if (guest_end < addr_min) guest_end = addr_min;
+        if (guest_end > addr_max) guest_end = addr_max;
 
         hit_list_t hits = {NULL, 0, 0};
         if (pid > 0) {
@@ -1668,8 +1713,9 @@ static void handle_rpc_line(int fd, const char *line) {
             if (guest_end > guest_start) {
                 search_host_range(
                     pid,
-                    GUEST_WINDOW_BASE + guest_start,
-                    GUEST_WINDOW_BASE + guest_end,
+                    guest_base + guest_start,
+                    guest_base + guest_end,
+                    guest_base,
                     pat_bytes,
                     pat_mask,
                     pat_len,
@@ -1681,13 +1727,14 @@ static void handle_rpc_line(int fd, const char *line) {
                     scan_buf,
                     scan_buf_len);
             }
-            if (hits.count == 0 && (is_heap || guest_start >= STANDARD_HEAP_THRESHOLD)) {
+            if (!is_direct_host_va && hits.count == 0 && (is_heap || guest_start >= STANDARD_HEAP_THRESHOLD)) {
                 bool already_covered = guest_start <= LONGSHOT_HEAP_BASE && guest_end >= LONGSHOT_HEAP_END;
                 if (!already_covered) {
                     search_host_range(
                         pid,
                         GUEST_WINDOW_BASE + LONGSHOT_HEAP_BASE,
                         GUEST_WINDOW_BASE + LONGSHOT_HEAP_END,
+                        GUEST_WINDOW_BASE,
                         pat_bytes,
                         pat_mask,
                         pat_len,

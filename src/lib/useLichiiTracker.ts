@@ -273,6 +273,10 @@ export function isLiveMemoryState(state: LichiiTelemetryState): boolean {
   return Boolean(state.connected && state.emulatorRunning && state.source === 'memory')
 }
 
+export function canSyncTelemetryProgress(state: LichiiTelemetryState): boolean {
+  return isLiveMemoryState(state) || state.source === 'save'
+}
+
 export type ReconcileResult = {
   nextDone: string[]
   nextRevealed: string[]
@@ -495,7 +499,7 @@ function syncTrackedCategory(params: {
   skulltulaCount: number | null
 }): void {
   const { next, syncState, enabled, collectedIds, authoritative, signature, validIds } = params
-  if (!isLiveMemoryState(next)) {
+  if (!canSyncTelemetryProgress(next)) {
     resetCategorySyncState(syncState, true)
     return
   }
@@ -528,7 +532,12 @@ function syncTrackedCategory(params: {
   }
 
   const isIncrementalPickup =
-    wasSyncedBefore && authoritative && removedIds.length === 0 && addedIds.length > 0 && addedIds.length <= 2
+    isLiveMemoryState(next) &&
+    wasSyncedBefore &&
+    authoritative &&
+    removedIds.length === 0 &&
+    addedIds.length > 0 &&
+    addedIds.length <= 2
 
   const newlyMarkedItems: Item[] = []
   for (const id of addedIds) {
@@ -743,7 +752,7 @@ export function mergeOwnedRequirements(
 }
 
 function processAutoPrerequisites(next: LichiiTelemetryState): void {
-  if (!isLiveMemoryState(next) || !read(prereqAutoSyncSlot)) {
+  if (!canSyncTelemetryProgress(next) || !read(prereqAutoSyncSlot)) {
     lastPrereqSyncSignature = null
     return
   }
@@ -759,7 +768,7 @@ function processAutoPrerequisites(next: LichiiTelemetryState): void {
 }
 
 export function applyTelemetryState(data: LichiiTelemetryState) {
-  if (!isLiveMemoryState(data)) {
+  if (!canSyncTelemetryProgress(data)) {
     resetAllCategorySyncStates(true)
     lastPrereqSyncSignature = null
   } else {

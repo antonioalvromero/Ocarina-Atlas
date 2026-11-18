@@ -358,6 +358,7 @@ const EN_MESSAGES = {
   'floor.adult': 'Adult',
   'floor.main': 'Main',
 
+  'filter.hideCompleted': 'Hide completed',
   'filter.prereqOnly': 'Only reachable',
   'filter.gearButton': 'My Gear',
   'filter.gearTitle': 'Owned Gear & Songs',
@@ -548,6 +549,7 @@ const ES_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': 'Adulto',
   'floor.main': 'Principal',
 
+  'filter.hideCompleted': 'Ocultar completados',
   'filter.prereqOnly': 'Solo alcanzables',
   'filter.gearButton': 'Mi equipo',
   'filter.gearTitle': 'Equipo y canciones',
@@ -736,6 +738,7 @@ const FR_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': 'Adulte',
   'floor.main': 'Principal',
 
+  'filter.hideCompleted': 'Masquer complétés',
   'filter.prereqOnly': 'Accessibles uniquement',
   'filter.gearButton': 'Équipement',
   'filter.gearTitle': 'Équipement et chants',
@@ -924,6 +927,7 @@ const PT_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': 'Adulto',
   'floor.main': 'Principal',
 
+  'filter.hideCompleted': 'Ocultar concluídos',
   'filter.prereqOnly': 'Apenas alcançáveis',
   'filter.gearButton': 'Meu equipamento',
   'filter.gearTitle': 'Equipamentos e canções',
@@ -1112,6 +1116,7 @@ const ZH_CN_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': '青年',
   'floor.main': '主层',
 
+  'filter.hideCompleted': '隐藏已完成',
   'filter.prereqOnly': '仅显示可获取',
   'filter.gearButton': '我的装备',
   'filter.gearTitle': '已拥有的装备与乐曲',
@@ -1300,6 +1305,7 @@ const ZH_TW_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': '青年',
   'floor.main': '主層',
 
+  'filter.hideCompleted': '隱藏已完成',
   'filter.prereqOnly': '僅顯示可取得',
   'filter.gearButton': '我的裝備',
   'filter.gearTitle': '已擁有的裝備與樂曲',
@@ -1488,6 +1494,7 @@ const DE_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': 'Erwachsener',
   'floor.main': 'Hauptebene',
 
+  'filter.hideCompleted': 'Erledigte ausblenden',
   'filter.prereqOnly': 'Nur erreichbare',
   'filter.gearButton': 'Meine Ausrüstung',
   'filter.gearTitle': 'Ausrüstung & Lieder',
@@ -1676,6 +1683,7 @@ const IT_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': 'Adulto',
   'floor.main': 'Principale',
 
+  'filter.hideCompleted': 'Nascondi completati',
   'filter.prereqOnly': 'Solo raggiungibili',
   'filter.gearButton': 'Il mio equipaggiamento',
   'filter.gearTitle': 'Equipaggiamento e melodie',
@@ -1864,6 +1872,7 @@ const JA_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': '大人',
   'floor.main': 'メイン',
 
+  'filter.hideCompleted': '完了済みを非表示',
   'filter.prereqOnly': '入手可能のみ',
   'filter.gearButton': '所持装備',
   'filter.gearTitle': '所持している装備・歌',
@@ -2052,6 +2061,7 @@ const KO_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': '성인',
   'floor.main': '메인',
 
+  'filter.hideCompleted': '완료 항목 숨기기',
   'filter.prereqOnly': '획득 가능만',
   'filter.gearButton': '내 장비',
   'filter.gearTitle': '보유 장비 및 노래',
@@ -2240,6 +2250,7 @@ const NL_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': 'Volwassene',
   'floor.main': 'Hoofd',
 
+  'filter.hideCompleted': 'Voltooide verbergen',
   'filter.prereqOnly': 'Alleen bereikbaar',
   'filter.gearButton': 'Mijn uitrusting',
   'filter.gearTitle': 'Uitrusting & liederen',
@@ -2428,6 +2439,7 @@ const RU_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': 'Взрослый',
   'floor.main': 'Основной',
 
+  'filter.hideCompleted': 'Скрыть выполненные',
   'filter.prereqOnly': 'Только доступные',
   'filter.gearButton': 'Моё снаряжение',
   'filter.gearTitle': 'Снаряжение и песни',
@@ -2616,6 +2628,7 @@ const PL_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': 'Dorosły',
   'floor.main': 'Główne',
 
+  'filter.hideCompleted': 'Ukryj ukończone',
   'filter.prereqOnly': 'Tylko osiągalne',
   'filter.gearButton': 'Mój ekwipunek',
   'filter.gearTitle': 'Posiadany ekwipunek i pieśni',
@@ -2804,6 +2817,7 @@ const TR_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': 'Yetişkin',
   'floor.main': 'Ana',
 
+  'filter.hideCompleted': 'Tamamlananları gizle',
   'filter.prereqOnly': 'Yalnızca ulaşılabilir',
   'filter.gearButton': 'Ekipmanım',
   'filter.gearTitle': 'Sahip Olunan Ekipman ve Şarkılar',
@@ -2992,6 +3006,7 @@ const UK_MESSAGES: Record<TranslationKey, string> = {
   'floor.adult': 'Дорослий',
   'floor.main': 'Основний',
 
+  'filter.hideCompleted': 'Приховати виконані',
   'filter.prereqOnly': 'Лише доступні',
   'filter.gearButton': 'Моє спорядження',
   'filter.gearTitle': 'Наявне спорядження та пісні',

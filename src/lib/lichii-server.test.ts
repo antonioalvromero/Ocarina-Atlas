@@ -927,6 +927,9 @@ describe('Lichii environment config helpers', () => {
       }
     }
 
+    const prevLichiiPort = process.env.LICHII_PORT
+    closeLichiiRpc()
+    process.env.LICHII_PORT = '1'
     try {
       const gameRoot = path.join(tmpRoot, 'HeyListen')
       const profileDir = path.join(gameRoot, 'user', 'save', 'abcdef0123456789abcdef0123456789')
@@ -966,6 +969,12 @@ describe('Lichii environment config helpers', () => {
       expect(badJsonRes.handled).toBe(true)
       expect(badJsonRes.statusCode).toBe(400)
     } finally {
+      closeLichiiRpc()
+      if (prevLichiiPort === undefined) {
+        delete process.env.LICHII_PORT
+      } else {
+        process.env.LICHII_PORT = prevLichiiPort
+      }
       setCustomSaveOverride(null, null)
       fs.rmSync(tmpRoot, { recursive: true, force: true })
     }
@@ -2446,6 +2455,20 @@ describe('Longshot live .bss telemetry resolution (getLichiiTelemetryState)', ()
       'nx2saria',
     )
 
+    await withMockLongshotRpcServer(
+      mainBase,
+      regions,
+      async () => {
+        const state = await getLichiiTelemetryState()
+        expect(state.emulator).toBe('ootpc')
+        expect(state.source).toBe('memory')
+        expect(state.scene).toBe('KokiriForest')
+        expect(state.skulltulaCount).toBe(1)
+        expect(state.collectedSkulltulaIds).toEqual(['kokiri-gs-01'])
+      },
+      'ootpc',
+    )
+
     // The floor follows each status response, so other emulators still reject these pointers
     await withMockLongshotRpcServer(mainBase, regions, async () => {
       const state = await getLichiiTelemetryState()
@@ -2456,14 +2479,16 @@ describe('Longshot live .bss telemetry resolution (getLichiiTelemetryState)', ()
 })
 
 describe('getMinGuestHeapPtr', () => {
-  it('lowers the guest heap pointer floor to 4 GiB only for nx2saria', () => {
+  it('lowers the guest heap pointer floor to 4 GiB only for nx2saria and ootpc', () => {
     expect(getMinGuestHeapPtr('nx2saria')).toBe(0x100000000n)
+    expect(getMinGuestHeapPtr('ootpc')).toBe(0x100000000n)
     for (const emulator of ['longshot', 'relink', 'triforce', 'cheezyemu', 'fritchii', 'lichii', 'eden']) {
       expect(getMinGuestHeapPtr(emulator)).toBe(0x1000000000n)
     }
     expect(getMinGuestHeapPtr(undefined)).toBe(0x1000000000n)
     expect(getMinGuestHeapPtr(null)).toBe(0x1000000000n)
     expect(getMinGuestHeapPtr('NX2Saria')).toBe(0x1000000000n)
+    expect(getMinGuestHeapPtr('OOTPC')).toBe(0x1000000000n)
     expect(getMinGuestHeapPtr(42)).toBe(0x1000000000n)
   })
 })

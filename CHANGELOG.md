@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-11-18
+
+### Added
+- **Live Telemetry for `NovaOOT / OOT-PC` & `NX2navi` (`launcher/OcarinaAtlas.cs`, `launcher/linux/*`, `src/lib/lichii-server.ts`):** Added read-only direct host VA bridge support (`GuestWindowBase = 0`, `[0x7000000000, 0x8000000000)` `main` validation, `0x100000000n` 4 GiB heap floor) for `ocarina` / `nx2navi` processes across Windows and Linux when port `6545` is not already served externally (e.g. by `NX2Saria`).
+- **Global **Hide Completed** Filter & **Show Official Pins** Quick Controls (`src/lib/storage.ts`, `src/components/GlobalStatsDrawer.tsx`, `src/components/PlaceView.tsx`, `src/components/LichiiStatusPanel.tsx`):** Added `hideDoneSlot` across all 15 languages to hide 100%-completed areas in Stats and completed pins in zone/dungeon maps, added **Show official pins** to the Stats drawer, and added **Official pins**, **Only reachable**, and **Hide completed** quick-toggle pills to the Dynamic Island (removing raw XYZ coordinates for a cleaner fullscreen layout).
+
+### Fixed
+- **Save-Only Mode Map & Global Progress Sync (`src/lib/useLichiiTracker.ts`):** Enabled `canSyncTelemetryProgress()` for `source === 'save'` so all 184/184 `progress.sav` collectibles and `ownedRequirements` automatically mark map pins and update **Stats / Global Progress** even when no live emulator/recomp RAM bridge is attached (without triggering live pickup toasts or Camera Follow).
+- **Collected Marker Visual Contrast (`src/components/Pins.tsx`):** Dimmed completed `OfficialMarker` pins (`opacity-50 hover:opacity-100`) alongside the green checkmark badge so collected vs. uncollected pins stand out immediately.
+
 ## [2.4.1] - 2026-11-18
 
 ### Fixed

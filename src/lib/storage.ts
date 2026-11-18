@@ -10,6 +10,7 @@ const SYNCABLE_EXACT_KEYS = new Set([
   'official-done',
   'official-revealed',
   'hidden-categories',
+  'hide-done',
   'item-count-visible',
   'age-filter',
   'age',
@@ -80,6 +81,12 @@ function parsePins(raw: unknown): CustomPin[] {
 
 export const officialVisibleSlot: Slot<boolean> = {
   key: 'official-visible',
+  empty: false,
+  parse: (raw) => raw === true,
+}
+
+export const hideDoneSlot: Slot<boolean> = {
+  key: 'hide-done',
   empty: false,
   parse: (raw) => raw === true,
 }

@@ -1,7 +1,10 @@
+import { createElement } from 'react'
+import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { expandOwnedRequirements } from '../lib/prerequisites'
+import type { GlobalProgressSummary } from '../lib/progress-stats'
 import type { Dataset } from '../lib/types'
-import { getCategoryDrawerItems } from './GlobalStatsDrawer'
+import { filterPlacesForDrawer, GlobalStatsDrawer, getCategoryDrawerItems } from './GlobalStatsDrawer'
 
 const MOCK_DATASET: Dataset = {
   map: { image: '/hyrule.png', width: 1000, height: 1000 },
@@ -121,5 +124,80 @@ describe('getCategoryDrawerItems', () => {
       ownedExpanded: expandOwnedRequirements(['longshot']),
     })
     expect(withLongshot.map((e) => e.item.id)).toEqual(['espiritu-gs-01', 'kokiri-gs-01'])
+  })
+})
+
+describe('GlobalStatsDrawer official pins toggle', () => {
+  const emptySummary: GlobalProgressSummary = {
+    totalDone: 0,
+    totalItems: 0,
+    percentage: 0,
+    completedPlaces: 0,
+    totalPlaces: 0,
+    categories: [],
+    places: [],
+  }
+
+  it('renders the Show official pins switch above the Only reachable filter', () => {
+    const html = renderToString(
+      createElement(GlobalStatsDrawer, {
+        open: true,
+        onClose: () => {},
+        summary: emptySummary,
+      }),
+    )
+    expect(html).toContain('Show official pins')
+    expect(html).toContain('role="switch"')
+    expect(html).toContain('Only reachable')
+    expect(html).toContain('Hide completed')
+    expect(html.indexOf('Show official pins')).toBeLessThan(html.indexOf('Only reachable'))
+  })
+})
+
+describe('filterPlacesForDrawer', () => {
+  const places: GlobalProgressSummary['places'] = [
+    {
+      id: 'kokiri-forest',
+      slug: 'kokiri-forest',
+      name: 'Kokiri Forest',
+      region: 'Kokiri',
+      kind: 'zone',
+      done: 5,
+      total: 5,
+      percentage: 100,
+    },
+    {
+      id: 'spirit-temple',
+      slug: 'spirit-temple',
+      name: 'Spirit Temple',
+      region: 'Haunted Wasteland',
+      kind: 'dungeon',
+      done: 2,
+      total: 5,
+      percentage: 40,
+    },
+    {
+      id: 'empty-zone',
+      slug: 'empty-zone',
+      name: 'Empty Zone',
+      region: 'Hyrule',
+      kind: 'zone',
+      done: 0,
+      total: 0,
+      percentage: 0,
+    },
+  ]
+
+  it('hides 100%-completed places when hideDone is true', () => {
+    expect(filterPlacesForDrawer(places, 'all', false).map((p) => p.id)).toEqual([
+      'kokiri-forest',
+      'spirit-temple',
+      'empty-zone',
+    ])
+    expect(filterPlacesForDrawer(places, 'all', true).map((p) => p.id)).toEqual([
+      'spirit-temple',
+      'empty-zone',
+    ])
+    expect(filterPlacesForDrawer(places, 'zones', true).map((p) => p.id)).toEqual(['empty-zone'])
   })
 })

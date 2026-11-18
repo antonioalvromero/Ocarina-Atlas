@@ -92,6 +92,13 @@ describe('getConnectionView', () => {
     expect(view.note).toBe('Offline (Lichii RPC :6545 closed)')
   })
 
+  it('returns OOT-PC display name for ootpc emulator', () => {
+    const view = getConnectionView(
+      makeState({ connected: true, emulatorRunning: true, emulator: 'ootpc', source: 'memory' }),
+    )
+    expect(view.label).toBe('OOT-PC · Live')
+  })
+
   it('returns muted disconnected view when offline with no save', () => {
     const view = getConnectionView(makeState())
     expect(view.tone).toBe('disconnected')
@@ -301,7 +308,9 @@ describe('LichiiStatusPanel SSR rendering', () => {
     expect(html).toContain('Go to Link')
     expect(html).toContain('Follow Link: On')
     expect(html).toContain('Auto Tracking: On')
-    expect(html).toContain('(12.3, 45.7, -78.9)')
+    expect(html).toContain('Official pins')
+    expect(html).toContain('Only reachable')
+    expect(html).not.toContain('(12.3, 45.7, -78.9)')
     expect(html).toContain('Collapse tracker panel')
   })
 
@@ -366,6 +375,13 @@ describe('LichiiStatusPanel SSR rendering', () => {
 
     const disconnectedNoSlots = renderPanelText(makeProps({ state: makeState({ source: 'none' }) }))
     expect(disconnectedNoSlots).not.toContain('aria-label="Save Slot"')
+  })
+
+  it('renders Hide completed quick-toggle pill in the Dynamic Island', () => {
+    const html = renderPanelText(makeProps())
+    expect(html).toContain('Official pins')
+    expect(html).toContain('Only reachable')
+    expect(html).toContain('Hide completed')
   })
 })
 

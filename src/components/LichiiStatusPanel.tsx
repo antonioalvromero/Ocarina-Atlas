@@ -1,4 +1,4 @@
-import { Compass, Crosshair, Radio, RefreshCw, Skull, Sparkles, X } from 'lucide-react'
+import { CheckCircle2, Compass, Crosshair, Eye, EyeOff, Radio, RefreshCw, Skull, SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import {
   useCallback,
   useEffect,
@@ -11,6 +11,7 @@ import {
 } from 'react'
 import { dataset, formatFloorLabel } from '../lib/data'
 import { DEFAULT_LOCALE, translate, translatePlace, useI18n, type Locale } from '../lib/i18n'
+import { hideDoneSlot, officialVisibleSlot, prereqFilterEnabledSlot, useStored, write } from '../lib/storage'
 
 const itemsById = new Map(dataset.items.map((item) => [item.id, item]))
 import type { LichiiTelemetryState } from '../lib/lichii-types'
@@ -57,6 +58,7 @@ function getEmulatorDisplayName(emulator?: LichiiTelemetryState['emulator']): st
   if (emulator === 'relink') return 'Project ReLink'
   if (emulator === 'triforce') return 'Triforce'
   if (emulator === 'nx2saria') return 'NX2Saria'
+  if (emulator === 'ootpc') return 'OOT-PC'
   return 'Lichii'
 }
 
@@ -310,6 +312,9 @@ export function LichiiStatusPanel({
   const suppressFocusReopenRef = useRef(false)
 
   const { locale, t, tPlace, tItemName } = useI18n()
+  const showOfficialPins = useStored(officialVisibleSlot)
+  const prereqFilterEnabled = useStored(prereqFilterEnabledSlot)
+  const hideDone = useStored(hideDoneSlot)
   const [panelState, dispatch] = useReducer(reducePanelInteraction, INITIAL_PANEL_INTERACTION)
   const [selectedSlot, setSelectedSlot] = useState<string | undefined>(undefined)
   const [isSwitchingSlot, setIsSwitchingSlot] = useState(false)
@@ -733,12 +738,66 @@ export function LichiiStatusPanel({
                   )}
                 </div>
               )}
+            </div>
 
-              {state.position && (
-                <span className="font-mono text-[10px] text-parchment-400 tabular-nums sm:ml-auto">
-                  ({state.position.x.toFixed(1)}, {state.position.y.toFixed(1)}, {state.position.z.toFixed(1)})
-                </span>
-              )}
+            {/* Quick map filter toggles */}
+            <div className="flex flex-wrap items-center gap-1.5 border-t border-ink-700/70 pt-1.5">
+              <button
+                type="button"
+                aria-pressed={showOfficialPins}
+                onClick={() => write(officialVisibleSlot, !showOfficialPins)}
+                title={t('panel.showOfficialPins')}
+                className={`inline-flex cursor-pointer items-center gap-1 rounded border px-2 py-1 text-[11px] font-medium transition-colors motion-reduce:transition-none ${
+                  showOfficialPins
+                    ? 'border-moss/60 bg-moss/15 text-parchment-50'
+                    : 'border-ink-600 bg-ink-800 text-parchment-400 hover:text-parchment-50'
+                }`}
+              >
+                {showOfficialPins ? (
+                  <Eye size={11} className="shrink-0 text-moss" aria-hidden />
+                ) : (
+                  <EyeOff size={11} className="shrink-0" aria-hidden />
+                )}
+                <span>{t('place.officialPins')}</span>
+              </button>
+
+              <button
+                type="button"
+                aria-pressed={prereqFilterEnabled}
+                onClick={() => write(prereqFilterEnabledSlot, !prereqFilterEnabled)}
+                title={t('filter.prereqNotice')}
+                className={`inline-flex cursor-pointer items-center gap-1 rounded border px-2 py-1 text-[11px] font-medium transition-colors motion-reduce:transition-none ${
+                  prereqFilterEnabled
+                    ? 'border-[#e6b450]/70 bg-[#e6b450]/20 text-parchment-50'
+                    : 'border-ink-600 bg-ink-800 text-parchment-400 hover:text-parchment-50'
+                }`}
+              >
+                <SlidersHorizontal
+                  size={11}
+                  className={`shrink-0 ${prereqFilterEnabled ? 'text-[#e6b450]' : ''}`}
+                  aria-hidden
+                />
+                <span>{t('filter.prereqOnly')}</span>
+              </button>
+
+              <button
+                type="button"
+                aria-pressed={hideDone}
+                onClick={() => write(hideDoneSlot, !hideDone)}
+                title={t('filter.hideCompleted')}
+                className={`inline-flex cursor-pointer items-center gap-1 rounded border px-2 py-1 text-[11px] font-medium transition-colors motion-reduce:transition-none ${
+                  hideDone
+                    ? 'border-moss/60 bg-moss/15 text-parchment-50'
+                    : 'border-ink-600 bg-ink-800 text-parchment-400 hover:text-parchment-50'
+                }`}
+              >
+                <CheckCircle2
+                  size={11}
+                  className={`shrink-0 ${hideDone ? 'text-moss' : ''}`}
+                  aria-hidden
+                />
+                <span>{t('filter.hideCompleted')}</span>
+              </button>
             </div>
           </section>
         </div>

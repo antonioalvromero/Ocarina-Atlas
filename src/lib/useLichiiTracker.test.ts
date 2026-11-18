@@ -229,12 +229,12 @@ describe('applyTelemetryState Heart Container auto-marking', () => {
     expect(read(officialRevealedSlot)).toEqual(['kakariko-heart-01'])
   })
 
-  it('ignores Heart Container reconciliation when not live memory or not authoritative', () => {
+  it('ignores Heart Container reconciliation when source is none or not authoritative', () => {
     write(officialDoneSlot, ['kakariko-heart-01'])
 
     applyTelemetryState(
       makeTelemetry({
-        source: 'save',
+        source: 'none',
         connected: false,
         emulatorRunning: false,
         collectedHeartContainerIds: ['espiritu-heart-01'],
@@ -295,12 +295,55 @@ describe('applyTelemetryState Fairy Thought auto-marking', () => {
     expect(read(officialRevealedSlot)).toEqual(['deku-heart-01'])
   })
 
-  it('ignores Fairy Thought reconciliation when not live memory or not authoritative', () => {
+  it('syncs authoritative collectibles in save-only mode without emitting toasts', () => {
     write(officialDoneSlot, ['espiritu-gs-04'])
 
     applyTelemetryState(
       makeTelemetry({
         source: 'save',
+        connected: false,
+        emulatorRunning: false,
+        collectedThoughtIds: ['cementerio-thought-01'],
+        authoritativeThoughts: true,
+        collectedHeartContainerIds: ['espiritu-heart-01'],
+        authoritativeHeartContainers: true,
+      }),
+    )
+    expect(read(officialDoneSlot)).toEqual([
+      'espiritu-gs-04',
+      'espiritu-heart-01',
+      'cementerio-thought-01',
+    ])
+    expect(read(officialRevealedSlot)).toEqual(['espiritu-heart-01', 'cementerio-thought-01'])
+    expect(getTrackerSnapshotForTests().toasts).toHaveLength(0)
+
+    // Subsequent save-only update adding 1 item should also emit 0 toasts
+    applyTelemetryState(
+      makeTelemetry({
+        source: 'save',
+        connected: false,
+        emulatorRunning: false,
+        collectedThoughtIds: ['cementerio-thought-01', 'coloso-thought-01'],
+        authoritativeThoughts: true,
+        collectedHeartContainerIds: ['espiritu-heart-01'],
+        authoritativeHeartContainers: true,
+      }),
+    )
+    expect(read(officialDoneSlot)).toEqual([
+      'espiritu-gs-04',
+      'espiritu-heart-01',
+      'cementerio-thought-01',
+      'coloso-thought-01',
+    ])
+    expect(getTrackerSnapshotForTests().toasts).toHaveLength(0)
+  })
+
+  it('ignores Fairy Thought reconciliation when source is none or not authoritative', () => {
+    write(officialDoneSlot, ['espiritu-gs-04'])
+
+    applyTelemetryState(
+      makeTelemetry({
+        source: 'none',
         connected: false,
         emulatorRunning: false,
         collectedThoughtIds: ['cementerio-thought-01'],
@@ -399,7 +442,23 @@ describe('applyTelemetryState prerequisite auto-sync', () => {
     expect(read(ownedPrereqsSlot)).toEqual(['bugs', 'hookshot', 'bombs', 'zeldas-lullaby'])
   })
 
-  it('skips auto-sync when prereqAutoSyncSlot is false or telemetry is not live memory', () => {
+  it('syncs ownedRequirements in save-only mode without emitting toasts', () => {
+    write(ownedPrereqsSlot, ['ocarina'])
+    write(prereqAutoSyncSlot, true)
+
+    applyTelemetryState(
+      makeTelemetry({
+        source: 'save',
+        connected: false,
+        emulatorRunning: false,
+        ownedRequirements: ['bombs', 'bow'],
+      }),
+    )
+    expect(read(ownedPrereqsSlot)).toEqual(['ocarina', 'bombs', 'bow'])
+    expect(getTrackerSnapshotForTests().toasts).toHaveLength(0)
+  })
+
+  it('skips auto-sync when prereqAutoSyncSlot is false or source is none', () => {
     write(ownedPrereqsSlot, ['ocarina'])
     write(prereqAutoSyncSlot, false)
 
@@ -413,7 +472,7 @@ describe('applyTelemetryState prerequisite auto-sync', () => {
     write(prereqAutoSyncSlot, true)
     applyTelemetryState(
       makeTelemetry({
-        source: 'save',
+        source: 'none',
         connected: false,
         emulatorRunning: false,
         ownedRequirements: ['bombs', 'bow'],

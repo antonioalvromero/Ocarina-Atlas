@@ -134,9 +134,9 @@ export const OfficialMarker = memo(function OfficialMarker({
         aria-pressed={selected}
         onClick={onSelect}
         style={{ borderColor: color, color }}
-        className={`absolute -top-3.5 -left-3.5 grid size-7 cursor-pointer place-items-center rounded-full border-2 bg-ink-950 shadow-md shadow-black/50 transition-transform hover:scale-115 ${
+        className={`absolute -top-3.5 -left-3.5 grid size-7 cursor-pointer place-items-center rounded-full border-2 bg-ink-950 shadow-md shadow-black/50 transition-[transform,opacity] hover:scale-115 ${
           selected ? 'scale-125 ring-2 ring-parchment-50' : ''
-        } ${target?.appeared ? 'merge-pop' : ''}`}
+        } ${done && !selected ? 'opacity-50 hover:opacity-100' : 'opacity-100'} ${target?.appeared ? 'merge-pop' : ''}`}
       >
         <Icon size={15} strokeWidth={2.25} />
         {done && <DoneBadge />}

@@ -20,7 +20,10 @@ export const RECOMP_PROCESS_NAMES = new Set([
   'relink-game',
   'relink',
   'triforce',
+  'ocarina',
+  'nx2navi',
 ])
+export const DIRECT_HOST_VA_PROCESS_NAMES = new Set(['ocarina', 'nx2navi'])
 // NX2Saria serves the debug RPC on 127.0.0.1:6545 itself, so only its save folder is detected
 export const NX2SARIA_PROCESS_NAMES = new Set(['ocarina', 'nx2saria'])
 export const EMULATOR_PROCESS_NAMES = new Set([
@@ -39,6 +42,8 @@ const RUNTIME_DISPLAY_NAMES = {
   eden: 'Eden',
   ocarina: 'NX2Saria',
   nx2saria: 'NX2Saria',
+  ootpc: 'OOT-PC',
+  nx2navi: 'OOT-PC',
   hookshot: 'Hookshot',
   longshot: 'Longshot',
   heylisten: 'HeyListen',
@@ -404,13 +409,23 @@ export function scanRunningRecompProcess() {
 
     try {
       const maps = fs.readFileSync(`/proc/${pid}/maps`, 'utf8')
+      const isDirectHostVa = DIRECT_HOST_VA_PROCESS_NAMES.has(matchedName)
       let hasGuestCode = false
       for (const line of maps.split('\n')) {
         const match = /^([0-9a-f]+)-([0-9a-f]+)\s+([r-])/i.exec(line)
         if (!match || match[3] !== 'r') continue
         const start = BigInt(`0x${match[1]}`)
         const end = BigInt(`0x${match[2]}`)
-        if (start <= 0x100080000000n && end >= 0x100080000008n) {
+        if (isDirectHostVa) {
+          if (end > 0x7000000000n && start < 0x8000000000n) {
+            const ovStart = start > 0x7000000000n ? start : 0x7000000000n
+            const ovEnd = end < 0x8000000000n ? end : 0x8000000000n
+            if (ovEnd - ovStart >= 8n) {
+              hasGuestCode = true
+              break
+            }
+          }
+        } else if (start <= 0x100080000000n && end >= 0x100080000008n) {
           hasGuestCode = true
           break
         }

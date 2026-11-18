@@ -24,8 +24,8 @@ using System.Windows.Forms;
 [assembly: AssemblyCompany("antonioalvromero")]
 [assembly: AssemblyProduct("Ocarina Atlas")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 antonioalvromero")]
-[assembly: AssemblyVersion("2.4.1.0")]
-[assembly: AssemblyFileVersion("2.4.1.0")]
+[assembly: AssemblyVersion("2.5.0.0")]
+[assembly: AssemblyFileVersion("2.5.0.0")]
 
 namespace OcarinaAtlasLauncher
 {
@@ -1227,6 +1227,9 @@ namespace OcarinaAtlasLauncher
         private const ulong LongshotHeapBase = 0x1000000000UL; // HOS_HEAP_BASE
         private const ulong LongshotHeapEnd = 0x2000000000UL;
         private const ulong StandardHeapThreshold = 0x2000000000UL;
+        private const ulong DirectHostMainBase = 0x7000000000UL; // OOT-PC / NX2navi main base
+        private const ulong DirectHostRangeMin = 0x100000000UL;
+        private const ulong DirectHostRangeMax = 0x8000000000UL;
         private const int MaxReadMemorySize = 262144;
         private const int SearchChunkSize = 1048576; // 1 MB
         private const int DefaultMaxHits = 64;
@@ -1246,7 +1249,7 @@ namespace OcarinaAtlasLauncher
         private const uint PageExecuteWriteCopy = 0x80;
         private const uint PageGuard = 0x100;
 
-        private static readonly string[] ProcessNames = new[] { "hookshot", "Longshot", "relink-game", "relink", "Triforce", "HeyListen" };
+        private static readonly string[] ProcessNames = new[] { "hookshot", "Longshot", "relink-game", "relink", "Triforce", "HeyListen", "ocarina", "nx2navi" };
         private static readonly char[] HexDigits = "0123456789abcdef".ToCharArray();
 
         [StructLayout(LayoutKind.Sequential)]
@@ -1292,6 +1295,7 @@ namespace OcarinaAtlasLauncher
         private readonly int _processId;
         private readonly string _detectedUserSaveDir;
         private readonly string _emulatorKind;
+        private readonly bool _isDirectHostVa;
         private readonly object _handleLock = new object();
         private readonly object _clientsLock = new object();
         private readonly List<TcpClient> _clients = new List<TcpClient>();
@@ -1310,6 +1314,7 @@ namespace OcarinaAtlasLauncher
             _processHandle = processHandle;
             _detectedUserSaveDir = detectedUserSaveDir;
             _emulatorKind = string.IsNullOrEmpty(emulatorKind) ? "longshot" : emulatorKind;
+            _isDirectHostVa = string.Equals(_emulatorKind, "ootpc", StringComparison.Ordinal);
         }
 
         public int ProcessId
@@ -1387,19 +1392,25 @@ namespace OcarinaAtlasLauncher
                             continue;
                         }
 
-                        if (!VerifyGuestCodeMapped(handle))
+                        string procKey = ProcessNames[n];
+                        string emulatorKind = procKey.StartsWith("relink", StringComparison.OrdinalIgnoreCase)
+                            ? "relink"
+                            : string.Equals(procKey, "Triforce", StringComparison.OrdinalIgnoreCase)
+                                ? "triforce"
+                                : string.Equals(procKey, "HeyListen", StringComparison.OrdinalIgnoreCase)
+                                    ? "heylisten"
+                                    : (string.Equals(procKey, "ocarina", StringComparison.OrdinalIgnoreCase) ||
+                                       string.Equals(procKey, "nx2navi", StringComparison.OrdinalIgnoreCase))
+                                        ? "ootpc"
+                                        : "longshot";
+                        bool isDirectHostVa = string.Equals(emulatorKind, "ootpc", StringComparison.Ordinal);
+
+                        if (!VerifyGuestCodeMapped(handle, isDirectHostVa))
                         {
                             continue;
                         }
 
                         string userSaveDir = ResolveUserSaveDir(proc);
-                        string emulatorKind = ProcessNames[n].StartsWith("relink", StringComparison.OrdinalIgnoreCase)
-                            ? "relink"
-                            : string.Equals(ProcessNames[n], "Triforce", StringComparison.OrdinalIgnoreCase)
-                                ? "triforce"
-                                : string.Equals(ProcessNames[n], "HeyListen", StringComparison.OrdinalIgnoreCase)
-                                    ? "heylisten"
-                                    : "longshot";
                         keepProc = true;
                         for (int k = i + 1; k < procs.Length; k++)
                         {
@@ -1509,28 +1520,78 @@ namespace OcarinaAtlasLauncher
             }
         }
 
-        private static bool VerifyGuestCodeMapped(IntPtr handle)
+        private static bool VerifyGuestCodeMapped(IntPtr handle, bool isDirectHostVa)
         {
-            ulong hostCodeAddr = GuestWindowBase + GuestCodeBase;
-            MEMORY_BASIC_INFORMATION mbi;
             int mbiSize = Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION));
-            UIntPtr queried = VirtualQueryEx(handle, new UIntPtr(hostCodeAddr), out mbi, new UIntPtr((uint)mbiSize));
-            if (queried == UIntPtr.Zero)
+            if (isDirectHostVa)
+            {
+                ulong addr = DirectHostMainBase;
+                while (addr < DirectHostRangeMax)
+                {
+                    MEMORY_BASIC_INFORMATION mbi;
+                    UIntPtr queried = VirtualQueryEx(handle, new UIntPtr(addr), out mbi, new UIntPtr((uint)mbiSize));
+                    if (queried == UIntPtr.Zero)
+                    {
+                        break;
+                    }
+
+                    ulong regionBase = mbi.BaseAddress.ToUInt64();
+                    ulong regionSize = mbi.RegionSize.ToUInt64();
+                    if (regionSize == 0)
+                    {
+                        break;
+                    }
+
+                    ulong regionEnd = regionBase + regionSize;
+                    if (regionEnd < regionBase)
+                    {
+                        regionEnd = ulong.MaxValue;
+                    }
+
+                    if (mbi.State == MemCommit && IsReadableProtect(mbi.Protect))
+                    {
+                        ulong probeAddr = regionBase > addr ? regionBase : addr;
+                        ulong probeEnd = regionEnd < DirectHostRangeMax ? regionEnd : DirectHostRangeMax;
+                        if (probeEnd > probeAddr && (probeEnd - probeAddr) >= 8UL)
+                        {
+                            byte[] probe = new byte[8];
+                            UIntPtr bytesRead;
+                            if (ReadProcessMemory(handle, new UIntPtr(probeAddr), probe, new UIntPtr((uint)probe.Length), out bytesRead) &&
+                                bytesRead.ToUInt64() == (ulong)probe.Length)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+
+                    if (regionEnd >= DirectHostRangeMax || regionEnd <= addr)
+                    {
+                        break;
+                    }
+                    addr = regionEnd;
+                }
+                return false;
+            }
+
+            ulong hostCodeAddr = GuestWindowBase + GuestCodeBase;
+            MEMORY_BASIC_INFORMATION stdMbi;
+            UIntPtr stdQueried = VirtualQueryEx(handle, new UIntPtr(hostCodeAddr), out stdMbi, new UIntPtr((uint)mbiSize));
+            if (stdQueried == UIntPtr.Zero)
             {
                 return false;
             }
-            if (mbi.State != MemCommit || !IsReadableProtect(mbi.Protect))
+            if (stdMbi.State != MemCommit || !IsReadableProtect(stdMbi.Protect))
             {
                 return false;
             }
 
-            byte[] probe = new byte[8];
-            UIntPtr bytesRead;
-            if (!ReadProcessMemory(handle, new UIntPtr(hostCodeAddr), probe, new UIntPtr((uint)probe.Length), out bytesRead))
+            byte[] stdProbe = new byte[8];
+            UIntPtr stdBytesRead;
+            if (!ReadProcessMemory(handle, new UIntPtr(hostCodeAddr), stdProbe, new UIntPtr((uint)stdProbe.Length), out stdBytesRead))
             {
                 return false;
             }
-            return bytesRead.ToUInt64() == (ulong)probe.Length;
+            return stdBytesRead.ToUInt64() == (ulong)stdProbe.Length;
         }
 
         private static bool IsReadableProtect(uint protect)
@@ -1804,9 +1865,21 @@ namespace OcarinaAtlasLauncher
                 return BuildErrorResponse(idJson, -32602, "Invalid size (expected 1..262144)");
             }
 
-            if (guestAddr >= GuestWindowSize || (ulong)size > GuestWindowSize - guestAddr)
+            if (_isDirectHostVa)
             {
-                return BuildErrorResponse(idJson, -32602, "Address out of guest window");
+                if (guestAddr < DirectHostRangeMin ||
+                    guestAddr >= DirectHostRangeMax ||
+                    (ulong)size > DirectHostRangeMax - guestAddr)
+                {
+                    return BuildErrorResponse(idJson, -32602, "Address out of guest window");
+                }
+            }
+            else
+            {
+                if (guestAddr >= GuestWindowSize || (ulong)size > GuestWindowSize - guestAddr)
+                {
+                    return BuildErrorResponse(idJson, -32602, "Address out of guest window");
+                }
             }
 
             byte[] data;
@@ -1843,7 +1916,9 @@ namespace OcarinaAtlasLauncher
 
             object rawStart;
             bool hasStart = paramsDict.TryGetValue("start", out rawStart) && rawStart != null;
-            ulong guestStart = isHeapRegion ? StandardHeapThreshold : 0UL;
+            ulong guestStart = isHeapRegion
+                ? StandardHeapThreshold
+                : (_isDirectHostVa ? DirectHostRangeMin : 0UL);
             if (hasStart && !TryParseGuestAddress(rawStart, out guestStart))
             {
                 return BuildErrorResponse(idJson, -32602, "Invalid start address");
@@ -1851,14 +1926,23 @@ namespace OcarinaAtlasLauncher
 
             object rawEnd;
             bool hasEnd = paramsDict.TryGetValue("end", out rawEnd) && rawEnd != null;
-            ulong guestEnd = GuestWindowSize;
+            ulong guestEnd = _isDirectHostVa ? DirectHostRangeMax : GuestWindowSize;
             if (hasEnd && !TryParseGuestAddress(rawEnd, out guestEnd))
             {
                 return BuildErrorResponse(idJson, -32602, "Invalid end address");
             }
 
-            if (guestStart > GuestWindowSize) guestStart = GuestWindowSize;
-            if (guestEnd > GuestWindowSize) guestEnd = GuestWindowSize;
+            if (_isDirectHostVa)
+            {
+                if (guestStart < DirectHostRangeMin) guestStart = DirectHostRangeMin;
+                if (guestStart > DirectHostRangeMax) guestStart = DirectHostRangeMax;
+                if (guestEnd > DirectHostRangeMax) guestEnd = DirectHostRangeMax;
+            }
+            else
+            {
+                if (guestStart > GuestWindowSize) guestStart = GuestWindowSize;
+                if (guestEnd > GuestWindowSize) guestEnd = GuestWindowSize;
+            }
 
             int maxHits = DefaultMaxHits;
             int parsedMaxHits;
@@ -1915,9 +1999,21 @@ namespace OcarinaAtlasLauncher
         {
             buffer = null;
             if (size < 1 || size > MaxReadMemorySize) return false;
-            if (guestAddr >= GuestWindowSize || (ulong)size > GuestWindowSize - guestAddr) return false;
+            if (_isDirectHostVa)
+            {
+                if (guestAddr < DirectHostRangeMin ||
+                    guestAddr >= DirectHostRangeMax ||
+                    (ulong)size > DirectHostRangeMax - guestAddr)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (guestAddr >= GuestWindowSize || (ulong)size > GuestWindowSize - guestAddr) return false;
+            }
 
-            ulong hostAddr = GuestWindowBase + guestAddr;
+            ulong hostAddr = _isDirectHostVa ? guestAddr : (GuestWindowBase + guestAddr);
             byte[] data = new byte[size];
 
             lock (_handleLock)
@@ -1982,6 +2078,8 @@ namespace OcarinaAtlasLauncher
             byte[] scanBuffer = new byte[chunkSize];
             Stopwatch sw = Stopwatch.StartNew();
 
+            ulong hostOffset = _isDirectHostVa ? 0UL : GuestWindowBase;
+
             lock (_handleLock)
             {
                 if (_disposed != 0 || !_running || _processHandle == IntPtr.Zero)
@@ -1992,8 +2090,8 @@ namespace OcarinaAtlasLauncher
                 if (guestEnd > guestStart)
                 {
                     SearchHostRange(
-                        GuestWindowBase + guestStart,
-                        GuestWindowBase + guestEnd,
+                        hostOffset + guestStart,
+                        hostOffset + guestEnd,
                         patternBytes,
                         patternMask,
                         anchorIdx,
@@ -2002,7 +2100,8 @@ namespace OcarinaAtlasLauncher
                         hits,
                         sw,
                         budgetMs,
-                        scanBuffer);
+                        scanBuffer,
+                        hostOffset);
                 }
 
                 if (hits.Count == 0 && (isHeapRegion || guestStart >= StandardHeapThreshold))
@@ -2011,8 +2110,8 @@ namespace OcarinaAtlasLauncher
                     if (!alreadyCovered)
                     {
                         SearchHostRange(
-                            GuestWindowBase + LongshotHeapBase,
-                            GuestWindowBase + LongshotHeapEnd,
+                            hostOffset + LongshotHeapBase,
+                            hostOffset + LongshotHeapEnd,
                             patternBytes,
                             patternMask,
                             anchorIdx,
@@ -2021,7 +2120,8 @@ namespace OcarinaAtlasLauncher
                             hits,
                             sw,
                             budgetMs,
-                            scanBuffer);
+                            scanBuffer,
+                            hostOffset);
                     }
                 }
             }
@@ -2040,7 +2140,8 @@ namespace OcarinaAtlasLauncher
             List<string> hits,
             Stopwatch sw,
             int budgetMs,
-            byte[] scanBuffer)
+            byte[] scanBuffer,
+            ulong hostOffset)
         {
             ulong addr = rangeStartHost;
             int mbiSize = Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION));
@@ -2087,7 +2188,8 @@ namespace OcarinaAtlasLauncher
                             hits,
                             sw,
                             budgetMs,
-                            scanBuffer);
+                            scanBuffer,
+                            hostOffset);
                     }
                 }
 
@@ -2110,7 +2212,8 @@ namespace OcarinaAtlasLauncher
             List<string> hits,
             Stopwatch sw,
             int budgetMs,
-            byte[] scanBuffer)
+            byte[] scanBuffer,
+            ulong hostOffset)
         {
             int patternLen = patternBytes.Length;
             ulong overlap = (ulong)(patternLen - 1);
@@ -2147,7 +2250,7 @@ namespace OcarinaAtlasLauncher
                 }
 
                 int bufLen = (int)Math.Min(actualRead, (ulong)toRead);
-                MatchBuffer(scanBuffer, bufLen, cursor, patternBytes, patternMask, anchorIdx, hasAnchor, maxHits, hits);
+                MatchBuffer(scanBuffer, bufLen, cursor, patternBytes, patternMask, anchorIdx, hasAnchor, maxHits, hits, hostOffset);
 
                 if (cursor + (ulong)bufLen >= scanEnd || (ulong)bufLen <= overlap)
                 {
@@ -2167,7 +2270,8 @@ namespace OcarinaAtlasLauncher
             int anchorIdx,
             bool hasAnchor,
             int maxHits,
-            List<string> hits)
+            List<string> hits,
+            ulong hostOffset)
         {
             int m = patternBytes.Length;
             if (bufLen < m) return;
@@ -2177,7 +2281,7 @@ namespace OcarinaAtlasLauncher
             {
                 for (int i = 0; i <= maxStart && hits.Count < maxHits; i++)
                 {
-                    ulong guestAddr = (baseHostAddr + (ulong)i) - GuestWindowBase;
+                    ulong guestAddr = (baseHostAddr + (ulong)i) - hostOffset;
                     hits.Add("0x" + guestAddr.ToString("x", CultureInfo.InvariantCulture));
                 }
                 return;
@@ -2208,7 +2312,7 @@ namespace OcarinaAtlasLauncher
 
                 if (matched)
                 {
-                    ulong guestAddr = (baseHostAddr + (ulong)start) - GuestWindowBase;
+                    ulong guestAddr = (baseHostAddr + (ulong)start) - hostOffset;
                     hits.Add("0x" + guestAddr.ToString("x", CultureInfo.InvariantCulture));
                 }
 
@@ -6630,7 +6734,7 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "2.4.1";
+        public const string AppVersion = "2.5.0";
 
         private const int BaseClientWidth = 540;
         private const int CollapsedClientHeight = 392;
@@ -9829,6 +9933,7 @@ namespace OcarinaAtlasLauncher
             if (string.Equals(emulatorKind, "longshot", StringComparison.OrdinalIgnoreCase)) return "Longshot";
             if (string.Equals(emulatorKind, "relink", StringComparison.OrdinalIgnoreCase)) return "Project ReLink";
             if (string.Equals(emulatorKind, "triforce", StringComparison.OrdinalIgnoreCase)) return "Triforce";
+            if (string.Equals(emulatorKind, "ootpc", StringComparison.OrdinalIgnoreCase)) return "OOT-PC";
             if (string.Equals(emulatorKind, "nx2saria", StringComparison.OrdinalIgnoreCase)) return "NX2Saria";
             if (string.Equals(emulatorKind, "heylisten", StringComparison.OrdinalIgnoreCase)) return "HeyListen";
             if (string.Equals(emulatorKind, "fritchii", StringComparison.OrdinalIgnoreCase)) return "Fritchii";

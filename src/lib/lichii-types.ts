@@ -55,6 +55,12 @@ export type LichiiTelemetryState = {
   /** Most recently collected Gold Skulltula item ID if just picked up */
   lastCollectedSkulltulaId: string | null
   lastPickedItem: string | null
+  /** Resolved profile save directory currently active for offline/fallback save reading */
+  activeSaveDir?: string | null
+  /** Active save slot directory name (e.g. "slot_00") */
+  activeSaveSlot?: string | null
+  /** Sorted list of valid save slot names (e.g. ["slot_00", "slot_01"]) in the active profile */
+  availableSaveSlots?: string[]
   source: 'memory' | 'save' | 'none'
   updatedAt: number
 }

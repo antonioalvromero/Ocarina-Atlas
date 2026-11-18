@@ -5,6 +5,7 @@ import {
   useId,
   useReducer,
   useRef,
+  useState,
   type FocusEvent as ReactFocusEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
@@ -268,6 +269,20 @@ export function shouldIgnorePointerFocus(params: {
   )
 }
 
+export async function switchSaveSlot(slot: string | null): Promise<boolean> {
+  try {
+    const trimmed = typeof slot === 'string' ? slot.trim() : ''
+    const res = await fetch('/api/saves/slot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slot: trimmed || null }),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
 export function LichiiStatusPanel({
   state,
   followPlayer,
@@ -296,6 +311,32 @@ export function LichiiStatusPanel({
 
   const { locale, t, tPlace, tItemName } = useI18n()
   const [panelState, dispatch] = useReducer(reducePanelInteraction, INITIAL_PANEL_INTERACTION)
+  const [selectedSlot, setSelectedSlot] = useState<string | undefined>(undefined)
+  const [isSwitchingSlot, setIsSwitchingSlot] = useState(false)
+
+  const saveTelemetry = state as LichiiTelemetryState & {
+    availableSaveSlots?: string[]
+    activeSaveSlot?: string | null
+    activeSaveDir?: string | null
+  }
+  const availableSaveSlots = Array.isArray(saveTelemetry.availableSaveSlots)
+    ? saveTelemetry.availableSaveSlots.filter(
+        (slot): slot is string => typeof slot === 'string' && slot.trim().length > 0,
+      )
+    : []
+  const activeSaveSlot =
+    typeof saveTelemetry.activeSaveSlot === 'string' && saveTelemetry.activeSaveSlot.trim().length > 0
+      ? saveTelemetry.activeSaveSlot.trim()
+      : null
+  const activeSaveDir =
+    typeof saveTelemetry.activeSaveDir === 'string' && saveTelemetry.activeSaveDir.trim().length > 0
+      ? saveTelemetry.activeSaveDir.trim()
+      : null
+  const showSaveSlotPicker =
+    availableSaveSlots.length > 1 || (Boolean(activeSaveSlot) && state.source !== 'none')
+  const slotOptions = Array.from(
+    new Set([...availableSaveSlots, ...(activeSaveSlot ? [activeSaveSlot] : [])]),
+  )
 
   const isOpen = isPanelOpen(panelState)
   const isLiveMemory = isLiveMemoryState(state)
@@ -656,6 +697,42 @@ export function LichiiStatusPanel({
                   state: autoMarkSkulltulas ? t('common.on') : t('common.off'),
                 })}
               </button>
+
+              {showSaveSlotPicker && (
+                <div
+                  className="inline-flex items-center gap-1.5 rounded border border-ink-600 bg-ink-800 px-2 py-0.5 text-[11px] text-parchment-200"
+                  title={activeSaveDir ?? undefined}
+                >
+                  <label htmlFor={`${panelId}-save-slot`} className="font-medium text-parchment-400">
+                    Save Slot
+                  </label>
+                  <select
+                    id={`${panelId}-save-slot`}
+                    aria-label="Save Slot"
+                    disabled={isSwitchingSlot}
+                    value={selectedSlot ?? activeSaveSlot ?? ''}
+                    onChange={(event) => {
+                      const nextValue = event.target.value
+                      setSelectedSlot(nextValue)
+                      setIsSwitchingSlot(true)
+                      void switchSaveSlot(nextValue || null).finally(() => {
+                        setIsSwitchingSlot(false)
+                      })
+                    }}
+                    className="cursor-pointer rounded border border-ink-600 bg-ink-900 px-1.5 py-0.5 text-[11px] font-semibold text-parchment-50 focus:border-[#e6b450] focus:outline-none disabled:opacity-60"
+                  >
+                    <option value="">Auto</option>
+                    {slotOptions.map((slot) => (
+                      <option key={slot} value={slot}>
+                        {slot}
+                      </option>
+                    ))}
+                  </select>
+                  {activeSaveSlot && (
+                    <span className="font-mono text-[10px] text-[#e6b450]">{activeSaveSlot}</span>
+                  )}
+                </div>
+              )}
 
               {state.position && (
                 <span className="font-mono text-[10px] text-parchment-400 tabular-nums sm:ml-auto">

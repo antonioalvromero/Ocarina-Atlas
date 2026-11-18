@@ -13,6 +13,7 @@ import {
   reducePanelInteraction,
   shouldIgnoreHoverPointer,
   shouldIgnorePointerFocus,
+  switchSaveSlot,
   type LichiiStatusPanelProps,
 } from './LichiiStatusPanel'
 
@@ -329,5 +330,65 @@ describe('LichiiStatusPanel SSR rendering', () => {
     expect(html).toContain('Gold Skulltula collected!')
     expect(html).toContain('West Wall Torch')
     expect(html).toContain('(#43)')
+  })
+
+  it('renders Save Slot selector when multiple slots are available or activeSaveSlot is present in save/live mode', () => {
+    const multiSlotState = {
+      ...makeState({
+        connected: false,
+        emulatorRunning: false,
+        source: 'save',
+      }),
+      availableSaveSlots: ['slot_00', 'slot_01', 'slot_02'],
+      activeSaveSlot: 'slot_01',
+      activeSaveDir: '/home/user/.local/share/longshot',
+    } as LichiiTelemetryState
+
+    const html = renderPanelText(makeProps({ state: multiSlotState }))
+    expect(html).toContain('Save Slot')
+    expect(html).toContain('aria-label="Save Slot"')
+    expect(html).toContain('<option value="">Auto</option>')
+    expect(html).toContain('slot_00')
+    expect(html).toContain('slot_01')
+    expect(html).toContain('slot_02')
+    expect(html).toContain('title="/home/user/.local/share/longshot"')
+
+    const singleLiveState = {
+      ...makeState({
+        connected: true,
+        emulatorRunning: true,
+        source: 'memory',
+      }),
+      availableSaveSlots: ['slot_00'],
+      activeSaveSlot: 'slot_00',
+    } as LichiiTelemetryState
+    expect(renderPanelText(makeProps({ state: singleLiveState }))).toContain('aria-label="Save Slot"')
+
+    const disconnectedNoSlots = renderPanelText(makeProps({ state: makeState({ source: 'none' }) }))
+    expect(disconnectedNoSlots).not.toContain('aria-label="Save Slot"')
+  })
+})
+
+describe('switchSaveSlot', () => {
+  it('posts selected slot or null for Auto to /api/saves/slot', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true })
+    vi.stubGlobal('fetch', fetchMock)
+    try {
+      expect(await switchSaveSlot('slot_02')).toBe(true)
+      expect(fetchMock).toHaveBeenCalledWith('/api/saves/slot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slot: 'slot_02' }),
+      })
+
+      expect(await switchSaveSlot('')).toBe(true)
+      expect(fetchMock).toHaveBeenLastCalledWith('/api/saves/slot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slot: null }),
+      })
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 })

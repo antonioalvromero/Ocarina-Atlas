@@ -1,6 +1,6 @@
 'use strict'
 
-const { app, BrowserWindow, clipboard, ipcMain, shell } = require('electron')
+const { app, BrowserWindow, clipboard, dialog, ipcMain, shell } = require('electron')
 const { spawn } = require('node:child_process')
 const fs = require('node:fs')
 const http = require('node:http')
@@ -61,7 +61,7 @@ const VIRTUAL_ADAPTER_PATTERN =
 
 const WINDOW_WIDTH = 556
 const WINDOW_HEIGHT_COMPACT = 480
-const WINDOW_HEIGHT_EXPANDED = 732
+const WINDOW_HEIGHT_EXPANDED = 820
 
 function parsePort(raw, fallback, allowZero = false) {
   const trimmed = String(raw ?? '').trim()
@@ -85,6 +85,8 @@ function parseArgs(argv, env = process.env) {
     port: parsePort(env.PORT, DEFAULT_PORT, true),
     lichiiHost: env.LICHII_HOST?.trim() || env.FRITCHII_HOST?.trim() || DEFAULT_LICHII_HOST,
     lichiiPort: parsePort(env.LICHII_PORT || env.FRITCHII_PORT, DEFAULT_LICHII_PORT, false),
+    saveDir: env.CUSTOM_SAVE_DIR?.trim() || '',
+    saveSlot: env.CUSTOM_SAVE_SLOT?.trim() || '',
     noBrowser: false,
     cli: false,
     lanExplicit: false,
@@ -134,6 +136,14 @@ function parseArgs(argv, env = process.env) {
       const parsed = parsePort(val, -1, false)
       if (parsed < 1) throw new Error(`Invalid --lichii-port value: ${val}`)
       opts.lichiiPort = parsed
+    } else if (key === '--save-dir') {
+      const val = inlineVal ?? argv[++i]
+      if (!val || !val.trim()) throw new Error('--save-dir requires a value')
+      opts.saveDir = val.trim()
+    } else if (key === '--save-slot') {
+      const val = inlineVal ?? argv[++i]
+      if (!val || !val.trim()) throw new Error('--save-slot requires a value')
+      opts.saveSlot = val.trim()
     }
     // Ignore Electron/Chromium internal flags (e.g. --no-sandbox, --ozone-platform=...)
   }
@@ -153,6 +163,8 @@ Options:
   --local-only        Bind loopback only (127.0.0.1)
   --lichii-host <h>   Emulator/Lichii debug RPC host (default: ${DEFAULT_LICHII_HOST})
   --lichii-port <p>   Emulator/Lichii debug RPC port (default: ${DEFAULT_LICHII_PORT})
+  --save-dir <path>   Custom save folder path (overrides auto-detection)
+  --save-slot <slot>  Preferred save slot (e.g. slot_00)
   --no-browser        Run headlessly without opening GUI window or browser
   --cli               Alias for headless CLI mode
   --setup-sync        Write EDEN_NX2_DEBUG_SERVER=<host>:<port> to existing
@@ -586,6 +598,58 @@ function readAppVersion() {
   return app.getVersion() || '2.3.0'
 }
 
+const SUPPORTED_LANGUAGES = [
+  'en',
+  'es',
+  'fr',
+  'pt',
+  'zh-CN',
+  'zh-TW',
+  'de',
+  'it',
+  'ja',
+  'ko',
+  'nl',
+  'ru',
+  'pl',
+  'tr',
+  'uk',
+]
+
+function normalizeLanguage(raw) {
+  if (typeof raw !== 'string') return null
+  const cleaned = raw.trim().split('.')[0].split('@')[0].replace(/_/g, '-')
+  if (!cleaned) return null
+  const lower = cleaned.toLowerCase()
+
+  const exact = SUPPORTED_LANGUAGES.find((code) => code.toLowerCase() === lower)
+  if (exact) return exact
+
+  const parts = lower.split('-')
+  const base = parts[0]
+  const region = parts[1] || ''
+  if (base === 'zh') {
+    if (region === 'tw' || region === 'hk' || region === 'mo' || region === 'hant') {
+      return 'zh-TW'
+    }
+    return 'zh-CN'
+  }
+  const baseMatch = SUPPORTED_LANGUAGES.find((code) => code === base)
+  return baseMatch || null
+}
+
+function detectDefaultLanguage() {
+  try {
+    const appLocale = typeof app?.getLocale === 'function' ? app.getLocale() : ''
+    const fromApp = normalizeLanguage(appLocale)
+    if (fromApp) return fromApp
+  } catch {
+    // Ignore if app.getLocale is unavailable
+  }
+  const envLocale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || ''
+  return normalizeLanguage(envLocale) || 'en'
+}
+
 function getSettingsPath() {
   const configHome = process.env.XDG_CONFIG_HOME?.trim() || path.join(os.homedir(), '.config')
   return path.join(configHome, 'ocarina-atlas', 'launcher.json')
@@ -607,6 +671,62 @@ function saveSettings(settings) {
     const filePath = getSettingsPath()
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
     fs.writeFileSync(filePath, `${JSON.stringify(settings, null, 2)}\n`, 'utf8')
+    return true
+  } catch {
+    return false
+  }
+}
+
+function getSaveSettingsPath() {
+  const configHome = process.env.XDG_CONFIG_HOME?.trim() || path.join(os.homedir(), '.config')
+  return path.join(configHome, 'ocarina-atlas', 'settings.json')
+}
+
+function loadSaveSettings() {
+  try {
+    const filePath = getSaveSettingsPath()
+    if (!fs.existsSync(filePath)) return {}
+    const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+function normalizeSavedSaveDirs(rawDirs, currentDir = '') {
+  const result = []
+  const seen = new Set()
+  if (Array.isArray(rawDirs)) {
+    for (const entry of rawDirs) {
+      if (typeof entry !== 'string') continue
+      const trimmed = entry.trim()
+      if (!trimmed || seen.has(trimmed)) continue
+      seen.add(trimmed)
+      result.push(trimmed)
+    }
+  }
+  const active = typeof currentDir === 'string' ? currentDir.trim() : ''
+  if (active && !seen.has(active)) {
+    result.push(active)
+  }
+  return result
+}
+
+function saveSaveSettings(settings) {
+  try {
+    const filePath = getSaveSettingsPath()
+    fs.mkdirSync(path.dirname(filePath), { recursive: true })
+    const existing = loadSaveSettings()
+    const customSaveDir = typeof settings.customSaveDir === 'string' ? settings.customSaveDir.trim() : ''
+    const customSaveSlot = typeof settings.customSaveSlot === 'string' ? settings.customSaveSlot.trim() : ''
+    const savedSaveDirs = normalizeSavedSaveDirs(settings.savedSaveDirs, customSaveDir)
+    const merged = {
+      ...existing,
+      savedSaveDirs,
+      customSaveDir,
+      customSaveSlot,
+    }
+    fs.writeFileSync(filePath, `${JSON.stringify(merged, null, 2)}\n`, 'utf8')
     return true
   } catch {
     return false
@@ -670,6 +790,55 @@ function fetchJsonHttp(url, timeoutMs = 600) {
       resolve(null)
     })
     req.on('error', () => resolve(null))
+  })
+}
+
+function postJsonHttp(url, body, timeoutMs = 1500) {
+  return new Promise((resolve) => {
+    let payload = '{}'
+    try {
+      payload = JSON.stringify(body ?? {})
+    } catch {
+      resolve(null)
+      return
+    }
+    const parsed = new URL(url)
+    const req = http.request(
+      {
+        hostname: parsed.hostname,
+        port: parsed.port,
+        path: `${parsed.pathname}${parsed.search}`,
+        method: 'POST',
+        timeout: timeoutMs,
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload, 'utf8'),
+        },
+      },
+      (res) => {
+        const chunks = []
+        res.on('data', (c) => chunks.push(c))
+        res.on('end', () => {
+          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+            try {
+              const raw = Buffer.concat(chunks).toString('utf8')
+              resolve(raw ? JSON.parse(raw) : { ok: true })
+            } catch {
+              resolve({ ok: true })
+            }
+          } else {
+            resolve(null)
+          }
+        })
+      },
+    )
+    req.on('timeout', () => {
+      req.destroy()
+      resolve(null)
+    })
+    req.on('error', () => resolve(null))
+    req.write(payload)
+    req.end()
   })
 }
 
@@ -819,8 +988,14 @@ async function main() {
 
   const appVersion = readAppVersion()
   const saved = loadSavedSettings()
+  const savedSave = loadSaveSettings()
   const hasDisplay = Boolean(process.env.DISPLAY?.trim() || process.env.WAYLAND_DISPLAY?.trim())
   const isHeadless = cliOpts.noBrowser || cliOpts.cli || !hasDisplay
+
+  const initialCustomSaveDir =
+    cliOpts.saveDir || (typeof savedSave.customSaveDir === 'string' ? savedSave.customSaveDir.trim() : '')
+  const initialLanguage =
+    normalizeLanguage(saved.language) || normalizeLanguage(savedSave.language) || detectDefaultLanguage()
 
   const state = {
     version: appVersion,
@@ -828,10 +1003,20 @@ async function main() {
     lifecycle: 'stopped', // 'stopped' | 'starting' | 'running'
     port: cliOpts.port !== DEFAULT_PORT || process.env.PORT ? cliOpts.port : parsePort(saved.port, DEFAULT_PORT, true),
     host: cliOpts.lanExplicit ? cliOpts.host : (typeof saved.host === 'string' && saved.host.trim() ? saved.host.trim() : cliOpts.host),
-    lichiiHost: cliOpts.lichiiHost,
-    lichiiPort: cliOpts.lichiiPort,
+    lichiiHost:
+      process.env.LICHII_HOST || cliOpts.lichiiHost !== DEFAULT_LICHII_HOST
+        ? cliOpts.lichiiHost
+        : (typeof saved.lichiiHost === 'string' && saved.lichiiHost.trim() ? saved.lichiiHost.trim() : cliOpts.lichiiHost),
+    lichiiPort:
+      process.env.LICHII_PORT || cliOpts.lichiiPort !== DEFAULT_LICHII_PORT
+        ? cliOpts.lichiiPort
+        : parsePort(saved.lichiiPort, cliOpts.lichiiPort, false),
     autoOpen: typeof saved.autoOpen === 'boolean' ? saved.autoOpen : true,
     autoStart: typeof saved.autoStart === 'boolean' ? saved.autoStart : true,
+    language: initialLanguage,
+    savedSaveDirs: normalizeSavedSaveDirs(savedSave.savedSaveDirs, initialCustomSaveDir),
+    customSaveDir: initialCustomSaveDir,
+    customSaveSlot: cliOpts.saveSlot || (typeof savedSave.customSaveSlot === 'string' ? savedSave.customSaveSlot.trim() : ''),
     localUrl: '',
     boundPort: cliOpts.port,
     lanUrls: [],
@@ -887,6 +1072,10 @@ async function main() {
       lichiiPort: state.lichiiPort,
       autoOpen: state.autoOpen,
       autoStart: state.autoStart,
+      language: state.language,
+      savedSaveDirs: state.savedSaveDirs,
+      customSaveDir: state.customSaveDir,
+      customSaveSlot: state.customSaveSlot,
       localUrl: state.localUrl,
       boundPort: state.boundPort,
       lanUrls: state.lanUrls,
@@ -907,7 +1096,36 @@ async function main() {
       lichiiPort: state.lichiiPort,
       autoOpen: state.autoOpen,
       autoStart: state.autoStart,
+      language: state.language,
     })
+  }
+
+  function persistSaveSettings() {
+    state.savedSaveDirs = normalizeSavedSaveDirs(state.savedSaveDirs, state.customSaveDir)
+    saveSaveSettings({
+      savedSaveDirs: state.savedSaveDirs,
+      customSaveDir: state.customSaveDir,
+      customSaveSlot: state.customSaveSlot,
+    })
+  }
+
+  async function postSaveSlotUpdate() {
+    if (state.lifecycle !== 'running' || !state.boundPort) return null
+    const payload = {
+      saveDir: state.customSaveDir || null,
+      slot: state.customSaveSlot || null,
+    }
+    const res = await postJsonHttp(`http://127.0.0.1:${state.boundPort}/api/saves/slot`, payload, 1500)
+    if (res && res.ok !== false) {
+      emitLog(
+        'info',
+        `[saves] Updated save source: dir=${state.customSaveDir || 'auto-detect'}, slot=${state.customSaveSlot || 'auto'}`,
+      )
+      void pollTelemetry()
+    } else {
+      emitLog('warn', '[saves] Failed to push save folder/slot update to running server.')
+    }
+    return res
   }
 
   async function manageBridge() {
@@ -1015,6 +1233,16 @@ async function main() {
     }
     if (nx2sariaSaveDir && !serverEnv.NX2SARIA_SAVE_DIR) {
       serverEnv.NX2SARIA_SAVE_DIR = nx2sariaSaveDir
+    }
+    if (state.customSaveDir) {
+      serverEnv.CUSTOM_SAVE_DIR = state.customSaveDir
+    } else {
+      delete serverEnv.CUSTOM_SAVE_DIR
+    }
+    if (state.customSaveSlot) {
+      serverEnv.CUSTOM_SAVE_SLOT = state.customSaveSlot
+    } else {
+      delete serverEnv.CUSTOM_SAVE_SLOT
     }
 
     emitLog('info', `[server] Starting Ocarina Atlas on ${state.host}:${state.port}...`)
@@ -1242,7 +1470,47 @@ async function main() {
     return getPublicState()
   })
 
-  ipcMain.handle('launcher:update-settings', (_ev, patch) => {
+  ipcMain.handle('launcher:browse-save-dir', async () => {
+    const result = await dialog.showOpenDialog(mainWindow || undefined, {
+      title: 'Select Custom Save Folder',
+      defaultPath: state.customSaveDir || undefined,
+      properties: ['openDirectory'],
+    })
+    if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+      return { canceled: true, state: getPublicState() }
+    }
+    const selected = String(result.filePaths[0] || '').trim()
+    if (!selected) {
+      return { canceled: true, state: getPublicState() }
+    }
+    state.savedSaveDirs = normalizeSavedSaveDirs(state.savedSaveDirs, selected)
+    state.customSaveDir = selected
+    persistSaveSettings()
+    pushState()
+    if (state.lifecycle === 'running' && state.boundPort) {
+      await postSaveSlotUpdate()
+    }
+    return { canceled: false, saveDir: selected, state: getPublicState() }
+  })
+
+  ipcMain.handle('launcher:remove-save-dir', async (_ev, dir) => {
+    const target = typeof dir === 'string' && dir.trim() ? dir.trim() : state.customSaveDir
+    if (!target) {
+      return getPublicState()
+    }
+    state.savedSaveDirs = state.savedSaveDirs.filter((entry) => entry !== target)
+    if (state.customSaveDir === target) {
+      state.customSaveDir = ''
+    }
+    persistSaveSettings()
+    pushState()
+    if (state.lifecycle === 'running' && state.boundPort) {
+      await postSaveSlotUpdate()
+    }
+    return getPublicState()
+  })
+
+  ipcMain.handle('launcher:update-settings', async (_ev, patch) => {
     if (!patch || typeof patch !== 'object') return getPublicState()
     if (state.lifecycle === 'stopped') {
       if (patch.port !== undefined) {
@@ -1262,8 +1530,47 @@ async function main() {
     }
     if (typeof patch.autoOpen === 'boolean') state.autoOpen = patch.autoOpen
     if (typeof patch.autoStart === 'boolean') state.autoStart = patch.autoStart
+    if (typeof patch.language === 'string') {
+      const nextLang = normalizeLanguage(patch.language)
+      if (nextLang) state.language = nextLang
+    }
+    let saveSettingsChanged = false
+    if (typeof patch.customSaveDir === 'string') {
+      const nextDir = patch.customSaveDir.trim()
+      if (nextDir && !state.savedSaveDirs.includes(nextDir)) {
+        state.savedSaveDirs = [...state.savedSaveDirs, nextDir]
+        saveSettingsChanged = true
+      }
+      if (nextDir !== state.customSaveDir) {
+        state.customSaveDir = nextDir
+        saveSettingsChanged = true
+      }
+    }
+    if (typeof patch.customSaveSlot === 'string') {
+      const nextSlot = patch.customSaveSlot.trim()
+      if (nextSlot !== state.customSaveSlot) {
+        state.customSaveSlot = nextSlot
+        saveSettingsChanged = true
+      }
+    }
     persistSettings()
+    if (saveSettingsChanged) {
+      persistSaveSettings()
+      if (state.lifecycle === 'running' && state.boundPort) {
+        await postSaveSlotUpdate()
+      }
+    }
     pushState()
+    return getPublicState()
+  })
+
+  ipcMain.handle('launcher:set-language', (_ev, lang) => {
+    const nextLang = normalizeLanguage(lang)
+    if (nextLang && nextLang !== state.language) {
+      state.language = nextLang
+      persistSettings()
+      pushState()
+    }
     return getPublicState()
   })
 

@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld('ocarinaAtlas', {
   refreshLan: () => ipcRenderer.invoke('launcher:refresh-lan'),
   toggleLanMode: (enabled) => ipcRenderer.invoke('launcher:toggle-lan', enabled),
   updateSettings: (patch) => ipcRenderer.invoke('launcher:update-settings', patch),
+  browseSaveDir: () => ipcRenderer.invoke('launcher:browse-save-dir'),
+  removeSaveDir: (dir) => ipcRenderer.invoke('launcher:remove-save-dir', dir),
   resetRpcDefaults: () => ipcRenderer.invoke('launcher:reset-rpc-defaults'),
   checkUpdates: () => ipcRenderer.invoke('launcher:check-updates'),
   clearLogs: () => ipcRenderer.invoke('launcher:clear-logs'),

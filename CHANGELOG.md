@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-11-18
+
+### Added
+- **Saved Save Folders List & Save Slot Selector ([#44](https://github.com/antonioalvromero/Ocarina-Atlas/issues/44)):**
+  - Added a persistent **Save Folder** manager (`Add...`, `Remove`, `Auto-detect`) and **Save Slot** selector (`Auto (Latest)` + `slot_00`..`slot_05`) in the **`Settings`** tab of both the Windows (`%APPDATA%\OcarinaAtlas\settings.json`) and Linux AppImage (`~/.config/ocarina-atlas/settings.json`) launchers, plus `--save-dir` / `--save-slot` CLI flags and a live **Save Slot** dropdown in the web map's status card.
+  - Added 4-level save root resolution (`game root` including `LongshotLauncher-data/user/save` & `profile/save`, `user/save`, `<uid>`, or direct `slot_XX`) and live switching via `POST /api/saves/slot`.
+- **15-Language Launcher Localization:** Added all 15 supported languages (`en`, `es`, `fr`, `pt`, `zh-CN`, `zh-TW`, `de`, `it`, `ja`, `ko`, `nl`, `ru`, `pl`, `tr`, `uk`) with OS locale auto-detection and a `Language` selector in `Settings` for both Windows and Linux AppImage launchers.
+
+### Fixed
+- **Windows Tray Restore & Settings Persistence (`launcher/OcarinaAtlas.cs`):** Fixed `Minimize to tray` freezing/closing on restore by removing dynamic `ShowInTaskbar` handle recreation, added single-click tray restore, persisted all launcher settings (`port`, `lichiiHost`, `lichiiPort`, `allowLan`, `autoOpenBrowser`, `minimizeToTray`, `language`, `savedSaveDirs`) while preserving explicit CLI flag priority, and added custom `DarkComboBox` styling for all Windows dropdowns.
+- **Linux Settings Restore (`launcher/linux-appimage/main.cjs`):** Persisted and restored `lichiiHost` and `lichiiPort` across restarts.
+
 ## [2.3.1] - 2026-11-17
 
 ### Fixed

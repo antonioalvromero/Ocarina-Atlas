@@ -24,8 +24,8 @@ using System.Windows.Forms;
 [assembly: AssemblyCompany("antonioalvromero")]
 [assembly: AssemblyProduct("Ocarina Atlas")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 antonioalvromero")]
-[assembly: AssemblyVersion("2.3.1.0")]
-[assembly: AssemblyFileVersion("2.3.1.0")]
+[assembly: AssemblyVersion("2.4.0.0")]
+[assembly: AssemblyFileVersion("2.4.0.0")]
 
 namespace OcarinaAtlasLauncher
 {
@@ -60,11 +60,16 @@ namespace OcarinaAtlasLauncher
     internal sealed class LaunchOptions
     {
         public int Port = 3000;
+        public bool PortExplicit = false;
         public string LichiiHost = "127.0.0.1";
+        public bool LichiiHostExplicit = false;
         public int LichiiPort = 6545;
+        public bool LichiiPortExplicit = false;
         public bool AllowLan = true;
+        public bool AllowLanExplicit = false;
         public string BindHost = null;
         public bool AutoOpenBrowser = true;
+        public bool AutoOpenBrowserExplicit = false;
         public bool StartMinimized = false;
         public bool AutoStart = false;
         public string UpdateFeedUrl = null;
@@ -116,6 +121,7 @@ namespace OcarinaAtlasLauncher
                     if (int.TryParse(raw, out parsed) && parsed >= 1 && parsed <= 65535)
                     {
                         opts.Port = parsed;
+                        opts.PortExplicit = true;
                     }
                 }
                 else if (string.Equals(key, "--lichii-host", StringComparison.OrdinalIgnoreCase))
@@ -124,6 +130,7 @@ namespace OcarinaAtlasLauncher
                     if (!string.IsNullOrEmpty(raw))
                     {
                         opts.LichiiHost = raw.Trim();
+                        opts.LichiiHostExplicit = true;
                     }
                 }
                 else if (string.Equals(key, "--lichii-port", StringComparison.OrdinalIgnoreCase))
@@ -133,17 +140,20 @@ namespace OcarinaAtlasLauncher
                     if (int.TryParse(raw, out parsed) && parsed >= 1 && parsed <= 65535)
                     {
                         opts.LichiiPort = parsed;
+                        opts.LichiiPortExplicit = true;
                     }
                 }
                 else if (string.Equals(key, "--lan", StringComparison.OrdinalIgnoreCase))
                 {
                     opts.AllowLan = true;
+                    opts.AllowLanExplicit = true;
                     opts.BindHost = null;
                 }
                 else if (string.Equals(key, "--local-only", StringComparison.OrdinalIgnoreCase) ||
                          string.Equals(key, "--localhost", StringComparison.OrdinalIgnoreCase))
                 {
                     opts.AllowLan = false;
+                    opts.AllowLanExplicit = true;
                     opts.BindHost = "127.0.0.1";
                 }
                 else if (string.Equals(key, "--host", StringComparison.OrdinalIgnoreCase))
@@ -154,11 +164,13 @@ namespace OcarinaAtlasLauncher
                     {
                         opts.BindHost = sanitized;
                         opts.AllowLan = !LanNetworkHelper.IsLoopbackHost(sanitized);
+                        opts.AllowLanExplicit = true;
                     }
                 }
                 else if (string.Equals(key, "--no-browser", StringComparison.OrdinalIgnoreCase))
                 {
                     opts.AutoOpenBrowser = false;
+                    opts.AutoOpenBrowserExplicit = true;
                 }
                 else if (string.Equals(key, "--minimized", StringComparison.OrdinalIgnoreCase))
                 {
@@ -2644,6 +2656,1511 @@ namespace OcarinaAtlasLauncher
             }
             return result;
         }
+
+        public static string EscapeString(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return string.Empty;
+            StringBuilder sb = new StringBuilder(input.Length);
+            for (int i = 0; i < input.Length; i++)
+            {
+                char c = input[i];
+                switch (c)
+                {
+                    case '\\': sb.Append("\\\\"); break;
+                    case '"': sb.Append("\\\""); break;
+                    case '\r': sb.Append("\\r"); break;
+                    case '\n': sb.Append("\\n"); break;
+                    case '\t': sb.Append("\\t"); break;
+                    default:
+                        if (c < 0x20)
+                        {
+                            sb.AppendFormat(CultureInfo.InvariantCulture, "\\u{0:x4}", (int)c);
+                        }
+                        else
+                        {
+                            sb.Append(c);
+                        }
+                        break;
+                }
+            }
+            return sb.ToString();
+        }
+    }
+
+    internal sealed class LocaleOption
+    {
+        public readonly string Code;
+        public readonly string DisplayName;
+
+        public LocaleOption(string code, string displayName)
+        {
+            Code = code;
+            DisplayName = displayName;
+        }
+
+        public override string ToString()
+        {
+            return DisplayName;
+        }
+    }
+
+    internal static class LauncherI18n
+    {
+        public static readonly LocaleOption[] SupportedLocales = new LocaleOption[]
+        {
+            new LocaleOption("en", "English"),
+            new LocaleOption("es", "Espa\u00F1ol"),
+            new LocaleOption("fr", "Fran\u00E7ais"),
+            new LocaleOption("pt", "Portugu\u00EAs"),
+            new LocaleOption("zh-CN", "\u7B80\u4F53\u4E2D\u6587"),
+            new LocaleOption("zh-TW", "\u7E41\u9AD4\u4E2D\u6587"),
+            new LocaleOption("de", "Deutsch"),
+            new LocaleOption("it", "Italiano"),
+            new LocaleOption("ja", "\u65E5\u672C\u8A9E"),
+            new LocaleOption("ko", "\uD55C\uAD6D\uC5B4"),
+            new LocaleOption("nl", "Nederlands"),
+            new LocaleOption("ru", "\u0420\u0443\u0441\u0441\u043A\u0438\u0439"),
+            new LocaleOption("pl", "Polski"),
+            new LocaleOption("tr", "T\u00FCrk\u00E7e"),
+            new LocaleOption("uk", "\u0423\u043A\u0440\u0430\u0457\u043D\u0441\u044C\u043A\u0430")
+        };
+
+        private static readonly Dictionary<string, Dictionary<string, string>> Strings = BuildStrings();
+
+        public static string DetectSystemLocale()
+        {
+            try
+            {
+                string ui = CultureInfo.CurrentUICulture != null ? CultureInfo.CurrentUICulture.Name : string.Empty;
+                if (!string.IsNullOrEmpty(ui))
+                {
+                    return NormalizeLocale(ui);
+                }
+                string current = CultureInfo.CurrentCulture != null ? CultureInfo.CurrentCulture.Name : string.Empty;
+                if (!string.IsNullOrEmpty(current))
+                {
+                    return NormalizeLocale(current);
+                }
+            }
+            catch
+            {
+                // Fall back to English if culture inspection fails.
+            }
+            return "en";
+        }
+
+        public static string NormalizeLocale(string raw)
+        {
+            if (string.IsNullOrEmpty(raw)) return "en";
+            string normalized = raw.Trim().Replace('_', '-');
+            if (string.IsNullOrEmpty(normalized)) return "en";
+
+            for (int i = 0; i < SupportedLocales.Length; i++)
+            {
+                if (string.Equals(SupportedLocales[i].Code, normalized, StringComparison.OrdinalIgnoreCase))
+                {
+                    return SupportedLocales[i].Code;
+                }
+            }
+
+            string lower = normalized.ToLowerInvariant();
+            if (lower.StartsWith("zh-", StringComparison.Ordinal) || string.Equals(lower, "zh", StringComparison.Ordinal))
+            {
+                if (lower.IndexOf("hant", StringComparison.Ordinal) >= 0 ||
+                    lower.IndexOf("-tw", StringComparison.Ordinal) >= 0 ||
+                    lower.IndexOf("-hk", StringComparison.Ordinal) >= 0 ||
+                    lower.IndexOf("-mo", StringComparison.Ordinal) >= 0)
+                {
+                    return "zh-TW";
+                }
+                return "zh-CN";
+            }
+
+            int dash = lower.IndexOf('-');
+            string prefix = dash > 0 ? lower.Substring(0, dash) : lower;
+            for (int i = 0; i < SupportedLocales.Length; i++)
+            {
+                if (string.Equals(SupportedLocales[i].Code, prefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    return SupportedLocales[i].Code;
+                }
+            }
+
+            return "en";
+        }
+
+        public static string Get(string locale, string key)
+        {
+            if (string.IsNullOrEmpty(key)) return string.Empty;
+            string code = NormalizeLocale(locale);
+            Dictionary<string, string> table;
+            string value;
+            if (Strings.TryGetValue(code, out table) && table.TryGetValue(key, out value))
+            {
+                return value;
+            }
+            if (!string.Equals(code, "en", StringComparison.Ordinal) &&
+                Strings.TryGetValue("en", out table) && table.TryGetValue(key, out value))
+            {
+                return value;
+            }
+            return key;
+        }
+
+        public static string Format(string locale, string key, params object[] args)
+        {
+            string template = Get(locale, key);
+            if (args == null || args.Length == 0) return template;
+            try
+            {
+                return string.Format(CultureInfo.InvariantCulture, template, args);
+            }
+            catch
+            {
+                return template;
+            }
+        }
+
+        private static Dictionary<string, Dictionary<string, string>> BuildStrings()
+        {
+            Dictionary<string, Dictionary<string, string>> map =
+                new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+
+            Dictionary<string, string> en = new Dictionary<string, string>(StringComparer.Ordinal);
+            en["app_title"] = "Ocarina Atlas \u2014 Ocarina of Time Map Tracker";
+            en["start_map"] = "Start Map";
+            en["stop_map"] = "Stop Map";
+            en["stopping"] = "Stopping...";
+            en["open_map"] = "Open Map";
+            en["setup_sync"] = "1-Click Setup Sync";
+            en["setup_sync_port"] = "Setup Sync (:{0})";
+            en["configured"] = "Configured \u21BB";
+            en["configured_port"] = "Configured (:{0}) \u21BB";
+            en["hero_idle"] = "Click Start Map to open the interactive Hyrule map in your browser.";
+            en["hero_starting"] = "Starting the local map server...";
+            en["hero_running"] = "Map is live and ready in your browser.";
+            en["hero_stopping"] = "Shutting down the map server...";
+            en["hero_error"] = "Could not start the map server. Check Settings, Logs & About for details.";
+            en["sync_hint_default"] = "Click 1-Click Setup Sync to enable live tracking in Lichii / Fritchii.";
+            en["sync_hint_configured"] = "Live sync configured. Start Lichii or Fritchii and load Ocarina of Time.";
+            en["status_stopped"] = "Stopped";
+            en["status_running"] = "Running";
+            en["status_starting"] = "Starting";
+            en["status_stopping"] = "Stopping...";
+            en["status_error"] = "Error";
+            en["emu_none"] = "No Emu";
+            en["emu_live"] = "Live";
+            en["emu_waiting"] = "Waiting";
+            en["emu_save"] = "Save";
+            en["emu_rpc_closed"] = "RPC Closed";
+            en["lan_title"] = "Second Screen (LAN)";
+            en["copy_url"] = "Copy URL";
+            en["copied"] = "Copied!";
+            en["qr_code"] = "QR Code";
+            en["allow_firewall"] = "Allow Firewall";
+            en["firewall_ready"] = "Firewall Ready";
+            en["localhost_only"] = "Localhost Only";
+            en["configuring"] = "Configuring...";
+            en["refresh"] = "Refresh";
+            en["lan_hint_default"] = "Open this address or click QR Code to connect your tablet, iPad, or phone.";
+            en["lan_hint_disabled"] = "Enable \"Allow LAN access\" in Settings to connect a tablet or phone.";
+            en["lan_hint_no_adapter"] = "Connect your PC to Wi-Fi or Ethernet, then click Refresh.";
+            en["lan_hint_multi"] = "Multiple network adapters found \u2014 pick the one your tablet or phone uses.";
+            en["lan_disabled"] = "Disabled (localhost only \u2014 127.0.0.1)";
+            en["lan_no_adapter"] = "No active Wi-Fi or Ethernet connection detected";
+            en["lan_checking"] = "Checking network adapters...";
+            en["drawer_title"] = "Settings, Logs & About";
+            en["tab_settings"] = "Settings";
+            en["tab_logs"] = "Logs";
+            en["tab_about"] = "About";
+            en["settings_lock_hint"] = "Stop server to edit port or host settings";
+            en["map_port"] = "Map Port";
+            en["rpc_host"] = "Emulator RPC Host";
+            en["rpc_port"] = "Emulator RPC Port";
+            en["reset"] = "Reset";
+            en["allow_lan"] = "Allow LAN access";
+            en["auto_open"] = "Auto-open browser";
+            en["minimize_tray"] = "Minimize to tray";
+            en["save_folder"] = "Save Folder";
+            en["auto_detect"] = "Auto-detect";
+            en["add_ellipsis"] = "Add...";
+            en["remove"] = "Remove";
+            en["save_slot"] = "Save Slot";
+            en["auto_latest"] = "Auto (Latest)";
+            en["language"] = "Language";
+            en["check_updates"] = "Check for Updates";
+            en["version_label"] = "Version {0}";
+            en["copy_logs"] = "Copy Logs";
+            en["clear"] = "Clear";
+            en["about_original_map"] = "Original Map";
+            en["about_artwork"] = "Map Artwork";
+            en["about_security"] = "Free & open-source (GNU AGPL-3.0). Official builds: github.com/antonioalvromero/Ocarina-Atlas \u2014 forks must preserve credits and share source.";
+            en["about_footer"] = "Version {0}  \u2022  Verify official releases via SHA-256 or GitHub attestation";
+            en["tray_show"] = "Show Ocarina Atlas";
+            en["tray_open"] = "Open Map in Browser";
+            en["tray_exit"] = "Exit";
+            en["update_pill"] = "Update";
+            map["en"] = en;
+
+            Dictionary<string, string> es = new Dictionary<string, string>(StringComparer.Ordinal);
+            es["app_title"] = "Ocarina Atlas \u2014 Mapa de Ocarina of Time";
+            es["start_map"] = "Iniciar mapa";
+            es["stop_map"] = "Detener mapa";
+            es["stopping"] = "Deteniendo...";
+            es["open_map"] = "Abrir mapa";
+            es["setup_sync"] = "Configurar Sync (1 clic)";
+            es["setup_sync_port"] = "Configurar Sync (:{0})";
+            es["configured"] = "Configurado \u21BB";
+            es["configured_port"] = "Configurado (:{0}) \u21BB";
+            es["hero_idle"] = "Haz clic en Iniciar mapa para abrir el mapa interactivo de Hyrule en tu navegador.";
+            es["hero_starting"] = "Iniciando el servidor local del mapa...";
+            es["hero_running"] = "El mapa est\u00E1 activo y listo en tu navegador.";
+            es["hero_stopping"] = "Deteniendo el servidor del mapa...";
+            es["hero_error"] = "No se pudo iniciar el servidor. Revisa Ajustes, Registros y Acerca de.";
+            es["sync_hint_default"] = "Haz clic en Configurar Sync (1 clic) para activar el seguimiento en vivo.";
+            es["sync_hint_configured"] = "Sync en vivo configurado. Inicia Lichii o Fritchii y carga Ocarina of Time.";
+            es["status_stopped"] = "Detenido";
+            es["status_running"] = "Activo";
+            es["status_starting"] = "Iniciando";
+            es["status_stopping"] = "Deteniendo...";
+            es["status_error"] = "Error";
+            es["emu_none"] = "Sin emu";
+            es["emu_live"] = "En vivo";
+            es["emu_waiting"] = "Esperando";
+            es["emu_save"] = "Guardado";
+            es["emu_rpc_closed"] = "RPC cerrado";
+            es["lan_title"] = "Segunda pantalla (LAN)";
+            es["copy_url"] = "Copiar URL";
+            es["copied"] = "\u00A1Copiado!";
+            es["qr_code"] = "C\u00F3digo QR";
+            es["allow_firewall"] = "Permitir firewall";
+            es["firewall_ready"] = "Firewall listo";
+            es["localhost_only"] = "Solo localhost";
+            es["configuring"] = "Configurando...";
+            es["refresh"] = "Actualizar";
+            es["lan_hint_default"] = "Abre esta direcci\u00F3n o haz clic en C\u00F3digo QR para conectar tu tablet, iPad o m\u00F3vil.";
+            es["lan_hint_disabled"] = "Activa \"Permitir acceso LAN\" en Ajustes para conectar una tablet o m\u00F3vil.";
+            es["lan_hint_no_adapter"] = "Conecta tu PC a Wi-Fi o Ethernet y haz clic en Actualizar.";
+            es["lan_hint_multi"] = "Varios adaptadores detectados \u2014 elige el que usa tu tablet o m\u00F3vil.";
+            es["lan_disabled"] = "Desactivado (solo localhost \u2014 127.0.0.1)";
+            es["lan_no_adapter"] = "No se detect\u00F3 conexi\u00F3n Wi-Fi o Ethernet activa";
+            es["lan_checking"] = "Comprobando adaptadores de red...";
+            es["drawer_title"] = "Ajustes, Registros y Acerca de";
+            es["tab_settings"] = "Ajustes";
+            es["tab_logs"] = "Registros";
+            es["tab_about"] = "Acerca de";
+            es["settings_lock_hint"] = "Det\u00E9n el servidor para editar el puerto o host";
+            es["map_port"] = "Puerto del mapa";
+            es["rpc_host"] = "Host RPC del emulador";
+            es["rpc_port"] = "Puerto RPC del emulador";
+            es["reset"] = "Restablecer";
+            es["allow_lan"] = "Permitir acceso LAN";
+            es["auto_open"] = "Abrir navegador autom.";
+            es["minimize_tray"] = "Minimizar a la bandeja";
+            es["save_folder"] = "Carpeta de guardado";
+            es["auto_detect"] = "Detecci\u00F3n autom.";
+            es["add_ellipsis"] = "A\u00F1adir...";
+            es["remove"] = "Quitar";
+            es["save_slot"] = "Ranura";
+            es["auto_latest"] = "Auto (M\u00E1s reciente)";
+            es["language"] = "Idioma";
+            es["check_updates"] = "Buscar actualizaciones";
+            es["version_label"] = "Versi\u00F3n {0}";
+            es["copy_logs"] = "Copiar";
+            es["clear"] = "Limpiar";
+            es["about_original_map"] = "Mapa original";
+            es["about_artwork"] = "Arte del mapa";
+            es["about_security"] = "Software libre (GNU AGPL-3.0). Compilaciones oficiales: github.com/antonioalvromero/Ocarina-Atlas \u2014 los forks deben conservar cr\u00E9ditos y compartir c\u00F3digo.";
+            es["about_footer"] = "Versi\u00F3n {0}  \u2022  Verifica lanzamientos oficiales por SHA-256 o atestaci\u00F3n GitHub";
+            es["tray_show"] = "Mostrar Ocarina Atlas";
+            es["tray_open"] = "Abrir mapa en el navegador";
+            es["tray_exit"] = "Salir";
+            es["update_pill"] = "Actualiz.";
+            map["es"] = es;
+
+            Dictionary<string, string> fr = new Dictionary<string, string>(StringComparer.Ordinal);
+            fr["app_title"] = "Ocarina Atlas \u2014 Carte Ocarina of Time";
+            fr["start_map"] = "D\u00E9marrer";
+            fr["stop_map"] = "Arr\u00EAter";
+            fr["stopping"] = "Arr\u00EAt...";
+            fr["open_map"] = "Ouvrir la carte";
+            fr["setup_sync"] = "Sync en 1 clic";
+            fr["setup_sync_port"] = "Config. Sync (:{0})";
+            fr["configured"] = "Configur\u00E9 \u21BB";
+            fr["configured_port"] = "Configur\u00E9 (:{0}) \u21BB";
+            fr["hero_idle"] = "Cliquez sur D\u00E9marrer pour ouvrir la carte interactive d'Hyrule dans votre navigateur.";
+            fr["hero_starting"] = "D\u00E9marrage du serveur de carte local...";
+            fr["hero_running"] = "La carte est active et pr\u00EAte dans votre navigateur.";
+            fr["hero_stopping"] = "Arr\u00EAt du serveur de carte...";
+            fr["hero_error"] = "Impossible de d\u00E9marrer le serveur. V\u00E9rifiez Param\u00E8tres, Journaux & \u00C0 propos.";
+            fr["sync_hint_default"] = "Cliquez sur Sync en 1 clic pour activer le suivi en direct dans Lichii / Fritchii.";
+            fr["sync_hint_configured"] = "Sync en direct configur\u00E9e. Lancez Lichii ou Fritchii et chargez Ocarina of Time.";
+            fr["status_stopped"] = "Arr\u00EAt\u00E9";
+            fr["status_running"] = "Actif";
+            fr["status_starting"] = "D\u00E9marrage";
+            fr["status_stopping"] = "Arr\u00EAt...";
+            fr["status_error"] = "Erreur";
+            fr["emu_none"] = "Aucun \u00E9mu";
+            fr["emu_live"] = "En direct";
+            fr["emu_waiting"] = "En attente";
+            fr["emu_save"] = "Sauvegarde";
+            fr["emu_rpc_closed"] = "RPC ferm\u00E9";
+            fr["lan_title"] = "Deuxi\u00E8me \u00E9cran (LAN)";
+            fr["copy_url"] = "Copier URL";
+            fr["copied"] = "Copi\u00E9 !";
+            fr["qr_code"] = "Code QR";
+            fr["allow_firewall"] = "Pare-feu LAN";
+            fr["firewall_ready"] = "Pare-feu pr\u00EAt";
+            fr["localhost_only"] = "Local uniquement";
+            fr["configuring"] = "Configuration...";
+            fr["refresh"] = "Actualiser";
+            fr["lan_hint_default"] = "Ouvrez cette adresse ou cliquez sur Code QR pour connecter votre tablette, iPad ou t\u00E9l\u00E9phone.";
+            fr["lan_hint_disabled"] = "Activez \"Autoriser l'acc\u00E8s LAN\" dans les Param\u00E8tres pour connecter un appareil.";
+            fr["lan_hint_no_adapter"] = "Connectez votre PC au Wi-Fi ou Ethernet, puis cliquez sur Actualiser.";
+            fr["lan_hint_multi"] = "Plusieurs cartes r\u00E9seau d\u00E9tect\u00E9es \u2014 choisissez celle de votre appareil.";
+            fr["lan_disabled"] = "D\u00E9sactiv\u00E9 (localhost uniquement \u2014 127.0.0.1)";
+            fr["lan_no_adapter"] = "Aucune connexion Wi-Fi ou Ethernet active";
+            fr["lan_checking"] = "V\u00E9rification des cartes r\u00E9seau...";
+            fr["drawer_title"] = "Param\u00E8tres, Journaux & \u00C0 propos";
+            fr["tab_settings"] = "Param\u00E8tres";
+            fr["tab_logs"] = "Journaux";
+            fr["tab_about"] = "\u00C0 propos";
+            fr["settings_lock_hint"] = "Arr\u00EAtez le serveur pour modifier le port ou l'h\u00F4te";
+            fr["map_port"] = "Port de la carte";
+            fr["rpc_host"] = "H\u00F4te RPC \u00E9mulateur";
+            fr["rpc_port"] = "Port RPC \u00E9mulateur";
+            fr["reset"] = "R\u00E9init.";
+            fr["allow_lan"] = "Autoriser l'acc\u00E8s LAN";
+            fr["auto_open"] = "Ouvrir le navigateur auto.";
+            fr["minimize_tray"] = "R\u00E9duire dans la zone notif.";
+            fr["save_folder"] = "Dossier de sauvegarde";
+            fr["auto_detect"] = "D\u00E9tection auto.";
+            fr["add_ellipsis"] = "Ajouter...";
+            fr["remove"] = "Retirer";
+            fr["save_slot"] = "Emplacement";
+            fr["auto_latest"] = "Auto (Plus r\u00E9cent)";
+            fr["language"] = "Langue";
+            fr["check_updates"] = "V\u00E9rifier les mises \u00E0 jour";
+            fr["version_label"] = "Version {0}";
+            fr["copy_logs"] = "Copier";
+            fr["clear"] = "Effacer";
+            fr["about_original_map"] = "Carte d'origine";
+            fr["about_artwork"] = "Illustrations";
+            fr["about_security"] = "Libre et open-source (GNU AGPL-3.0). Builds officiels : github.com/antonioalvromero/Ocarina-Atlas \u2014 les forks doivent pr\u00E9server les cr\u00E9dits.";
+            fr["about_footer"] = "Version {0}  \u2022  V\u00E9rifiez les versions officielles via SHA-256 ou attestation GitHub";
+            fr["tray_show"] = "Afficher Ocarina Atlas";
+            fr["tray_open"] = "Ouvrir la carte dans le navigateur";
+            fr["tray_exit"] = "Quitter";
+            fr["update_pill"] = "M\u00E0J";
+            map["fr"] = fr;
+
+            Dictionary<string, string> pt = new Dictionary<string, string>(StringComparer.Ordinal);
+            pt["app_title"] = "Ocarina Atlas \u2014 Mapa de Ocarina of Time";
+            pt["start_map"] = "Iniciar mapa";
+            pt["stop_map"] = "Parar mapa";
+            pt["stopping"] = "Parando...";
+            pt["open_map"] = "Abrir mapa";
+            pt["setup_sync"] = "Configurar Sync (1 clique)";
+            pt["setup_sync_port"] = "Configurar Sync (:{0})";
+            pt["configured"] = "Configurado \u21BB";
+            pt["configured_port"] = "Configurado (:{0}) \u21BB";
+            pt["hero_idle"] = "Clique em Iniciar mapa para abrir o mapa interativo de Hyrule no navegador.";
+            pt["hero_starting"] = "Iniciando o servidor local do mapa...";
+            pt["hero_running"] = "O mapa est\u00E1 ativo e pronto no seu navegador.";
+            pt["hero_stopping"] = "Encerrando o servidor do mapa...";
+            pt["hero_error"] = "N\u00E3o foi poss\u00EDvel iniciar o servidor. Verifique Configura\u00E7\u00F5es, Logs e Sobre.";
+            pt["sync_hint_default"] = "Clique em Configurar Sync para ativar o rastreamento ao vivo.";
+            pt["sync_hint_configured"] = "Sync ao vivo configurado. Inicie Lichii ou Fritchii e carregue Ocarina of Time.";
+            pt["status_stopped"] = "Parado";
+            pt["status_running"] = "Ativo";
+            pt["status_starting"] = "Iniciando";
+            pt["status_stopping"] = "Parando...";
+            pt["status_error"] = "Erro";
+            pt["emu_none"] = "Sem emu";
+            pt["emu_live"] = "Ao vivo";
+            pt["emu_waiting"] = "Aguardando";
+            pt["emu_save"] = "Save";
+            pt["emu_rpc_closed"] = "RPC fechado";
+            pt["lan_title"] = "Segunda tela (LAN)";
+            pt["copy_url"] = "Copiar URL";
+            pt["copied"] = "Copiado!";
+            pt["qr_code"] = "C\u00F3digo QR";
+            pt["allow_firewall"] = "Liberar firewall";
+            pt["firewall_ready"] = "Firewall pronto";
+            pt["localhost_only"] = "Apenas local";
+            pt["configuring"] = "Configurando...";
+            pt["refresh"] = "Atualizar";
+            pt["lan_hint_default"] = "Abra este endere\u00E7o ou clique em C\u00F3digo QR para conectar seu tablet, iPad ou celular.";
+            pt["lan_hint_disabled"] = "Ative \"Permitir acesso LAN\" nas Configura\u00E7\u00F5es para conectar um dispositivo.";
+            pt["lan_hint_no_adapter"] = "Conecte o PC ao Wi-Fi ou Ethernet e clique em Atualizar.";
+            pt["lan_hint_multi"] = "V\u00E1rios adaptadores encontrados \u2014 escolha o usado pelo seu dispositivo.";
+            pt["lan_disabled"] = "Desativado (apenas localhost \u2014 127.0.0.1)";
+            pt["lan_no_adapter"] = "Nenhuma conex\u00E3o Wi-Fi ou Ethernet ativa detectada";
+            pt["lan_checking"] = "Verificando adaptadores de rede...";
+            pt["drawer_title"] = "Configura\u00E7\u00F5es, Logs e Sobre";
+            pt["tab_settings"] = "Config.";
+            pt["tab_logs"] = "Logs";
+            pt["tab_about"] = "Sobre";
+            pt["settings_lock_hint"] = "Pare o servidor para editar porta ou host";
+            pt["map_port"] = "Porta do mapa";
+            pt["rpc_host"] = "Host RPC do emulador";
+            pt["rpc_port"] = "Porta RPC do emulador";
+            pt["reset"] = "Redefinir";
+            pt["allow_lan"] = "Permitir acesso LAN";
+            pt["auto_open"] = "Abrir navegador autom.";
+            pt["minimize_tray"] = "Minimizar para bandeja";
+            pt["save_folder"] = "Pasta de saves";
+            pt["auto_detect"] = "Detec\u00E7\u00E3o autom.";
+            pt["add_ellipsis"] = "Adicionar...";
+            pt["remove"] = "Remover";
+            pt["save_slot"] = "Slot";
+            pt["auto_latest"] = "Auto (Mais recente)";
+            pt["language"] = "Idioma";
+            pt["check_updates"] = "Verificar atualiza\u00E7\u00F5es";
+            pt["version_label"] = "Vers\u00E3o {0}";
+            pt["copy_logs"] = "Copiar logs";
+            pt["clear"] = "Limpar";
+            pt["about_original_map"] = "Mapa original";
+            pt["about_artwork"] = "Arte do mapa";
+            pt["about_security"] = "Gratuito e c\u00F3digo aberto (GNU AGPL-3.0). Compila\u00E7\u00F5es oficiais: github.com/antonioalvromero/Ocarina-Atlas.";
+            pt["about_footer"] = "Vers\u00E3o {0}  \u2022  Verifique lan\u00E7amentos oficiais via SHA-256 ou GitHub";
+            pt["tray_show"] = "Mostrar Ocarina Atlas";
+            pt["tray_open"] = "Abrir mapa no navegador";
+            pt["tray_exit"] = "Sair";
+            pt["update_pill"] = "Atualiz.";
+            map["pt"] = pt;
+
+            Dictionary<string, string> zhCn = new Dictionary<string, string>(StringComparer.Ordinal);
+            zhCn["app_title"] = "Ocarina Atlas \u2014 \u65F6\u4E4B\u7B1B\u4E92\u52A8\u5730\u56FE";
+            zhCn["start_map"] = "\u542F\u52A8\u5730\u56FE";
+            zhCn["stop_map"] = "\u505C\u6B62\u5730\u56FE";
+            zhCn["stopping"] = "\u6B63\u5728\u505C\u6B62...";
+            zhCn["open_map"] = "\u6253\u5F00\u5730\u56FE";
+            zhCn["setup_sync"] = "\u4E00\u952E\u914D\u7F6E\u540C\u6B65";
+            zhCn["setup_sync_port"] = "\u914D\u7F6E\u540C\u6B65 (:{0})";
+            zhCn["configured"] = "\u5DF2\u914D\u7F6E \u21BB";
+            zhCn["configured_port"] = "\u5DF2\u914D\u7F6E (:{0}) \u21BB";
+            zhCn["hero_idle"] = "\u70B9\u51FB\u201C\u542F\u52A8\u5730\u56FE\u201D\u5728\u6D4F\u89C8\u5668\u4E2D\u6253\u5F00\u6D77\u62C9\u9C81\u4E92\u52A8\u5730\u56FE\u3002";
+            zhCn["hero_starting"] = "\u6B63\u5728\u542F\u52A8\u672C\u5730\u5730\u56FE\u670D\u52A1\u5668...";
+            zhCn["hero_running"] = "\u5730\u56FE\u5DF2\u5C31\u7EEA\uFF0C\u53EF\u5728\u6D4F\u89C8\u5668\u4E2D\u67E5\u770B\u3002";
+            zhCn["hero_stopping"] = "\u6B63\u5728\u5173\u95ED\u5730\u56FE\u670D\u52A1\u5668...";
+            zhCn["hero_error"] = "\u65E0\u6CD5\u542F\u52A8\u5730\u56FE\u670D\u52A1\u5668\u3002\u8BF7\u67E5\u770B\u8BBE\u7F6E\u3001\u65E5\u5FD7\u4E0E\u5173\u4E8E\u3002";
+            zhCn["sync_hint_default"] = "\u70B9\u51FB\u201C\u4E00\u952E\u914D\u7F6E\u540C\u6B65\u201D\u4EE5\u542F\u7528\u5B9E\u65F6\u8FFD\u8E2A\u3002";
+            zhCn["sync_hint_configured"] = "\u5B9E\u65F6\u540C\u6B65\u5DF2\u914D\u7F6E\u3002\u8BF7\u542F\u52A8 Lichii \u6216 Fritchii \u5E76\u52A0\u8F7D\u6E38\u620F\u3002";
+            zhCn["status_stopped"] = "\u5DF2\u505C\u6B62";
+            zhCn["status_running"] = "\u8FD0\u884C\u4E2D";
+            zhCn["status_starting"] = "\u542F\u52A8\u4E2D";
+            zhCn["status_stopping"] = "\u505C\u6B62\u4E2D...";
+            zhCn["status_error"] = "\u9519\u8BEF";
+            zhCn["emu_none"] = "\u672A\u68C0\u6D4B";
+            zhCn["emu_live"] = "\u5B9E\u65F6";
+            zhCn["emu_waiting"] = "\u7B49\u5F85\u4E2D";
+            zhCn["emu_save"] = "\u5B58\u6863";
+            zhCn["emu_rpc_closed"] = "RPC\u5173\u95ED";
+            zhCn["lan_title"] = "\u526F\u5C4F (LAN)";
+            zhCn["copy_url"] = "\u590D\u5236\u94FE\u63A5";
+            zhCn["copied"] = "\u5DF2\u590D\u5236!";
+            zhCn["qr_code"] = "\u4E8C\u7EF4\u7801";
+            zhCn["allow_firewall"] = "\u5141\u8BB8\u9632\u706B\u5899";
+            zhCn["firewall_ready"] = "\u9632\u706B\u5899\u5DF2\u5C31\u7EEA";
+            zhCn["localhost_only"] = "\u4EC5\u672C\u673A";
+            zhCn["configuring"] = "\u914D\u7F6E\u4E2D...";
+            zhCn["refresh"] = "\u5237\u65B0";
+            zhCn["lan_hint_default"] = "\u6253\u5F00\u6B64\u5730\u5740\u6216\u70B9\u51FB\u4E8C\u7EF4\u7801\u4EE5\u8FDE\u63A5\u5E73\u677F\u3001iPad \u6216\u624B\u673A\u3002";
+            zhCn["lan_hint_disabled"] = "\u8BF7\u5728\u8BBE\u7F6E\u4E2D\u542F\u7528\u201C\u5141\u8BB8\u5C40\u57DF\u7F51\u8BBF\u95EE\u201D\u4EE5\u8FDE\u63A5\u79FB\u52A8\u8BBE\u5907\u3002";
+            zhCn["lan_hint_no_adapter"] = "\u8BF7\u5C06\u7535\u8111\u8FDE\u63A5\u5230 Wi-Fi \u6216\u4EE5\u592A\u7F51\uFF0C\u7136\u540E\u70B9\u51FB\u5237\u65B0\u3002";
+            zhCn["lan_hint_multi"] = "\u68C0\u6D4B\u5230\u591A\u4E2A\u7F51\u7EDC\u9002\u914D\u5668 \u2014 \u8BF7\u9009\u62E9\u8BBE\u5907\u6240\u7528\u7684\u7F51\u7EDC\u3002";
+            zhCn["lan_disabled"] = "\u5DF2\u7981\u7528 (\u4EC5\u672C\u673A \u2014 127.0.0.1)";
+            zhCn["lan_no_adapter"] = "\u672A\u68C0\u6D4B\u5230\u6D3B\u52A8\u7684 Wi-Fi \u6216\u4EE5\u592A\u7F51\u8FDE\u63A5";
+            zhCn["lan_checking"] = "\u6B63\u5728\u68C0\u67E5\u7F51\u7EDC\u9002\u914D\u5668...";
+            zhCn["drawer_title"] = "\u8BBE\u7F6E\u3001\u65E5\u5FD7\u4E0E\u5173\u4E8E";
+            zhCn["tab_settings"] = "\u8BBE\u7F6E";
+            zhCn["tab_logs"] = "\u65E5\u5FD7";
+            zhCn["tab_about"] = "\u5173\u4E8E";
+            zhCn["settings_lock_hint"] = "\u505C\u6B62\u670D\u52A1\u5668\u540E\u53EF\u7F16\u8F91\u7AEF\u53E3\u6216\u4E3B\u673A";
+            zhCn["map_port"] = "\u5730\u56FE\u7AEF\u53E3";
+            zhCn["rpc_host"] = "\u6A21\u62DF\u5668 RPC \u4E3B\u673A";
+            zhCn["rpc_port"] = "\u6A21\u62DF\u5668 RPC \u7AEF\u53E3";
+            zhCn["reset"] = "\u91CD\u7F6E";
+            zhCn["allow_lan"] = "\u5141\u8BB8\u5C40\u57DF\u7F51\u8BBF\u95EE";
+            zhCn["auto_open"] = "\u81EA\u52A8\u6253\u5F00\u6D4F\u89C8\u5668";
+            zhCn["minimize_tray"] = "\u6700\u5C0F\u5316\u5230\u6258\u76D8";
+            zhCn["save_folder"] = "\u5B58\u6863\u6587\u4EF6\u5939";
+            zhCn["auto_detect"] = "\u81EA\u52A8\u68C0\u6D4B";
+            zhCn["add_ellipsis"] = "\u6DFB\u52A0...";
+            zhCn["remove"] = "\u79FB\u9664";
+            zhCn["save_slot"] = "\u5B58\u6863\u69FD\u4F4D";
+            zhCn["auto_latest"] = "\u81EA\u52A8 (\u6700\u65B0)";
+            zhCn["language"] = "\u8BED\u8A00";
+            zhCn["check_updates"] = "\u68C0\u67E5\u66F4\u65B0";
+            zhCn["version_label"] = "\u7248\u672C {0}";
+            zhCn["copy_logs"] = "\u590D\u5236\u65E5\u5FD7";
+            zhCn["clear"] = "\u6E05\u7A7A";
+            zhCn["about_original_map"] = "\u539F\u59CB\u5730\u56FE";
+            zhCn["about_artwork"] = "\u5730\u56FE\u7F8E\u672F";
+            zhCn["about_security"] = "\u514D\u8D39\u5F00\u6E90 (GNU AGPL-3.0)\u3002\u5B98\u65B9\u6784\u5EFA: github.com/antonioalvromero/Ocarina-Atlas\u3002";
+            zhCn["about_footer"] = "\u7248\u672C {0}  \u2022  \u8BF7\u901A\u8FC7 SHA-256 \u6216 GitHub \u8BC1\u660E\u9A8C\u8BC1\u5B98\u65B9\u7248\u672C";
+            zhCn["tray_show"] = "\u663E\u793A Ocarina Atlas";
+            zhCn["tray_open"] = "\u5728\u6D4F\u89C8\u5668\u4E2D\u6253\u5F00\u5730\u56FE";
+            zhCn["tray_exit"] = "\u9000\u51FA";
+            zhCn["update_pill"] = "\u66F4\u65B0";
+            map["zh-CN"] = zhCn;
+
+            Dictionary<string, string> zhTw = new Dictionary<string, string>(StringComparer.Ordinal);
+            zhTw["app_title"] = "Ocarina Atlas \u2014 \u6642\u4E4B\u7B1B\u4E92\u52D5\u5730\u5716";
+            zhTw["start_map"] = "\u555F\u52D5\u5730\u5716";
+            zhTw["stop_map"] = "\u505C\u6B62\u5730\u5716";
+            zhTw["stopping"] = "\u6B63\u5728\u505C\u6B62...";
+            zhTw["open_map"] = "\u958B\u555F\u5730\u5716";
+            zhTw["setup_sync"] = "\u4E00\u9375\u8A2D\u5B9A\u540C\u6B65";
+            zhTw["setup_sync_port"] = "\u8A2D\u5B9A\u540C\u6B65 (:{0})";
+            zhTw["configured"] = "\u5DF2\u8A2D\u5B9A \u21BB";
+            zhTw["configured_port"] = "\u5DF2\u8A2D\u5B9A (:{0}) \u21BB";
+            zhTw["hero_idle"] = "\u9EDE\u64CA\u300C\u555F\u52D5\u5730\u5716\u300D\u5728\u700F\u89BD\u5668\u4E2D\u958B\u555F\u6D77\u62C9\u9B6F\u4E92\u52D5\u5730\u5716\u3002";
+            zhTw["hero_starting"] = "\u6B63\u5728\u555F\u52D5\u672C\u6A5F\u5730\u5716\u4F3A\u670D\u5668...";
+            zhTw["hero_running"] = "\u5730\u5716\u5DF2\u5C31\u7DD2\uFF0C\u53EF\u5728\u700F\u89BD\u5668\u4E2D\u67E5\u770B\u3002";
+            zhTw["hero_stopping"] = "\u6B63\u5728\u95DC\u9589\u5730\u5716\u4F3A\u670D\u5668...";
+            zhTw["hero_error"] = "\u7121\u6CD5\u555F\u52D5\u5730\u5716\u4F3A\u670D\u5668\u3002\u8ACB\u67E5\u770B\u8A2D\u5B9A\u3001\u8A18\u9304\u8207\u95DC\u65BC\u3002";
+            zhTw["sync_hint_default"] = "\u9EDE\u64CA\u300C\u4E00\u9375\u8A2D\u5B9A\u540C\u6B65\u300D\u4EE5\u555F\u7528\u5373\u6642\u8FFD\u8E64\u3002";
+            zhTw["sync_hint_configured"] = "\u5373\u6642\u540C\u6B65\u5DF2\u8A2D\u5B9A\u3002\u8ACB\u555F\u52D5 Lichii \u6216 Fritchii \u4E26\u8F09\u5165\u904A\u6232\u3002";
+            zhTw["status_stopped"] = "\u5DF2\u505C\u6B62";
+            zhTw["status_running"] = "\u904B\u884C\u4E2D";
+            zhTw["status_starting"] = "\u555F\u52D5\u4E2D";
+            zhTw["status_stopping"] = "\u505C\u6B62\u4E2D...";
+            zhTw["status_error"] = "\u932F\u8AA4";
+            zhTw["emu_none"] = "\u672A\u5075\u6E2C";
+            zhTw["emu_live"] = "\u5373\u6642";
+            zhTw["emu_waiting"] = "\u7B49\u5019\u4E2D";
+            zhTw["emu_save"] = "\u5B58\u6A94";
+            zhTw["emu_rpc_closed"] = "RPC\u95DC\u9589";
+            zhTw["lan_title"] = "\u526F\u87A2\u5E55 (LAN)";
+            zhTw["copy_url"] = "\u8907\u88FD\u7DB2\u5740";
+            zhTw["copied"] = "\u5DF2\u8907\u88FD!";
+            zhTw["qr_code"] = "QR \u78BC";
+            zhTw["allow_firewall"] = "\u5141\u8A31\u9632\u706B\u7246";
+            zhTw["firewall_ready"] = "\u9632\u706B\u7246\u5DF2\u5C31\u7DD2";
+            zhTw["localhost_only"] = "\u50C5\u9650\u672C\u6A5F";
+            zhTw["configuring"] = "\u8A2D\u5B9A\u4E2D...";
+            zhTw["refresh"] = "\u91CD\u65B0\u6574\u7406";
+            zhTw["lan_hint_default"] = "\u958B\u555F\u6B64\u4F4D\u5740\u6216\u9EDE\u64CA QR \u78BC\u4EE5\u9023\u7DDA\u5E73\u677F\u3001iPad \u6216\u624B\u6A5F\u3002";
+            zhTw["lan_hint_disabled"] = "\u8ACB\u5728\u8A2D\u5B9A\u4E2D\u555F\u7528\u300C\u5141\u8A31\u5340\u57DF\u7DB2\u8DEF\u5B58\u53D6\u300D\u4EE5\u9023\u7DDA\u88DD\u7F6E\u3002";
+            zhTw["lan_hint_no_adapter"] = "\u8ACB\u5C07\u96FB\u8166\u9023\u7DDA\u81F3 Wi-Fi \u6216\u4E59\u592A\u7DB2\u8DEF\uFF0C\u7136\u5F8C\u9EDE\u64CA\u91CD\u65B0\u6574\u7406\u3002";
+            zhTw["lan_hint_multi"] = "\u5075\u6E2C\u5230\u591A\u500B\u7DB2\u8DEF\u4ECB\u9762 \u2014 \u8ACB\u9078\u64C7\u88DD\u7F6E\u4F7F\u7528\u7684\u7DB2\u8DEF\u3002";
+            zhTw["lan_disabled"] = "\u5DF2\u505C\u7528 (\u50C5\u672C\u6A5F \u2014 127.0.0.1)";
+            zhTw["lan_no_adapter"] = "\u672A\u5075\u6E2C\u5230\u4F5C\u7528\u4E2D\u7684 Wi-Fi \u6216\u4E59\u592A\u7DB2\u8DEF\u9023\u7DDA";
+            zhTw["lan_checking"] = "\u6B63\u5728\u6AA2\u67E5\u7DB2\u8DEF\u4ECB\u9762...";
+            zhTw["drawer_title"] = "\u8A2D\u5B9A\u3001\u8A18\u9304\u8207\u95DC\u65BC";
+            zhTw["tab_settings"] = "\u8A2D\u5B9A";
+            zhTw["tab_logs"] = "\u8A18\u9304";
+            zhTw["tab_about"] = "\u95DC\u65BC";
+            zhTw["settings_lock_hint"] = "\u505C\u6B62\u4F3A\u670D\u5668\u5F8C\u53EF\u7DE8\u8F2F\u9023\u63A5\u57E0\u6216\u4E3B\u6A5F";
+            zhTw["map_port"] = "\u5730\u5716\u9023\u63A5\u57E0";
+            zhTw["rpc_host"] = "\u6A21\u64EC\u5668 RPC \u4E3B\u6A5F";
+            zhTw["rpc_port"] = "\u6A21\u64EC\u5668 RPC \u9023\u63A5\u57E0";
+            zhTw["reset"] = "\u91CD\u8A2D";
+            zhTw["allow_lan"] = "\u5141\u8A31\u5340\u57DF\u7DB2\u8DEF\u5B58\u53D6";
+            zhTw["auto_open"] = "\u81EA\u52D5\u958B\u555F\u700F\u89BD\u5668";
+            zhTw["minimize_tray"] = "\u6700\u5C0F\u5316\u81F3\u7CFB\u7D71\u5323";
+            zhTw["save_folder"] = "\u5B58\u6A94\u8CC7\u6599\u593E";
+            zhTw["auto_detect"] = "\u81EA\u52D5\u5075\u6E2C";
+            zhTw["add_ellipsis"] = "\u65B0\u589E...";
+            zhTw["remove"] = "\u79FB\u9664";
+            zhTw["save_slot"] = "\u5B58\u6A94\u69FD\u4F4D";
+            zhTw["auto_latest"] = "\u81EA\u52D5 (\u6700\u65B0)";
+            zhTw["language"] = "\u8A9E\u8A00";
+            zhTw["check_updates"] = "\u6AA2\u67E5\u66F4\u65B0";
+            zhTw["version_label"] = "\u7248\u672C {0}";
+            zhTw["copy_logs"] = "\u8907\u88FD\u8A18\u9304";
+            zhTw["clear"] = "\u6E05\u9664";
+            zhTw["about_original_map"] = "\u539F\u59CB\u5730\u5716";
+            zhTw["about_artwork"] = "\u5730\u5716\u7F8E\u8853";
+            zhTw["about_security"] = "\u514D\u8CBB\u958B\u6E90 (GNU AGPL-3.0)\u3002\u5B98\u65B9\u5EFA\u7F6E: github.com/antonioalvromero/Ocarina-Atlas\u3002";
+            zhTw["about_footer"] = "\u7248\u672C {0}  \u2022  \u8ACB\u900F\u904E SHA-256 \u6216 GitHub \u8B49\u660E\u9A57\u8B49\u5B98\u65B9\u7248\u672C";
+            zhTw["tray_show"] = "\u986F\u793A Ocarina Atlas";
+            zhTw["tray_open"] = "\u5728\u700F\u89BD\u5668\u4E2D\u958B\u555F\u5730\u5716";
+            zhTw["tray_exit"] = "\u7D50\u675F";
+            zhTw["update_pill"] = "\u66F4\u65B0";
+            map["zh-TW"] = zhTw;
+
+            Dictionary<string, string> de = new Dictionary<string, string>(StringComparer.Ordinal);
+            de["app_title"] = "Ocarina Atlas \u2014 Ocarina of Time Karten-Tracker";
+            de["start_map"] = "Karte starten";
+            de["stop_map"] = "Karte stoppen";
+            de["stopping"] = "Stoppt...";
+            de["open_map"] = "Karte \u00F6ffnen";
+            de["setup_sync"] = "1-Klick-Sync-Setup";
+            de["setup_sync_port"] = "Sync-Setup (:{0})";
+            de["configured"] = "Konfiguriert \u21BB";
+            de["configured_port"] = "Konfiguriert (:{0}) \u21BB";
+            de["hero_idle"] = "Klicke auf Karte starten, um die interaktive Hyrule-Karte im Browser zu \u00F6ffnen.";
+            de["hero_starting"] = "Lokaler Kartenserver wird gestartet...";
+            de["hero_running"] = "Die Karte ist live und im Browser bereit.";
+            de["hero_stopping"] = "Kartenserver wird beendet...";
+            de["hero_error"] = "Kartenserver konnte nicht gestartet werden. Siehe Einstellungen, Protokoll & Info.";
+            de["sync_hint_default"] = "Klicke auf 1-Klick-Sync-Setup, um Live-Tracking in Lichii / Fritchii zu aktivieren.";
+            de["sync_hint_configured"] = "Live-Sync konfiguriert. Starte Lichii oder Fritchii und lade Ocarina of Time.";
+            de["status_stopped"] = "Gestoppt";
+            de["status_running"] = "L\u00E4uft";
+            de["status_starting"] = "Startet";
+            de["status_stopping"] = "Stoppt...";
+            de["status_error"] = "Fehler";
+            de["emu_none"] = "Kein Emu";
+            de["emu_live"] = "Live";
+            de["emu_waiting"] = "Wartet";
+            de["emu_save"] = "Spielstand";
+            de["emu_rpc_closed"] = "RPC zu";
+            de["lan_title"] = "Zweiter Bildschirm (LAN)";
+            de["copy_url"] = "URL kopieren";
+            de["copied"] = "Kopiert!";
+            de["qr_code"] = "QR-Code";
+            de["allow_firewall"] = "Firewall erlauben";
+            de["firewall_ready"] = "Firewall bereit";
+            de["localhost_only"] = "Nur lokal";
+            de["configuring"] = "Konfiguriere...";
+            de["refresh"] = "Aktualis.";
+            de["lan_hint_default"] = "\u00D6ffne diese Adresse oder klicke auf QR-Code f\u00FCr Tablet, iPad oder Smartphone.";
+            de["lan_hint_disabled"] = "Aktiviere \"LAN-Zugriff erlauben\" in den Einstellungen f\u00FCr mobile Ger\u00E4te.";
+            de["lan_hint_no_adapter"] = "Verbinde deinen PC mit WLAN oder Ethernet und klicke auf Aktualis.";
+            de["lan_hint_multi"] = "Mehrere Netzwerkadapter gefunden \u2014 w\u00E4hle den deines Ger\u00E4ts.";
+            de["lan_disabled"] = "Deaktiviert (nur Localhost \u2014 127.0.0.1)";
+            de["lan_no_adapter"] = "Keine aktive WLAN- oder Ethernet-Verbindung erkannt";
+            de["lan_checking"] = "Netzwerkadapter werden gepr\u00FCft...";
+            de["drawer_title"] = "Einstellungen, Protokoll & Info";
+            de["tab_settings"] = "Einstell.";
+            de["tab_logs"] = "Protokoll";
+            de["tab_about"] = "Info";
+            de["settings_lock_hint"] = "Server stoppen, um Port oder Host zu \u00E4ndern";
+            de["map_port"] = "Karten-Port";
+            de["rpc_host"] = "Emulator-RPC-Host";
+            de["rpc_port"] = "Emulator-RPC-Port";
+            de["reset"] = "Zur\u00FCck.";
+            de["allow_lan"] = "LAN-Zugriff erlauben";
+            de["auto_open"] = "Browser autom. \u00F6ffnen";
+            de["minimize_tray"] = "In Tray minimieren";
+            de["save_folder"] = "Speicherordner";
+            de["auto_detect"] = "Automatisch";
+            de["add_ellipsis"] = "Hinzuf....";
+            de["remove"] = "Entfernen";
+            de["save_slot"] = "Speicherplatz";
+            de["auto_latest"] = "Auto (Neuester)";
+            de["language"] = "Sprache";
+            de["check_updates"] = "Nach Updates suchen";
+            de["version_label"] = "Version {0}";
+            de["copy_logs"] = "Kopieren";
+            de["clear"] = "Leeren";
+            de["about_original_map"] = "Originalkarte";
+            de["about_artwork"] = "Karten-Artwork";
+            de["about_security"] = "Frei & Open-Source (GNU AGPL-3.0). Offizielle Builds: github.com/antonioalvromero/Ocarina-Atlas.";
+            de["about_footer"] = "Version {0}  \u2022  Offizielle Releases per SHA-256 oder GitHub-Attestierung pr\u00FCfen";
+            de["tray_show"] = "Ocarina Atlas anzeigen";
+            de["tray_open"] = "Karte im Browser \u00F6ffnen";
+            de["tray_exit"] = "Beenden";
+            de["update_pill"] = "Update";
+            map["de"] = de;
+
+            Dictionary<string, string> it = new Dictionary<string, string>(StringComparer.Ordinal);
+            it["app_title"] = "Ocarina Atlas \u2014 Mappa di Ocarina of Time";
+            it["start_map"] = "Avvia mappa";
+            it["stop_map"] = "Ferma mappa";
+            it["stopping"] = "Arresto...";
+            it["open_map"] = "Apri mappa";
+            it["setup_sync"] = "Configura Sync (1 clic)";
+            it["setup_sync_port"] = "Configura Sync (:{0})";
+            it["configured"] = "Configurato \u21BB";
+            it["configured_port"] = "Configurato (:{0}) \u21BB";
+            it["hero_idle"] = "Fai clic su Avvia mappa per aprire la mappa interattiva di Hyrule nel browser.";
+            it["hero_starting"] = "Avvio del server locale della mappa...";
+            it["hero_running"] = "La mappa \u00E8 attiva e pronta nel browser.";
+            it["hero_stopping"] = "Arresto del server della mappa...";
+            it["hero_error"] = "Impossibile avviare il server. Controlla Impostazioni, Log e Info.";
+            it["sync_hint_default"] = "Fai clic su Configura Sync per abilitare il tracciamento in tempo reale.";
+            it["sync_hint_configured"] = "Sync live configurato. Avvia Lichii o Fritchii e carica Ocarina of Time.";
+            it["status_stopped"] = "Fermo";
+            it["status_running"] = "Attivo";
+            it["status_starting"] = "Avvio";
+            it["status_stopping"] = "Arresto...";
+            it["status_error"] = "Errore";
+            it["emu_none"] = "No Emu";
+            it["emu_live"] = "Live";
+            it["emu_waiting"] = "In attesa";
+            it["emu_save"] = "Salvat.";
+            it["emu_rpc_closed"] = "RPC chiuso";
+            it["lan_title"] = "Secondo schermo (LAN)";
+            it["copy_url"] = "Copia URL";
+            it["copied"] = "Copiato!";
+            it["qr_code"] = "Codice QR";
+            it["allow_firewall"] = "Consenti firewall";
+            it["firewall_ready"] = "Firewall pronto";
+            it["localhost_only"] = "Solo locale";
+            it["configuring"] = "Configurazione...";
+            it["refresh"] = "Aggiorna";
+            it["lan_hint_default"] = "Apri questo indirizzo o clicca Codice QR per connettere tablet, iPad o smartphone.";
+            it["lan_hint_disabled"] = "Attiva \"Consenti accesso LAN\" nelle Impostazioni per connettere un dispositivo.";
+            it["lan_hint_no_adapter"] = "Collega il PC a Wi-Fi o Ethernet, poi clicca Aggiorna.";
+            it["lan_hint_multi"] = "Pi\u00F9 schede di rete trovate \u2014 scegli quella del tuo dispositivo.";
+            it["lan_disabled"] = "Disattivato (solo localhost \u2014 127.0.0.1)";
+            it["lan_no_adapter"] = "Nessuna connessione Wi-Fi o Ethernet attiva rilevata";
+            it["lan_checking"] = "Verifica schede di rete...";
+            it["drawer_title"] = "Impostazioni, Log e Info";
+            it["tab_settings"] = "Impost.";
+            it["tab_logs"] = "Log";
+            it["tab_about"] = "Info";
+            it["settings_lock_hint"] = "Ferma il server per modificare porta o host";
+            it["map_port"] = "Porta mappa";
+            it["rpc_host"] = "Host RPC emulatore";
+            it["rpc_port"] = "Porta RPC emulatore";
+            it["reset"] = "Ripristina";
+            it["allow_lan"] = "Consenti accesso LAN";
+            it["auto_open"] = "Apri browser autom.";
+            it["minimize_tray"] = "Riduci a icona nel tray";
+            it["save_folder"] = "Cartella salvataggi";
+            it["auto_detect"] = "Rileva autom.";
+            it["add_ellipsis"] = "Aggiungi...";
+            it["remove"] = "Rimuovi";
+            it["save_slot"] = "Slot";
+            it["auto_latest"] = "Auto (Pi\u00F9 recente)";
+            it["language"] = "Lingua";
+            it["check_updates"] = "Cerca aggiornamenti";
+            it["version_label"] = "Versione {0}";
+            it["copy_logs"] = "Copia log";
+            it["clear"] = "Pulisci";
+            it["about_original_map"] = "Mappa originale";
+            it["about_artwork"] = "Grafica mappa";
+            it["about_security"] = "Gratuito e open-source (GNU AGPL-3.0). Build ufficiali: github.com/antonioalvromero/Ocarina-Atlas.";
+            it["about_footer"] = "Versione {0}  \u2022  Verifica le release ufficiali tramite SHA-256 o GitHub";
+            it["tray_show"] = "Mostra Ocarina Atlas";
+            it["tray_open"] = "Apri mappa nel browser";
+            it["tray_exit"] = "Esci";
+            it["update_pill"] = "Aggiorna";
+            map["it"] = it;
+
+            Dictionary<string, string> ja = new Dictionary<string, string>(StringComparer.Ordinal);
+            ja["app_title"] = "Ocarina Atlas \u2014 \u6642\u306E\u30AA\u30AB\u30EA\u30CA \u30DE\u30C3\u30D7";
+            ja["start_map"] = "\u30DE\u30C3\u30D7\u958B\u59CB";
+            ja["stop_map"] = "\u30DE\u30C3\u30D7\u505C\u6B62";
+            ja["stopping"] = "\u505C\u6B62\u4E2D...";
+            ja["open_map"] = "\u30DE\u30C3\u30D7\u3092\u958B\u304F";
+            ja["setup_sync"] = "1\u30AF\u30EA\u30C3\u30AF\u540C\u671F\u8A2D\u5B9A";
+            ja["setup_sync_port"] = "\u540C\u671F\u8A2D\u5B9A (:{0})";
+            ja["configured"] = "\u8A2D\u5B9A\u6E08\u307F \u21BB";
+            ja["configured_port"] = "\u8A2D\u5B9A\u6E08\u307F (:{0}) \u21BB";
+            ja["hero_idle"] = "\u300C\u30DE\u30C3\u30D7\u958B\u59CB\u300D\u3092\u30AF\u30EA\u30C3\u30AF\u3057\u3066\u30D6\u30E9\u30A6\u30B6\u3067\u30CF\u30A4\u30E9\u30EB\u30DE\u30C3\u30D7\u3092\u958B\u304D\u307E\u3059\u3002";
+            ja["hero_starting"] = "\u30ED\u30FC\u30AB\u30EB\u30DE\u30C3\u30D7\u30B5\u30FC\u30D0\u30FC\u3092\u8D77\u52D5\u4E2D...";
+            ja["hero_running"] = "\u30DE\u30C3\u30D7\u306F\u30D6\u30E9\u30A6\u30B6\u3067\u5229\u7528\u53EF\u80FD\u3067\u3059\u3002";
+            ja["hero_stopping"] = "\u30DE\u30C3\u30D7\u30B5\u30FC\u30D0\u30FC\u3092\u505C\u6B62\u4E2D...";
+            ja["hero_error"] = "\u30B5\u30FC\u30D0\u30FC\u3092\u8D77\u52D5\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F\u3002\u8A2D\u5B9A\u30FB\u30ED\u30B0\u3092\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044\u3002";
+            ja["sync_hint_default"] = "\u300C1\u30AF\u30EA\u30C3\u30AF\u540C\u671F\u8A2D\u5B9A\u300D\u3067\u30EA\u30A2\u30EB\u30BF\u30A4\u30E0\u8FFD\u8DE1\u3092\u6709\u52B9\u306B\u3057\u307E\u3059\u3002";
+            ja["sync_hint_configured"] = "\u540C\u671F\u8A2D\u5B9A\u5B8C\u4E86\u3002Lichii / Fritchii \u3092\u8D77\u52D5\u3057\u3066\u30B2\u30FC\u30E0\u3092\u8AAD\u307F\u8FBC\u3093\u3067\u304F\u3060\u3055\u3044\u3002";
+            ja["status_stopped"] = "\u505C\u6B62";
+            ja["status_running"] = "\u7A3C\u50CD\u4E2D";
+            ja["status_starting"] = "\u8D77\u52D5\u4E2D";
+            ja["status_stopping"] = "\u505C\u6B62\u4E2D...";
+            ja["status_error"] = "\u30A8\u30E9\u30FC";
+            ja["emu_none"] = "\u672A\u691C\u51FA";
+            ja["emu_live"] = "\u540C\u671F\u4E2D";
+            ja["emu_waiting"] = "\u5F85\u6A5F\u4E2D";
+            ja["emu_save"] = "\u30BB\u30FC\u30D6";
+            ja["emu_rpc_closed"] = "RPC\u9589\u9396";
+            ja["lan_title"] = "\u30B5\u30D6\u753B\u9762 (LAN)";
+            ja["copy_url"] = "URL\u30B3\u30D4\u30FC";
+            ja["copied"] = "\u30B3\u30D4\u30FC!";
+            ja["qr_code"] = "QR\u30B3\u30FC\u30C9";
+            ja["allow_firewall"] = "\u30D5\u30A1\u30A4\u30A2\u30A6\u30A9\u30FC\u30EB";
+            ja["firewall_ready"] = "\u901A\u4FE1\u8A31\u53EF\u6E08";
+            ja["localhost_only"] = "\u30ED\u30FC\u30AB\u30EB\u306E\u307F";
+            ja["configuring"] = "\u8A2D\u5B9A\u4E2D...";
+            ja["refresh"] = "\u66F4\u65B0";
+            ja["lan_hint_default"] = "\u3053\u306EURL\u3092\u958B\u304F\u304B QR\u30B3\u30FC\u30C9\u3067\u30BF\u30D6\u30EC\u30C3\u30C8\u3084\u30B9\u30DE\u30DB\u3092\u63A5\u7D9A\u3057\u307E\u3059\u3002";
+            ja["lan_hint_disabled"] = "\u8A2D\u5B9A\u3067\u300CLAN\u30A2\u30AF\u30BB\u30B9\u3092\u8A31\u53EF\u300D\u3092\u6709\u52B9\u306B\u3057\u3066\u304F\u3060\u3055\u3044\u3002";
+            ja["lan_hint_no_adapter"] = "PC\u3092 Wi-Fi \u307E\u305F\u306F\u6709\u7DDALAN\u306B\u63A5\u7D9A\u3057\u3066\u66F4\u65B0\u3092\u62BC\u3057\u3066\u304F\u3060\u3055\u3044\u3002";
+            ja["lan_hint_multi"] = "\u8907\u6570\u306E\u30CD\u30C3\u30C8\u30EF\u30FC\u30AF\u304C\u691C\u51FA\u3055\u308C\u307E\u3057\u305F \u2014 \u7AEF\u672B\u3068\u540C\u3058\u3082\u306E\u3092\u9078\u629E\u3057\u3066\u304F\u3060\u3055\u3044\u3002";
+            ja["lan_disabled"] = "\u7121\u52B9 (localhost \u306E\u307F \u2014 127.0.0.1)";
+            ja["lan_no_adapter"] = "\u6709\u52B9\u306A Wi-Fi / \u6709\u7DDALAN\u63A5\u7D9A\u304C\u3042\u308A\u307E\u305B\u3093";
+            ja["lan_checking"] = "\u30CD\u30C3\u30C8\u30EF\u30FC\u30AF\u3092\u78BA\u8A8D\u4E2D...";
+            ja["drawer_title"] = "\u8A2D\u5B9A\u30FB\u30ED\u30B0\u30FB\u60C5\u5831";
+            ja["tab_settings"] = "\u8A2D\u5B9A";
+            ja["tab_logs"] = "\u30ED\u30B0";
+            ja["tab_about"] = "\u60C5\u5831";
+            ja["settings_lock_hint"] = "\u30DD\u30FC\u30C8\u3084\u30DB\u30B9\u30C8\u5909\u66F4\u306F\u30B5\u30FC\u30D0\u30FC\u505C\u6B62\u4E2D\u306B\u53EF\u80FD";
+            ja["map_port"] = "\u30DE\u30C3\u30D7\u30DD\u30FC\u30C8";
+            ja["rpc_host"] = "\u30A8\u30DF\u30E5\u30EC\u30FC\u30BF RPC \u30DB\u30B9\u30C8";
+            ja["rpc_port"] = "\u30A8\u30DF\u30E5\u30EC\u30FC\u30BF RPC \u30DD\u30FC\u30C8";
+            ja["reset"] = "\u30EA\u30BB\u30C3\u30C8";
+            ja["allow_lan"] = "LAN\u30A2\u30AF\u30BB\u30B9\u3092\u8A31\u53EF";
+            ja["auto_open"] = "\u30D6\u30E9\u30A6\u30B6\u3092\u81EA\u52D5\u3067\u958B\u304F";
+            ja["minimize_tray"] = "\u30C8\u30EC\u30A4\u306B\u6700\u5C0F\u5316";
+            ja["save_folder"] = "\u30BB\u30FC\u30D6\u30D5\u30A9\u30EB\u30C0";
+            ja["auto_detect"] = "\u81EA\u52D5\u691C\u51FA";
+            ja["add_ellipsis"] = "\u8FFD\u52A0...";
+            ja["remove"] = "\u524A\u9664";
+            ja["save_slot"] = "\u30BB\u30FC\u30D6\u30B9\u30ED\u30C3\u30C8";
+            ja["auto_latest"] = "\u81EA\u52D5 (\u6700\u65B0)";
+            ja["language"] = "\u8A00\u8A9E";
+            ja["check_updates"] = "\u30A2\u30C3\u30D7\u30C7\u30FC\u30C8\u78BA\u8A8D";
+            ja["version_label"] = "\u30D0\u30FC\u30B8\u30E7\u30F3 {0}";
+            ja["copy_logs"] = "\u30B3\u30D4\u30FC";
+            ja["clear"] = "\u30AF\u30EA\u30A2";
+            ja["about_original_map"] = "\u5143\u306E\u30DE\u30C3\u30D7";
+            ja["about_artwork"] = "\u30DE\u30C3\u30D7\u30A2\u30FC\u30C8";
+            ja["about_security"] = "\u7121\u6599\u30FB\u30AA\u30FC\u30D7\u30F3\u30BD\u30FC\u30B9 (GNU AGPL-3.0)\u3002\u516C\u5F0F: github.com/antonioalvromero/Ocarina-Atlas\u3002";
+            ja["about_footer"] = "\u30D0\u30FC\u30B8\u30E7\u30F3 {0}  \u2022  SHA-256 \u307E\u305F\u306F GitHub \u8A3C\u660E\u3067\u516C\u5F0F\u30D3\u30EB\u30C9\u3092\u78BA\u8A8D";
+            ja["tray_show"] = "Ocarina Atlas \u3092\u8868\u793A";
+            ja["tray_open"] = "\u30D6\u30E9\u30A6\u30B6\u3067\u30DE\u30C3\u30D7\u3092\u958B\u304F";
+            ja["tray_exit"] = "\u7D42\u4E86";
+            ja["update_pill"] = "\u66F4\u65B0";
+            map["ja"] = ja;
+
+            Dictionary<string, string> ko = new Dictionary<string, string>(StringComparer.Ordinal);
+            ko["app_title"] = "Ocarina Atlas \u2014 \uC2DC\uAC04\uC758 \uC624\uCE74\uB9AC\uB098 \uC9C0\uB3C4";
+            ko["start_map"] = "\uC9C0\uB3C4 \uC2DC\uC791";
+            ko["stop_map"] = "\uC9C0\uB3C4 \uC911\uC9C0";
+            ko["stopping"] = "\uC911\uC9C0 \uC911...";
+            ko["open_map"] = "\uC9C0\uB3C4 \uC5F4\uAE30";
+            ko["setup_sync"] = "\uC6D0\uD074\uB9AD \uB3D9\uAE30\uD654";
+            ko["setup_sync_port"] = "\uB3D9\uAE30\uD654 \uC124\uC815 (:{0})";
+            ko["configured"] = "\uC124\uC815\uB428 \u21BB";
+            ko["configured_port"] = "\uC124\uC815\uB428 (:{0}) \u21BB";
+            ko["hero_idle"] = "\uC9C0\uB3C4 \uC2DC\uC791\uC744 \uB20C\uB7EC \uBE0C\uB77C\uC6B0\uC800\uC5D0\uC11C \uD558\uC774\uB7F4 \uC9C0\uB3C4\uB97C \uC5FD\uB2C8\uB2E4.";
+            ko["hero_starting"] = "\uB85C\uCEEC \uC9C0\uB3C4 \uC11C\uBC84\uB97C \uC2DC\uC791\uD558\uB294 \uC911...";
+            ko["hero_running"] = "\uC9C0\uB3C4\uAC00 \uBE0C\uB77C\uC6B0\uC800\uC5D0\uC11C \uC2E4\uD589 \uC911\uC785\uB2C8\uB2E4.";
+            ko["hero_stopping"] = "\uC9C0\uB3C4 \uC11C\uBC84\uB97C \uC885\uB8CC\uD558\uB294 \uC911...";
+            ko["hero_error"] = "\uC11C\uBC84\uB97C \uC2DC\uC791\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. \uC124\uC815 \uBC0F \uB85C\uADF8\uB97C \uD655\uC778\uD558\uC138\uC694.";
+            ko["sync_hint_default"] = "\uC6D0\uD074\uB9AD \uB3D9\uAE30\uD654\uB97C \uB20C\uB7EC \uC2E4\uC2DC\uAC04 \uCD94\uC801\uC744 \uD65C\uC131\uD654\uD558\uC138\uC694.";
+            ko["sync_hint_configured"] = "\uC2E4\uC2DC\uAC04 \uB3D9\uAE30\uD654 \uC124\uC815\uB428. Lichii \uB610\uB294 Fritchii\uB97C \uC2E4\uD589\uD558\uC138\uC694.";
+            ko["status_stopped"] = "\uC911\uC9C0\uB428";
+            ko["status_running"] = "\uC2E4\uD589 \uC911";
+            ko["status_starting"] = "\uC2DC\uC791 \uC911";
+            ko["status_stopping"] = "\uC911\uC9C0 \uC911...";
+            ko["status_error"] = "\uC624\uB958";
+            ko["emu_none"] = "\uC5D0\uBBA4 \uC5C6\uC74C";
+            ko["emu_live"] = "\uC2E4\uC2DC\uAC04";
+            ko["emu_waiting"] = "\uB300\uAE30 \uC911";
+            ko["emu_save"] = "\uC800\uC7A5";
+            ko["emu_rpc_closed"] = "RPC \uB2EB\uD798";
+            ko["lan_title"] = "\uC138\uCEE8\uB4DC \uC2A4\uD06C\uB9B0 (LAN)";
+            ko["copy_url"] = "URL \uBCF5\uC0AC";
+            ko["copied"] = "\uBCF5\uC0AC\uB428!";
+            ko["qr_code"] = "QR \uCF54\uB4DC";
+            ko["allow_firewall"] = "\uBC29\uD654\uBCBD \uD5C8\uC6A9";
+            ko["firewall_ready"] = "\uBC29\uD654\uBCBD \uC900\uBE44";
+            ko["localhost_only"] = "\uB85C\uCEEC \uC804\uC6A9";
+            ko["configuring"] = "\uC124\uC815 \uC911...";
+            ko["refresh"] = "\uC0C8\uB85C\uACE0\uCE68";
+            ko["lan_hint_default"] = "\uC774 \uC8FC\uC18C\uB97C \uC5F4\uAC70\uB098 QR \uCF54\uB4DC\uB85C \uD0DC\uBE14\uB9BF, iPad, \uD734\uB300\uD3F0\uC744 \uC5F0\uACB0\uD558\uC138\uC694.";
+            ko["lan_hint_disabled"] = "\uAE30\uAE30\uB97C \uC5F0\uACB0\uD558\uB824\uBA74 \uC124\uC815\uC5D0\uC11C \"LAN \uC811\uADFC \uD5C8\uC6A9\"\uC744 \uCF1C\uC138\uC694.";
+            ko["lan_hint_no_adapter"] = "PC\uB97C Wi-Fi \uB610\uB294 \uC774\uB354\uB137\uC5D0 \uC5F0\uACB0\uD55C \uD6C4 \uC0C8\uB85C\uACE0\uCE68\uC744 \uB204\uB974\uC138\uC694.";
+            ko["lan_hint_multi"] = "\uC5EC\uB7EC \uB124\uD2B8\uC6CC\uD06C \uC5B4\uB311\uD130 \uAC10\uC9C0 \u2014 \uAE30\uAE30\uAC00 \uC0AC\uC6A9\uD558\uB294 \uAC83\uC744 \uC120\uD0DD\uD558\uC138\uC694.";
+            ko["lan_disabled"] = "\uBE44\uD65C\uC131\uD654 (\uB85C\uCEEC \uC804\uC6A9 \u2014 127.0.0.1)";
+            ko["lan_no_adapter"] = "\uD65C\uC131 Wi-Fi \uB610\uB294 \uC774\uB354\uB137 \uC5F0\uACB0\uC774 \uAC10\uC9C0\uB418\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4";
+            ko["lan_checking"] = "\uB124\uD2B8\uC6CC\uD06C \uC5B4\uB311\uD130 \uD655\uC778 \uC911...";
+            ko["drawer_title"] = "\uC124\uC815, \uB85C\uADF8 \uBC0F \uC815\uBCF4";
+            ko["tab_settings"] = "\uC124\uC815";
+            ko["tab_logs"] = "\uB85C\uADF8";
+            ko["tab_about"] = "\uC815\uBCF4";
+            ko["settings_lock_hint"] = "\uD3EC\uD2B8/\uD638\uC2A4\uD2B8\uB97C \uC218\uC815\uD558\uB824\uBA74 \uC11C\uBC84\uB97C \uC911\uC9C0\uD558\uC138\uC694";
+            ko["map_port"] = "\uC9C0\uB3C4 \uD3EC\uD2B8";
+            ko["rpc_host"] = "\uC5D0\uBBA4\uB808\uC774\uD130 RPC \uD638\uC2A4\uD2B8";
+            ko["rpc_port"] = "\uC5D0\uBBA4\uB808\uC774\uD130 RPC \uD3EC\uD2B8";
+            ko["reset"] = "\uCD08\uAE30\uD654";
+            ko["allow_lan"] = "LAN \uC811\uADFC \uD5C8\uC6A9";
+            ko["auto_open"] = "\uBE0C\uB77C\uC6B0\uC800 \uC790\uB3D9 \uC5F4\uAE30";
+            ko["minimize_tray"] = "\uD2B8\uB808\uC774\uB85C \uCD5C\uC18C\uD654";
+            ko["save_folder"] = "\uC800\uC7A5 \uD3F4\uB354";
+            ko["auto_detect"] = "\uC790\uB3D9 \uAC10\uC9C0";
+            ko["add_ellipsis"] = "\uCD94\uAC00...";
+            ko["remove"] = "\uC81C\uAC70";
+            ko["save_slot"] = "\uC800\uC7A5 \uC2AC\uB86F";
+            ko["auto_latest"] = "\uC790\uB3D9 (\uCD5C\uC2E0)";
+            ko["language"] = "\uC5B8\uC5B4";
+            ko["check_updates"] = "\uC5C5\uB370\uC774\uD2B8 \uD655\uC778";
+            ko["version_label"] = "\uBC84\uC804 {0}";
+            ko["copy_logs"] = "\uB85C\uADF8 \uBCF5\uC0AC";
+            ko["clear"] = "\uC9C0\uC6B0\uAE30";
+            ko["about_original_map"] = "\uC6D0\uBCF8 \uC9C0\uB3C4";
+            ko["about_artwork"] = "\uC9C0\uB3C4 \uC544\uD2B8\uC6CC\uD06C";
+            ko["about_security"] = "\uBB34\uB8CC \uC624\uD508 \uC18C\uC2A4 (GNU AGPL-3.0). \uACF5\uC2DD \uBE4C\uB4DC: github.com/antonioalvromero/Ocarina-Atlas.";
+            ko["about_footer"] = "\uBC84\uC804 {0}  \u2022  SHA-256 \uB610\uB294 GitHub \uC99D\uBA85\uC73C\uB85C \uACF5\uC2DD \uB9B4\uB9AC\uC2A4 \uD655\uC778";
+            ko["tray_show"] = "Ocarina Atlas \uBCF4\uAE30";
+            ko["tray_open"] = "\uBE0C\uB77C\uC6B0\uC800\uC5D0\uC11C \uC9C0\uB3C4 \uC5F4\uAE30";
+            ko["tray_exit"] = "\uC885\uB8CC";
+            ko["update_pill"] = "\uC5C5\uB370\uC774\uD2B8";
+            map["ko"] = ko;
+
+            Dictionary<string, string> nl = new Dictionary<string, string>(StringComparer.Ordinal);
+            nl["app_title"] = "Ocarina Atlas \u2014 Ocarina of Time Kaart-tracker";
+            nl["start_map"] = "Start kaart";
+            nl["stop_map"] = "Stop kaart";
+            nl["stopping"] = "Stoppen...";
+            nl["open_map"] = "Open kaart";
+            nl["setup_sync"] = "1-Klik Sync Instellen";
+            nl["setup_sync_port"] = "Sync Instellen (:{0})";
+            nl["configured"] = "Ingesteld \u21BB";
+            nl["configured_port"] = "Ingesteld (:{0}) \u21BB";
+            nl["hero_idle"] = "Klik op Start kaart om de interactieve Hyrule-kaart in je browser te openen.";
+            nl["hero_starting"] = "Lokale kaartserver wordt gestart...";
+            nl["hero_running"] = "De kaart is live en klaar in je browser.";
+            nl["hero_stopping"] = "Kaartserver wordt afgesloten...";
+            nl["hero_error"] = "Kan de kaartserver niet starten. Controleer Instellingen, Logboek & Over.";
+            nl["sync_hint_default"] = "Klik op 1-Klik Sync Instellen om live tracking in Lichii / Fritchii te activeren.";
+            nl["sync_hint_configured"] = "Live sync ingesteld. Start Lichii of Fritchii en laad Ocarina of Time.";
+            nl["status_stopped"] = "Gestopt";
+            nl["status_running"] = "Actief";
+            nl["status_starting"] = "Starten";
+            nl["status_stopping"] = "Stoppen...";
+            nl["status_error"] = "Fout";
+            nl["emu_none"] = "Geen emu";
+            nl["emu_live"] = "Live";
+            nl["emu_waiting"] = "Wachten";
+            nl["emu_save"] = "Save";
+            nl["emu_rpc_closed"] = "RPC dicht";
+            nl["lan_title"] = "Tweede scherm (LAN)";
+            nl["copy_url"] = "Kopieer URL";
+            nl["copied"] = "Gekopieerd!";
+            nl["qr_code"] = "QR-code";
+            nl["allow_firewall"] = "Firewall toestaan";
+            nl["firewall_ready"] = "Firewall gereed";
+            nl["localhost_only"] = "Alleen lokaal";
+            nl["configuring"] = "Instellen...";
+            nl["refresh"] = "Vernieuwen";
+            nl["lan_hint_default"] = "Open dit adres of klik op QR-code om je tablet, iPad of telefoon te verbinden.";
+            nl["lan_hint_disabled"] = "Schakel \"LAN-toegang toestaan\" in bij Instellingen voor een mobiel apparaat.";
+            nl["lan_hint_no_adapter"] = "Verbind je pc met Wi-Fi of Ethernet en klik op Vernieuwen.";
+            nl["lan_hint_multi"] = "Meerdere netwerkadapters gevonden \u2014 kies die van je apparaat.";
+            nl["lan_disabled"] = "Uitgeschakeld (alleen localhost \u2014 127.0.0.1)";
+            nl["lan_no_adapter"] = "Geen actieve Wi-Fi- of Ethernet-verbinding gevonden";
+            nl["lan_checking"] = "Netwerkadapters controleren...";
+            nl["drawer_title"] = "Instellingen, Logboek & Over";
+            nl["tab_settings"] = "Instell.";
+            nl["tab_logs"] = "Logboek";
+            nl["tab_about"] = "Over";
+            nl["settings_lock_hint"] = "Stop de server om poort of host te wijzigen";
+            nl["map_port"] = "Kaartpoort";
+            nl["rpc_host"] = "Emulator RPC-host";
+            nl["rpc_port"] = "Emulator RPC-poort";
+            nl["reset"] = "Herstel";
+            nl["allow_lan"] = "LAN-toegang toestaan";
+            nl["auto_open"] = "Browser autom. openen";
+            nl["minimize_tray"] = "Minimaliseren naar systeemvak";
+            nl["save_folder"] = "Opslagmap";
+            nl["auto_detect"] = "Automatisch";
+            nl["add_ellipsis"] = "Toevoegen...";
+            nl["remove"] = "Verwijder";
+            nl["save_slot"] = "Opslagslot";
+            nl["auto_latest"] = "Auto (Nieuwste)";
+            nl["language"] = "Taal";
+            nl["check_updates"] = "Controleer op updates";
+            nl["version_label"] = "Versie {0}";
+            nl["copy_logs"] = "Kopieer";
+            nl["clear"] = "Wissen";
+            nl["about_original_map"] = "Originele kaart";
+            nl["about_artwork"] = "Kaart-artwork";
+            nl["about_security"] = "Gratis & open-source (GNU AGPL-3.0). Offici\u00EBle builds: github.com/antonioalvromero/Ocarina-Atlas.";
+            nl["about_footer"] = "Versie {0}  \u2022  Controleer offici\u00EBle releases via SHA-256 of GitHub-attestatie";
+            nl["tray_show"] = "Ocarina Atlas tonen";
+            nl["tray_open"] = "Kaart openen in browser";
+            nl["tray_exit"] = "Afsluiten";
+            nl["update_pill"] = "Update";
+            map["nl"] = nl;
+
+            Dictionary<string, string> ru = new Dictionary<string, string>(StringComparer.Ordinal);
+            ru["app_title"] = "Ocarina Atlas \u2014 \u041A\u0430\u0440\u0442\u0430 Ocarina of Time";
+            ru["start_map"] = "\u0417\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u044C";
+            ru["stop_map"] = "\u041E\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C";
+            ru["stopping"] = "\u041E\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430...";
+            ru["open_map"] = "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043A\u0430\u0440\u0442\u0443";
+            ru["setup_sync"] = "\u041D\u0430\u0441\u0442\u0440\u043E\u0438\u0442\u044C Sync";
+            ru["setup_sync_port"] = "\u041D\u0430\u0441\u0442\u0440. Sync (:{0})";
+            ru["configured"] = "\u041D\u0430\u0441\u0442\u0440\u043E\u0435\u043D\u043E \u21BB";
+            ru["configured_port"] = "\u041D\u0430\u0441\u0442\u0440\u043E\u0435\u043D\u043E (:{0}) \u21BB";
+            ru["hero_idle"] = "\u041D\u0430\u0436\u043C\u0438\u0442\u0435 \u0417\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u044C, \u0447\u0442\u043E\u0431\u044B \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u0438\u043D\u0442\u0435\u0440\u0430\u043A\u0442\u0438\u0432\u043D\u0443\u044E \u043A\u0430\u0440\u0442\u0443 \u0425\u0430\u0439\u0440\u0443\u043B\u0430 \u0432 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0435.";
+            ru["hero_starting"] = "\u0417\u0430\u043F\u0443\u0441\u043A \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u043A\u0430\u0440\u0442\u044B...";
+            ru["hero_running"] = "\u041A\u0430\u0440\u0442\u0430 \u0440\u0430\u0431\u043E\u0442\u0430\u0435\u0442 \u0438 \u0433\u043E\u0442\u043E\u0432\u0430 \u0432 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0435.";
+            ru["hero_stopping"] = "\u041E\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430 \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u043A\u0430\u0440\u0442\u044B...";
+            ru["hero_error"] = "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u044C \u0441\u0435\u0440\u0432\u0435\u0440. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0438 \u0416\u0443\u0440\u043D\u0430\u043B.";
+            ru["sync_hint_default"] = "\u041D\u0430\u0436\u043C\u0438\u0442\u0435 \u041D\u0430\u0441\u0442\u0440\u043E\u0438\u0442\u044C Sync \u0434\u043B\u044F \u043E\u0442\u0441\u043B\u0435\u0436\u0438\u0432\u0430\u043D\u0438\u044F \u0432 \u0440\u0435\u0430\u043B\u044C\u043D\u043E\u043C \u0432\u0440\u0435\u043C\u0435\u043D\u0438.";
+            ru["sync_hint_configured"] = "\u0421\u0438\u043D\u0445\u0440\u043E\u043D\u0438\u0437\u0430\u0446\u0438\u044F \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043D\u0430. \u0417\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u0435 Lichii \u0438\u043B\u0438 Fritchii.";
+            ru["status_stopped"] = "\u041E\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D";
+            ru["status_running"] = "\u0420\u0430\u0431\u043E\u0442\u0430\u0435\u0442";
+            ru["status_starting"] = "\u0417\u0430\u043F\u0443\u0441\u043A";
+            ru["status_stopping"] = "\u041E\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430...";
+            ru["status_error"] = "\u041E\u0448\u0438\u0431\u043A\u0430";
+            ru["emu_none"] = "\u041D\u0435\u0442 \u044D\u043C\u0443";
+            ru["emu_live"] = "\u0412 \u044D\u0444\u0438\u0440\u0435";
+            ru["emu_waiting"] = "\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435";
+            ru["emu_save"] = "\u0421\u043E\u0445\u0440\u0430\u043D.";
+            ru["emu_rpc_closed"] = "RPC \u0437\u0430\u043A\u0440\u044B\u0442";
+            ru["lan_title"] = "\u0412\u0442\u043E\u0440\u043E\u0439 \u044D\u043A\u0440\u0430\u043D (LAN)";
+            ru["copy_url"] = "\u041A\u043E\u043F\u0438\u0440. URL";
+            ru["copied"] = "\u0421\u043A\u043E\u043F\u0438\u0440.!";
+            ru["qr_code"] = "QR-\u043A\u043E\u0434";
+            ru["allow_firewall"] = "\u0411\u0440\u0430\u043D\u0434\u043C\u0430\u0443\u044D\u0440";
+            ru["firewall_ready"] = "\u041F\u043E\u0440\u0442 \u043E\u0442\u043A\u0440\u044B\u0442";
+            ru["localhost_only"] = "\u0422\u043E\u043B\u044C\u043A\u043E \u043B\u043E\u043A\u0430\u043B.";
+            ru["configuring"] = "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430...";
+            ru["refresh"] = "\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C";
+            ru["lan_hint_default"] = "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u044D\u0442\u043E\u0442 \u0430\u0434\u0440\u0435\u0441 \u0438\u043B\u0438 QR-\u043A\u043E\u0434 \u043D\u0430 \u043F\u043B\u0430\u043D\u0448\u0435\u0442\u0435 \u0438\u043B\u0438 \u0442\u0435\u043B\u0435\u0444\u043E\u043D\u0435.";
+            ru["lan_hint_disabled"] = "\u0412\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u00AB\u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u044C \u0434\u043E\u0441\u0442\u0443\u043F \u043F\u043E LAN\u00BB \u0432 \u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445.";
+            ru["lan_hint_no_adapter"] = "\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u041F\u041A \u043A Wi-Fi \u0438\u043B\u0438 Ethernet \u0438 \u043D\u0430\u0436\u043C\u0438\u0442\u0435 \u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C.";
+            ru["lan_hint_multi"] = "\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0430\u0434\u0430\u043F\u0442\u0435\u0440\u043E\u0432 \u2014 \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043D\u0443\u0436\u043D\u044B\u0439.";
+            ru["lan_disabled"] = "\u041E\u0442\u043A\u043B\u044E\u0447\u0435\u043D\u043E (\u0442\u043E\u043B\u044C\u043A\u043E localhost \u2014 127.0.0.1)";
+            ru["lan_no_adapter"] = "\u0410\u043A\u0442\u0438\u0432\u043D\u043E\u0435 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 Wi-Fi \u0438\u043B\u0438 Ethernet \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u043E";
+            ru["lan_checking"] = "\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0441\u0435\u0442\u0435\u0432\u044B\u0445 \u0430\u0434\u0430\u043F\u0442\u0435\u0440\u043E\u0432...";
+            ru["drawer_title"] = "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438, \u0416\u0443\u0440\u043D\u0430\u043B \u0438 \u041E \u043F\u0440\u043E\u0433\u0440\u0430\u043C\u043C\u0435";
+            ru["tab_settings"] = "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438";
+            ru["tab_logs"] = "\u0416\u0443\u0440\u043D\u0430\u043B";
+            ru["tab_about"] = "\u041E \u043F\u0440\u043E\u0433\u0440.";
+            ru["settings_lock_hint"] = "\u041E\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u0435 \u0441\u0435\u0440\u0432\u0435\u0440 \u0434\u043B\u044F \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u043F\u043E\u0440\u0442\u0430";
+            ru["map_port"] = "\u041F\u043E\u0440\u0442 \u043A\u0430\u0440\u0442\u044B";
+            ru["rpc_host"] = "\u0425\u043E\u0441\u0442 RPC \u044D\u043C\u0443\u043B\u044F\u0442\u043E\u0440\u0430";
+            ru["rpc_port"] = "\u041F\u043E\u0440\u0442 RPC \u044D\u043C\u0443\u043B\u044F\u0442\u043E\u0440\u0430";
+            ru["reset"] = "\u0421\u0431\u0440\u043E\u0441";
+            ru["allow_lan"] = "\u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u044C \u0434\u043E\u0441\u0442\u0443\u043F \u043F\u043E LAN";
+            ru["auto_open"] = "\u0410\u0432\u0442\u043E\u043E\u0442\u043A\u0440\u044B\u0442\u0438\u0435 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0430";
+            ru["minimize_tray"] = "\u0421\u0432\u043E\u0440\u0430\u0447\u0438\u0432\u0430\u0442\u044C \u0432 \u0442\u0440\u0435\u0439";
+            ru["save_folder"] = "\u041F\u0430\u043F\u043A\u0430 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0439";
+            ru["auto_detect"] = "\u0410\u0432\u0442\u043E\u043E\u043F\u0440\u0435\u0434\u0435\u043B\u0435\u043D\u0438\u0435";
+            ru["add_ellipsis"] = "\u0414\u043E\u0431\u0430\u0432...";
+            ru["remove"] = "\u0423\u0434\u0430\u043B\u0438\u0442\u044C";
+            ru["save_slot"] = "\u0421\u043B\u043E\u0442";
+            ru["auto_latest"] = "\u0410\u0432\u0442\u043E (\u041F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439)";
+            ru["language"] = "\u042F\u0437\u044B\u043A";
+            ru["check_updates"] = "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u044F";
+            ru["version_label"] = "\u0412\u0435\u0440\u0441\u0438\u044F {0}";
+            ru["copy_logs"] = "\u041A\u043E\u043F\u0438\u0440.";
+            ru["clear"] = "\u041E\u0447\u0438\u0441\u0442.";
+            ru["about_original_map"] = "\u041E\u0440\u0438\u0433\u0438\u043D\u0430\u043B";
+            ru["about_artwork"] = "\u0413\u0440\u0430\u0444\u0438\u043A\u0430";
+            ru["about_security"] = "\u0421\u0432\u043E\u0431\u043E\u0434\u043D\u043E\u0435 \u041F\u041E (GNU AGPL-3.0). \u041E\u0444\u0438\u0446\u0438\u0430\u043B\u044C\u043D\u044B\u0435 \u0441\u0431\u043E\u0440\u043A\u0438: github.com/antonioalvromero/Ocarina-Atlas.";
+            ru["about_footer"] = "\u0412\u0435\u0440\u0441\u0438\u044F {0}  \u2022  \u041F\u0440\u043E\u0432\u0435\u0440\u044F\u0439\u0442\u0435 \u0440\u0435\u043B\u0438\u0437\u044B \u0447\u0435\u0440\u0435\u0437 SHA-256 \u0438\u043B\u0438 GitHub";
+            ru["tray_show"] = "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C Ocarina Atlas";
+            ru["tray_open"] = "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043A\u0430\u0440\u0442\u0443 \u0432 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0435";
+            ru["tray_exit"] = "\u0412\u044B\u0445\u043E\u0434";
+            ru["update_pill"] = "\u041E\u0431\u043D\u043E\u0432.";
+            map["ru"] = ru;
+
+            Dictionary<string, string> pl = new Dictionary<string, string>(StringComparer.Ordinal);
+            pl["app_title"] = "Ocarina Atlas \u2014 Mapa Ocarina of Time";
+            pl["start_map"] = "Uruchom map\u0119";
+            pl["stop_map"] = "Zatrzymaj";
+            pl["stopping"] = "Zatrzymywanie...";
+            pl["open_map"] = "Otw\u00F3rz map\u0119";
+            pl["setup_sync"] = "Konfiguruj Sync (1 klik)";
+            pl["setup_sync_port"] = "Konfiguruj Sync (:{0})";
+            pl["configured"] = "Skonfig. \u21BB";
+            pl["configured_port"] = "Skonfig. (:{0}) \u21BB";
+            pl["hero_idle"] = "Kliknij Uruchom map\u0119, aby otworzy\u0107 interaktywn\u0105 map\u0119 Hyrule w przegl\u0105darce.";
+            pl["hero_starting"] = "Uruchamianie lokalnego serwera mapy...";
+            pl["hero_running"] = "Mapa jest aktywna i gotowa w przegl\u0105darce.";
+            pl["hero_stopping"] = "Zamykanie serwera mapy...";
+            pl["hero_error"] = "Nie uda\u0142o si\u0119 uruchomi\u0107 serwera. Sprawd\u017A Ustawienia, Logi i O programie.";
+            pl["sync_hint_default"] = "Kliknij Konfiguruj Sync, aby w\u0142\u0105czy\u0107 \u015Bledzenie na \u017Cywo w Lichii / Fritchii.";
+            pl["sync_hint_configured"] = "Sync na \u017Cywo skonfigurowany. Uruchom Lichii lub Fritchii i wczytaj gr\u0119.";
+            pl["status_stopped"] = "Zatrzymany";
+            pl["status_running"] = "Dzia\u0142a";
+            pl["status_starting"] = "Urucham.";
+            pl["status_stopping"] = "Zatrzym...";
+            pl["status_error"] = "B\u0142\u0105d";
+            pl["emu_none"] = "Brak emu";
+            pl["emu_live"] = "Na \u017Cywo";
+            pl["emu_waiting"] = "Oczekiw.";
+            pl["emu_save"] = "Zapis";
+            pl["emu_rpc_closed"] = "RPC zamkn.";
+            pl["lan_title"] = "Drugi ekran (LAN)";
+            pl["copy_url"] = "Kopiuj URL";
+            pl["copied"] = "Skopiowano!";
+            pl["qr_code"] = "Kod QR";
+            pl["allow_firewall"] = "Zezw\u00F3l zaporze";
+            pl["firewall_ready"] = "Zapora gotowa";
+            pl["localhost_only"] = "Tylko lokalnie";
+            pl["configuring"] = "Konfiguracja...";
+            pl["refresh"] = "Od\u015Bwie\u017C";
+            pl["lan_hint_default"] = "Otw\u00F3rz ten adres lub kliknij Kod QR, aby po\u0142\u0105czy\u0107 tablet, iPad lub telefon.";
+            pl["lan_hint_disabled"] = "W\u0142\u0105cz \"Zezw\u00F3l na dost\u0119p LAN\" w Ustawieniach, aby po\u0142\u0105czy\u0107 urz\u0105dzenie.";
+            pl["lan_hint_no_adapter"] = "Po\u0142\u0105cz PC z Wi-Fi lub Ethernet i kliknij Od\u015Bwie\u017C.";
+            pl["lan_hint_multi"] = "Wykryto wiele kart sieciowych \u2014 wybierz t\u0119 u\u017Cywan\u0105 przez urz\u0105dzenie.";
+            pl["lan_disabled"] = "Wy\u0142\u0105czono (tylko localhost \u2014 127.0.0.1)";
+            pl["lan_no_adapter"] = "Nie wykryto aktywnego po\u0142\u0105czenia Wi-Fi ani Ethernet";
+            pl["lan_checking"] = "Sprawdzanie kart sieciowych...";
+            pl["drawer_title"] = "Ustawienia, Logi i O programie";
+            pl["tab_settings"] = "Ustaw.";
+            pl["tab_logs"] = "Logi";
+            pl["tab_about"] = "O prog.";
+            pl["settings_lock_hint"] = "Zatrzymaj serwer, aby edytowa\u0107 port lub host";
+            pl["map_port"] = "Port mapy";
+            pl["rpc_host"] = "Host RPC emulatora";
+            pl["rpc_port"] = "Port RPC emulatora";
+            pl["reset"] = "Resetuj";
+            pl["allow_lan"] = "Zezw\u00F3l na dost\u0119p LAN";
+            pl["auto_open"] = "Auto-otwieranie przegl\u0105darki";
+            pl["minimize_tray"] = "Minimalizuj do zasobnika";
+            pl["save_folder"] = "Folder zapis\u00F3w";
+            pl["auto_detect"] = "Auto-wykrywanie";
+            pl["add_ellipsis"] = "Dodaj...";
+            pl["remove"] = "Usu\u0144";
+            pl["save_slot"] = "Slot zapisu";
+            pl["auto_latest"] = "Auto (Najnowszy)";
+            pl["language"] = "J\u0119zyk";
+            pl["check_updates"] = "Sprawd\u017A aktualizacje";
+            pl["version_label"] = "Wersja {0}";
+            pl["copy_logs"] = "Kopiuj";
+            pl["clear"] = "Wyczy\u015B\u0107";
+            pl["about_original_map"] = "Oryginalna mapa";
+            pl["about_artwork"] = "Grafika mapy";
+            pl["about_security"] = "Darmowe i open-source (GNU AGPL-3.0). Oficjalne wydania: github.com/antonioalvromero/Ocarina-Atlas.";
+            pl["about_footer"] = "Wersja {0}  \u2022  Weryfikuj oficjalne wydania przez SHA-256 lub GitHub";
+            pl["tray_show"] = "Poka\u017C Ocarina Atlas";
+            pl["tray_open"] = "Otw\u00F3rz map\u0119 w przegl\u0105darce";
+            pl["tray_exit"] = "Zako\u0144cz";
+            pl["update_pill"] = "Aktual.";
+            map["pl"] = pl;
+
+            Dictionary<string, string> tr = new Dictionary<string, string>(StringComparer.Ordinal);
+            tr["app_title"] = "Ocarina Atlas \u2014 Ocarina of Time Haritas\u0131";
+            tr["start_map"] = "Haritay\u0131 Ba\u015Flat";
+            tr["stop_map"] = "Durdur";
+            tr["stopping"] = "Durduruluyor...";
+            tr["open_map"] = "Haritay\u0131 A\u00E7";
+            tr["setup_sync"] = "Tek T\u0131kla Sync Kur";
+            tr["setup_sync_port"] = "Sync Kur (:{0})";
+            tr["configured"] = "Ayarland\u0131 \u21BB";
+            tr["configured_port"] = "Ayarland\u0131 (:{0}) \u21BB";
+            tr["hero_idle"] = "Taray\u0131c\u0131da etkile\u015Fimli Hyrule haritas\u0131n\u0131 a\u00E7mak i\u00E7in Haritay\u0131 Ba\u015Flat'a t\u0131klay\u0131n.";
+            tr["hero_starting"] = "Yerel harita sunucusu ba\u015Flat\u0131l\u0131yor...";
+            tr["hero_running"] = "Harita canl\u0131 ve taray\u0131c\u0131n\u0131zda haz\u0131r.";
+            tr["hero_stopping"] = "Harita sunucusu kapat\u0131l\u0131yor...";
+            tr["hero_error"] = "Harita sunucusu ba\u015Flat\u0131lamad\u0131. Ayarlar ve G\u00FCnl\u00FCkleri kontrol edin.";
+            tr["sync_hint_default"] = "Canl\u0131 takip i\u00E7in Tek T\u0131kla Sync Kur d\u00FC\u011Fmesine t\u0131klay\u0131n.";
+            tr["sync_hint_configured"] = "Canl\u0131 sync ayarland\u0131. Lichii veya Fritchii'yi ba\u015Flat\u0131p oyunu y\u00FCkleyin.";
+            tr["status_stopped"] = "Durdu";
+            tr["status_running"] = "\u00C7al\u0131\u015F\u0131yor";
+            tr["status_starting"] = "Ba\u015Fl\u0131yor";
+            tr["status_stopping"] = "Duruyor...";
+            tr["status_error"] = "Hata";
+            tr["emu_none"] = "Emu Yok";
+            tr["emu_live"] = "Canl\u0131";
+            tr["emu_waiting"] = "Bekliyor";
+            tr["emu_save"] = "Kay\u0131t";
+            tr["emu_rpc_closed"] = "RPC Kapal\u0131";
+            tr["lan_title"] = "\u0130kinci Ekran (LAN)";
+            tr["copy_url"] = "URL Kopyala";
+            tr["copied"] = "Kopyaland\u0131!";
+            tr["qr_code"] = "QR Kod";
+            tr["allow_firewall"] = "G\u00FCvenlik Duvar\u0131";
+            tr["firewall_ready"] = "Duvar Haz\u0131r";
+            tr["localhost_only"] = "Yaln\u0131z Yerel";
+            tr["configuring"] = "Ayarlan\u0131yor...";
+            tr["refresh"] = "Yenile";
+            tr["lan_hint_default"] = "Tablet, iPad veya telefon ba\u011Flamak i\u00E7in bu adresi a\u00E7\u0131n veya QR Kod'a t\u0131klay\u0131n.";
+            tr["lan_hint_disabled"] = "Cihaz ba\u011Flamak i\u00E7in Ayarlar'dan \"LAN eri\u015Fimine izin ver\"i etkinle\u015Ftirin.";
+            tr["lan_hint_no_adapter"] = "PC'yi Wi-Fi veya Ethernet'e ba\u011Flay\u0131p Yenile'ye t\u0131klay\u0131n.";
+            tr["lan_hint_multi"] = "Birden fazla a\u011F ba\u011Fda\u015Ft\u0131r\u0131c\u0131s\u0131 bulundu \u2014 cihaz\u0131n\u0131z\u0131n kulland\u0131\u011F\u0131n\u0131 se\u00E7in.";
+            tr["lan_disabled"] = "Devre d\u0131\u015F\u0131 (yaln\u0131zca localhost \u2014 127.0.0.1)";
+            tr["lan_no_adapter"] = "Etkin Wi-Fi veya Ethernet ba\u011Flant\u0131s\u0131 alg\u0131lanmad\u0131";
+            tr["lan_checking"] = "A\u011F ba\u011Fda\u015Ft\u0131r\u0131c\u0131lar\u0131 denetleniyor...";
+            tr["drawer_title"] = "Ayarlar, G\u00FCnl\u00FCkler ve Hakk\u0131nda";
+            tr["tab_settings"] = "Ayarlar";
+            tr["tab_logs"] = "G\u00FCnl\u00FCk";
+            tr["tab_about"] = "Hakk\u0131nda";
+            tr["settings_lock_hint"] = "Port/host d\u00FCzenlemek i\u00E7in sunucuyu durdurun";
+            tr["map_port"] = "Harita Portu";
+            tr["rpc_host"] = "Em\u00FClat\u00F6r RPC Host";
+            tr["rpc_port"] = "Em\u00FClat\u00F6r RPC Portu";
+            tr["reset"] = "S\u0131f\u0131rla";
+            tr["allow_lan"] = "LAN eri\u015Fimine izin ver";
+            tr["auto_open"] = "Taray\u0131c\u0131y\u0131 oto. a\u00E7";
+            tr["minimize_tray"] = "Tepsiye k\u00FC\u00E7\u00FClt";
+            tr["save_folder"] = "Kay\u0131t Klas\u00F6r\u00FC";
+            tr["auto_detect"] = "Otomatik alg\u0131la";
+            tr["add_ellipsis"] = "Ekle...";
+            tr["remove"] = "Kald\u0131r";
+            tr["save_slot"] = "Kay\u0131t Yuvas\u0131";
+            tr["auto_latest"] = "Oto (En Son)";
+            tr["language"] = "Dil";
+            tr["check_updates"] = "G\u00FCncellemeleri Denetle";
+            tr["version_label"] = "S\u00FCr\u00FCm {0}";
+            tr["copy_logs"] = "Kopyala";
+            tr["clear"] = "Temizle";
+            tr["about_original_map"] = "Orijinal Harita";
+            tr["about_artwork"] = "Harita \u00C7izimi";
+            tr["about_security"] = "\u00DCcretsiz ve a\u00E7\u0131k kaynak (GNU AGPL-3.0). Resmi derlemeler: github.com/antonioalvromero/Ocarina-Atlas.";
+            tr["about_footer"] = "S\u00FCr\u00FCm {0}  \u2022  Resmi s\u00FCr\u00FCmleri SHA-256 veya GitHub ile do\u011Frulay\u0131n";
+            tr["tray_show"] = "Ocarina Atlas'\u0131 G\u00F6ster";
+            tr["tray_open"] = "Haritay\u0131 Taray\u0131c\u0131da A\u00E7";
+            tr["tray_exit"] = "\u00C7\u0131k\u0131\u015F";
+            tr["update_pill"] = "G\u00FCncel.";
+            map["tr"] = tr;
+
+            Dictionary<string, string> uk = new Dictionary<string, string>(StringComparer.Ordinal);
+            uk["app_title"] = "Ocarina Atlas \u2014 \u041A\u0430\u0440\u0442\u0430 Ocarina of Time";
+            uk["start_map"] = "\u0417\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u0438";
+            uk["stop_map"] = "\u0417\u0443\u043F\u0438\u043D\u0438\u0442\u0438";
+            uk["stopping"] = "\u0417\u0443\u043F\u0438\u043D\u043A\u0430...";
+            uk["open_map"] = "\u0412\u0456\u0434\u043A\u0440\u0438\u0442\u0438 \u043A\u0430\u0440\u0442\u0443";
+            uk["setup_sync"] = "\u041D\u0430\u043B\u0430\u0448\u0442. Sync";
+            uk["setup_sync_port"] = "\u041D\u0430\u043B\u0430\u0448\u0442. Sync (:{0})";
+            uk["configured"] = "\u041D\u0430\u043B\u0430\u0448\u0442\u043E\u0432. \u21BB";
+            uk["configured_port"] = "\u041D\u0430\u043B\u0430\u0448\u0442. (:{0}) \u21BB";
+            uk["hero_idle"] = "\u041D\u0430\u0442\u0438\u0441\u043D\u0456\u0442\u044C \u0417\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u0438, \u0449\u043E\u0431 \u0432\u0456\u0434\u043A\u0440\u0438\u0442\u0438 \u0456\u043D\u0442\u0435\u0440\u0430\u043A\u0442\u0438\u0432\u043D\u0443 \u043A\u0430\u0440\u0442\u0443 \u0425\u0430\u0439\u0440\u0443\u043B\u0430 \u0443 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0456.";
+            uk["hero_starting"] = "\u0417\u0430\u043F\u0443\u0441\u043A \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u043E\u0433\u043E \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u043A\u0430\u0440\u0442\u0438...";
+            uk["hero_running"] = "\u041A\u0430\u0440\u0442\u0430 \u043F\u0440\u0430\u0446\u044E\u0454 \u0442\u0430 \u0433\u043E\u0442\u043E\u0432\u0430 \u0443 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0456.";
+            uk["hero_stopping"] = "\u0417\u0443\u043F\u0438\u043D\u043A\u0430 \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u043A\u0430\u0440\u0442\u0438...";
+            uk["hero_error"] = "\u041D\u0435 \u0432\u0434\u0430\u043B\u043E\u0441\u044F \u0437\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u0438 \u0441\u0435\u0440\u0432\u0435\u0440. \u041F\u0435\u0440\u0435\u0432\u0456\u0440\u0442\u0435 \u041D\u0430\u043B\u0430\u0448\u0442\u0443\u0432\u0430\u043D\u043D\u044F \u0442\u0430 \u0416\u0443\u0440\u043D\u0430\u043B.";
+            uk["sync_hint_default"] = "\u041D\u0430\u0442\u0438\u0441\u043D\u0456\u0442\u044C \u041D\u0430\u043B\u0430\u0448\u0442. Sync \u0434\u043B\u044F \u0432\u0456\u0434\u0441\u0442\u0435\u0436\u0435\u043D\u043D\u044F \u0432 \u0440\u0435\u0430\u043B\u044C\u043D\u043E\u043C\u0443 \u0447\u0430\u0441\u0456.";
+            uk["sync_hint_configured"] = "\u0421\u0438\u043D\u0445\u0440\u043E\u043D\u0456\u0437\u0430\u0446\u0456\u044E \u043D\u0430\u043B\u0430\u0448\u0442\u043E\u0432\u0430\u043D\u043E. \u0417\u0430\u043F\u0443\u0441\u0442\u0456\u0442\u044C Lichii \u0430\u0431\u043E Fritchii.";
+            uk["status_stopped"] = "\u0417\u0443\u043F\u0438\u043D\u0435\u043D\u043E";
+            uk["status_running"] = "\u041F\u0440\u0430\u0446\u044E\u0454";
+            uk["status_starting"] = "\u0417\u0430\u043F\u0443\u0441\u043A";
+            uk["status_stopping"] = "\u0417\u0443\u043F\u0438\u043D\u043A\u0430...";
+            uk["status_error"] = "\u041F\u043E\u043C\u0438\u043B\u043A\u0430";
+            uk["emu_none"] = "\u041D\u0435\u043C\u0430 \u0435\u043C\u0443";
+            uk["emu_live"] = "\u041D\u0430\u0436\u0438\u0432\u043E";
+            uk["emu_waiting"] = "\u041E\u0447\u0456\u043A\u0443\u0432.";
+            uk["emu_save"] = "\u0417\u0431\u0435\u0440\u0435\u0436.";
+            uk["emu_rpc_closed"] = "RPC \u0437\u0430\u043A\u0440.";
+            uk["lan_title"] = "\u0414\u0440\u0443\u0433\u0438\u0439 \u0435\u043A\u0440\u0430\u043D (LAN)";
+            uk["copy_url"] = "\u041A\u043E\u043F\u0456\u044E\u0432. URL";
+            uk["copied"] = "\u0421\u043A\u043E\u043F\u0456\u0439\u043E\u0432.!";
+            uk["qr_code"] = "QR-\u043A\u043E\u0434";
+            uk["allow_firewall"] = "\u0411\u0440\u0430\u043D\u0434\u043C\u0430\u0443\u0435\u0440";
+            uk["firewall_ready"] = "\u041F\u043E\u0440\u0442 \u0432\u0456\u0434\u043A\u0440.";
+            uk["localhost_only"] = "\u041B\u0438\u0448\u0435 \u043B\u043E\u043A\u0430\u043B.";
+            uk["configuring"] = "\u041D\u0430\u043B\u0430\u0448\u0442\u0443\u0432...";
+            uk["refresh"] = "\u041E\u043D\u043E\u0432\u0438\u0442\u0438";
+            uk["lan_hint_default"] = "\u0412\u0456\u0434\u043A\u0440\u0438\u0439\u0442\u0435 \u0446\u044E \u0430\u0434\u0440\u0435\u0441\u0443 \u0430\u0431\u043E QR-\u043A\u043E\u0434 \u043D\u0430 \u043F\u043B\u0430\u043D\u0448\u0435\u0442\u0456 \u0447\u0438 \u0442\u0435\u043B\u0435\u0444\u043E\u043D\u0456.";
+            uk["lan_hint_disabled"] = "\u0423\u0432\u0456\u043C\u043A\u043D\u0456\u0442\u044C \u00AB\u0414\u043E\u0437\u0432\u043E\u043B\u0438\u0442\u0438 \u0434\u043E\u0441\u0442\u0443\u043F \u043F\u043E LAN\u00BB \u0443 \u041D\u0430\u043B\u0430\u0448\u0442\u0443\u0432\u0430\u043D\u043D\u044F\u0445.";
+            uk["lan_hint_no_adapter"] = "\u041F\u0456\u0434\u043A\u043B\u044E\u0447\u0456\u0442\u044C \u041F\u041A \u0434\u043E Wi-Fi \u0430\u0431\u043E Ethernet \u0456 \u043D\u0430\u0442\u0438\u0441\u043D\u0456\u0442\u044C \u041E\u043D\u043E\u0432\u0438\u0442\u0438.";
+            uk["lan_hint_multi"] = "\u0417\u043D\u0430\u0439\u0434\u0435\u043D\u043E \u043A\u0456\u043B\u044C\u043A\u0430 \u0430\u0434\u0430\u043F\u0442\u0435\u0440\u0456\u0432 \u2014 \u043E\u0431\u0435\u0440\u0456\u0442\u044C \u043F\u043E\u0442\u0440\u0456\u0431\u043D\u0438\u0439.";
+            uk["lan_disabled"] = "\u0412\u0438\u043C\u043A\u043D\u0435\u043D\u043E (\u043B\u0438\u0448\u0435 localhost \u2014 127.0.0.1)";
+            uk["lan_no_adapter"] = "\u0410\u043A\u0442\u0438\u0432\u043D\u0435 \u043F\u0456\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u043D\u044F Wi-Fi \u0430\u0431\u043E Ethernet \u043D\u0435 \u0437\u043D\u0430\u0439\u0434\u0435\u043D\u043E";
+            uk["lan_checking"] = "\u041F\u0435\u0440\u0435\u0432\u0456\u0440\u043A\u0430 \u043C\u0435\u0440\u0435\u0436\u0435\u0432\u0438\u0445 \u0430\u0434\u0430\u043F\u0442\u0435\u0440\u0456\u0432...";
+            uk["drawer_title"] = "\u041D\u0430\u043B\u0430\u0448\u0442\u0443\u0432\u0430\u043D\u043D\u044F, \u0416\u0443\u0440\u043D\u0430\u043B \u0456 \u041F\u0440\u043E \u043F\u0440\u043E\u0433\u0440\u0430\u043C\u0443";
+            uk["tab_settings"] = "\u041D\u0430\u043B\u0430\u0448\u0442.";
+            uk["tab_logs"] = "\u0416\u0443\u0440\u043D\u0430\u043B";
+            uk["tab_about"] = "\u041F\u0440\u043E \u043F\u0440\u043E\u0433\u0440.";
+            uk["settings_lock_hint"] = "\u0417\u0443\u043F\u0438\u043D\u0456\u0442\u044C \u0441\u0435\u0440\u0432\u0435\u0440 \u0434\u043B\u044F \u0437\u043C\u0456\u043D\u0438 \u043F\u043E\u0440\u0442\u0443";
+            uk["map_port"] = "\u041F\u043E\u0440\u0442 \u043A\u0430\u0440\u0442\u0438";
+            uk["rpc_host"] = "\u0425\u043E\u0441\u0442 RPC \u0435\u043C\u0443\u043B\u044F\u0442\u043E\u0440\u0430";
+            uk["rpc_port"] = "\u041F\u043E\u0440\u0442 RPC \u0435\u043C\u0443\u043B\u044F\u0442\u043E\u0440\u0430";
+            uk["reset"] = "\u0421\u043A\u0438\u043D\u0443\u0442\u0438";
+            uk["allow_lan"] = "\u0414\u043E\u0437\u0432\u043E\u043B\u0438\u0442\u0438 \u0434\u043E\u0441\u0442\u0443\u043F \u043F\u043E LAN";
+            uk["auto_open"] = "\u0410\u0432\u0442\u043E\u0432\u0456\u0434\u043A\u0440\u0438\u0442\u0442\u044F \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0430";
+            uk["minimize_tray"] = "\u0417\u0433\u043E\u0440\u0442\u0430\u0442\u0438 \u0432 \u0442\u0440\u0435\u0439";
+            uk["save_folder"] = "\u041F\u0430\u043F\u043A\u0430 \u0437\u0431\u0435\u0440\u0435\u0436\u0435\u043D\u044C";
+            uk["auto_detect"] = "\u0410\u0432\u0442\u043E\u0432\u0438\u0437\u043D\u0430\u0447\u0435\u043D\u043D\u044F";
+            uk["add_ellipsis"] = "\u0414\u043E\u0434\u0430\u0442\u0438...";
+            uk["remove"] = "\u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438";
+            uk["save_slot"] = "\u0421\u043B\u043E\u0442";
+            uk["auto_latest"] = "\u0410\u0432\u0442\u043E (\u041E\u0441\u0442\u0430\u043D\u043D\u0456\u0439)";
+            uk["language"] = "\u041C\u043E\u0432\u0430";
+            uk["check_updates"] = "\u041F\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u043E\u043D\u043E\u0432\u043B\u0435\u043D\u043D\u044F";
+            uk["version_label"] = "\u0412\u0435\u0440\u0441\u0456\u044F {0}";
+            uk["copy_logs"] = "\u041A\u043E\u043F\u0456\u044E\u0432.";
+            uk["clear"] = "\u041E\u0447\u0438\u0441\u0442.";
+            uk["about_original_map"] = "\u041E\u0440\u0438\u0433\u0456\u043D\u0430\u043B";
+            uk["about_artwork"] = "\u0413\u0440\u0430\u0444\u0456\u043A\u0430";
+            uk["about_security"] = "\u0412\u0456\u043B\u044C\u043D\u0435 \u041F\u0417 (GNU AGPL-3.0). \u041E\u0444\u0456\u0446\u0456\u0439\u043D\u0456 \u0437\u0431\u0456\u0440\u043A\u0438: github.com/antonioalvromero/Ocarina-Atlas.";
+            uk["about_footer"] = "\u0412\u0435\u0440\u0441\u0456\u044F {0}  \u2022  \u041F\u0435\u0440\u0435\u0432\u0456\u0440\u044F\u0439\u0442\u0435 \u0440\u0435\u043B\u0456\u0437\u0438 \u0447\u0435\u0440\u0435\u0437 SHA-256 \u0430\u0431\u043E GitHub";
+            uk["tray_show"] = "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u0438 Ocarina Atlas";
+            uk["tray_open"] = "\u0412\u0456\u0434\u043A\u0440\u0438\u0442\u0438 \u043A\u0430\u0440\u0442\u0443 \u0443 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0456";
+            uk["tray_exit"] = "\u0412\u0438\u0445\u0456\u0434";
+            uk["update_pill"] = "\u041E\u043D\u043E\u0432.";
+            map["uk"] = uk;
+
+            return map;
+        }
+    }
+
+    internal sealed class LauncherSettings
+    {
+        public List<string> SavedSaveDirs = new List<string>();
+        public string CustomSaveDir = string.Empty;
+        public string CustomSaveSlot = string.Empty;
+        public int? Port;
+        public string LichiiHost;
+        public int? LichiiPort;
+        public bool? AllowLan;
+        public bool? AutoOpenBrowser;
+        public bool? MinimizeToTray;
+        public string Language = string.Empty;
+
+        public static string GetSettingsFilePath()
+        {
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            if (string.IsNullOrEmpty(appData)) return string.Empty;
+            return Path.Combine(Path.Combine(appData, "OcarinaAtlas"), "settings.json");
+        }
+
+        private static bool ContainsSaveDir(List<string> list, string candidate)
+        {
+            if (list == null || string.IsNullOrEmpty(candidate)) return false;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (string.Equals(list[i], candidate, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static LauncherSettings Load()
+        {
+            LauncherSettings settings = new LauncherSettings();
+            try
+            {
+                string path = GetSettingsFilePath();
+                if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                {
+                    return settings;
+                }
+
+                string json = File.ReadAllText(path, Encoding.UTF8);
+                Dictionary<string, object> obj = SimpleJsonParser.ParseObject(json);
+                if (obj == null)
+                {
+                    return settings;
+                }
+
+                List<object> rawSavedDirs = SimpleJsonParser.GetArray(obj, "savedSaveDirs");
+                if (rawSavedDirs == null) rawSavedDirs = SimpleJsonParser.GetArray(obj, "SavedSaveDirs");
+                if (rawSavedDirs != null)
+                {
+                    for (int i = 0; i < rawSavedDirs.Count; i++)
+                    {
+                        string entry = rawSavedDirs[i] as string;
+                        if (string.IsNullOrEmpty(entry)) continue;
+                        string trimmed = entry.Trim();
+                        if (!string.IsNullOrEmpty(trimmed) && !ContainsSaveDir(settings.SavedSaveDirs, trimmed))
+                        {
+                            settings.SavedSaveDirs.Add(trimmed);
+                        }
+                    }
+                }
+
+                string saveDir = SimpleJsonParser.GetString(obj, "customSaveDir");
+                if (saveDir == null) saveDir = SimpleJsonParser.GetString(obj, "CustomSaveDir");
+                if (!string.IsNullOrEmpty(saveDir))
+                {
+                    settings.CustomSaveDir = saveDir.Trim();
+                }
+
+                // Backward compatibility: if an existing settings.json only has customSaveDir, include it in savedSaveDirs.
+                if (!string.IsNullOrEmpty(settings.CustomSaveDir) &&
+                    !ContainsSaveDir(settings.SavedSaveDirs, settings.CustomSaveDir))
+                {
+                    settings.SavedSaveDirs.Add(settings.CustomSaveDir);
+                }
+
+                string saveSlot = SimpleJsonParser.GetString(obj, "customSaveSlot");
+                if (saveSlot == null) saveSlot = SimpleJsonParser.GetString(obj, "CustomSaveSlot");
+                if (!string.IsNullOrEmpty(saveSlot))
+                {
+                    settings.CustomSaveSlot = saveSlot.Trim();
+                }
+
+                int? port = SimpleJsonParser.GetInt(obj, "port");
+                if (port.HasValue && port.Value >= 1 && port.Value <= 65535)
+                {
+                    settings.Port = port.Value;
+                }
+
+                string lichiiHost = SimpleJsonParser.GetString(obj, "lichiiHost");
+                if (!string.IsNullOrEmpty(lichiiHost))
+                {
+                    settings.LichiiHost = lichiiHost.Trim();
+                }
+
+                int? lichiiPort = SimpleJsonParser.GetInt(obj, "lichiiPort");
+                if (lichiiPort.HasValue && lichiiPort.Value >= 1 && lichiiPort.Value <= 65535)
+                {
+                    settings.LichiiPort = lichiiPort.Value;
+                }
+
+                if (obj.ContainsKey("allowLan"))
+                {
+                    settings.AllowLan = SimpleJsonParser.GetBool(obj, "allowLan");
+                }
+                if (obj.ContainsKey("autoOpenBrowser"))
+                {
+                    settings.AutoOpenBrowser = SimpleJsonParser.GetBool(obj, "autoOpenBrowser");
+                }
+                if (obj.ContainsKey("minimizeToTray"))
+                {
+                    settings.MinimizeToTray = SimpleJsonParser.GetBool(obj, "minimizeToTray");
+                }
+
+                string language = SimpleJsonParser.GetString(obj, "language");
+                if (language == null) language = SimpleJsonParser.GetString(obj, "Language");
+                if (!string.IsNullOrEmpty(language))
+                {
+                    settings.Language = LauncherI18n.NormalizeLocale(language);
+                }
+            }
+            catch
+            {
+                // Ignore corrupt or unreadable settings; fall back to defaults.
+            }
+            return settings;
+        }
+
+        public void Save()
+        {
+            try
+            {
+                string path = GetSettingsFilePath();
+                if (string.IsNullOrEmpty(path)) return;
+
+                string dir = Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                List<string> uniqueDirs = new List<string>();
+                if (SavedSaveDirs != null)
+                {
+                    for (int i = 0; i < SavedSaveDirs.Count; i++)
+                    {
+                        string trimmed = (SavedSaveDirs[i] ?? string.Empty).Trim();
+                        if (!string.IsNullOrEmpty(trimmed) && !ContainsSaveDir(uniqueDirs, trimmed))
+                        {
+                            uniqueDirs.Add(trimmed);
+                        }
+                    }
+                }
+
+                StringBuilder dirsJson = new StringBuilder();
+                dirsJson.Append('[');
+                for (int i = 0; i < uniqueDirs.Count; i++)
+                {
+                    if (i > 0) dirsJson.Append(", ");
+                    dirsJson.Append('"');
+                    dirsJson.Append(SimpleJsonParser.EscapeString(uniqueDirs[i]));
+                    dirsJson.Append('"');
+                }
+                dirsJson.Append(']');
+
+                string json = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "{{\n  \"savedSaveDirs\": {0},\n  \"customSaveDir\": \"{1}\",\n  \"customSaveSlot\": \"{2}\",\n  \"port\": {3},\n  \"lichiiHost\": \"{4}\",\n  \"lichiiPort\": {5},\n  \"allowLan\": {6},\n  \"autoOpenBrowser\": {7},\n  \"minimizeToTray\": {8},\n  \"language\": \"{9}\"\n}}\n",
+                    dirsJson.ToString(),
+                    SimpleJsonParser.EscapeString((CustomSaveDir ?? string.Empty).Trim()),
+                    SimpleJsonParser.EscapeString((CustomSaveSlot ?? string.Empty).Trim()),
+                    (Port ?? 3000).ToString(CultureInfo.InvariantCulture),
+                    SimpleJsonParser.EscapeString((LichiiHost ?? "127.0.0.1").Trim()),
+                    (LichiiPort ?? 6545).ToString(CultureInfo.InvariantCulture),
+                    (AllowLan ?? true) ? "true" : "false",
+                    (AutoOpenBrowser ?? true) ? "true" : "false",
+                    (MinimizeToTray ?? false) ? "true" : "false",
+                    SimpleJsonParser.EscapeString(string.IsNullOrEmpty(Language) ? string.Empty : LauncherI18n.NormalizeLocale(Language)));
+
+                File.WriteAllText(path, json, new UTF8Encoding(false));
+            }
+            catch
+            {
+                // Ignore write failures (e.g. read-only profile).
+            }
+        }
     }
 
     internal sealed class QrCodeEncoder
@@ -3189,6 +4706,7 @@ namespace OcarinaAtlasLauncher
         public string MapId;
         public string Age;
         public int? SkulltulaCount;
+        public string[] AvailableSaveSlots;
     }
 
     internal enum ServerLifecycle
@@ -3197,6 +4715,104 @@ namespace OcarinaAtlasLauncher
         Starting,
         Running,
         Stopping
+    }
+
+    internal sealed class DarkComboBox : ComboBox
+    {
+        private const int WmPaint = 0x000F;
+        private bool _hovered = false;
+
+        public DarkComboBox()
+        {
+            DropDownStyle = ComboBoxStyle.DropDownList;
+            FlatStyle = FlatStyle.Flat;
+            BackColor = Theme.Ink800;
+            ForeColor = Theme.Parchment50;
+            DrawMode = DrawMode.OwnerDrawFixed;
+        }
+
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            _hovered = true;
+            Invalidate();
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);
+            _hovered = false;
+            Invalidate();
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+            if (m.Msg == WmPaint && Width > 2 && Height > 2)
+            {
+                using (Graphics g = CreateGraphics())
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    Rectangle bounds = new Rectangle(0, 0, Width, Height);
+                    Color bg = Enabled ? Theme.Ink800 : Theme.Ink900;
+                    Color border = !Enabled
+                        ? Theme.Ink700
+                        : (Focused || DroppedDown)
+                            ? Theme.Gold
+                            : (_hovered ? Theme.Parchment600 : Theme.Ink600);
+
+                    using (SolidBrush bgBrush = new SolidBrush(bg))
+                    {
+                        g.FillRectangle(bgBrush, bounds);
+                    }
+
+                    int arrowWidth = Math.Max(18, (int)Math.Round(22 * (g.DpiX / 96f)));
+                    Rectangle arrowRect = new Rectangle(Width - arrowWidth, 1, arrowWidth - 1, Height - 2);
+                    using (SolidBrush arrowBgBrush = new SolidBrush(Enabled ? Theme.Ink700 : Theme.Ink800))
+                    {
+                        g.FillRectangle(arrowBgBrush, arrowRect);
+                    }
+
+                    using (Pen sepPen = new Pen(border))
+                    {
+                        g.DrawLine(sepPen, Width - arrowWidth, 1, Width - arrowWidth, Height - 2);
+                    }
+
+                    int padX = Math.Max(6, (int)Math.Round(8 * (g.DpiX / 96f)));
+                    Rectangle textRect = new Rectangle(padX, 1, Math.Max(10, Width - arrowWidth - padX - 2), Height - 2);
+                    string displayText = SelectedItem != null ? SelectedItem.ToString() : Text;
+                    Color textColor = Enabled ? Theme.Parchment50 : Theme.Parchment600;
+                    TextRenderer.DrawText(
+                        g,
+                        displayText ?? string.Empty,
+                        Font,
+                        textRect,
+                        textColor,
+                        TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+
+                    float cx = Width - arrowWidth / 2f;
+                    float cy = Height / 2f;
+                    float halfW = Math.Max(3.2f, 3.8f * (g.DpiX / 96f));
+                    float halfH = Math.Max(1.8f, 2.1f * (g.DpiX / 96f));
+                    PointF[] chevron = new PointF[]
+                    {
+                        new PointF(cx - halfW, cy - halfH),
+                        new PointF(cx + halfW, cy - halfH),
+                        new PointF(cx, cy + halfH)
+                    };
+                    Color chevronColor = !Enabled ? Theme.Parchment600 : (DroppedDown || _hovered ? Theme.Gold : Theme.Parchment300);
+                    using (SolidBrush chevBrush = new SolidBrush(chevronColor))
+                    {
+                        g.FillPolygon(chevBrush, chevron);
+                    }
+
+                    using (Pen borderPen = new Pen(border))
+                    {
+                        g.DrawRectangle(borderPen, 0, 0, Width - 1, Height - 1);
+                    }
+                }
+            }
+        }
     }
 
     internal sealed class BorderedPanel : Panel
@@ -4865,14 +6481,32 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "2.3.1";
+        public const string AppVersion = "2.4.0";
 
         private const int BaseClientWidth = 540;
         private const int CollapsedClientHeight = 392;
-        private const int ExpandedMinClientHeight = 590;
-        private const int ExpandedClientHeight = 640;
+        private const int ExpandedMinClientHeight = 700;
+        private const int ExpandedClientHeight = 750;
+
+        private sealed class SaveSlotItem
+        {
+            public readonly string Value;
+            public readonly string Label;
+
+            public SaveSlotItem(string value, string label)
+            {
+                Value = value ?? string.Empty;
+                Label = label ?? string.Empty;
+            }
+
+            public override string ToString()
+            {
+                return Label;
+            }
+        }
 
         private readonly LaunchOptions _options;
+        private readonly LauncherSettings _launcherSettings;
         private readonly object _procLock = new object();
         private readonly object _bridgeLock = new object();
         private readonly System.Windows.Forms.Timer _pollTimer;
@@ -4938,6 +6572,8 @@ namespace OcarinaAtlasLauncher
         private LinkLabel _originalRepoLink;
         private Label _artworkCreditTitle;
         private Label _artworkCreditAuthor;
+        private Label _securityNoticeLabel;
+        private Label _aboutFooterLabel;
 
         // Primary Control + Sync Card controls
         private Label _heroSummaryLabel;
@@ -4948,6 +6584,7 @@ namespace OcarinaAtlasLauncher
         private Label _lichiiStepDetailLabel;
 
         // Second Screen / LAN Card controls
+        private Label _step2TitleLabel;
         private Button _firewallButton;
         private ComboBox _lanComboBox;
         private LinkLabel _lanUrlLink;
@@ -4967,27 +6604,58 @@ namespace OcarinaAtlasLauncher
         private Label _modeBadgeLabel;
         private Button _copyLogButton;
         private Button _clearLogButton;
+        private Label _portLabel;
         private NumericUpDown _portInput;
+        private Label _lichiiHostLabel;
         private TextBox _lichiiHostInput;
+        private Label _lichiiPortLabel;
         private NumericUpDown _lichiiPortInput;
+        private Button _resetLichiiButton;
         private CheckBox _allowLanCheckBox;
         private CheckBox _autoOpenCheckBox;
         private CheckBox _trayMinimizeCheckBox;
+        private Label _saveDirLabel;
+        private ComboBox _saveDirComboBox;
+        private Button _addSaveDirButton;
+        private Button _removeSaveDirButton;
+        private Label _saveSlotLabel;
+        private ComboBox _saveSlotComboBox;
+        private Label _languageLabel;
+        private ComboBox _languageComboBox;
         private Label _updateStatusLabel;
         private LinkLabel _checkUpdatesLink;
         private TextBox _logTextBox;
 
         private NotifyIcon _trayIcon;
+        private ToolStripMenuItem _trayShowItem;
         private ToolStripMenuItem _trayToggleServerItem;
         private ToolStripMenuItem _trayOpenBrowserItem;
+        private ToolStripMenuItem _trayExitItem;
 
         private bool _advancedExpanded = false;
         private int _activeDrawerTab = 0; // 0 = Settings, 1 = Logs, 2 = About
         private bool _trayHintShown = false;
+        private bool _suppressSaveDirChange = false;
+        private bool _suppressSaveSlotChange = false;
+        private bool _suppressLanguageChange = false;
+        private bool _isApplyingInitialOptions = false;
+        private string _currentLocale = "en";
+        private string[] _lastDiscoveredSaveSlots;
 
         public MainForm(LaunchOptions options)
         {
             _options = options ?? new LaunchOptions();
+            _launcherSettings = LauncherSettings.Load();
+            if (string.IsNullOrEmpty(_launcherSettings.Language))
+            {
+                _currentLocale = LauncherI18n.DetectSystemLocale();
+                _launcherSettings.Language = _currentLocale;
+                _launcherSettings.Save();
+            }
+            else
+            {
+                _currentLocale = LauncherI18n.NormalizeLocale(_launcherSettings.Language);
+            }
             _activePort = _options.Port;
             _customBindHost = _options.BindHost;
             _activeBindHost = _options.AllowLan
@@ -5021,10 +6689,7 @@ namespace OcarinaAtlasLauncher
             BuildTrayIcon();
             ApplyInitialOptions();
             RefreshRuntimeBadge();
-            RefreshLanDisplays();
-            RefreshLichiiConfigStatus();
-            UpdateControlStates();
-            ReflowLayout();
+            ApplyLauncherLanguage();
 
             _pollTimer = new System.Windows.Forms.Timer();
             _pollTimer.Interval = 1500;
@@ -5182,7 +6847,7 @@ namespace OcarinaAtlasLauncher
             _openBrowserButton.Click += OnOpenBrowserClick;
             _heroCard.Controls.Add(_openBrowserButton);
 
-            _enableRpcButton = CreateButton("1-Click Setup Sync", 342, 65, 144, 30, true);
+            _enableRpcButton = CreateButton("1-Click Setup Sync", 336, 65, 150, 30, true);
             _enableRpcButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _enableRpcButton.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
             _enableRpcButton.ForeColor = Theme.Gold;
@@ -5220,38 +6885,40 @@ namespace OcarinaAtlasLauncher
             _step2Card.CornerRadius = 10;
             Controls.Add(_step2Card);
 
-            Label step2Title = new Label();
-            step2Title.Text = "Second Screen (LAN)";
-            step2Title.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-            step2Title.ForeColor = Theme.Parchment50;
-            step2Title.AutoSize = true;
-            step2Title.Location = new Point(18, 16);
-            _step2Card.Controls.Add(step2Title);
+            _step2TitleLabel = new Label();
+            _step2TitleLabel.Text = "Second Screen (LAN)";
+            _step2TitleLabel.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            _step2TitleLabel.ForeColor = Theme.Parchment50;
+            _step2TitleLabel.AutoSize = true;
+            _step2TitleLabel.Location = new Point(18, 16);
+            _step2Card.Controls.Add(_step2TitleLabel);
 
-            _firewallButton = CreateButton("Allow LAN Access", 292, 13, 126, 26, true);
+            _firewallButton = CreateButton("Allow Firewall", 274, 13, 134, 26, true);
             _firewallButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _firewallButton.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
             _firewallButton.Click += OnAllowFirewallClick;
             _step2Card.Controls.Add(_firewallButton);
             _toolTip.SetToolTip(_firewallButton, "Adds a Windows Firewall rule on Private networks so your tablet or phone can connect.");
 
-            _refreshLanButton = CreateButton("Refresh", 424, 13, 64, 26, false);
+            _refreshLanButton = CreateButton("Refresh", 414, 13, 74, 26, false);
             _refreshLanButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _refreshLanButton.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
             _refreshLanButton.Click += OnRefreshLanClick;
             _step2Card.Controls.Add(_refreshLanButton);
             _toolTip.SetToolTip(_refreshLanButton, "Re-scan active Wi-Fi and Ethernet network adapters.");
 
-            _lanComboBox = new ComboBox();
+            _lanComboBox = new DarkComboBox();
             _lanComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             _lanComboBox.FlatStyle = FlatStyle.Flat;
             _lanComboBox.BackColor = Theme.Ink800;
             _lanComboBox.ForeColor = Theme.Parchment50;
+            _lanComboBox.ItemHeight = Theme.ScaleDpi(20, _dpiScale);
             _lanComboBox.Font = new Font("Segoe UI", 8.75f, FontStyle.Regular);
             _lanComboBox.Location = new Point(18, 49);
-            _lanComboBox.Size = new Size(296, 24);
+            _lanComboBox.Size = new Size(286, 24);
             _lanComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _lanComboBox.Visible = false;
+            _lanComboBox.DrawItem += DrawDarkComboItem;
             _lanComboBox.SelectedIndexChanged += OnLanComboSelectedIndexChanged;
             _step2Card.Controls.Add(_lanComboBox);
 
@@ -5264,7 +6931,7 @@ namespace OcarinaAtlasLauncher
             _lanUrlLink.AutoSize = false;
             _lanUrlLink.AutoEllipsis = true;
             _lanUrlLink.Location = new Point(18, 52);
-            _lanUrlLink.Size = new Size(296, 20);
+            _lanUrlLink.Size = new Size(286, 20);
             _lanUrlLink.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _lanUrlLink.Visible = false;
             _lanUrlLink.LinkClicked += OnLanUrlLinkClicked;
@@ -5277,11 +6944,11 @@ namespace OcarinaAtlasLauncher
             _lanStatusLabel.AutoSize = false;
             _lanStatusLabel.AutoEllipsis = true;
             _lanStatusLabel.Location = new Point(18, 52);
-            _lanStatusLabel.Size = new Size(296, 20);
+            _lanStatusLabel.Size = new Size(286, 20);
             _lanStatusLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _step2Card.Controls.Add(_lanStatusLabel);
 
-            _copyLanUrlButton = CreateButton("Copy URL", 322, 48, 82, 28, true);
+            _copyLanUrlButton = CreateButton("Copy URL", 312, 48, 92, 28, true);
             _copyLanUrlButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _copyLanUrlButton.Font = new Font("Segoe UI", 8f, FontStyle.Bold);
             _copyLanUrlButton.Click += OnCopyLanUrlClick;
@@ -5320,7 +6987,7 @@ namespace OcarinaAtlasLauncher
 
             _advancedDrawerPanel = new BorderedPanel();
             _advancedDrawerPanel.Location = new Point(18, 384);
-            _advancedDrawerPanel.Size = new Size(504, 242);
+            _advancedDrawerPanel.Size = new Size(504, 352);
             _advancedDrawerPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             _advancedDrawerPanel.FillColor = Theme.Ink900;
             _advancedDrawerPanel.BorderColor = Theme.Ink700;
@@ -5382,8 +7049,8 @@ namespace OcarinaAtlasLauncher
             _advancedDrawerPanel.Controls.Add(_settingsLockHintLabel);
 
             _modeBadgePanel = new BorderedPanel();
-            _modeBadgePanel.Location = new Point(254, 13);
-            _modeBadgePanel.Size = new Size(96, 24);
+            _modeBadgePanel.Location = new Point(252, 13);
+            _modeBadgePanel.Size = new Size(84, 24);
             _modeBadgePanel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _modeBadgePanel.FillColor = Theme.Ink800;
             _modeBadgePanel.BorderColor = Theme.Ink700;
@@ -5399,14 +7066,14 @@ namespace OcarinaAtlasLauncher
             _modeBadgeLabel.ForeColor = Theme.Parchment400;
             _modeBadgePanel.Controls.Add(_modeBadgeLabel);
 
-            _copyLogButton = CreateButton("Copy", 356, 13, 62, 24, false);
+            _copyLogButton = CreateButton("Copy Logs", 342, 13, 80, 24, false);
             _copyLogButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _copyLogButton.Font = new Font("Segoe UI", 7.75f, FontStyle.Regular);
             _copyLogButton.Visible = false;
             _copyLogButton.Click += OnCopyLogClick;
             _advancedDrawerPanel.Controls.Add(_copyLogButton);
 
-            _clearLogButton = CreateButton("Clear", 424, 13, 64, 24, false);
+            _clearLogButton = CreateButton("Clear", 428, 13, 62, 24, false);
             _clearLogButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _clearLogButton.Font = new Font("Segoe UI", 7.75f, FontStyle.Regular);
             _clearLogButton.Visible = false;
@@ -5416,18 +7083,18 @@ namespace OcarinaAtlasLauncher
             // Settings Tab Panel (2-column grid)
             _settingsTabPanel = new Panel();
             _settingsTabPanel.Location = new Point(14, 48);
-            _settingsTabPanel.Size = new Size(476, 182);
+            _settingsTabPanel.Size = new Size(476, 292);
             _settingsTabPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             _settingsTabPanel.BackColor = Theme.Ink900;
             _advancedDrawerPanel.Controls.Add(_settingsTabPanel);
 
-            Label portLabel = new Label();
-            portLabel.Text = "Map Port";
-            portLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
-            portLabel.ForeColor = Theme.Parchment400;
-            portLabel.AutoSize = true;
-            portLabel.Location = new Point(0, 4);
-            _settingsTabPanel.Controls.Add(portLabel);
+            _portLabel = new Label();
+            _portLabel.Text = "Map Port";
+            _portLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _portLabel.ForeColor = Theme.Parchment400;
+            _portLabel.AutoSize = true;
+            _portLabel.Location = new Point(0, 4);
+            _settingsTabPanel.Controls.Add(_portLabel);
 
             _portInput = new NumericUpDown();
             _portInput.Minimum = 1;
@@ -5439,13 +7106,13 @@ namespace OcarinaAtlasLauncher
             _portInput.ValueChanged += OnPortInputChanged;
             _settingsTabPanel.Controls.Add(WrapInputInBorderedPanel(_portInput, 0, 24, 110, 28));
 
-            Label lHostLabel = new Label();
-            lHostLabel.Text = "Emulator RPC Host";
-            lHostLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
-            lHostLabel.ForeColor = Theme.Parchment400;
-            lHostLabel.AutoSize = true;
-            lHostLabel.Location = new Point(244, 4);
-            _settingsTabPanel.Controls.Add(lHostLabel);
+            _lichiiHostLabel = new Label();
+            _lichiiHostLabel.Text = "Emulator RPC Host";
+            _lichiiHostLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _lichiiHostLabel.ForeColor = Theme.Parchment400;
+            _lichiiHostLabel.AutoSize = true;
+            _lichiiHostLabel.Location = new Point(244, 4);
+            _settingsTabPanel.Controls.Add(_lichiiHostLabel);
 
             _lichiiHostInput = new TextBox();
             _lichiiHostInput.Text = "127.0.0.1";
@@ -5457,13 +7124,13 @@ namespace OcarinaAtlasLauncher
             hostWrap.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _settingsTabPanel.Controls.Add(hostWrap);
 
-            Label lPortLabel = new Label();
-            lPortLabel.Text = "Emulator RPC Port";
-            lPortLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
-            lPortLabel.ForeColor = Theme.Parchment400;
-            lPortLabel.AutoSize = true;
-            lPortLabel.Location = new Point(0, 64);
-            _settingsTabPanel.Controls.Add(lPortLabel);
+            _lichiiPortLabel = new Label();
+            _lichiiPortLabel.Text = "Emulator RPC Port";
+            _lichiiPortLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _lichiiPortLabel.ForeColor = Theme.Parchment400;
+            _lichiiPortLabel.AutoSize = true;
+            _lichiiPortLabel.Location = new Point(0, 64);
+            _settingsTabPanel.Controls.Add(_lichiiPortLabel);
 
             _lichiiPortInput = new NumericUpDown();
             _lichiiPortInput.Minimum = 1;
@@ -5475,10 +7142,10 @@ namespace OcarinaAtlasLauncher
             _lichiiPortInput.ValueChanged += OnLichiiPortChanged;
             _settingsTabPanel.Controls.Add(WrapInputInBorderedPanel(_lichiiPortInput, 0, 84, 110, 28));
 
-            Button resetLichiiBtn = CreateButton("Reset", 118, 84, 68, 28, false);
-            resetLichiiBtn.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
-            resetLichiiBtn.Click += OnResetLichiiDefaultsClick;
-            _settingsTabPanel.Controls.Add(resetLichiiBtn);
+            _resetLichiiButton = CreateButton("Reset", 118, 84, 76, 28, false);
+            _resetLichiiButton.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+            _resetLichiiButton.Click += OnResetLichiiDefaultsClick;
+            _settingsTabPanel.Controls.Add(_resetLichiiButton);
 
             _allowLanCheckBox = new CheckBox();
             _allowLanCheckBox.Text = "Allow LAN access";
@@ -5508,12 +7175,96 @@ namespace OcarinaAtlasLauncher
             _trayMinimizeCheckBox.Location = new Point(244, 114);
             _settingsTabPanel.Controls.Add(_trayMinimizeCheckBox);
 
+            _saveDirLabel = new Label();
+            _saveDirLabel.Text = "Save Folder";
+            _saveDirLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _saveDirLabel.ForeColor = Theme.Parchment400;
+            _saveDirLabel.AutoSize = true;
+            _saveDirLabel.Location = new Point(0, 138);
+            _settingsTabPanel.Controls.Add(_saveDirLabel);
+
+            _saveDirComboBox = new DarkComboBox();
+            _saveDirComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            _saveDirComboBox.FlatStyle = FlatStyle.Flat;
+            _saveDirComboBox.BackColor = Theme.Ink800;
+            _saveDirComboBox.ForeColor = Theme.Parchment50;
+            _saveDirComboBox.DrawMode = DrawMode.OwnerDrawFixed;
+            _saveDirComboBox.ItemHeight = Theme.ScaleDpi(20, _dpiScale);
+            _saveDirComboBox.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            _saveDirComboBox.Location = new Point(0, 157);
+            _saveDirComboBox.Size = new Size(326, 26);
+            _saveDirComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _saveDirComboBox.DrawItem += DrawDarkComboItem;
+            _saveDirComboBox.SelectedIndexChanged += OnSaveDirSelectedIndexChanged;
+            _settingsTabPanel.Controls.Add(_saveDirComboBox);
+
+            _addSaveDirButton = CreateButton("Add...", 332, 156, 68, 28, false);
+            _addSaveDirButton.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+            _addSaveDirButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _addSaveDirButton.Click += OnAddSaveDirClick;
+            _settingsTabPanel.Controls.Add(_addSaveDirButton);
+
+            _removeSaveDirButton = CreateButton("Remove", 406, 156, 70, 28, false);
+            _removeSaveDirButton.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+            _removeSaveDirButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _removeSaveDirButton.Enabled = false;
+            _removeSaveDirButton.Click += OnRemoveSaveDirClick;
+            _settingsTabPanel.Controls.Add(_removeSaveDirButton);
+
+            _saveSlotLabel = new Label();
+            _saveSlotLabel.Text = "Save Slot";
+            _saveSlotLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _saveSlotLabel.ForeColor = Theme.Parchment400;
+            _saveSlotLabel.AutoSize = true;
+            _saveSlotLabel.Location = new Point(0, 195);
+            _settingsTabPanel.Controls.Add(_saveSlotLabel);
+
+            _saveSlotComboBox = new DarkComboBox();
+            _saveSlotComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            _saveSlotComboBox.FlatStyle = FlatStyle.Flat;
+            _saveSlotComboBox.BackColor = Theme.Ink800;
+            _saveSlotComboBox.ForeColor = Theme.Parchment50;
+            _saveSlotComboBox.DrawMode = DrawMode.OwnerDrawFixed;
+            _saveSlotComboBox.ItemHeight = Theme.ScaleDpi(20, _dpiScale);
+            _saveSlotComboBox.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            _saveSlotComboBox.Location = new Point(76, 192);
+            _saveSlotComboBox.Size = new Size(180, 26);
+            _saveSlotComboBox.DrawItem += DrawDarkComboItem;
+            _saveSlotComboBox.SelectedIndexChanged += OnSaveSlotSelectedIndexChanged;
+            _settingsTabPanel.Controls.Add(_saveSlotComboBox);
+
+            _languageLabel = new Label();
+            _languageLabel.Text = "Language";
+            _languageLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _languageLabel.ForeColor = Theme.Parchment400;
+            _languageLabel.AutoSize = true;
+            _languageLabel.Location = new Point(0, 229);
+            _settingsTabPanel.Controls.Add(_languageLabel);
+
+            _languageComboBox = new DarkComboBox();
+            _languageComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            _languageComboBox.FlatStyle = FlatStyle.Flat;
+            _languageComboBox.BackColor = Theme.Ink800;
+            _languageComboBox.ForeColor = Theme.Parchment50;
+            _languageComboBox.DrawMode = DrawMode.OwnerDrawFixed;
+            _languageComboBox.ItemHeight = Theme.ScaleDpi(20, _dpiScale);
+            _languageComboBox.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            _languageComboBox.Location = new Point(76, 226);
+            _languageComboBox.Size = new Size(200, 26);
+            _languageComboBox.DrawItem += DrawDarkComboItem;
+            for (int i = 0; i < LauncherI18n.SupportedLocales.Length; i++)
+            {
+                _languageComboBox.Items.Add(LauncherI18n.SupportedLocales[i]);
+            }
+            _languageComboBox.SelectedIndexChanged += OnLanguageSelectedIndexChanged;
+            _settingsTabPanel.Controls.Add(_languageComboBox);
+
             _updateStatusLabel = new Label();
             _updateStatusLabel.Text = "Version " + AppVersion;
             _updateStatusLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
             _updateStatusLabel.ForeColor = Theme.Parchment600;
             _updateStatusLabel.AutoSize = false;
-            _updateStatusLabel.Location = new Point(0, 150);
+            _updateStatusLabel.Location = new Point(0, 264);
             _updateStatusLabel.Size = new Size(340, 20);
             _updateStatusLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             _settingsTabPanel.Controls.Add(_updateStatusLabel);
@@ -5526,14 +7277,14 @@ namespace OcarinaAtlasLauncher
             _checkUpdatesLink.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
             _checkUpdatesLink.AutoSize = true;
             _checkUpdatesLink.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            _checkUpdatesLink.Location = new Point(368, 150);
+            _checkUpdatesLink.Location = new Point(368, 264);
             _checkUpdatesLink.LinkClicked += OnCheckUpdatesClick;
             _settingsTabPanel.Controls.Add(_checkUpdatesLink);
 
             // Logs Tab Panel
             _logsTabPanel = new Panel();
             _logsTabPanel.Location = new Point(14, 48);
-            _logsTabPanel.Size = new Size(476, 182);
+            _logsTabPanel.Size = new Size(476, 292);
             _logsTabPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             _logsTabPanel.BackColor = Theme.Ink900;
             _logsTabPanel.Visible = false;
@@ -5561,7 +7312,7 @@ namespace OcarinaAtlasLauncher
             // About Tab Panel
             _aboutTabPanel = new Panel();
             _aboutTabPanel.Location = new Point(14, 48);
-            _aboutTabPanel.Size = new Size(476, 182);
+            _aboutTabPanel.Size = new Size(476, 292);
             _aboutTabPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             _aboutTabPanel.BackColor = Theme.Ink900;
             _aboutTabPanel.Visible = false;
@@ -5648,25 +7399,25 @@ namespace OcarinaAtlasLauncher
             securityNoticePanel.CornerRadius = 6;
             _aboutTabPanel.Controls.Add(securityNoticePanel);
 
-            Label securityNoticeLabel = new Label();
-            securityNoticeLabel.Text = "Free & open-source (GNU AGPL-3.0). Official builds: github.com/antonioalvromero/Ocarina-Atlas \u2014 forks must preserve credits and share source.";
-            securityNoticeLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
-            securityNoticeLabel.ForeColor = Theme.Parchment200;
-            securityNoticeLabel.BackColor = Theme.Ink950;
-            securityNoticeLabel.Dock = DockStyle.Fill;
-            securityNoticeLabel.Padding = new Padding(10, 8, 10, 8);
-            securityNoticeLabel.TextAlign = ContentAlignment.MiddleLeft;
-            securityNoticePanel.Controls.Add(securityNoticeLabel);
+            _securityNoticeLabel = new Label();
+            _securityNoticeLabel.Text = "Free & open-source (GNU AGPL-3.0). Official builds: github.com/antonioalvromero/Ocarina-Atlas \u2014 forks must preserve credits and share source.";
+            _securityNoticeLabel.Font = new Font("Segoe UI", 8.25f, FontStyle.Regular);
+            _securityNoticeLabel.ForeColor = Theme.Parchment200;
+            _securityNoticeLabel.BackColor = Theme.Ink950;
+            _securityNoticeLabel.Dock = DockStyle.Fill;
+            _securityNoticeLabel.Padding = new Padding(10, 8, 10, 8);
+            _securityNoticeLabel.TextAlign = ContentAlignment.MiddleLeft;
+            securityNoticePanel.Controls.Add(_securityNoticeLabel);
 
-            Label aboutFooterLabel = new Label();
-            aboutFooterLabel.Text = "Version " + AppVersion + "  \u2022  Verify official releases via SHA-256 or GitHub attestation";
-            aboutFooterLabel.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
-            aboutFooterLabel.ForeColor = Theme.Parchment600;
-            aboutFooterLabel.AutoSize = false;
-            aboutFooterLabel.Location = new Point(0, 150);
-            aboutFooterLabel.Size = new Size(476, 20);
-            aboutFooterLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            _aboutTabPanel.Controls.Add(aboutFooterLabel);
+            _aboutFooterLabel = new Label();
+            _aboutFooterLabel.Text = "Version " + AppVersion + "  \u2022  Verify official releases via SHA-256 or GitHub attestation";
+            _aboutFooterLabel.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+            _aboutFooterLabel.ForeColor = Theme.Parchment600;
+            _aboutFooterLabel.AutoSize = false;
+            _aboutFooterLabel.Location = new Point(0, 260);
+            _aboutFooterLabel.Size = new Size(476, 20);
+            _aboutFooterLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            _aboutTabPanel.Controls.Add(_aboutFooterLabel);
 
             SelectDrawerTab(0);
         }
@@ -5735,9 +7486,9 @@ namespace OcarinaAtlasLauncher
         private void BuildTrayIcon()
         {
             ContextMenuStrip menu = new ContextMenuStrip();
-            ToolStripMenuItem showItem = new ToolStripMenuItem("Show Ocarina Atlas");
-            showItem.Font = new Font(showItem.Font, FontStyle.Bold);
-            showItem.Click += delegate { RestoreFromTray(); };
+            _trayShowItem = new ToolStripMenuItem("Show Ocarina Atlas");
+            _trayShowItem.Font = new Font(_trayShowItem.Font, FontStyle.Bold);
+            _trayShowItem.Click += delegate { RestoreFromTray(); };
 
             _trayOpenBrowserItem = new ToolStripMenuItem("Open Map in Browser");
             _trayOpenBrowserItem.Enabled = false;
@@ -5746,42 +7497,222 @@ namespace OcarinaAtlasLauncher
             _trayToggleServerItem = new ToolStripMenuItem("Start Map");
             _trayToggleServerItem.Click += delegate { OnStartStopClick(this, EventArgs.Empty); };
 
-            ToolStripMenuItem exitItem = new ToolStripMenuItem("Exit");
-            exitItem.Click += delegate
+            _trayExitItem = new ToolStripMenuItem("Exit");
+            _trayExitItem.Click += delegate
             {
                 Close();
             };
 
-            menu.Items.Add(showItem);
+            menu.Items.Add(_trayShowItem);
             menu.Items.Add(_trayOpenBrowserItem);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(_trayToggleServerItem);
             menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add(exitItem);
+            menu.Items.Add(_trayExitItem);
 
             _trayIcon = new NotifyIcon();
             _trayIcon.Icon = _appIcon;
             _trayIcon.Text = "Ocarina Atlas";
             _trayIcon.ContextMenuStrip = menu;
             _trayIcon.Visible = true;
+            _trayIcon.MouseClick += delegate(object s, MouseEventArgs e)
+            {
+                if (e.Button == MouseButtons.Left) RestoreFromTray();
+            };
             _trayIcon.DoubleClick += delegate { RestoreFromTray(); };
         }
 
         private void ApplyInitialOptions()
         {
-            _portInput.Value = Math.Max(1, Math.Min(65535, _options.Port));
-            _allowLanCheckBox.Checked = _options.AllowLan;
-            _customBindHost = _options.BindHost;
-            _lichiiHostInput.Text = _options.LichiiHost;
-            _lichiiPortInput.Value = Math.Max(1, Math.Min(65535, _options.LichiiPort));
-            _autoOpenCheckBox.Checked = _options.AutoOpenBrowser;
-
-            if (_options.StartMinimized)
+            _isApplyingInitialOptions = true;
+            try
             {
-                _trayMinimizeCheckBox.Checked = true;
-                ShowInTaskbar = false;
-                WindowState = FormWindowState.Minimized;
+                int port = _options.PortExplicit ? _options.Port : (_launcherSettings.Port ?? _options.Port);
+                bool allowLan = _options.AllowLanExplicit ? _options.AllowLan : (_launcherSettings.AllowLan ?? _options.AllowLan);
+                string lichiiHost = _options.LichiiHostExplicit
+                    ? _options.LichiiHost
+                    : (!string.IsNullOrEmpty(_launcherSettings.LichiiHost)
+                        ? _launcherSettings.LichiiHost
+                        : _options.LichiiHost);
+                int lichiiPort = _options.LichiiPortExplicit ? _options.LichiiPort : (_launcherSettings.LichiiPort ?? _options.LichiiPort);
+                bool autoOpen = _options.AutoOpenBrowserExplicit ? _options.AutoOpenBrowser : (_launcherSettings.AutoOpenBrowser ?? _options.AutoOpenBrowser);
+                bool minimizeToTray = _options.StartMinimized || (_launcherSettings.MinimizeToTray ?? false);
+
+                _portInput.Value = Math.Max(1, Math.Min(65535, port));
+                _allowLanCheckBox.Checked = allowLan;
+                _customBindHost = _options.BindHost;
+                _lichiiHostInput.Text = lichiiHost;
+                _lichiiPortInput.Value = Math.Max(1, Math.Min(65535, lichiiPort));
+                _autoOpenCheckBox.Checked = autoOpen;
+                _trayMinimizeCheckBox.Checked = minimizeToTray;
+
+                if (_languageComboBox != null)
+                {
+                    _suppressLanguageChange = true;
+                    try
+                    {
+                        int selectedLangIdx = 0;
+                        for (int i = 0; i < _languageComboBox.Items.Count; i++)
+                        {
+                            LocaleOption opt = _languageComboBox.Items[i] as LocaleOption;
+                            if (opt != null && string.Equals(opt.Code, _currentLocale, StringComparison.OrdinalIgnoreCase))
+                            {
+                                selectedLangIdx = i;
+                                break;
+                            }
+                        }
+                        if (_languageComboBox.Items.Count > 0)
+                        {
+                            _languageComboBox.SelectedIndex = selectedLangIdx;
+                        }
+                    }
+                    finally
+                    {
+                        _suppressLanguageChange = false;
+                    }
+                }
+
+                if (_options.StartMinimized)
+                {
+                    WindowState = FormWindowState.Minimized;
+                }
             }
+            finally
+            {
+                _isApplyingInitialOptions = false;
+            }
+
+            _portInput.ValueChanged += OnPersistentSettingChanged;
+            _lichiiHostInput.Leave += OnPersistentSettingChanged;
+            _lichiiPortInput.ValueChanged += OnPersistentSettingChanged;
+            _allowLanCheckBox.CheckedChanged += OnPersistentSettingChanged;
+            _autoOpenCheckBox.CheckedChanged += OnPersistentSettingChanged;
+            _trayMinimizeCheckBox.CheckedChanged += OnPersistentSettingChanged;
+
+            UpdateSaveDirUi();
+            RefreshSaveSlotOptions(DiscoverSlotsInFolder(_launcherSettings.CustomSaveDir));
+        }
+
+        private void OnPersistentSettingChanged(object sender, EventArgs e)
+        {
+            SaveCurrentLauncherSettings();
+        }
+
+        private string T(string key)
+        {
+            return LauncherI18n.Get(_currentLocale, key);
+        }
+
+        private string Tf(string key, params object[] args)
+        {
+            return LauncherI18n.Format(_currentLocale, key, args);
+        }
+
+        private void OnLanguageSelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_suppressLanguageChange || _languageComboBox == null) return;
+            LocaleOption opt = _languageComboBox.SelectedItem as LocaleOption;
+            string nextLocale = opt != null ? LauncherI18n.NormalizeLocale(opt.Code) : "en";
+            if (string.Equals(nextLocale, _currentLocale, StringComparison.OrdinalIgnoreCase)) return;
+
+            _currentLocale = nextLocale;
+            _launcherSettings.Language = _currentLocale;
+            _launcherSettings.Save();
+            ApplyLauncherLanguage();
+        }
+
+        private void ApplyLauncherLanguage()
+        {
+            Text = T("app_title");
+            if (_updatePillLabel != null) _updatePillLabel.Text = T("update_pill");
+            if (_openBrowserButton != null) _openBrowserButton.Text = T("open_map");
+
+            if (_step2TitleLabel != null) _step2TitleLabel.Text = T("lan_title");
+            if (_refreshLanButton != null) _refreshLanButton.Text = T("refresh");
+            if (_copyLanUrlButton != null && _copyFeedbackTicks == 0) _copyLanUrlButton.Text = T("copy_url");
+            if (_qrButton != null) _qrButton.Text = T("qr_code");
+
+            if (_settingsTabButton != null) _settingsTabButton.Text = T("tab_settings");
+            if (_logsTabButton != null) _logsTabButton.Text = T("tab_logs");
+            if (_aboutTabButton != null) _aboutTabButton.Text = T("tab_about");
+            if (_settingsLockHintLabel != null) _settingsLockHintLabel.Text = T("settings_lock_hint");
+            if (_copyLogButton != null && _copyLogFeedbackTicks == 0) _copyLogButton.Text = T("copy_logs");
+            if (_clearLogButton != null) _clearLogButton.Text = T("clear");
+
+            if (_portLabel != null) _portLabel.Text = T("map_port");
+            if (_lichiiHostLabel != null) _lichiiHostLabel.Text = T("rpc_host");
+            if (_lichiiPortLabel != null) _lichiiPortLabel.Text = T("rpc_port");
+            if (_resetLichiiButton != null) _resetLichiiButton.Text = T("reset");
+            if (_allowLanCheckBox != null) _allowLanCheckBox.Text = T("allow_lan");
+            if (_autoOpenCheckBox != null) _autoOpenCheckBox.Text = T("auto_open");
+            if (_trayMinimizeCheckBox != null) _trayMinimizeCheckBox.Text = T("minimize_tray");
+            if (_saveDirLabel != null) _saveDirLabel.Text = T("save_folder");
+            if (_addSaveDirButton != null) _addSaveDirButton.Text = T("add_ellipsis");
+            if (_removeSaveDirButton != null) _removeSaveDirButton.Text = T("remove");
+            if (_saveSlotLabel != null) _saveSlotLabel.Text = T("save_slot");
+            if (_languageLabel != null) _languageLabel.Text = T("language");
+            if (_updateStatusLabel != null && !_updateCheckInFlight && _pendingUpdateInfo == null)
+            {
+                _updateStatusLabel.Text = Tf("version_label", AppVersion);
+            }
+            if (_checkUpdatesLink != null) _checkUpdatesLink.Text = T("check_updates");
+
+            if (_originalCreditTitle != null) _originalCreditTitle.Text = T("about_original_map");
+            if (_artworkCreditTitle != null) _artworkCreditTitle.Text = T("about_artwork");
+            if (_securityNoticeLabel != null) _securityNoticeLabel.Text = T("about_security");
+            if (_aboutFooterLabel != null) _aboutFooterLabel.Text = Tf("about_footer", AppVersion);
+
+            if (_trayShowItem != null) _trayShowItem.Text = T("tray_show");
+            if (_trayOpenBrowserItem != null) _trayOpenBrowserItem.Text = T("tray_open");
+            if (_trayExitItem != null) _trayExitItem.Text = T("tray_exit");
+
+            UpdateSaveDirUi();
+            RefreshSaveSlotOptions(_lastDiscoveredSaveSlots);
+
+            AlignAutoSizedPairs();
+            UpdateControlStates();
+            RefreshLanDisplays();
+            RefreshLichiiConfigStatus();
+            ReflowLayout();
+        }
+
+        private void SaveCurrentLauncherSettings()
+        {
+            if (_isApplyingInitialOptions) return;
+            _launcherSettings.Port = (int)_portInput.Value;
+            _launcherSettings.LichiiHost = (_lichiiHostInput.Text ?? string.Empty).Trim();
+            _launcherSettings.LichiiPort = (int)_lichiiPortInput.Value;
+            _launcherSettings.AllowLan = _allowLanCheckBox.Checked;
+            _launcherSettings.AutoOpenBrowser = _autoOpenCheckBox.Checked;
+            _launcherSettings.MinimizeToTray = _trayMinimizeCheckBox.Checked;
+            _launcherSettings.Language = _currentLocale;
+            _launcherSettings.Save();
+        }
+
+        private void FitHeaderStatusPills()
+        {
+            if (_serverStatusPill == null || _serverStatusLabel == null || _emulatorStatusPill == null || _heroLichiiLabel == null)
+            {
+                return;
+            }
+            int rightMargin = Theme.ScaleDpi(18, _dpiScale);
+            int pillGap = Theme.ScaleDpi(8, _dpiScale);
+            int textLeft = Theme.ScaleDpi(23, _dpiScale);
+            int rightPad = Theme.ScaleDpi(10, _dpiScale);
+            int minServerPillW = Theme.ScaleDpi(90, _dpiScale);
+            int minEmuPillW = Theme.ScaleDpi(96, _dpiScale);
+
+            int emuTextW = TextRenderer.MeasureText(_heroLichiiLabel.Text ?? string.Empty, _heroLichiiLabel.Font).Width;
+            int emuPillW = Math.Max(minEmuPillW, textLeft + emuTextW + rightPad);
+            _heroLichiiLabel.Width = emuPillW - textLeft - Theme.ScaleDpi(5, _dpiScale);
+            _emulatorStatusPill.Width = emuPillW;
+            _emulatorStatusPill.Left = ClientSize.Width - rightMargin - emuPillW;
+
+            int srvTextW = TextRenderer.MeasureText(_serverStatusLabel.Text ?? string.Empty, _serverStatusLabel.Font).Width;
+            int srvPillW = Math.Max(minServerPillW, textLeft + srvTextW + rightPad);
+            _serverStatusLabel.Width = srvPillW - textLeft - Theme.ScaleDpi(5, _dpiScale);
+            _serverStatusPill.Width = srvPillW;
+            _serverStatusPill.Left = _emulatorStatusPill.Left - pillGap - srvPillW;
         }
 
         private void AlignAutoSizedPairs()
@@ -5791,6 +7722,7 @@ namespace OcarinaAtlasLauncher
             int creditGap = Theme.ScaleDpi(6, _dpiScale);
             int repoGap = Theme.ScaleDpi(10, _dpiScale);
             int repoMinX = Theme.ScaleDpi(214, _dpiScale);
+            int slotGap = Theme.ScaleDpi(10, _dpiScale);
 
             _versionLabel.Left = _titleLabel.Right + titleGap;
             _updatePill.Left = _versionLabel.Right + pillGap;
@@ -5802,13 +7734,44 @@ namespace OcarinaAtlasLauncher
             _originalRepoLink.Left = Math.Max(repoMinX, _originalCreditAuthor.Right + repoGap);
 
             _artworkCreditAuthor.Left = _artworkCreditTitle.Right + creditGap;
+
+            int comboLeft = Theme.ScaleDpi(76, _dpiScale);
+            if (_saveSlotLabel != null)
+            {
+                comboLeft = Math.Max(comboLeft, _saveSlotLabel.Right + slotGap);
+            }
+            if (_languageLabel != null)
+            {
+                comboLeft = Math.Max(comboLeft, _languageLabel.Right + slotGap);
+            }
+
+            if (_saveSlotComboBox != null)
+            {
+                _saveSlotComboBox.Left = comboLeft;
+                _saveSlotComboBox.ItemHeight = Math.Max(16, Theme.ScaleDpi(20, _dpiScale));
+            }
+            if (_languageComboBox != null)
+            {
+                _languageComboBox.Left = comboLeft;
+                _languageComboBox.ItemHeight = Math.Max(16, Theme.ScaleDpi(20, _dpiScale));
+            }
+            if (_saveDirComboBox != null)
+            {
+                _saveDirComboBox.ItemHeight = Math.Max(16, Theme.ScaleDpi(20, _dpiScale));
+            }
+
+            if (_settingsTabPanel != null && _checkUpdatesLink != null && _updateStatusLabel != null)
+            {
+                _checkUpdatesLink.Left = Math.Max(Theme.ScaleDpi(180, _dpiScale), _settingsTabPanel.ClientSize.Width - _checkUpdatesLink.Width);
+                _updateStatusLabel.Width = Math.Max(Theme.ScaleDpi(100, _dpiScale), _checkUpdatesLink.Left - _updateStatusLabel.Left - slotGap);
+            }
+
+            FitHeaderStatusPills();
         }
 
         private void ReflowLayout()
         {
-            _advancedToggleButton.Text = _advancedExpanded
-                ? "\u25BE Settings, Logs & About"
-                : "\u25B8 Settings, Logs & About";
+            _advancedToggleButton.Text = (_advancedExpanded ? "\u25BE " : "\u25B8 ") + T("drawer_title");
 
             int nonClientW = Size.Width - ClientSize.Width;
             int nonClientH = Size.Height - ClientSize.Height;
@@ -5817,7 +7780,7 @@ namespace OcarinaAtlasLauncher
             int collapsedHeight = Theme.ScaleDpi(CollapsedClientHeight, _dpiScale);
             int expandedMinHeight = Theme.ScaleDpi(ExpandedMinClientHeight, _dpiScale);
             int expandedHeight = Theme.ScaleDpi(ExpandedClientHeight, _dpiScale);
-            int minDrawerHeight = Theme.ScaleDpi(180, _dpiScale);
+            int minDrawerHeight = Theme.ScaleDpi(286, _dpiScale);
             int bottomMargin = Theme.ScaleDpi(14, _dpiScale);
 
             if (_advancedExpanded)
@@ -5837,6 +7800,459 @@ namespace OcarinaAtlasLauncher
                 MinimumSize = new Size(minWidth + nonClientW, collapsedHeight + nonClientH);
                 ClientSize = new Size(ClientSize.Width, collapsedHeight);
             }
+        }
+
+        private static string[] DiscoverSlotsInFolder(string folder)
+        {
+            if (string.IsNullOrEmpty(folder)) return null;
+            try
+            {
+                if (!Directory.Exists(folder)) return null;
+                List<string> found = new List<string>();
+                string folderName = Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                if (!string.IsNullOrEmpty(folderName) &&
+                    folderName.StartsWith("slot_", StringComparison.OrdinalIgnoreCase))
+                {
+                    found.Add(folderName);
+                }
+                else
+                {
+                    string[] dirs = Directory.GetDirectories(folder, "slot_*", SearchOption.TopDirectoryOnly);
+                    for (int i = 0; i < dirs.Length; i++)
+                    {
+                        string name = Path.GetFileName(dirs[i]);
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            found.Add(name);
+                        }
+                    }
+                    found.Sort(StringComparer.OrdinalIgnoreCase);
+                }
+                return found.Count > 0 ? found.ToArray() : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void DrawDarkComboItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0) return;
+            ComboBox combo = sender as ComboBox;
+            if (combo == null || e.Index >= combo.Items.Count) return;
+
+            bool isComboBoxEdit = (e.State & DrawItemState.ComboBoxEdit) != 0;
+            bool isSelected = (e.State & DrawItemState.Selected) != 0;
+            Color bgColor = isSelected ? Theme.Ink700 : Theme.Ink800;
+            Color textColor = (!isComboBoxEdit && isSelected) ? Theme.Gold : Theme.Parchment50;
+
+            using (SolidBrush bgBrush = new SolidBrush(bgColor))
+            {
+                e.Graphics.FillRectangle(bgBrush, e.Bounds);
+            }
+
+            string text = combo.GetItemText(combo.Items[e.Index]);
+            Rectangle textBounds = new Rectangle(
+                e.Bounds.X + 4,
+                e.Bounds.Y,
+                Math.Max(0, e.Bounds.Width - 8),
+                e.Bounds.Height);
+            Font font = e.Font ?? combo.Font;
+            TextRenderer.DrawText(
+                e.Graphics,
+                text,
+                font,
+                textBounds,
+                textColor,
+                bgColor,
+                TextFormatFlags.EndEllipsis | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+        }
+
+        private string FormatSaveDirLabel(string dir)
+        {
+            string trimmed = (dir ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(trimmed)) return T("auto_detect");
+            string cleaned = trimmed.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            string name = Path.GetFileName(cleaned);
+            if (!string.IsNullOrEmpty(name) && !string.Equals(name, trimmed, StringComparison.OrdinalIgnoreCase))
+            {
+                return string.Format(CultureInfo.InvariantCulture, "{0} ({1})", name, trimmed);
+            }
+            return trimmed;
+        }
+
+        private void UpdateSaveDirUi()
+        {
+            if (_saveDirComboBox == null || _removeSaveDirButton == null) return;
+
+            string activeDir = (_launcherSettings.CustomSaveDir ?? string.Empty).Trim();
+            if (_launcherSettings.SavedSaveDirs == null)
+            {
+                _launcherSettings.SavedSaveDirs = new List<string>();
+            }
+
+            List<string> dirs = new List<string>();
+            for (int i = 0; i < _launcherSettings.SavedSaveDirs.Count; i++)
+            {
+                string entry = (_launcherSettings.SavedSaveDirs[i] ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(entry)) continue;
+                bool exists = false;
+                for (int j = 0; j < dirs.Count; j++)
+                {
+                    if (string.Equals(dirs[j], entry, StringComparison.OrdinalIgnoreCase))
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) dirs.Add(entry);
+            }
+
+            if (!string.IsNullOrEmpty(activeDir))
+            {
+                bool activeFound = false;
+                for (int i = 0; i < dirs.Count; i++)
+                {
+                    if (string.Equals(dirs[i], activeDir, StringComparison.OrdinalIgnoreCase))
+                    {
+                        activeFound = true;
+                        break;
+                    }
+                }
+                if (!activeFound) dirs.Add(activeDir);
+            }
+
+            _suppressSaveDirChange = true;
+            try
+            {
+                _saveDirComboBox.BeginUpdate();
+                _saveDirComboBox.Items.Clear();
+                _saveDirComboBox.Items.Add(new SaveSlotItem(string.Empty, T("auto_detect")));
+
+                int selectIndex = 0;
+                for (int i = 0; i < dirs.Count; i++)
+                {
+                    string path = dirs[i];
+                    _saveDirComboBox.Items.Add(new SaveSlotItem(path, FormatSaveDirLabel(path)));
+                    if (!string.IsNullOrEmpty(activeDir) &&
+                        string.Equals(path, activeDir, StringComparison.OrdinalIgnoreCase))
+                    {
+                        selectIndex = i + 1;
+                    }
+                }
+
+                _saveDirComboBox.SelectedIndex = selectIndex;
+                _saveDirComboBox.EndUpdate();
+            }
+            finally
+            {
+                _suppressSaveDirChange = false;
+            }
+
+            bool hasCustomDir = !string.IsNullOrEmpty(activeDir);
+            _removeSaveDirButton.Enabled = hasCustomDir;
+            if (_toolTip != null)
+            {
+                _toolTip.SetToolTip(
+                    _saveDirComboBox,
+                    hasCustomDir ? activeDir : "Auto-detect emulator or recomp save folder");
+            }
+        }
+
+        private void RefreshSaveSlotOptions(string[] discoveredSlots)
+        {
+            if (_saveSlotComboBox == null) return;
+
+            List<string> slotNames = new List<string>();
+            if (discoveredSlots != null && discoveredSlots.Length > 0)
+            {
+                for (int i = 0; i < discoveredSlots.Length; i++)
+                {
+                    string s = (discoveredSlots[i] ?? string.Empty).Trim();
+                    if (!string.IsNullOrEmpty(s) && !slotNames.Contains(s))
+                    {
+                        slotNames.Add(s);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i <= 5; i++)
+                {
+                    slotNames.Add(string.Format(CultureInfo.InvariantCulture, "slot_{0:00}", i));
+                }
+            }
+
+            string selectedSlot = (_launcherSettings.CustomSaveSlot ?? string.Empty).Trim();
+            if (!string.IsNullOrEmpty(selectedSlot) && !slotNames.Contains(selectedSlot))
+            {
+                slotNames.Add(selectedSlot);
+            }
+
+            _lastDiscoveredSaveSlots = discoveredSlots;
+
+            _suppressSaveSlotChange = true;
+            try
+            {
+                _saveSlotComboBox.BeginUpdate();
+                _saveSlotComboBox.Items.Clear();
+                _saveSlotComboBox.Items.Add(new SaveSlotItem(string.Empty, T("auto_latest")));
+
+                int selectIndex = 0;
+                for (int i = 0; i < slotNames.Count; i++)
+                {
+                    string name = slotNames[i];
+                    _saveSlotComboBox.Items.Add(new SaveSlotItem(name, name));
+                    if (string.Equals(name, selectedSlot, StringComparison.OrdinalIgnoreCase))
+                    {
+                        selectIndex = i + 1;
+                    }
+                }
+
+                _saveSlotComboBox.SelectedIndex = selectIndex;
+                _saveSlotComboBox.EndUpdate();
+            }
+            finally
+            {
+                _suppressSaveSlotChange = false;
+            }
+        }
+
+        private void OnSaveDirSelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_suppressSaveDirChange) return;
+            SaveSlotItem item = _saveDirComboBox.SelectedItem as SaveSlotItem;
+            string dirValue = item != null ? item.Value : string.Empty;
+            if (string.Equals(dirValue, _launcherSettings.CustomSaveDir, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            _launcherSettings.CustomSaveDir = dirValue;
+            _launcherSettings.Save();
+            _removeSaveDirButton.Enabled = !string.IsNullOrEmpty(dirValue);
+            if (_toolTip != null)
+            {
+                _toolTip.SetToolTip(
+                    _saveDirComboBox,
+                    string.IsNullOrEmpty(dirValue) ? "Auto-detect emulator or recomp save folder" : dirValue);
+            }
+            RefreshSaveSlotOptions(DiscoverSlotsInFolder(dirValue));
+            AppendLog(string.IsNullOrEmpty(dirValue)
+                ? "Save folder reset to auto-detect."
+                : "Save folder set to: " + dirValue);
+            ApplySaveSelectionToServerAsync();
+        }
+
+        private void OnAddSaveDirClick(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "Select your Ocarina of Time save folder (e.g. slot_00, user\\save, or game root)";
+                dialog.ShowNewFolderButton = false;
+                if (!string.IsNullOrEmpty(_launcherSettings.CustomSaveDir) &&
+                    Directory.Exists(_launcherSettings.CustomSaveDir))
+                {
+                    dialog.SelectedPath = _launcherSettings.CustomSaveDir;
+                }
+
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                string chosen = (dialog.SelectedPath ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(chosen))
+                {
+                    return;
+                }
+
+                if (_launcherSettings.SavedSaveDirs == null)
+                {
+                    _launcherSettings.SavedSaveDirs = new List<string>();
+                }
+
+                string matchedExisting = null;
+                for (int i = 0; i < _launcherSettings.SavedSaveDirs.Count; i++)
+                {
+                    if (string.Equals(_launcherSettings.SavedSaveDirs[i], chosen, StringComparison.OrdinalIgnoreCase))
+                    {
+                        matchedExisting = _launcherSettings.SavedSaveDirs[i];
+                        break;
+                    }
+                }
+
+                if (matchedExisting == null)
+                {
+                    _launcherSettings.SavedSaveDirs.Add(chosen);
+                }
+                else
+                {
+                    chosen = matchedExisting;
+                }
+
+                bool changedActive = !string.Equals(chosen, _launcherSettings.CustomSaveDir, StringComparison.OrdinalIgnoreCase);
+                _launcherSettings.CustomSaveDir = chosen;
+                _launcherSettings.Save();
+                UpdateSaveDirUi();
+
+                if (changedActive)
+                {
+                    RefreshSaveSlotOptions(DiscoverSlotsInFolder(chosen));
+                    AppendLog("Save folder set to: " + chosen);
+                    ApplySaveSelectionToServerAsync();
+                }
+            }
+        }
+
+        private void OnRemoveSaveDirClick(object sender, EventArgs e)
+        {
+            string activeDir = (_launcherSettings.CustomSaveDir ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(activeDir)) return;
+
+            if (_launcherSettings.SavedSaveDirs != null)
+            {
+                for (int i = _launcherSettings.SavedSaveDirs.Count - 1; i >= 0; i--)
+                {
+                    if (string.Equals(_launcherSettings.SavedSaveDirs[i], activeDir, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _launcherSettings.SavedSaveDirs.RemoveAt(i);
+                    }
+                }
+            }
+
+            _launcherSettings.CustomSaveDir = string.Empty;
+            _launcherSettings.Save();
+            UpdateSaveDirUi();
+            RefreshSaveSlotOptions(null);
+            AppendLog("Save folder removed; reset to auto-detect.");
+            ApplySaveSelectionToServerAsync();
+        }
+
+        private void OnSaveSlotSelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_suppressSaveSlotChange) return;
+            SaveSlotItem item = _saveSlotComboBox.SelectedItem as SaveSlotItem;
+            string slotValue = item != null ? item.Value : string.Empty;
+            if (string.Equals(slotValue, _launcherSettings.CustomSaveSlot, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _launcherSettings.CustomSaveSlot = slotValue;
+            _launcherSettings.Save();
+            AppendLog(string.IsNullOrEmpty(slotValue)
+                ? "Save slot set to: Auto (Latest)."
+                : "Save slot set to: " + slotValue);
+            ApplySaveSelectionToServerAsync();
+        }
+
+        private void ApplySaveSelectionToServerAsync()
+        {
+            if (_lifecycle != ServerLifecycle.Running && _lifecycle != ServerLifecycle.Starting)
+            {
+                return;
+            }
+
+            int port = _activePort;
+            string saveDir = (_launcherSettings.CustomSaveDir ?? string.Empty).Trim();
+            string saveSlot = (_launcherSettings.CustomSaveSlot ?? string.Empty).Trim();
+
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                string url = string.Format(CultureInfo.InvariantCulture, "http://127.0.0.1:{0}/api/saves/slot", port);
+                string saveDirJson = string.IsNullOrEmpty(saveDir)
+                    ? "null"
+                    : "\"" + SimpleJsonParser.EscapeString(saveDir) + "\"";
+                string slotJson = string.IsNullOrEmpty(saveSlot)
+                    ? "null"
+                    : "\"" + SimpleJsonParser.EscapeString(saveSlot) + "\"";
+                string payload = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "{{\"saveDir\":{0},\"slot\":{1}}}",
+                    saveDirJson,
+                    slotJson);
+
+                try
+                {
+                    HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+                    req.Method = "POST";
+                    req.ContentType = "application/json";
+                    req.Timeout = 2000;
+                    req.ReadWriteTimeout = 2000;
+                    req.Proxy = null;
+                    req.KeepAlive = false;
+
+                    byte[] bodyBytes = Encoding.UTF8.GetBytes(payload);
+                    req.ContentLength = bodyBytes.Length;
+                    using (Stream reqStream = req.GetRequestStream())
+                    {
+                        reqStream.Write(bodyBytes, 0, bodyBytes.Length);
+                    }
+
+                    using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
+                    {
+                        using (Stream respStream = resp.GetResponseStream())
+                        using (StreamReader reader = new StreamReader(respStream, Encoding.UTF8))
+                        {
+                            string respBody = reader.ReadToEnd();
+                            Dictionary<string, object> obj = SimpleJsonParser.ParseObject(respBody);
+                            string[] slots = ExtractStringArray(obj, "availableSaveSlots");
+                            if (slots != null && !IsDisposed && IsHandleCreated)
+                            {
+                                BeginInvoke(new Action(delegate
+                                {
+                                    if (!IsDisposed)
+                                    {
+                                        RefreshSaveSlotOptions(slots);
+                                    }
+                                }));
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (!IsDisposed && IsHandleCreated)
+                    {
+                        BeginInvoke(new Action(delegate
+                        {
+                            if (!IsDisposed)
+                            {
+                                AppendLog("Warning: could not apply save selection to running server (" + ex.Message + ").");
+                            }
+                        }));
+                    }
+                }
+            });
+        }
+
+        private static string[] ExtractStringArray(Dictionary<string, object> obj, string key)
+        {
+            List<object> arr = SimpleJsonParser.GetArray(obj, key);
+            if (arr == null || arr.Count == 0) return null;
+            List<string> list = new List<string>(arr.Count);
+            for (int i = 0; i < arr.Count; i++)
+            {
+                string s = arr[i] as string;
+                if (!string.IsNullOrEmpty(s))
+                {
+                    list.Add(s);
+                }
+            }
+            return list.Count > 0 ? list.ToArray() : null;
+        }
+
+        private static bool StringArraysEqual(string[] a, string[] b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (a == null || b == null || a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (!string.Equals(a[i], b[i], StringComparison.Ordinal)) return false;
+            }
+            return true;
         }
 
         private void OnVersionLabelClick(object sender, EventArgs e)
@@ -5890,7 +8306,7 @@ namespace OcarinaAtlasLauncher
 
         private void HideToTray()
         {
-            ShowInTaskbar = false;
+            // Hide() removes the window from the taskbar without triggering ShowInTaskbar RecreateHandle().
             Hide();
             if (!_trayHintShown && _trayIcon != null)
             {
@@ -5898,16 +8314,22 @@ namespace OcarinaAtlasLauncher
                 _trayIcon.ShowBalloonTip(
                     2500,
                     "Ocarina Atlas",
-                    "Still running in the system tray. Double-click the icon to reopen.",
+                    "Still running in the system tray. Click or double-click the icon to reopen.",
                     ToolTipIcon.Info);
             }
         }
 
         private void RestoreFromTray()
         {
-            Show();
-            ShowInTaskbar = true;
-            WindowState = FormWindowState.Normal;
+            if (!Visible)
+            {
+                Show();
+            }
+            if (WindowState == FormWindowState.Minimized)
+            {
+                WindowState = FormWindowState.Normal;
+            }
+            BringToFront();
             Activate();
         }
 
@@ -5951,7 +8373,7 @@ namespace OcarinaAtlasLauncher
                 _enableRpcButton.FlatAppearance.BorderColor = Theme.Moss;
                 if (_syncFeedbackTicks == 0)
                 {
-                    _lichiiStepDetailLabel.Text = "Live sync configured. Start Lichii or Fritchii and load Ocarina of Time.";
+                    _lichiiStepDetailLabel.Text = T("sync_hint_configured");
                     _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
                 }
                 string pathsSummary = status.TargetPaths != null && status.TargetPaths.Count > 0
@@ -5967,7 +8389,7 @@ namespace OcarinaAtlasLauncher
                 _enableRpcButton.FlatAppearance.BorderColor = Theme.Gold;
                 if (_syncFeedbackTicks == 0)
                 {
-                    _lichiiStepDetailLabel.Text = "Click 1-Click Setup Sync to enable live tracking in Lichii / Fritchii.";
+                    _lichiiStepDetailLabel.Text = T("sync_hint_default");
                     _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
                 }
                 _toolTip.SetToolTip(_enableRpcButton, "Writes EDEN_NX2_DEBUG_SERVER to nx2_switches.txt for Lichii and Fritchii.");
@@ -5980,14 +8402,14 @@ namespace OcarinaAtlasLauncher
             if (_lichiiConfigured)
             {
                 _enableRpcButton.Text = lPort == 6545
-                    ? "Configured \u21BB"
-                    : string.Format(CultureInfo.InvariantCulture, "Configured (:{0}) \u21BB", lPort);
+                    ? T("configured")
+                    : Tf("configured_port", lPort);
             }
             else
             {
                 _enableRpcButton.Text = lPort == 6545
-                    ? "1-Click Setup Sync"
-                    : string.Format(CultureInfo.InvariantCulture, "Setup Sync (:{0})", lPort);
+                    ? T("setup_sync")
+                    : Tf("setup_sync_port", lPort);
             }
         }
 
@@ -6022,7 +8444,7 @@ namespace OcarinaAtlasLauncher
             try
             {
                 Clipboard.SetText(_logTextBox.Text);
-                _copyLogButton.Text = "Copied!";
+                _copyLogButton.Text = T("copied");
                 _copyLogFeedbackTicks = 2;
             }
             catch (Exception ex)
@@ -6243,7 +8665,7 @@ namespace OcarinaAtlasLauncher
             {
                 _lanComboBox.Visible = false;
                 _lanUrlLink.Visible = false;
-                _lanStatusLabel.Text = "Disabled (localhost only \u2014 127.0.0.1)";
+                _lanStatusLabel.Text = T("lan_disabled");
                 _lanStatusLabel.ForeColor = Theme.Parchment600;
                 _lanStatusLabel.Visible = true;
                 _copyLanUrlButton.Enabled = false;
@@ -6252,7 +8674,7 @@ namespace OcarinaAtlasLauncher
                 _qrButton.FlatAppearance.BorderColor = Theme.Ink700;
                 if (_lanFeedbackTicks == 0)
                 {
-                    _lanHintLabel.Text = "Enable \"Allow LAN access\" in Settings to connect a tablet or phone.";
+                    _lanHintLabel.Text = T("lan_hint_disabled");
                     _lanHintLabel.ForeColor = Theme.Parchment400;
                 }
                 return;
@@ -6262,7 +8684,7 @@ namespace OcarinaAtlasLauncher
             {
                 _lanComboBox.Visible = false;
                 _lanUrlLink.Visible = false;
-                _lanStatusLabel.Text = "No active Wi-Fi or Ethernet connection detected";
+                _lanStatusLabel.Text = T("lan_no_adapter");
                 _lanStatusLabel.ForeColor = Theme.Ember;
                 _lanStatusLabel.Visible = true;
                 _copyLanUrlButton.Enabled = false;
@@ -6271,7 +8693,7 @@ namespace OcarinaAtlasLauncher
                 _qrButton.FlatAppearance.BorderColor = Theme.Ink700;
                 if (_lanFeedbackTicks == 0)
                 {
-                    _lanHintLabel.Text = "Connect your PC to Wi-Fi or Ethernet, then click Refresh.";
+                    _lanHintLabel.Text = T("lan_hint_no_adapter");
                     _lanHintLabel.ForeColor = Theme.Parchment400;
                 }
                 return;
@@ -6289,7 +8711,7 @@ namespace OcarinaAtlasLauncher
                 _lanComboBox.Visible = true;
                 if (_lanFeedbackTicks == 0)
                 {
-                    _lanHintLabel.Text = "Multiple network adapters found \u2014 pick the one your tablet or phone uses.";
+                    _lanHintLabel.Text = T("lan_hint_multi");
                     _lanHintLabel.ForeColor = Theme.Parchment400;
                 }
             }
@@ -6319,7 +8741,7 @@ namespace OcarinaAtlasLauncher
 
                 if (_lanFeedbackTicks == 0)
                 {
-                    _lanHintLabel.Text = "Open this address or click QR Code to connect your tablet, iPad, or phone.";
+                    _lanHintLabel.Text = T("lan_hint_default");
                     _lanHintLabel.ForeColor = Theme.Parchment400;
                 }
             }
@@ -6392,7 +8814,7 @@ namespace OcarinaAtlasLauncher
             try
             {
                 Clipboard.SetText(_selectedLanUrl);
-                _copyLanUrlButton.Text = "Copied!";
+                _copyLanUrlButton.Text = T("copied");
                 _copyFeedbackTicks = 2;
                 AppendLog("Copied LAN URL to clipboard: " + _selectedLanUrl);
             }
@@ -6443,7 +8865,7 @@ namespace OcarinaAtlasLauncher
             if (!lanEnabled)
             {
                 _firewallButton.Enabled = false;
-                _firewallButton.Text = "Localhost Only";
+                _firewallButton.Text = T("localhost_only");
                 _firewallButton.ForeColor = Theme.Parchment600;
                 _firewallButton.FlatAppearance.BorderColor = Theme.Ink700;
                 return;
@@ -6452,13 +8874,13 @@ namespace OcarinaAtlasLauncher
             _firewallButton.Enabled = true;
             if (_firewallCheckedPort == port && _firewallAllowed)
             {
-                _firewallButton.Text = "LAN Allowed";
+                _firewallButton.Text = T("firewall_ready");
                 _firewallButton.ForeColor = Theme.Moss;
                 _firewallButton.FlatAppearance.BorderColor = Theme.Moss;
             }
             else
             {
-                _firewallButton.Text = "Allow LAN Access";
+                _firewallButton.Text = T("allow_firewall");
                 _firewallButton.ForeColor = Theme.Parchment200;
                 _firewallButton.FlatAppearance.BorderColor = Theme.Ink700;
             }
@@ -6647,6 +9069,14 @@ namespace OcarinaAtlasLauncher
                     {
                         psi.EnvironmentVariables["NX2SARIA_SAVE_DIR"] = nx2sariaProfileDir;
                     }
+                }
+                if (!string.IsNullOrEmpty(_launcherSettings.CustomSaveDir))
+                {
+                    psi.EnvironmentVariables["CUSTOM_SAVE_DIR"] = _launcherSettings.CustomSaveDir;
+                }
+                if (!string.IsNullOrEmpty(_launcherSettings.CustomSaveSlot))
+                {
+                    psi.EnvironmentVariables["CUSTOM_SAVE_SLOT"] = _launcherSettings.CustomSaveSlot;
                 }
 
                 Process proc = new Process();
@@ -6916,7 +9346,7 @@ namespace OcarinaAtlasLauncher
 
             if (isStopped)
             {
-                _startStopButton.Text = "Start Map";
+                _startStopButton.Text = T("start_map");
                 _startStopButton.Enabled = true;
                 _startStopButton.BackColor = Theme.Moss;
                 _startStopButton.ForeColor = Theme.Ink950;
@@ -6925,68 +9355,69 @@ namespace OcarinaAtlasLauncher
                 if (_hasStartupError)
                 {
                     _serverDot.DotColor = Theme.Ember;
-                    _serverStatusLabel.Text = "Error";
+                    _serverStatusLabel.Text = T("status_error");
                     _serverStatusLabel.ForeColor = Theme.Ember;
                     _serverStatusPill.BorderColor = Theme.Ember;
-                    _heroSummaryLabel.Text = "Could not start the map server. Check Settings, Logs & About for details.";
+                    _heroSummaryLabel.Text = T("hero_error");
                 }
                 else
                 {
                     _serverDot.DotColor = Theme.Parchment600;
-                    _serverStatusLabel.Text = "Stopped";
+                    _serverStatusLabel.Text = T("status_stopped");
                     _serverStatusLabel.ForeColor = Theme.Parchment400;
                     _serverStatusPill.BorderColor = Theme.Ink700;
-                    _heroSummaryLabel.Text = "Click Start Map to open the interactive Hyrule map in your browser.";
+                    _heroSummaryLabel.Text = T("hero_idle");
                 }
                 _serverUrlLink.Visible = false;
             }
             else if (_lifecycle == ServerLifecycle.Starting)
             {
-                _startStopButton.Text = "Stop Map";
+                _startStopButton.Text = T("stop_map");
                 _startStopButton.Enabled = true;
                 _startStopButton.BackColor = Theme.Ember;
                 _startStopButton.ForeColor = Theme.Ink950;
                 _startStopButton.FlatAppearance.BorderColor = Theme.Ember;
 
                 _serverDot.DotColor = Theme.Ember;
-                _serverStatusLabel.Text = "Starting...";
+                _serverStatusLabel.Text = T("status_starting");
                 _serverStatusLabel.ForeColor = Theme.Ember;
                 _serverStatusPill.BorderColor = Theme.Ember;
-                _heroSummaryLabel.Text = "Starting the local map server...";
+                _heroSummaryLabel.Text = T("hero_starting");
                 _serverUrlLink.Visible = false;
             }
             else if (isRunning)
             {
-                _startStopButton.Text = "Stop Map";
+                _startStopButton.Text = T("stop_map");
                 _startStopButton.Enabled = true;
                 _startStopButton.BackColor = Theme.Ember;
                 _startStopButton.ForeColor = Theme.Ink950;
                 _startStopButton.FlatAppearance.BorderColor = Theme.Ember;
 
                 _serverDot.DotColor = Theme.Moss;
-                _serverStatusLabel.Text = "Running";
+                _serverStatusLabel.Text = T("status_running");
                 _serverStatusLabel.ForeColor = Theme.Moss;
                 _serverStatusPill.BorderColor = Theme.Moss;
-                _heroSummaryLabel.Text = "Map is live and ready in your browser.";
+                _heroSummaryLabel.Text = T("hero_running");
                 _serverUrlLink.Text = GetServerUrl();
                 _serverUrlLink.Visible = true;
             }
             else if (isStopping)
             {
-                _startStopButton.Text = "Stopping...";
+                _startStopButton.Text = T("stopping");
                 _startStopButton.Enabled = false;
                 _startStopButton.BackColor = Theme.Ink800;
                 _startStopButton.ForeColor = Theme.Parchment400;
                 _startStopButton.FlatAppearance.BorderColor = Theme.Ink700;
 
                 _serverDot.DotColor = Theme.Ember;
-                _serverStatusLabel.Text = "Stopping...";
+                _serverStatusLabel.Text = T("status_stopping");
                 _serverStatusLabel.ForeColor = Theme.Ember;
                 _serverStatusPill.BorderColor = Theme.Ember;
-                _heroSummaryLabel.Text = "Shutting down the map server...";
+                _heroSummaryLabel.Text = T("hero_stopping");
                 _serverUrlLink.Visible = false;
             }
 
+            FitHeaderStatusPills();
             _serverStatusPill.Invalidate();
             _openBrowserButton.Enabled = isRunning;
             if (isRunning)
@@ -7005,14 +9436,14 @@ namespace OcarinaAtlasLauncher
             if (_trayOpenBrowserItem != null) _trayOpenBrowserItem.Enabled = isRunning;
             if (_trayToggleServerItem != null)
             {
-                _trayToggleServerItem.Text = isStopped ? "Start Map" : "Stop Map";
+                _trayToggleServerItem.Text = isStopped ? T("start_map") : T("stop_map");
                 _trayToggleServerItem.Enabled = !isStopping;
             }
             if (_trayIcon != null)
             {
                 _trayIcon.Text = isRunning
-                    ? "Ocarina Atlas \u2014 Running (" + GetServerUrl() + ")"
-                    : "Ocarina Atlas \u2014 " + _lifecycle.ToString();
+                    ? "Ocarina Atlas \u2014 " + T("status_running") + " (" + GetServerUrl() + ")"
+                    : "Ocarina Atlas \u2014 " + _serverStatusLabel.Text;
             }
         }
 
@@ -7023,7 +9454,7 @@ namespace OcarinaAtlasLauncher
                 _copyFeedbackTicks--;
                 if (_copyFeedbackTicks == 0 && _copyLanUrlButton != null)
                 {
-                    _copyLanUrlButton.Text = "Copy URL";
+                    _copyLanUrlButton.Text = T("copy_url");
                 }
             }
             if (_copyLogFeedbackTicks > 0)
@@ -7031,7 +9462,7 @@ namespace OcarinaAtlasLauncher
                 _copyLogFeedbackTicks--;
                 if (_copyLogFeedbackTicks == 0 && _copyLogButton != null)
                 {
-                    _copyLogButton.Text = "Copy";
+                    _copyLogButton.Text = T("copy_logs");
                 }
             }
             if (_syncFeedbackTicks > 0)
@@ -7307,6 +9738,7 @@ namespace OcarinaAtlasLauncher
                                     snap.MapId = SimpleJsonParser.GetString(obj, "mapId");
                                     snap.Age = SimpleJsonParser.GetString(obj, "age");
                                     snap.SkulltulaCount = SimpleJsonParser.GetInt(obj, "skulltulaCount");
+                                    snap.AvailableSaveSlots = ExtractStringArray(obj, "availableSaveSlots");
                                     snap.RpcPortOpen = snap.Connected || ProbeTcpPort(lichiiHost, lichiiPort, 150);
                                     snap.RunningEmulator = LichiiConfigManager.DetectRunningEmulator();
                                     if (snap.Connected && string.IsNullOrEmpty(snap.RunningEmulator))
@@ -7343,6 +9775,12 @@ namespace OcarinaAtlasLauncher
                 MarkServerRunning();
             }
 
+            if (snap.ServerHttpOk && snap.AvailableSaveSlots != null &&
+                !StringArraysEqual(snap.AvailableSaveSlots, _lastDiscoveredSaveSlots))
+            {
+                RefreshSaveSlotOptions(snap.AvailableSaveSlots);
+            }
+
             string emuName = !string.IsNullOrEmpty(snap.RunningEmulator) ? snap.RunningEmulator : "Emulator";
 
             if (snap.ServerHttpOk && snap.Connected && snap.EmulatorRunning &&
@@ -7350,10 +9788,10 @@ namespace OcarinaAtlasLauncher
             {
                 _syncFeedbackTicks = 0;
                 _heroLichiiDot.DotColor = Theme.Moss;
-                _heroLichiiLabel.Text = "Live Sync";
+                _heroLichiiLabel.Text = T("emu_live");
                 _heroLichiiLabel.ForeColor = Theme.Moss;
                 _emulatorStatusPill.BorderColor = Theme.Moss;
-                string fullEmuTip = emuName + ": Live Sync";
+                string fullEmuTip = emuName + ": " + T("emu_live");
                 _toolTip.SetToolTip(_emulatorStatusPill, fullEmuTip);
                 _toolTip.SetToolTip(_heroLichiiLabel, fullEmuTip);
 
@@ -7385,10 +9823,10 @@ namespace OcarinaAtlasLauncher
             else if ((snap.ServerHttpOk && snap.Connected) || snap.RpcPortOpen)
             {
                 _heroLichiiDot.DotColor = Theme.Ember;
-                _heroLichiiLabel.Text = "Waiting";
+                _heroLichiiLabel.Text = T("emu_waiting");
                 _heroLichiiLabel.ForeColor = Theme.Ember;
                 _emulatorStatusPill.BorderColor = Theme.Ember;
-                string fullEmuTip = emuName + ": Waiting for game";
+                string fullEmuTip = emuName + ": " + T("emu_waiting");
                 _toolTip.SetToolTip(_emulatorStatusPill, fullEmuTip);
                 _toolTip.SetToolTip(_heroLichiiLabel, fullEmuTip);
 
@@ -7416,10 +9854,10 @@ namespace OcarinaAtlasLauncher
                                 string.Equals(snap.RunningEmulator, "Triforce", StringComparison.OrdinalIgnoreCase) ||
                                 string.Equals(snap.RunningEmulator, "HeyListen", StringComparison.OrdinalIgnoreCase);
                 _heroLichiiDot.DotColor = Theme.Ember;
-                _heroLichiiLabel.Text = isRecomp ? "Waiting" : "RPC Closed";
+                _heroLichiiLabel.Text = isRecomp ? T("emu_waiting") : T("emu_rpc_closed");
                 _heroLichiiLabel.ForeColor = Theme.Ember;
                 _emulatorStatusPill.BorderColor = Theme.Ember;
-                string fullEmuTip = isRecomp ? (snap.RunningEmulator + ": Waiting for game") : (snap.RunningEmulator + ": RPC closed");
+                string fullEmuTip = snap.RunningEmulator + ": " + (isRecomp ? T("emu_waiting") : T("emu_rpc_closed"));
                 _toolTip.SetToolTip(_emulatorStatusPill, fullEmuTip);
                 _toolTip.SetToolTip(_heroLichiiLabel, fullEmuTip);
 
@@ -7447,16 +9885,17 @@ namespace OcarinaAtlasLauncher
             }
             else
             {
-                _heroLichiiDot.DotColor = Theme.Parchment600;
-                _heroLichiiLabel.Text = "No Emu";
-                _heroLichiiLabel.ForeColor = Theme.Parchment400;
-                _emulatorStatusPill.BorderColor = Theme.Ink700;
-                _toolTip.SetToolTip(_emulatorStatusPill, "Emulator: Not detected");
-                _toolTip.SetToolTip(_heroLichiiLabel, "Emulator: Not detected");
+                bool hasSave = snap.ServerHttpOk && string.Equals(snap.Source, "save", StringComparison.OrdinalIgnoreCase) && snap.SkulltulaCount.HasValue;
+                _heroLichiiDot.DotColor = hasSave ? Theme.Gold : Theme.Parchment600;
+                _heroLichiiLabel.Text = hasSave ? T("emu_save") : T("emu_none");
+                _heroLichiiLabel.ForeColor = hasSave ? Theme.Gold : Theme.Parchment400;
+                _emulatorStatusPill.BorderColor = hasSave ? Theme.Gold : Theme.Ink700;
+                _toolTip.SetToolTip(_emulatorStatusPill, hasSave ? T("emu_save") : "Emulator: Not detected");
+                _toolTip.SetToolTip(_heroLichiiLabel, hasSave ? T("emu_save") : "Emulator: Not detected");
 
                 if (_syncFeedbackTicks == 0)
                 {
-                    if (snap.ServerHttpOk && string.Equals(snap.Source, "save", StringComparison.OrdinalIgnoreCase) && snap.SkulltulaCount.HasValue)
+                    if (hasSave)
                     {
                         _lichiiStepDetailLabel.Text = string.Format(
                             CultureInfo.InvariantCulture,
@@ -7466,17 +9905,18 @@ namespace OcarinaAtlasLauncher
                     }
                     else if (_lichiiConfigured)
                     {
-                        _lichiiStepDetailLabel.Text = "Live sync configured. Start Lichii or Fritchii and load Ocarina of Time.";
+                        _lichiiStepDetailLabel.Text = T("sync_hint_configured");
                         _lichiiStepDetailLabel.ForeColor = Theme.Parchment400;
                     }
                     else
                     {
-                        _lichiiStepDetailLabel.Text = "Click 1-Click Setup Sync so the map can follow Link automatically.";
+                        _lichiiStepDetailLabel.Text = T("sync_hint_default");
                         _lichiiStepDetailLabel.ForeColor = Theme.Parchment200;
                     }
                 }
             }
 
+            FitHeaderStatusPills();
             _emulatorStatusPill.Invalidate();
         }
 

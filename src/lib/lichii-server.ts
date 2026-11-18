@@ -212,16 +212,32 @@ function collectLinuxContainerSaveDirs(
   }
 }
 
+let runtimeCustomSaveDir: string | null = null
+// undefined = defer to process.env.CUSTOM_SAVE_SLOT; null = explicitly auto-latest; string = explicit slot
+let runtimeSelectedSaveSlot: string | null | undefined = undefined
+
+function getEffectiveSelectedSaveSlot(env: NodeJS.ProcessEnv = process.env): string | null {
+  if (runtimeSelectedSaveSlot !== undefined) {
+    return runtimeSelectedSaveSlot
+  }
+  const envSlot = env.CUSTOM_SAVE_SLOT?.trim()
+  return envSlot || null
+}
+
 /**
  * Returns candidate emulator save root directories in priority order:
- * explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / CHEEZYEMU_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR / TRIFORCE_SAVE_DIR /
- * NX2SARIA_SAVE_DIR overrides first,
+ * runtime custom save override / CUSTOM_SAVE_DIR first,
+ * then explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / CHEEZYEMU_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR / TRIFORCE_SAVE_DIR /
+ * NX2SARIA_SAVE_DIR overrides,
  * then default %APPDATA%\{fritchii,lichii,eden,cheezyemu}\nand\user\save\0000000000000000,
  * Linux $XDG_DATA_HOME/{fritchii,lichii,eden,cheezyemu}/nand/user/save/0000000000000000 (or ~/.local/share),
  * Longshot/Hookshot/HeyListen/ProjectReLink/Triforce user paths,
  * and existing Linux Wine, Steam/Proton, Flatpak, Bottles, Heroic, and Lutris ~/Games/* paths.
  */
-export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): string[] {
+export function getCandidateSaveDirs(
+  env: NodeJS.ProcessEnv = process.env,
+  includeRuntimeOverride = env === process.env,
+): string[] {
   const dirs: string[] = []
   const seen = new Set<string>()
   const pushUnique = (candidatePath: string) => {
@@ -233,7 +249,12 @@ export function getCandidateSaveDirs(env: NodeJS.ProcessEnv = process.env): stri
     }
   }
 
+  if (includeRuntimeOverride && runtimeCustomSaveDir) {
+    pushUnique(runtimeCustomSaveDir)
+  }
+
   for (const explicitRaw of [
+    env.CUSTOM_SAVE_DIR,
     env.LICHII_SAVE_DIR,
     env.FRITCHII_SAVE_DIR,
     env.CHEEZYEMU_SAVE_DIR,
@@ -1562,19 +1583,22 @@ function collectSlotsInCandidateRoot(rootDir: string): string[] {
   if (!fs.existsSync(rootDir)) return []
   const slots = new Set<string>()
 
-  // 1. Direct slot_* folder (or folder directly holding caption.sav / progress.sav)
+  // Level 4: Direct slot_* folder (or folder directly holding caption.sav / progress.sav)
   addSlotIfValid(rootDir, slots)
-  // 2. Title ID folder (0400486024DEC000) or Longshot UID folder containing slot_*
+  // Level 3: Title ID folder (0400486024DEC000) or Longshot/ReLink/HeyListen UID profile folder containing slot_*
   collectSlotsFromTitleDir(rootDir, slots)
-  // 3. Profile folder (<userId>) containing 0400486024DEC000/slot_*
+  // Level 3 (Switch profile): Profile folder (<userId>) containing 0400486024DEC000/slot_*
   collectSlotsFromTitleDir(path.join(rootDir, OOT_REMAKE_TITLE_ID), slots)
-  // 4. Account folder (0000000000000000) containing <userId>/0400486024DEC000/slot_*
+  // Level 2: Account folder (0000000000000000) or user/save / profile/save containing <userId>/slot_*
   collectSlotsFromAccountDir(rootDir, slots)
 
-  // 5. Full Lichii / Longshot root / nand / user / save directory layouts
+  // Level 1 & 2: Full game install root / LongshotLauncher-data / user / profile / nand layouts
   const saveRoots = [
     path.join(rootDir, 'nand', 'user', 'save'),
     path.join(rootDir, 'user', 'save'),
+    path.join(rootDir, 'LongshotLauncher-data', 'user', 'save'),
+    path.join(rootDir, 'profile', 'save'),
+    path.join(rootDir, 'user'),
     path.join(rootDir, 'save'),
   ]
   if (path.basename(rootDir).toLowerCase() === 'save') {
@@ -1643,51 +1667,105 @@ function isDefaultEmulatorSaveDir(dir: string): boolean {
   )
 }
 
-function findBestSlotInRoot(
-  candidateRoot: string,
-): { dir: string; key: string; mtimeMs: number } | null {
-  const slotDirs = collectSlotsInCandidateRoot(candidateRoot)
-  if (slotDirs.length === 0) return null
+export type SaveSlotSelectionResult = {
+  dir: string
+  key: string
+  mtimeMs: number
+  profileDir: string
+  slotName: string
+  availableSaveSlots: string[]
+}
 
-  let bestDir: string | null = null
-  let bestMtime = -1
-  let bestKey = ''
+function isCustomOverrideDir(dir: string, env: NodeJS.ProcessEnv = process.env): boolean {
+  const normalized = path.resolve(dir)
+  const cmp = (a: string, b: string) =>
+    process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b
+  if (runtimeCustomSaveDir && cmp(normalized, runtimeCustomSaveDir)) return true
+  const envCustom = env.CUSTOM_SAVE_DIR?.trim()
+  if (envCustom && cmp(normalized, path.resolve(envCustom))) return true
+  return false
+}
 
+function statSlotDir(slotDir: string): { dir: string; key: string; mtimeMs: number } | null {
   try {
-    for (const slotDir of slotDirs) {
-      const capPath = path.join(slotDir, 'caption.sav')
-      const progPath = path.join(slotDir, 'progress.sav')
-      const capStat = fs.existsSync(capPath) ? fs.statSync(capPath) : null
-      const progStat = fs.existsSync(progPath) ? fs.statSync(progPath) : null
-      if (!capStat && !progStat) continue
-      const mtime = Math.max(capStat?.mtimeMs ?? 0, progStat?.mtimeMs ?? 0)
-      if (mtime > bestMtime) {
-        bestMtime = mtime
-        bestDir = slotDir
-        bestKey = `${slotDir}:${capStat?.mtimeMs ?? 0}:${progStat?.mtimeMs ?? 0}`
-      }
+    const capPath = path.join(slotDir, 'caption.sav')
+    const progPath = path.join(slotDir, 'progress.sav')
+    const capStat = fs.existsSync(capPath) ? fs.statSync(capPath) : null
+    const progStat = fs.existsSync(progPath) ? fs.statSync(progPath) : null
+    if (!capStat && !progStat) return null
+    const mtimeMs = Math.max(capStat?.mtimeMs ?? 0, progStat?.mtimeMs ?? 0)
+    return {
+      dir: slotDir,
+      key: `${slotDir}:${capStat?.mtimeMs ?? 0}:${progStat?.mtimeMs ?? 0}`,
+      mtimeMs,
     }
   } catch {
     return null
   }
+}
 
-  return bestDir ? { dir: bestDir, key: bestKey, mtimeMs: bestMtime } : null
+function collectAvailableSlotsInProfile(profileDir: string): string[] {
+  const slots = new Set<string>()
+  collectSlotsFromTitleDir(profileDir, slots)
+  return Array.from(slots)
+    .map((dir) => path.basename(dir))
+    .sort()
+}
+
+function resolveSlotInRoot(
+  candidateRoot: string,
+  selectedSlot: string | null,
+): SaveSlotSelectionResult | null {
+  const slotDirs = collectSlotsInCandidateRoot(candidateRoot)
+  if (slotDirs.length === 0) return null
+
+  let bestLatest: { dir: string; key: string; mtimeMs: number } | null = null
+  for (const slotDir of slotDirs) {
+    const info = statSlotDir(slotDir)
+    if (info && (!bestLatest || info.mtimeMs > bestLatest.mtimeMs)) {
+      bestLatest = info
+    }
+  }
+  if (!bestLatest) return null
+
+  const baseName = path.basename(bestLatest.dir)
+  const isNamedSlot = baseName.startsWith('slot_')
+  const profileDir = isNamedSlot ? path.dirname(bestLatest.dir) : bestLatest.dir
+  const availableSaveSlots = isNamedSlot ? collectAvailableSlotsInProfile(profileDir) : []
+
+  let chosen = bestLatest
+  if (selectedSlot && isNamedSlot && availableSaveSlots.includes(selectedSlot)) {
+    const selectedStat = statSlotDir(path.join(profileDir, selectedSlot))
+    if (selectedStat) {
+      chosen = selectedStat
+    }
+  }
+
+  return {
+    dir: chosen.dir,
+    key: chosen.key,
+    mtimeMs: chosen.mtimeMs,
+    profileDir,
+    slotName: path.basename(chosen.dir),
+    availableSaveSlots,
+  }
 }
 
 /**
- * Finds the most recently modified save slot directory across candidate save roots.
- * Explicit *_SAVE_DIR overrides take priority over default %APPDATA%, $XDG_DATA_HOME,
+ * Resolves the active save slot and available slots in the winning profile across candidate save roots.
+ * Custom/explicit *_SAVE_DIR overrides take priority over default %APPDATA%, $XDG_DATA_HOME,
  * and ~/Games recomp roots; among default roots, the most recently modified save slot
- * wins across all installed emulators.
+ * selects the winning profile.
  */
-export function findLatestSaveSlotDir(
+export function resolveSaveSlotSelection(
   candidateDirs: string[] = getCandidateSaveDirs(),
-): { dir: string; key: string; mtimeMs: number } | null {
+  selectedSlot: string | null = getEffectiveSelectedSaveSlot(),
+): SaveSlotSelectionResult | null {
   const explicitDirs: string[] = []
   const defaultDirs: string[] = []
 
   for (const candidateRoot of candidateDirs) {
-    if (isDefaultEmulatorSaveDir(candidateRoot)) {
+    if (!isCustomOverrideDir(candidateRoot) && isDefaultEmulatorSaveDir(candidateRoot)) {
       defaultDirs.push(candidateRoot)
     } else {
       explicitDirs.push(candidateRoot)
@@ -1695,19 +1773,54 @@ export function findLatestSaveSlotDir(
   }
 
   for (const explicitRoot of explicitDirs) {
-    const found = findBestSlotInRoot(explicitRoot)
+    const found = resolveSlotInRoot(explicitRoot, selectedSlot)
     if (found) return found
   }
 
-  let bestOverall: { dir: string; key: string; mtimeMs: number } | null = null
+  let bestDefault: SaveSlotSelectionResult | null = null
+  let bestDefaultLatestMtime = -1
   for (const defaultRoot of defaultDirs) {
-    const found = findBestSlotInRoot(defaultRoot)
-    if (found && (!bestOverall || found.mtimeMs > bestOverall.mtimeMs)) {
-      bestOverall = found
+    // Compare winning profiles by their most recently modified slot so selecting an older slot
+    // doesn't unexpectedly jump to a different emulator's profile.
+    const latestInRoot = resolveSlotInRoot(defaultRoot, null)
+    if (latestInRoot && latestInRoot.mtimeMs > bestDefaultLatestMtime) {
+      bestDefaultLatestMtime = latestInRoot.mtimeMs
+      bestDefault =
+        selectedSlot && latestInRoot.availableSaveSlots.includes(selectedSlot)
+          ? resolveSlotInRoot(defaultRoot, selectedSlot) ?? latestInRoot
+          : latestInRoot
     }
   }
 
-  return bestOverall
+  return bestDefault
+}
+
+/**
+ * Finds the most recently modified save slot directory (or the selected slot if valid) across candidate save roots.
+ */
+export function findLatestSaveSlotDir(
+  candidateDirs: string[] = getCandidateSaveDirs(),
+  selectedSlot: string | null = getEffectiveSelectedSaveSlot(),
+): { dir: string; key: string; mtimeMs: number } | null {
+  const resolved = resolveSaveSlotSelection(candidateDirs, selectedSlot)
+  return resolved ? { dir: resolved.dir, key: resolved.key, mtimeMs: resolved.mtimeMs } : null
+}
+
+/** Sets or clears the runtime selected save slot (`null` = auto-select most recently modified). */
+export function setSelectedSaveSlot(slot: string | null): void {
+  runtimeSelectedSaveSlot = slot?.trim() || null
+  lastSaveSlotScanTime = 0
+  cachedLatestSlotInfo = null
+  cachedSaveSlot = null
+  cachedSaveKey = ''
+  cachedTelemetryState = null
+  cachedTelemetryStateTime = 0
+}
+
+/** Sets or clears the runtime custom save directory and selected save slot override. */
+export function setCustomSaveOverride(dir: string | null, slot: string | null): void {
+  runtimeCustomSaveDir = dir?.trim() ? path.resolve(dir.trim()) : null
+  setSelectedSaveSlot(slot)
 }
 
 export function parseSaveSlot(slotInfo: { dir: string; key: string; mtimeMs: number }): ParsedSaveSlot | null {
@@ -1927,6 +2040,7 @@ export class LichiiRpcClient {
   }
 
   close(): void {
+    this.lastConnectFailureAt = 0
     this.resetSocket(false)
   }
 
@@ -3954,16 +4068,21 @@ export async function getLichiiTelemetryState(): Promise<LichiiTelemetryState> {
 }
 
 const SAVE_SLOT_SCAN_TTL_MS = 1500
-let cachedLatestSlotInfo: { dir: string; key: string; mtimeMs: number } | null = null
+let cachedLatestSlotInfo: SaveSlotSelectionResult | null = null
 let lastSaveSlotScanTime = 0
 
-function getCachedSaveState(): ParsedSaveSlot | null {
+function refreshCachedSaveSlotSelection(): SaveSlotSelectionResult | null {
   const now = Date.now()
   if (now - lastSaveSlotScanTime >= SAVE_SLOT_SCAN_TTL_MS) {
-    cachedLatestSlotInfo = findLatestSaveSlotDir()
+    cachedLatestSlotInfo = resolveSaveSlotSelection()
     lastSaveSlotScanTime = now
   }
-  return cachedLatestSlotInfo ? parseSaveSlot(cachedLatestSlotInfo) : null
+  return cachedLatestSlotInfo
+}
+
+function getCachedSaveState(): ParsedSaveSlot | null {
+  const slotInfo = refreshCachedSaveSlotSelection()
+  return slotInfo ? parseSaveSlot(slotInfo) : null
 }
 
 async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
@@ -4019,8 +4138,12 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
     resetLiveSessionCaches()
   }
 
-  // Skip synchronous save-directory I/O when live memory already provides position and scene.
+  // Skip synchronous save-directory I/O when live memory already provides position and scene,
+  // except on initial scan (or after a runtime slot/folder override) so save metadata stays populated.
   const needsSaveFallback = !tcpConnected || !emulatorRunning || !liveState.position || !liveState.scene
+  if (!needsSaveFallback && lastSaveSlotScanTime === 0) {
+    refreshCachedSaveSlotSelection()
+  }
   const saveState = needsSaveFallback ? getCachedSaveState() : null
 
   const { connected, emulatorRunning: activeEmulatorRunning, source } = deriveConnectionStatus({
@@ -4222,6 +4345,9 @@ async function computeLichiiTelemetryState(): Promise<LichiiTelemetryState> {
     ...(ownedRequirements !== undefined ? { ownedRequirements } : {}),
     lastCollectedSkulltulaId: stickyLastCollectedId,
     lastPickedItem,
+    activeSaveDir: cachedLatestSlotInfo?.profileDir ?? runtimeCustomSaveDir ?? null,
+    activeSaveSlot: cachedLatestSlotInfo?.slotName ?? null,
+    availableSaveSlots: cachedLatestSlotInfo?.availableSaveSlots ?? [],
     source,
     updatedAt: Date.now(),
   }
@@ -4430,6 +4556,137 @@ export function handleLichiiStreamRequest(req: http.IncomingMessage, res: http.S
   }
 }
 
+const MAX_SAVE_SLOT_BODY_BYTES = 16 * 1024
+
+function sendSaveSlotJson(res: http.ServerResponse, statusCode: number, body: unknown): void {
+  const json = JSON.stringify(body)
+  res.writeHead(statusCode, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store, no-cache, must-revalidate',
+    'Content-Length': Buffer.byteLength(json).toString(),
+  })
+  res.end(json)
+}
+
+function readSaveSlotJsonBody(req: http.IncomingMessage): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+    let totalBytes = 0
+    let settled = false
+
+    const fail = (err: Error) => {
+      if (settled) return
+      settled = true
+      reject(err)
+    }
+
+    req.on('data', (chunk: Buffer | string) => {
+      if (settled) return
+      const buf = typeof chunk === 'string' ? Buffer.from(chunk, 'utf8') : chunk
+      totalBytes += buf.byteLength
+      if (totalBytes > MAX_SAVE_SLOT_BODY_BYTES) {
+        req.destroy()
+        fail(new RangeError('Payload too large'))
+        return
+      }
+      chunks.push(buf)
+    })
+
+    req.on('end', () => {
+      if (settled) return
+      settled = true
+      const raw = Buffer.concat(chunks).toString('utf8').trim()
+      if (!raw) {
+        resolve({})
+        return
+      }
+      try {
+        resolve(JSON.parse(raw) as unknown)
+      } catch {
+        reject(new SyntaxError('Invalid JSON'))
+      }
+    })
+
+    req.on('error', (err) => {
+      fail(err instanceof Error ? err : new Error(String(err)))
+    })
+  })
+}
+
+/** Handles `POST /api/saves/slot` (`{ slot?: string | null, saveDir?: string | null }`). Returns true if matched. */
+export async function handleSaveSlotApiRequest(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  pathname: string,
+): Promise<boolean> {
+  if (pathname !== '/api/saves/slot') {
+    return false
+  }
+
+  const method = (req.method || 'GET').toUpperCase()
+  if (method !== 'POST') {
+    res.setHeader('Allow', 'POST')
+    sendSaveSlotJson(res, 405, { error: 'Method not allowed' })
+    return true
+  }
+
+  let parsedBody: unknown
+  try {
+    parsedBody = await readSaveSlotJsonBody(req)
+  } catch (err) {
+    if (err instanceof RangeError) {
+      sendSaveSlotJson(res, 413, { error: 'Payload too large' })
+      return true
+    }
+    sendSaveSlotJson(res, 400, { error: 'Invalid JSON body' })
+    return true
+  }
+
+  if (typeof parsedBody !== 'object' || parsedBody === null || Array.isArray(parsedBody)) {
+    sendSaveSlotJson(res, 400, { error: 'Invalid save slot payload' })
+    return true
+  }
+
+  const body = parsedBody as Record<string, unknown>
+  const hasSlot = Object.prototype.hasOwnProperty.call(body, 'slot')
+  const hasSaveDir = Object.prototype.hasOwnProperty.call(body, 'saveDir')
+
+  if (hasSlot && body.slot !== null && body.slot !== undefined && typeof body.slot !== 'string') {
+    sendSaveSlotJson(res, 400, { error: 'Invalid slot value' })
+    return true
+  }
+  if (hasSaveDir && body.saveDir !== null && body.saveDir !== undefined && typeof body.saveDir !== 'string') {
+    sendSaveSlotJson(res, 400, { error: 'Invalid saveDir value' })
+    return true
+  }
+
+  const nextSlot = hasSlot ? ((body.slot as string | null | undefined) ?? null) : null
+  if (hasSaveDir) {
+    setCustomSaveOverride((body.saveDir as string | null | undefined) ?? null, nextSlot)
+  } else if (hasSlot) {
+    setSelectedSaveSlot(nextSlot)
+  }
+
+  const state = await getSafeTelemetryState()
+  if (sseClients.size > 0) {
+    const comparable = serializeComparableTelemetry(state)
+    if (comparable !== sseLastComparable) {
+      sseLastComparable = comparable
+      const frame = formatSseEvent('telemetry', state)
+      sseLastTelemetryFrame = frame
+      broadcastSseFrame(frame)
+    }
+  }
+
+  sendSaveSlotJson(res, 200, {
+    ok: true,
+    activeSaveDir: state.activeSaveDir ?? null,
+    activeSaveSlot: state.activeSaveSlot ?? null,
+    availableSaveSlots: state.availableSaveSlots ?? [],
+  })
+  return true
+}
+
 export function lichiiTelemetryPlugin(): Plugin {
   const registerMiddleware = (middlewares: {
     use: (
@@ -4447,6 +4704,20 @@ export function lichiiTelemetryPlugin(): Plugin {
 
     middlewares.use('/api/sync/state', (req, res, next) => {
       void handleSyncApiRequest(req, res, '/api/sync/state')
+        .then((handled) => {
+          if (!handled) next()
+        })
+        .catch(() => {
+          if (!res.headersSent) {
+            res.statusCode = 500
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify({ error: 'Internal Server Error' }))
+          }
+        })
+    })
+
+    middlewares.use('/api/saves/slot', (req, res, next) => {
+      void handleSaveSlotApiRequest(req, res, '/api/saves/slot')
         .then((handled) => {
           if (!handled) next()
         })

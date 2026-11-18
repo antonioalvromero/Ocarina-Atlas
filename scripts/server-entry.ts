@@ -9,6 +9,7 @@ import {
   closeLichiiRpc,
   getLichiiTelemetryState,
   handleLichiiStreamRequest,
+  handleSaveSlotApiRequest,
   setStaticAssetRoots,
 } from '../src/lib/lichii-server'
 import {
@@ -361,6 +362,10 @@ async function main(): Promise<void> {
     }
 
     if (await handleSyncApiRequest(req, res, requestUrl.pathname)) {
+      return
+    }
+
+    if (await handleSaveSlotApiRequest(req, res, requestUrl.pathname)) {
       return
     }
 

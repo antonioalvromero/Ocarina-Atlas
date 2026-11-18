@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
 <title>Ocarina Atlas</title>
 <style>
   :root {
@@ -358,7 +358,8 @@
   }
 
   .tab-btn {
-    width: 76px;
+    min-width: 76px;
+    padding: 0 10px;
     height: 24px;
     border: none;
     border-radius: 4px;
@@ -409,6 +410,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 10px 18px;
   }
+  .settings-full { grid-column: 1 / -1; }
 
   .field-label {
     display: block;
@@ -427,6 +429,7 @@
   .input {
     height: 28px;
     width: 100%;
+    min-width: 0;
     padding: 0 8px;
     background: var(--ink-800);
     border: 1px solid var(--ink-700);
@@ -439,6 +442,35 @@
   .input:focus { border-color: var(--gold); }
   .input:disabled { opacity: 0.55; }
   .input-port { width: 110px; }
+
+  select,
+  select.input,
+  .lan-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--ink-800);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.25L6 7.75L9.5 4.25' stroke='%23E0B354' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 9px center;
+    background-size: 12px 12px;
+    border: 1px solid var(--ink-700);
+    color: var(--parchment-50);
+    padding-right: 28px;
+    cursor: pointer;
+    text-overflow: ellipsis;
+  }
+  select:hover:not(:disabled),
+  select.input:hover:not(:disabled),
+  .lan-select:hover:not(:disabled),
+  select:focus,
+  select.input:focus,
+  .lan-select:focus {
+    border-color: var(--gold);
+  }
+  select option {
+    background: var(--ink-900);
+    color: var(--parchment-50);
+  }
 
   .checks {
     display: flex;
@@ -633,7 +665,7 @@
     <!-- Zone 2: Second Screen (LAN) Card -->
     <section class="card">
       <div class="lan-header">
-        <h2 class="card-title">Second Screen (LAN)</h2>
+        <h2 id="lanCardTitle" class="card-title">Second Screen (LAN)</h2>
         <div class="lan-header-actions">
           <button id="lanModeBtn" class="btn btn-sm btn-toggle active" title="Toggle 0.0.0.0 LAN access vs 127.0.0.1 local-only">LAN Mode: On</button>
           <button id="refreshLanBtn" class="btn btn-sm" title="Re-scan active Wi-Fi and Ethernet network adapters">Refresh</button>
@@ -646,7 +678,7 @@
         <button id="copyLanBtn" class="btn btn-sm" disabled>Copy URL</button>
         <button id="showQrBtn" class="btn btn-sm btn-gold" disabled>Show QR</button>
       </div>
-      <p class="lan-hint">Open this address or scan the QR code on your tablet, iPad, or phone.</p>
+      <p id="lanHintText" class="lan-hint">Open this address or scan the QR code on your tablet, iPad, or phone.</p>
     </section>
 
     <!-- Zone 3: Collapsible Drawer -->
@@ -654,9 +686,9 @@
     <section id="drawerPanel" class="drawer-panel">
       <div class="drawer-top">
         <div class="tab-bar">
-          <button class="tab-btn active" data-tab="settings">Settings</button>
-          <button class="tab-btn" data-tab="logs">Logs</button>
-          <button class="tab-btn" data-tab="about">About</button>
+          <button id="tabBtnSettings" class="tab-btn active" data-tab="settings">Settings</button>
+          <button id="tabBtnLogs" class="tab-btn" data-tab="logs">Logs</button>
+          <button id="tabBtnAbout" class="tab-btn" data-tab="about">About</button>
         </div>
         <div class="drawer-top-right">
           <span id="settingsLockHint" class="lock-hint" style="display:none;">Stop server to edit port or host settings</span>
@@ -670,24 +702,66 @@
       <div id="tab-settings" class="tab-pane active">
         <div class="settings-grid">
           <div>
-            <label class="field-label" for="portInput">Map Port</label>
+            <label id="portLabel" class="field-label" for="portInput">Map Port</label>
             <input id="portInput" class="input input-port" type="number" min="1" max="65535" value="3000" />
           </div>
           <div>
-            <label class="field-label" for="lichiiHostInput">Emulator RPC Host</label>
+            <label id="lichiiHostLabel" class="field-label" for="lichiiHostInput">Emulator RPC Host</label>
             <input id="lichiiHostInput" class="input" type="text" value="127.0.0.1" />
           </div>
           <div>
-            <label class="field-label" for="lichiiPortInput">Emulator RPC Port</label>
+            <label id="lichiiPortLabel" class="field-label" for="lichiiPortInput">Emulator RPC Port</label>
             <div class="input-row">
               <input id="lichiiPortInput" class="input input-port" type="number" min="1" max="65535" value="6545" />
               <button id="resetRpcBtn" class="btn btn-sm">Reset</button>
             </div>
           </div>
           <div class="checks">
-            <label class="check-label"><input id="lanCheck" type="checkbox" checked /> Allow LAN access</label>
-            <label class="check-label"><input id="autoOpenCheck" type="checkbox" checked /> Auto-open browser</label>
-            <label class="check-label"><input id="autoStartCheck" type="checkbox" checked /> Auto-start server</label>
+            <label class="check-label"><input id="lanCheck" type="checkbox" checked /> <span id="lanCheckText">Allow LAN access</span></label>
+            <label class="check-label"><input id="autoOpenCheck" type="checkbox" checked /> <span id="autoOpenCheckText">Auto-open browser</span></label>
+            <label class="check-label"><input id="autoStartCheck" type="checkbox" checked /> <span id="autoStartCheckText">Auto-start server</span></label>
+          </div>
+          <div class="settings-full">
+            <label id="saveDirLabel" class="field-label" for="customSaveDirSelect">Save Folder</label>
+            <div class="input-row">
+              <select id="customSaveDirSelect" class="input">
+                <option value="">Auto-detect</option>
+              </select>
+              <button id="addSaveDirBtn" class="btn btn-sm" type="button">Add...</button>
+              <button id="removeSaveDirBtn" class="btn btn-sm" type="button">Remove</button>
+            </div>
+          </div>
+          <div>
+            <label id="saveSlotLabel" class="field-label" for="customSaveSlotSelect">Save Slot</label>
+            <select id="customSaveSlotSelect" class="input">
+              <option value="">Auto (Latest)</option>
+              <option value="slot_00">slot_00</option>
+              <option value="slot_01">slot_01</option>
+              <option value="slot_02">slot_02</option>
+              <option value="slot_03">slot_03</option>
+              <option value="slot_04">slot_04</option>
+              <option value="slot_05">slot_05</option>
+            </select>
+          </div>
+          <div>
+            <label id="languageLabel" class="field-label" for="languageSelect">Language</label>
+            <select id="languageSelect" class="input">
+              <option value="en">English</option>
+              <option value="es">Espa&ntilde;ol</option>
+              <option value="fr">Fran&ccedil;ais</option>
+              <option value="pt">Portugu&ecirc;s</option>
+              <option value="zh-CN">&#31616;&#20307;&#20013;&#25991;</option>
+              <option value="zh-TW">&#32321;&#39636;&#20013;&#25991;</option>
+              <option value="de">Deutsch</option>
+              <option value="it">Italiano</option>
+              <option value="ja">&#26085;&#26412;&#35486;</option>
+              <option value="ko">&#54620;&#44397;&#50612;</option>
+              <option value="nl">Nederlands</option>
+              <option value="ru">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</option>
+              <option value="pl">Polski</option>
+              <option value="tr">T&uuml;rk&ccedil;e</option>
+              <option value="uk">&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;</option>
+            </select>
           </div>
         </div>
         <div class="settings-footer">
@@ -706,20 +780,20 @@
         <div class="about-rows">
           <div class="about-row">
             <span class="about-title">Ocarina Atlas</span>
-            <span class="about-author">by antonioalvromero</span>
+            <span id="aboutByAntonio" class="about-author">by antonioalvromero</span>
             <button class="about-link gold" data-open-url="https://github.com/antonioalvromero/Ocarina-Atlas">github.com/antonioalvromero/Ocarina-Atlas</button>
           </div>
           <div class="about-row">
-            <span class="about-title">Original Map</span>
-            <span class="about-author">by lucasriondel</span>
+            <span id="aboutOriginalMap" class="about-title">Original Map</span>
+            <span id="aboutByLucas" class="about-author">by lucasriondel</span>
             <button class="about-link moss" data-open-url="https://github.com/lucasriondel/oot-remake-map">lucasriondel/oot-remake-map</button>
           </div>
           <div class="about-row">
-            <span class="about-title">Map Artwork</span>
-            <span class="about-author">by Nintend&uacute;o</span>
+            <span id="aboutMapArtwork" class="about-title">Map Artwork</span>
+            <span id="aboutByNintenduo" class="about-author">by Nintend&uacute;o</span>
           </div>
         </div>
-        <div class="license-box">
+        <div id="aboutLicenseBox" class="license-box">
           Free &amp; open-source (GNU AGPL-3.0). Official builds: github.com/antonioalvromero/Ocarina-Atlas &mdash; forks must preserve credits and share source.
         </div>
         <div id="aboutFooter" class="about-footer">
@@ -732,7 +806,7 @@
   <!-- QR Modal -->
   <div id="qrModal" class="modal-backdrop">
     <div class="modal-card">
-      <h3 class="modal-title">Scan QR Code &mdash; Ocarina Atlas</h3>
+      <h3 id="qrModalTitle" class="modal-title">Scan QR Code &mdash; Ocarina Atlas</h3>
       <div id="qrFrame" class="qr-frame"></div>
       <div id="qrUrlText" class="qr-url"></div>
       <button id="closeQrBtn" class="btn btn-sm" style="width:96px;">Close</button>
@@ -746,6 +820,1161 @@
   let selectedLanUrl = ''
   let drawerOpen = false
   let activeTab = 'settings'
+  let currentLang = 'en'
+
+  const I18N = {
+    en: {
+      versionTooltip: 'About Ocarina Atlas, credits & official repository',
+      updatePill: 'Update',
+      updatePillTooltip: 'A newer official release is available',
+      serverStopped: 'Stopped',
+      serverStarting: 'Starting',
+      serverRunning: 'Running',
+      emuNone: 'No Emu',
+      emuLiveSync: 'Live Sync',
+      emuNoneTooltip: 'Emulator: Not detected',
+      emuLiveTooltip: 'Live memory sync active ({scene})',
+      emuDetectedTooltip: '{name} detected (PID {pid})',
+      heroStopped: 'Click Start Map to open the interactive Hyrule map in your browser.',
+      heroStarting: 'Starting Ocarina Atlas server...',
+      heroRunning: 'Map server is running. Open in your browser or connect a second screen.',
+      startMap: 'Start Map',
+      stopMap: 'Stop Map',
+      openMap: 'Open Map',
+      setupSync: '1-Click Setup Sync',
+      syncDefault: 'Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.',
+      syncPtrace: 'ptrace_scope={scope}: run "sudo sysctl kernel.yama.ptrace_scope=0" for live recomp sync.',
+      copySysctl: 'Copy sysctl',
+      copiedBang: 'Copied!',
+      copied: 'Copied',
+      lanTitle: 'Second Screen (LAN)',
+      lanModeOn: 'LAN Mode: On',
+      lanModeOff: 'LAN Mode: Off',
+      lanModeTooltip: 'Toggle 0.0.0.0 LAN access vs 127.0.0.1 local-only',
+      refresh: 'Refresh',
+      refreshTooltip: 'Re-scan active Wi-Fi and Ethernet network adapters',
+      lanChecking: 'Checking network adapters...',
+      lanLocalOnly: 'Local-only mode (127.0.0.1). Enable LAN Mode for tablets/phones.',
+      lanNoInterface: 'No non-virtual IPv4 LAN interface detected.',
+      copyUrl: 'Copy URL',
+      showQr: 'Show QR',
+      lanHint: 'Open this address or scan the QR code on your tablet, iPad, or phone.',
+      drawerLabel: 'Settings, Logs & About',
+      tabSettings: 'Settings',
+      tabLogs: 'Logs',
+      tabAbout: 'About',
+      lockHint: 'Stop server to edit port or host settings',
+      modeLan: 'LAN',
+      modeLocal: 'Local',
+      copy: 'Copy',
+      clear: 'Clear',
+      mapPort: 'Map Port',
+      rpcHost: 'Emulator RPC Host',
+      rpcPort: 'Emulator RPC Port',
+      reset: 'Reset',
+      allowLan: 'Allow LAN access',
+      autoOpen: 'Auto-open browser',
+      autoStart: 'Auto-start server',
+      saveFolder: 'Save Folder',
+      autoDetect: 'Auto-detect',
+      addDots: 'Add...',
+      remove: 'Remove',
+      saveSlot: 'Save Slot',
+      autoLatest: 'Auto (Latest)',
+      language: 'Language',
+      versionLabel: 'Version {ver}',
+      updateAvailable: 'Update available: v{ver}',
+      upToDate: 'Up to date (v{ver})',
+      updateFailed: 'Update check failed',
+      checkingGithub: 'Checking GitHub...',
+      checkUpdates: 'Check for Updates',
+      byAuthor: 'by {author}',
+      originalMap: 'Original Map',
+      mapArtwork: 'Map Artwork',
+      licenseText: 'Free & open-source (GNU AGPL-3.0). Official builds: github.com/antonioalvromero/Ocarina-Atlas — forks must preserve credits and share source.',
+      aboutFooter: 'Version {ver} • Verify official releases via SHA-256 or GitHub attestation',
+      qrTitle: 'Scan QR Code — Ocarina Atlas',
+      close: 'Close',
+    },
+    es: {
+      versionTooltip: 'Acerca de Ocarina Atlas, créditos y repositorio oficial',
+      updatePill: 'Actualizar',
+      updatePillTooltip: 'Hay una versión oficial más reciente disponible',
+      serverStopped: 'Detenido',
+      serverStarting: 'Iniciando',
+      serverRunning: 'Activo',
+      emuNone: 'Sin Emu',
+      emuLiveSync: 'Sinc. en vivo',
+      emuNoneTooltip: 'Emulador: No detectado',
+      emuLiveTooltip: 'Sincronización de memoria activa ({scene})',
+      emuDetectedTooltip: '{name} detectado (PID {pid})',
+      heroStopped: 'Pulsa Iniciar Mapa para abrir el mapa interactivo de Hyrule en tu navegador.',
+      heroStarting: 'Iniciando servidor de Ocarina Atlas...',
+      heroRunning: 'El servidor del mapa está activo. Ábrelo en tu navegador o conecta una segunda pantalla.',
+      startMap: 'Iniciar Mapa',
+      stopMap: 'Detener Mapa',
+      openMap: 'Abrir Mapa',
+      setupSync: 'Configurar Sinc. en 1 clic',
+      syncDefault: 'Permite que Ocarina Atlas siga a Link y marque Skulltulas Doradas automáticamente.',
+      syncPtrace: 'ptrace_scope={scope}: ejecuta "sudo sysctl kernel.yama.ptrace_scope=0" para sinc. en vivo.',
+      copySysctl: 'Copiar sysctl',
+      copiedBang: '¡Copiado!',
+      copied: 'Copiado',
+      lanTitle: 'Segunda Pantalla (LAN)',
+      lanModeOn: 'Modo LAN: Sí',
+      lanModeOff: 'Modo LAN: No',
+      lanModeTooltip: 'Alternar acceso LAN 0.0.0.0 frente a solo local 127.0.0.1',
+      refresh: 'Actualizar',
+      refreshTooltip: 'Volver a buscar adaptadores de red Wi-Fi y Ethernet activos',
+      lanChecking: 'Comprobando adaptadores de red...',
+      lanLocalOnly: 'Modo solo local (127.0.0.1). Activa el Modo LAN para tabletas o teléfonos.',
+      lanNoInterface: 'No se detectó ninguna interfaz LAN IPv4 no virtual.',
+      copyUrl: 'Copiar URL',
+      showQr: 'Mostrar QR',
+      lanHint: 'Abre esta dirección o escanea el código QR en tu tableta, iPad o teléfono.',
+      drawerLabel: 'Ajustes, Registros y Acerca de',
+      tabSettings: 'Ajustes',
+      tabLogs: 'Registros',
+      tabAbout: 'Acerca de',
+      lockHint: 'Detén el servidor para editar el puerto o host',
+      modeLan: 'LAN',
+      modeLocal: 'Local',
+      copy: 'Copiar',
+      clear: 'Limpiar',
+      mapPort: 'Puerto del Mapa',
+      rpcHost: 'Host RPC del Emulador',
+      rpcPort: 'Puerto RPC del Emulador',
+      reset: 'Restablecer',
+      allowLan: 'Permitir acceso LAN',
+      autoOpen: 'Abrir navegador al iniciar',
+      autoStart: 'Iniciar servidor automáticamente',
+      saveFolder: 'Carpeta de Guardado',
+      autoDetect: 'Detección automática',
+      addDots: 'Añadir...',
+      remove: 'Quitar',
+      saveSlot: 'Ranura de Guardado',
+      autoLatest: 'Auto (Más reciente)',
+      language: 'Idioma',
+      versionLabel: 'Versión {ver}',
+      updateAvailable: 'Actualización disponible: v{ver}',
+      upToDate: 'Actualizado (v{ver})',
+      updateFailed: 'Error al buscar actualizaciones',
+      checkingGithub: 'Comprobando GitHub...',
+      checkUpdates: 'Buscar actualizaciones',
+      byAuthor: 'por {author}',
+      originalMap: 'Mapa Original',
+      mapArtwork: 'Arte del Mapa',
+      licenseText: 'Software libre y de código abierto (GNU AGPL-3.0). Compilaciones oficiales: github.com/antonioalvromero/Ocarina-Atlas — los forks deben conservar los créditos y compartir el código.',
+      aboutFooter: 'Versión {ver} • Verifica los lanzamientos oficiales mediante SHA-256 o certificación de GitHub',
+      qrTitle: 'Escanear código QR — Ocarina Atlas',
+      close: 'Cerrar',
+    },
+    fr: {
+      versionTooltip: 'À propos d’Ocarina Atlas, crédits et dépôt officiel',
+      updatePill: 'Mise à jour',
+      updatePillTooltip: 'Une version officielle plus récente est disponible',
+      serverStopped: 'Arrêté',
+      serverStarting: 'Démarrage',
+      serverRunning: 'En cours',
+      emuNone: 'Aucun ému',
+      emuLiveSync: 'Synchro live',
+      emuNoneTooltip: 'Émulateur : non détecté',
+      emuLiveTooltip: 'Synchronisation mémoire active ({scene})',
+      emuDetectedTooltip: '{name} détecté (PID {pid})',
+      heroStopped: 'Cliquez sur Démarrer la carte pour ouvrir la carte interactive d’Hyrule dans votre navigateur.',
+      heroStarting: 'Démarrage du serveur Ocarina Atlas...',
+      heroRunning: 'Le serveur de carte est actif. Ouvrez-le dans votre navigateur ou connectez un second écran.',
+      startMap: 'Démarrer la carte',
+      stopMap: 'Arrêter la carte',
+      openMap: 'Ouvrir la carte',
+      setupSync: 'Config. Synchro 1 clic',
+      syncDefault: 'Permet à Ocarina Atlas de suivre Link et de cocher automatiquement les Skulltulas d’or.',
+      syncPtrace: 'ptrace_scope={scope} : exécutez « sudo sysctl kernel.yama.ptrace_scope=0 » pour la synchro live.',
+      copySysctl: 'Copier sysctl',
+      copiedBang: 'Copié !',
+      copied: 'Copié',
+      lanTitle: 'Second écran (LAN)',
+      lanModeOn: 'Mode LAN : Activé',
+      lanModeOff: 'Mode LAN : Désactivé',
+      lanModeTooltip: 'Basculer entre l’accès LAN 0.0.0.0 et local uniquement 127.0.0.1',
+      refresh: 'Actualiser',
+      refreshTooltip: 'Rechercher les adaptateurs réseau Wi-Fi et Ethernet actifs',
+      lanChecking: 'Vérification des adaptateurs réseau...',
+      lanLocalOnly: 'Mode local uniquement (127.0.0.1). Activez le mode LAN pour tablettes/téléphones.',
+      lanNoInterface: 'Aucune interface LAN IPv4 non virtuelle détectée.',
+      copyUrl: 'Copier l’URL',
+      showQr: 'Afficher QR',
+      lanHint: 'Ouvrez cette adresse ou scannez le code QR sur votre tablette, iPad ou téléphone.',
+      drawerLabel: 'Paramètres, Journaux et À propos',
+      tabSettings: 'Paramètres',
+      tabLogs: 'Journaux',
+      tabAbout: 'À propos',
+      lockHint: 'Arrêtez le serveur pour modifier le port ou l’hôte',
+      modeLan: 'LAN',
+      modeLocal: 'Local',
+      copy: 'Copier',
+      clear: 'Effacer',
+      mapPort: 'Port de la carte',
+      rpcHost: 'Hôte RPC émulateur',
+      rpcPort: 'Port RPC émulateur',
+      reset: 'Réinitialiser',
+      allowLan: 'Autoriser l’accès LAN',
+      autoOpen: 'Ouvrir le navigateur auto.',
+      autoStart: 'Démarrer le serveur auto.',
+      saveFolder: 'Dossier de sauvegarde',
+      autoDetect: 'Détection auto.',
+      addDots: 'Ajouter...',
+      remove: 'Supprimer',
+      saveSlot: 'Emplacement',
+      autoLatest: 'Auto (Plus récent)',
+      language: 'Langue',
+      versionLabel: 'Version {ver}',
+      updateAvailable: 'Mise à jour disponible : v{ver}',
+      upToDate: 'À jour (v{ver})',
+      updateFailed: 'Échec de vérification',
+      checkingGithub: 'Vérification sur GitHub...',
+      checkUpdates: 'Vérifier les mises à jour',
+      byAuthor: 'par {author}',
+      originalMap: 'Carte originale',
+      mapArtwork: 'Illustrations',
+      licenseText: 'Libre et open-source (GNU AGPL-3.0). Builds officiels : github.com/antonioalvromero/Ocarina-Atlas — les forks doivent conserver les crédits et partager le code.',
+      aboutFooter: 'Version {ver} • Vérifiez les versions officielles via SHA-256 ou attestation GitHub',
+      qrTitle: 'Scanner le code QR — Ocarina Atlas',
+      close: 'Fermer',
+    },
+    pt: {
+      versionTooltip: 'Sobre o Ocarina Atlas, créditos e repositório oficial',
+      updatePill: 'Atualizar',
+      updatePillTooltip: 'Uma versão oficial mais recente está disponível',
+      serverStopped: 'Parado',
+      serverStarting: 'Iniciando',
+      serverRunning: 'Em execução',
+      emuNone: 'Sem Emu',
+      emuLiveSync: 'Sinc. ao vivo',
+      emuNoneTooltip: 'Emulador: Não detectado',
+      emuLiveTooltip: 'Sincronização de memória ativa ({scene})',
+      emuDetectedTooltip: '{name} detectado (PID {pid})',
+      heroStopped: 'Clique em Iniciar Mapa para abrir o mapa interativo de Hyrule no navegador.',
+      heroStarting: 'Iniciando servidor do Ocarina Atlas...',
+      heroRunning: 'Servidor do mapa em execução. Abra no navegador ou conecte uma segunda tela.',
+      startMap: 'Iniciar Mapa',
+      stopMap: 'Parar Mapa',
+      openMap: 'Abrir Mapa',
+      setupSync: 'Configurar Sinc. 1-Clique',
+      syncDefault: 'Permite que o Ocarina Atlas siga Link e marque Skulltulas Douradas automaticamente.',
+      syncPtrace: 'ptrace_scope={scope}: execute "sudo sysctl kernel.yama.ptrace_scope=0" para sinc. ao vivo.',
+      copySysctl: 'Copiar sysctl',
+      copiedBang: 'Copiado!',
+      copied: 'Copiado',
+      lanTitle: 'Segunda Tela (LAN)',
+      lanModeOn: 'Modo LAN: Ligado',
+      lanModeOff: 'Modo LAN: Desligado',
+      lanModeTooltip: 'Alternar acesso LAN 0.0.0.0 vs apenas local 127.0.0.1',
+      refresh: 'Atualizar',
+      refreshTooltip: 'Verificar novamente adaptadores Wi-Fi e Ethernet ativos',
+      lanChecking: 'Verificando adaptadores de rede...',
+      lanLocalOnly: 'Modo apenas local (127.0.0.1). Ative o Modo LAN para tablets/celulares.',
+      lanNoInterface: 'Nenhuma interface LAN IPv4 não virtual detectada.',
+      copyUrl: 'Copiar URL',
+      showQr: 'Mostrar QR',
+      lanHint: 'Abra este endereço ou escaneie o código QR no seu tablet, iPad ou celular.',
+      drawerLabel: 'Configurações, Logs e Sobre',
+      tabSettings: 'Configurações',
+      tabLogs: 'Logs',
+      tabAbout: 'Sobre',
+      lockHint: 'Pare o servidor para editar porta ou host',
+      modeLan: 'LAN',
+      modeLocal: 'Local',
+      copy: 'Copiar',
+      clear: 'Limpar',
+      mapPort: 'Porta do Mapa',
+      rpcHost: 'Host RPC do Emulador',
+      rpcPort: 'Porta RPC do Emulador',
+      reset: 'Redefinir',
+      allowLan: 'Permitir acesso LAN',
+      autoOpen: 'Abrir navegador auto.',
+      autoStart: 'Iniciar servidor auto.',
+      saveFolder: 'Pasta de Save',
+      autoDetect: 'Detectar auto.',
+      addDots: 'Adicionar...',
+      remove: 'Remover',
+      saveSlot: 'Slot de Save',
+      autoLatest: 'Auto (Mais recente)',
+      language: 'Idioma',
+      versionLabel: 'Versão {ver}',
+      updateAvailable: 'Atualização disponível: v{ver}',
+      upToDate: 'Atualizado (v{ver})',
+      updateFailed: 'Falha ao verificar atualizações',
+      checkingGithub: 'Verificando GitHub...',
+      checkUpdates: 'Verificar atualizações',
+      byAuthor: 'por {author}',
+      originalMap: 'Mapa Original',
+      mapArtwork: 'Arte do Mapa',
+      licenseText: 'Gratuito e código aberto (GNU AGPL-3.0). Compilações oficiais: github.com/antonioalvromero/Ocarina-Atlas — forks devem preservar os créditos e compartilhar o código.',
+      aboutFooter: 'Versão {ver} • Verifique lançamentos oficiais via SHA-256 ou atestado do GitHub',
+      qrTitle: 'Escanear código QR — Ocarina Atlas',
+      close: 'Fechar',
+    },
+    'zh-CN': {
+      versionTooltip: '关于 Ocarina Atlas、致谢与官方仓库',
+      updatePill: '更新',
+      updatePillTooltip: '有新的官方版本可用',
+      serverStopped: '已停止',
+      serverStarting: '启动中',
+      serverRunning: '运行中',
+      emuNone: '无模拟器',
+      emuLiveSync: '实时同步',
+      emuNoneTooltip: '模拟器：未检测到',
+      emuLiveTooltip: '实时内存同步已激活 ({scene})',
+      emuDetectedTooltip: '已检测到 {name} (PID {pid})',
+      heroStopped: '点击“启动地图”在浏览器中打开海拉鲁交互式地图。',
+      heroStarting: '正在启动 Ocarina Atlas 服务器...',
+      heroRunning: '地图服务器正在运行。请在浏览器中打开或连接副屏。',
+      startMap: '启动地图',
+      stopMap: '停止地图',
+      openMap: '打开地图',
+      setupSync: '一键配置同步',
+      syncDefault: '允许 Ocarina Atlas 自动追踪林克并标记黄金蜘蛛。',
+      syncPtrace: 'ptrace_scope={scope}：请运行 "sudo sysctl kernel.yama.ptrace_scope=0" 以启用实时同步。',
+      copySysctl: '复制 sysctl',
+      copiedBang: '已复制！',
+      copied: '已复制',
+      lanTitle: '副屏 (局域网)',
+      lanModeOn: '局域网模式：开',
+      lanModeOff: '局域网模式：关',
+      lanModeTooltip: '切换 0.0.0.0 局域网访问与 127.0.0.1 仅本地访问',
+      refresh: '刷新',
+      refreshTooltip: '重新扫描活动的 Wi-Fi 和以太网适配器',
+      lanChecking: '正在检测网络适配器...',
+      lanLocalOnly: '仅本地模式 (127.0.0.1)。请开启局域网模式以供平板/手机访问。',
+      lanNoInterface: '未检测到非虚拟 IPv4 局域网接口。',
+      copyUrl: '复制链接',
+      showQr: '显示二维码',
+      lanHint: '在平板、iPad 或手机上打开此地址或扫描二维码。',
+      drawerLabel: '设置、日志与关于',
+      tabSettings: '设置',
+      tabLogs: '日志',
+      tabAbout: '关于',
+      lockHint: '停止服务器后才能编辑端口或主机设置',
+      modeLan: '局域网',
+      modeLocal: '本地',
+      copy: '复制',
+      clear: '清空',
+      mapPort: '地图端口',
+      rpcHost: '模拟器 RPC 主机',
+      rpcPort: '模拟器 RPC 端口',
+      reset: '重置',
+      allowLan: '允许局域网访问',
+      autoOpen: '自动打开浏览器',
+      autoStart: '自动启动服务器',
+      saveFolder: '存档目录',
+      autoDetect: '自动检测',
+      addDots: '添加...',
+      remove: '移除',
+      saveSlot: '存档槽位',
+      autoLatest: '自动（最新）',
+      language: '语言',
+      versionLabel: '版本 {ver}',
+      updateAvailable: '可用更新：v{ver}',
+      upToDate: '已是最新 (v{ver})',
+      updateFailed: '检查更新失败',
+      checkingGithub: '正在检查 GitHub...',
+      checkUpdates: '检查更新',
+      byAuthor: '作者：{author}',
+      originalMap: '原版地图',
+      mapArtwork: '地图美术',
+      licenseText: '免费开源 (GNU AGPL-3.0)。官方构建：github.com/antonioalvromero/Ocarina-Atlas — 衍生版本须保留署名并开源。',
+      aboutFooter: '版本 {ver} • 请通过 SHA-256 或 GitHub 证明验证官方发布',
+      qrTitle: '扫描二维码 — Ocarina Atlas',
+      close: '关闭',
+    },
+    'zh-TW': {
+      versionTooltip: '關於 Ocarina Atlas、致謝與官方儲存庫',
+      updatePill: '更新',
+      updatePillTooltip: '有新的官方版本可用',
+      serverStopped: '已停止',
+      serverStarting: '啟動中',
+      serverRunning: '執行中',
+      emuNone: '無模擬器',
+      emuLiveSync: '即時同步',
+      emuNoneTooltip: '模擬器：未偵測到',
+      emuLiveTooltip: '即時記憶體同步已啟用 ({scene})',
+      emuDetectedTooltip: '已偵測到 {name} (PID {pid})',
+      heroStopped: '點擊「啟動地圖」在瀏覽器中開啟海拉魯互動地圖。',
+      heroStarting: '正在啟動 Ocarina Atlas 伺服器...',
+      heroRunning: '地圖伺服器執行中。請在瀏覽器中開啟或連接副螢幕。',
+      startMap: '啟動地圖',
+      stopMap: '停止地圖',
+      openMap: '開啟地圖',
+      setupSync: '一鍵設定同步',
+      syncDefault: '允許 Ocarina Atlas 自動追蹤林克並標記黃金蜘蛛。',
+      syncPtrace: 'ptrace_scope={scope}：請執行 "sudo sysctl kernel.yama.ptrace_scope=0" 以啟用即時同步。',
+      copySysctl: '複製 sysctl',
+      copiedBang: '已複製！',
+      copied: '已複製',
+      lanTitle: '副螢幕 (區域網路)',
+      lanModeOn: '區網模式：開',
+      lanModeOff: '區網模式：關',
+      lanModeTooltip: '切換 0.0.0.0 區網存取與 127.0.0.1 僅本機存取',
+      refresh: '重新整理',
+      refreshTooltip: '重新掃描使用中的 Wi-Fi 與乙太網路介面卡',
+      lanChecking: '正在檢查網路介面卡...',
+      lanLocalOnly: '僅本機模式 (127.0.0.1)。請開啟區網模式以供平板/手機存取。',
+      lanNoInterface: '未偵測到非虛擬 IPv4 區網介面。',
+      copyUrl: '複製網址',
+      showQr: '顯示 QR 碼',
+      lanHint: '在平板、iPad 或手機上開啟此網址或掃描 QR 碼。',
+      drawerLabel: '設定、日誌與關於',
+      tabSettings: '設定',
+      tabLogs: '日誌',
+      tabAbout: '關於',
+      lockHint: '停止伺服器後才能編輯連接埠或主機設定',
+      modeLan: '區網',
+      modeLocal: '本機',
+      copy: '複製',
+      clear: '清除',
+      mapPort: '地圖連接埠',
+      rpcHost: '模擬器 RPC 主機',
+      rpcPort: '模擬器 RPC 連接埠',
+      reset: '重設',
+      allowLan: '允許區網存取',
+      autoOpen: '自動開啟瀏覽器',
+      autoStart: '自動啟動伺服器',
+      saveFolder: '存檔資料夾',
+      autoDetect: '自動偵測',
+      addDots: '新增...',
+      remove: '移除',
+      saveSlot: '存檔欄位',
+      autoLatest: '自動（最新）',
+      language: '語言',
+      versionLabel: '版本 {ver}',
+      updateAvailable: '有可用更新：v{ver}',
+      upToDate: '已是最新 (v{ver})',
+      updateFailed: '檢查更新失敗',
+      checkingGithub: '正在檢查 GitHub...',
+      checkUpdates: '檢查更新',
+      byAuthor: '作者：{author}',
+      originalMap: '原始地圖',
+      mapArtwork: '地圖美術',
+      licenseText: '免費開源 (GNU AGPL-3.0)。官方建置：github.com/antonioalvromero/Ocarina-Atlas — 衍生版本須保留署名並分享原始碼。',
+      aboutFooter: '版本 {ver} • 請透過 SHA-256 或 GitHub 證明驗證官方版本',
+      qrTitle: '掃描 QR 碼 — Ocarina Atlas',
+      close: '關閉',
+    },
+    de: {
+      versionTooltip: 'Über Ocarina Atlas, Mitwirkende & offizielles Repository',
+      updatePill: 'Update',
+      updatePillTooltip: 'Eine neuere offizielle Version ist verfügbar',
+      serverStopped: 'Gestoppt',
+      serverStarting: 'Startet',
+      serverRunning: 'Läuft',
+      emuNone: 'Kein Emu',
+      emuLiveSync: 'Live-Sync',
+      emuNoneTooltip: 'Emulator: Nicht erkannt',
+      emuLiveTooltip: 'Live-Speichersynchronisierung aktiv ({scene})',
+      emuDetectedTooltip: '{name} erkannt (PID {pid})',
+      heroStopped: 'Klicke auf Karte starten, um die interaktive Hyrule-Karte im Browser zu öffnen.',
+      heroStarting: 'Ocarina-Atlas-Server wird gestartet...',
+      heroRunning: 'Kartenserver läuft. Im Browser öffnen oder zweiten Bildschirm verbinden.',
+      startMap: 'Karte starten',
+      stopMap: 'Karte stoppen',
+      openMap: 'Karte öffnen',
+      setupSync: '1-Klick-Sync-Einrichtung',
+      syncDefault: 'Ermöglicht Ocarina Atlas, Link zu folgen und Goldene Skulltulas automatisch zu markieren.',
+      syncPtrace: 'ptrace_scope={scope}: „sudo sysctl kernel.yama.ptrace_scope=0“ für Live-Sync ausführen.',
+      copySysctl: 'sysctl kopieren',
+      copiedBang: 'Kopiert!',
+      copied: 'Kopiert',
+      lanTitle: 'Zweiter Bildschirm (LAN)',
+      lanModeOn: 'LAN-Modus: An',
+      lanModeOff: 'LAN-Modus: Aus',
+      lanModeTooltip: 'Zwischen 0.0.0.0 LAN-Zugriff und 127.0.0.1 nur lokal wechseln',
+      refresh: 'Aktualisieren',
+      refreshTooltip: 'Aktive WLAN- und Ethernet-Netzwerkadapter erneut scannen',
+      lanChecking: 'Netzwerkadapter werden geprüft...',
+      lanLocalOnly: 'Nur-Lokal-Modus (127.0.0.1). LAN-Modus für Tablets/Smartphones aktivieren.',
+      lanNoInterface: 'Keine nicht-virtuelle IPv4-LAN-Schnittstelle erkannt.',
+      copyUrl: 'URL kopieren',
+      showQr: 'QR zeigen',
+      lanHint: 'Öffne diese Adresse oder scanne den QR-Code auf deinem Tablet, iPad oder Smartphone.',
+      drawerLabel: 'Einstellungen, Protokolle & Über',
+      tabSettings: 'Einstellungen',
+      tabLogs: 'Protokolle',
+      tabAbout: 'Über',
+      lockHint: 'Server stoppen, um Port oder Host zu bearbeiten',
+      modeLan: 'LAN',
+      modeLocal: 'Lokal',
+      copy: 'Kopieren',
+      clear: 'Leeren',
+      mapPort: 'Karten-Port',
+      rpcHost: 'Emulator-RPC-Host',
+      rpcPort: 'Emulator-RPC-Port',
+      reset: 'Zurücksetzen',
+      allowLan: 'LAN-Zugriff erlauben',
+      autoOpen: 'Browser autom. öffnen',
+      autoStart: 'Server autom. starten',
+      saveFolder: 'Speicherordner',
+      autoDetect: 'Auto-Erkennung',
+      addDots: 'Hinzufügen...',
+      remove: 'Entfernen',
+      saveSlot: 'Speicherplatz',
+      autoLatest: 'Auto (Neuester)',
+      language: 'Sprache',
+      versionLabel: 'Version {ver}',
+      updateAvailable: 'Update verfügbar: v{ver}',
+      upToDate: 'Aktuell (v{ver})',
+      updateFailed: 'Update-Prüfung fehlgeschlagen',
+      checkingGithub: 'GitHub wird geprüft...',
+      checkUpdates: 'Nach Updates suchen',
+      byAuthor: 'von {author}',
+      originalMap: 'Originalkarte',
+      mapArtwork: 'Karten-Artwork',
+      licenseText: 'Frei & Open-Source (GNU AGPL-3.0). Offizielle Builds: github.com/antonioalvromero/Ocarina-Atlas — Forks müssen Credits bewahren und Quellcode teilen.',
+      aboutFooter: 'Version {ver} • Offizielle Releases per SHA-256 oder GitHub-Attestierung prüfen',
+      qrTitle: 'QR-Code scannen — Ocarina Atlas',
+      close: 'Schließen',
+    },
+    it: {
+      versionTooltip: 'Informazioni su Ocarina Atlas, crediti e repository ufficiale',
+      updatePill: 'Aggiorna',
+      updatePillTooltip: 'È disponibile una nuova versione ufficiale',
+      serverStopped: 'Fermo',
+      serverStarting: 'Avvio',
+      serverRunning: 'Attivo',
+      emuNone: 'Nessun Emu',
+      emuLiveSync: 'Sinc. Live',
+      emuNoneTooltip: 'Emulatore: Non rilevato',
+      emuLiveTooltip: 'Sincronizzazione memoria attiva ({scene})',
+      emuDetectedTooltip: '{name} rilevato (PID {pid})',
+      heroStopped: 'Fai clic su Avvia Mappa per aprire la mappa interattiva di Hyrule nel browser.',
+      heroStarting: 'Avvio del server Ocarina Atlas...',
+      heroRunning: 'Il server della mappa è attivo. Aprilo nel browser o collega un secondo schermo.',
+      startMap: 'Avvia Mappa',
+      stopMap: 'Ferma Mappa',
+      openMap: 'Apri Mappa',
+      setupSync: 'Config. Sinc. 1-Clic',
+      syncDefault: 'Consente a Ocarina Atlas di seguire Link e segnare automaticamente le Skulltula d’Oro.',
+      syncPtrace: 'ptrace_scope={scope}: esegui "sudo sysctl kernel.yama.ptrace_scope=0" per la sinc. live.',
+      copySysctl: 'Copia sysctl',
+      copiedBang: 'Copiato!',
+      copied: 'Copiato',
+      lanTitle: 'Secondo Schermo (LAN)',
+      lanModeOn: 'Modalità LAN: Sì',
+      lanModeOff: 'Modalità LAN: No',
+      lanModeTooltip: 'Alterna accesso LAN 0.0.0.0 e solo locale 127.0.0.1',
+      refresh: 'Aggiorna',
+      refreshTooltip: 'Scansiona nuovamente gli adattatori Wi-Fi ed Ethernet attivi',
+      lanChecking: 'Verifica adattatori di rete...',
+      lanLocalOnly: 'Modalità solo locale (127.0.0.1). Attiva la modalità LAN per tablet/telefoni.',
+      lanNoInterface: 'Nessuna interfaccia LAN IPv4 non virtuale rilevata.',
+      copyUrl: 'Copia URL',
+      showQr: 'Mostra QR',
+      lanHint: 'Apri questo indirizzo o scansiona il codice QR su tablet, iPad o telefono.',
+      drawerLabel: 'Impostazioni, Log e Info',
+      tabSettings: 'Impostazioni',
+      tabLogs: 'Log',
+      tabAbout: 'Info',
+      lockHint: 'Ferma il server per modificare porta o host',
+      modeLan: 'LAN',
+      modeLocal: 'Locale',
+      copy: 'Copia',
+      clear: 'Pulisci',
+      mapPort: 'Porta Mappa',
+      rpcHost: 'Host RPC Emulatore',
+      rpcPort: 'Porta RPC Emulatore',
+      reset: 'Ripristina',
+      allowLan: 'Consenti accesso LAN',
+      autoOpen: 'Apri browser auto.',
+      autoStart: 'Avvia server auto.',
+      saveFolder: 'Cartella Salvataggi',
+      autoDetect: 'Rilevamento auto.',
+      addDots: 'Aggiungi...',
+      remove: 'Rimuovi',
+      saveSlot: 'Slot Salvataggio',
+      autoLatest: 'Auto (Più recente)',
+      language: 'Lingua',
+      versionLabel: 'Versione {ver}',
+      updateAvailable: 'Aggiornamento disponibile: v{ver}',
+      upToDate: 'Aggiornato (v{ver})',
+      updateFailed: 'Controllo aggiornamenti fallito',
+      checkingGithub: 'Controllo GitHub...',
+      checkUpdates: 'Controlla aggiornamenti',
+      byAuthor: 'di {author}',
+      originalMap: 'Mappa Originale',
+      mapArtwork: 'Grafica Mappa',
+      licenseText: 'Gratuito e open-source (GNU AGPL-3.0). Build ufficiali: github.com/antonioalvromero/Ocarina-Atlas — i fork devono mantenere i crediti e condividere il codice.',
+      aboutFooter: 'Versione {ver} • Verifica le release ufficiali tramite SHA-256 o attestazione GitHub',
+      qrTitle: 'Scansiona codice QR — Ocarina Atlas',
+      close: 'Chiudi',
+    },
+    ja: {
+      versionTooltip: 'Ocarina Atlas について・クレジット・公式リポジトリ',
+      updatePill: '更新',
+      updatePillTooltip: '新しい公式リリースが利用可能です',
+      serverStopped: '停止中',
+      serverStarting: '起動中',
+      serverRunning: '稼働中',
+      emuNone: '未検出',
+      emuLiveSync: 'ライブ同期',
+      emuNoneTooltip: 'エミュレーター: 未検出',
+      emuLiveTooltip: 'ライブメモリ同期中 ({scene})',
+      emuDetectedTooltip: '{name} を検出 (PID {pid})',
+      heroStopped: '「マップ開始」をクリックしてブラウザでハイラル対話マップを開きます。',
+      heroStarting: 'Ocarina Atlas サーバーを起動しています...',
+      heroRunning: 'マップサーバー稼働中。ブラウザで開くかセカンドスクリーンを接続してください。',
+      startMap: 'マップ開始',
+      stopMap: 'マップ停止',
+      openMap: 'マップを開く',
+      setupSync: '1クリック同期設定',
+      syncDefault: 'Ocarina Atlas がリンクを追跡し黄金のスタルチュラを自動記録できるようにします。',
+      syncPtrace: 'ptrace_scope={scope}: ライブ同期には "sudo sysctl kernel.yama.ptrace_scope=0" を実行してください。',
+      copySysctl: 'sysctl をコピー',
+      copiedBang: 'コピーしました！',
+      copied: 'コピー済み',
+      lanTitle: 'セカンドスクリーン (LAN)',
+      lanModeOn: 'LAN モード: オン',
+      lanModeOff: 'LAN モード: オフ',
+      lanModeTooltip: '0.0.0.0 LAN アクセスと 127.0.0.1 ローカル専用を切り替え',
+      refresh: '更新',
+      refreshTooltip: '有効な Wi-Fi および Ethernet アダプターを再スキャン',
+      lanChecking: 'ネットワークアダプターを確認中...',
+      lanLocalOnly: 'ローカル専用モード (127.0.0.1)。タブレット/スマホには LAN モードを有効にしてください。',
+      lanNoInterface: '非仮想 IPv4 LAN インターフェースが検出されませんでした。',
+      copyUrl: 'URL をコピー',
+      showQr: 'QR 表示',
+      lanHint: 'タブレット、iPad、またはスマートフォンでこのアドレスを開くか QR コードをスキャンしてください。',
+      drawerLabel: '設定・ログ・情報',
+      tabSettings: '設定',
+      tabLogs: 'ログ',
+      tabAbout: '情報',
+      lockHint: 'ポートやホストを編集するにはサーバーを停止してください',
+      modeLan: 'LAN',
+      modeLocal: 'ローカル',
+      copy: 'コピー',
+      clear: '消去',
+      mapPort: 'マップポート',
+      rpcHost: 'エミュレーター RPC ホスト',
+      rpcPort: 'エミュレーター RPC ポート',
+      reset: 'リセット',
+      allowLan: 'LAN アクセスを許可',
+      autoOpen: 'ブラウザを自動で開く',
+      autoStart: 'サーバーを自動起動',
+      saveFolder: 'セーブフォルダ',
+      autoDetect: '自動検出',
+      addDots: '追加...',
+      remove: '削除',
+      saveSlot: 'セーブスロット',
+      autoLatest: '自動（最新）',
+      language: '言語',
+      versionLabel: 'バージョン {ver}',
+      updateAvailable: '更新あり: v{ver}',
+      upToDate: '最新です (v{ver})',
+      updateFailed: '更新確認に失敗しました',
+      checkingGithub: 'GitHub を確認中...',
+      checkUpdates: '更新を確認',
+      byAuthor: '作: {author}',
+      originalMap: 'オリジナルマップ',
+      mapArtwork: 'マップアート',
+      licenseText: 'フリー＆オープンソース (GNU AGPL-3.0)。公式ビルド: github.com/antonioalvromero/Ocarina-Atlas — フォーク時はクレジット保持とソース公開が必要です。',
+      aboutFooter: 'バージョン {ver} • SHA-256 または GitHub アテステーションで公式リリースを検証',
+      qrTitle: 'QR コードをスキャン — Ocarina Atlas',
+      close: '閉じる',
+    },
+    ko: {
+      versionTooltip: 'Ocarina Atlas 정보, 크레딧 및 공식 저장소',
+      updatePill: '업데이트',
+      updatePillTooltip: '새 공식 릴리스가 있습니다',
+      serverStopped: '중지됨',
+      serverStarting: '시작 중',
+      serverRunning: '실행 중',
+      emuNone: '에뮬 없음',
+      emuLiveSync: '실시간 동기화',
+      emuNoneTooltip: '에뮬레이터: 감지되지 않음',
+      emuLiveTooltip: '실시간 메모리 동기화 활성 ({scene})',
+      emuDetectedTooltip: '{name} 감지됨 (PID {pid})',
+      heroStopped: '맵 시작을 클릭하여 브라우저에서 하이랄 대화형 지도를 여세요.',
+      heroStarting: 'Ocarina Atlas 서버를 시작하는 중...',
+      heroRunning: '맵 서버가 실행 중입니다. 브라우저에서 열거나 보조 화면을 연결하세요.',
+      startMap: '맵 시작',
+      stopMap: '맵 중지',
+      openMap: '맵 열기',
+      setupSync: '원클릭 동기화 설정',
+      syncDefault: 'Ocarina Atlas가 링크를 추적하고 황금 스탈츄라를 자동으로 표시할 수 있게 합니다.',
+      syncPtrace: 'ptrace_scope={scope}: 실시간 동기화를 위해 "sudo sysctl kernel.yama.ptrace_scope=0"을 실행하세요.',
+      copySysctl: 'sysctl 복사',
+      copiedBang: '복사됨!',
+      copied: '복사됨',
+      lanTitle: '보조 화면 (LAN)',
+      lanModeOn: 'LAN 모드: 켜짐',
+      lanModeOff: 'LAN 모드: 꺼짐',
+      lanModeTooltip: '0.0.0.0 LAN 액세스와 127.0.0.1 로컬 전용 전환',
+      refresh: '새로고침',
+      refreshTooltip: '활성 Wi-Fi 및 이더넷 네트워크 어댑터 다시 검색',
+      lanChecking: '네트워크 어댑터 확인 중...',
+      lanLocalOnly: '로컬 전용 모드 (127.0.0.1). 태블릿/휴대폰에는 LAN 모드를 켜세요.',
+      lanNoInterface: '비-가상 IPv4 LAN 인터페이스가 감지되지 않았습니다.',
+      copyUrl: 'URL 복사',
+      showQr: 'QR 표시',
+      lanHint: '태블릿, iPad 또는 휴대폰에서 이 주소를 열거나 QR 코드를 스캔하세요.',
+      drawerLabel: '설정, 로그 및 정보',
+      tabSettings: '설정',
+      tabLogs: '로그',
+      tabAbout: '정보',
+      lockHint: '포트나 호스트 설정을 편집하려면 서버를 중지하세요',
+      modeLan: 'LAN',
+      modeLocal: '로컬',
+      copy: '복사',
+      clear: '지우기',
+      mapPort: '맵 포트',
+      rpcHost: '에뮬레이터 RPC 호스트',
+      rpcPort: '에뮬레이터 RPC 포트',
+      reset: '초기화',
+      allowLan: 'LAN 액세스 허용',
+      autoOpen: '브라우저 자동 열기',
+      autoStart: '서버 자동 시작',
+      saveFolder: '저장 폴더',
+      autoDetect: '자동 감지',
+      addDots: '추가...',
+      remove: '제거',
+      saveSlot: '저장 슬롯',
+      autoLatest: '자동 (최신)',
+      language: '언어',
+      versionLabel: '버전 {ver}',
+      updateAvailable: '업데이트 가능: v{ver}',
+      upToDate: '최신 버전 (v{ver})',
+      updateFailed: '업데이트 확인 실패',
+      checkingGithub: 'GitHub 확인 중...',
+      checkUpdates: '업데이트 확인',
+      byAuthor: '제작: {author}',
+      originalMap: '원본 지도',
+      mapArtwork: '지도 아트워크',
+      licenseText: '무료 오픈소스 (GNU AGPL-3.0). 공식 빌드: github.com/antonioalvromero/Ocarina-Atlas — 포크 시 크레딧 유지 및 소스 공개 필요.',
+      aboutFooter: '버전 {ver} • SHA-256 또는 GitHub 증명으로 공식 릴리스 확인',
+      qrTitle: 'QR 코드 스캔 — Ocarina Atlas',
+      close: '닫기',
+    },
+    nl: {
+      versionTooltip: 'Over Ocarina Atlas, credits & officiële repository',
+      updatePill: 'Update',
+      updatePillTooltip: 'Er is een nieuwere officiële versie beschikbaar',
+      serverStopped: 'Gestopt',
+      serverStarting: 'Starten',
+      serverRunning: 'Actief',
+      emuNone: 'Geen emu',
+      emuLiveSync: 'Live sync',
+      emuNoneTooltip: 'Emulator: Niet gedetecteerd',
+      emuLiveTooltip: 'Live geheugensynchronisatie actief ({scene})',
+      emuDetectedTooltip: '{name} gedetecteerd (PID {pid})',
+      heroStopped: 'Klik op Start Kaart om de interactieve Hyrule-kaart in je browser te openen.',
+      heroStarting: 'Ocarina Atlas-server wordt gestart...',
+      heroRunning: 'Kaartserver is actief. Open in je browser of verbind een tweede scherm.',
+      startMap: 'Start Kaart',
+      stopMap: 'Stop Kaart',
+      openMap: 'Open Kaart',
+      setupSync: '1-Klik Sync Instellen',
+      syncDefault: 'Laat Ocarina Atlas Link volgen en Gouden Skulltula’s automatisch markeren.',
+      syncPtrace: 'ptrace_scope={scope}: voer "sudo sysctl kernel.yama.ptrace_scope=0" uit voor live sync.',
+      copySysctl: 'Kopieer sysctl',
+      copiedBang: 'Gekopieerd!',
+      copied: 'Gekopieerd',
+      lanTitle: 'Tweede Scherm (LAN)',
+      lanModeOn: 'LAN-modus: Aan',
+      lanModeOff: 'LAN-modus: Uit',
+      lanModeTooltip: 'Schakel tussen 0.0.0.0 LAN-toegang en 127.0.0.1 alleen lokaal',
+      refresh: 'Vernieuwen',
+      refreshTooltip: 'Actieve wifi- en ethernetadapters opnieuw scannen',
+      lanChecking: 'Netwerkadapters controleren...',
+      lanLocalOnly: 'Alleen-lokaalmodus (127.0.0.1). Schakel LAN-modus in voor tablets/telefoons.',
+      lanNoInterface: 'Geen niet-virtuele IPv4 LAN-interface gedetecteerd.',
+      copyUrl: 'URL kopiëren',
+      showQr: 'QR tonen',
+      lanHint: 'Open dit adres of scan de QR-code op je tablet, iPad of telefoon.',
+      drawerLabel: 'Instellingen, Logs & Over',
+      tabSettings: 'Instellingen',
+      tabLogs: 'Logs',
+      tabAbout: 'Over',
+      lockHint: 'Stop de server om poort- of hostinstellingen te wijzigen',
+      modeLan: 'LAN',
+      modeLocal: 'Lokaal',
+      copy: 'Kopiëren',
+      clear: 'Wissen',
+      mapPort: 'Kaartpoort',
+      rpcHost: 'Emulator RPC-host',
+      rpcPort: 'Emulator RPC-poort',
+      reset: 'Herstellen',
+      allowLan: 'LAN-toegang toestaan',
+      autoOpen: 'Browser autom. openen',
+      autoStart: 'Server autom. starten',
+      saveFolder: 'Opslagmap',
+      autoDetect: 'Auto-detectie',
+      addDots: 'Toevoegen...',
+      remove: 'Verwijderen',
+      saveSlot: 'Opslagslot',
+      autoLatest: 'Auto (Nieuwste)',
+      language: 'Taal',
+      versionLabel: 'Versie {ver}',
+      updateAvailable: 'Update beschikbaar: v{ver}',
+      upToDate: 'Up-to-date (v{ver})',
+      updateFailed: 'Controleren op updates mislukt',
+      checkingGithub: 'GitHub controleren...',
+      checkUpdates: 'Controleren op updates',
+      byAuthor: 'door {author}',
+      originalMap: 'Originele kaart',
+      mapArtwork: 'Kaart-artwork',
+      licenseText: 'Gratis & open-source (GNU AGPL-3.0). Officiële builds: github.com/antonioalvromero/Ocarina-Atlas — forks moeten credits behouden en broncode delen.',
+      aboutFooter: 'Versie {ver} • Verifieer officiële releases via SHA-256 of GitHub-attestatie',
+      qrTitle: 'QR-code scannen — Ocarina Atlas',
+      close: 'Sluiten',
+    },
+    ru: {
+      versionTooltip: 'Об Ocarina Atlas, авторах и официальном репозитории',
+      updatePill: 'Обновить',
+      updatePillTooltip: 'Доступна новая официальная версия',
+      serverStopped: 'Остановлен',
+      serverStarting: 'Запуск',
+      serverRunning: 'Работает',
+      emuNone: 'Нет эмул.',
+      emuLiveSync: 'Синхр.',
+      emuNoneTooltip: 'Эмулятор: не обнаружен',
+      emuLiveTooltip: 'Активна синхронизация памяти ({scene})',
+      emuDetectedTooltip: 'Обнаружен {name} (PID {pid})',
+      heroStopped: 'Нажмите «Запустить карту», чтобы открыть интерактивную карту Хайрула в браузере.',
+      heroStarting: 'Запуск сервера Ocarina Atlas...',
+      heroRunning: 'Сервер карты запущен. Откройте в браузере или подключите второй экран.',
+      startMap: 'Запустить карту',
+      stopMap: 'Остановить карту',
+      openMap: 'Открыть карту',
+      setupSync: 'Настроить синхр. в 1 клик',
+      syncDefault: 'Позволяет Ocarina Atlas отслеживать Линка и автоматически отмечать Золотых Скуллтул.',
+      syncPtrace: 'ptrace_scope={scope}: выполните "sudo sysctl kernel.yama.ptrace_scope=0" для живой синхр.',
+      copySysctl: 'Копировать sysctl',
+      copiedBang: 'Скопировано!',
+      copied: 'Скопировано',
+      lanTitle: 'Второй экран (LAN)',
+      lanModeOn: 'Режим LAN: Вкл',
+      lanModeOff: 'Режим LAN: Выкл',
+      lanModeTooltip: 'Переключить доступ по LAN 0.0.0.0 или только локально 127.0.0.1',
+      refresh: 'Обновить',
+      refreshTooltip: 'Повторно проверить активные адаптеры Wi-Fi и Ethernet',
+      lanChecking: 'Проверка сетевых адаптеров...',
+      lanLocalOnly: 'Только локальный режим (127.0.0.1). Включите режим LAN для планшетов/телефонов.',
+      lanNoInterface: 'Невиртуальный интерфейс IPv4 LAN не обнаружен.',
+      copyUrl: 'Копировать URL',
+      showQr: 'Показать QR',
+      lanHint: 'Откройте этот адрес или отсканируйте QR-код на планшете, iPad или телефоне.',
+      drawerLabel: 'Настройки, Журнал и О программе',
+      tabSettings: 'Настройки',
+      tabLogs: 'Журнал',
+      tabAbout: 'О программе',
+      lockHint: 'Остановите сервер, чтобы изменить порт или хост',
+      modeLan: 'LAN',
+      modeLocal: 'Локально',
+      copy: 'Копировать',
+      clear: 'Очистить',
+      mapPort: 'Порт карты',
+      rpcHost: 'RPC-хост эмулятора',
+      rpcPort: 'RPC-порт эмулятора',
+      reset: 'Сбросить',
+      allowLan: 'Разрешить доступ по LAN',
+      autoOpen: 'Автооткрытие браузера',
+      autoStart: 'Автозапуск сервера',
+      saveFolder: 'Папка сохранений',
+      autoDetect: 'Автоопределение',
+      addDots: 'Добавить...',
+      remove: 'Удалить',
+      saveSlot: 'Слот сохранения',
+      autoLatest: 'Авто (Последний)',
+      language: 'Язык',
+      versionLabel: 'Версия {ver}',
+      updateAvailable: 'Доступно обновление: v{ver}',
+      upToDate: 'Актуальная версия (v{ver})',
+      updateFailed: 'Ошибка проверки обновлений',
+      checkingGithub: 'Проверка GitHub...',
+      checkUpdates: 'Проверить обновления',
+      byAuthor: 'автор: {author}',
+      originalMap: 'Оригинальная карта',
+      mapArtwork: 'Оформление карты',
+      licenseText: 'Свободное ПО с открытым кодом (GNU AGPL-3.0). Официальные сборки: github.com/antonioalvromero/Ocarina-Atlas — форки должны сохранять авторство и открывать код.',
+      aboutFooter: 'Версия {ver} • Проверяйте официальные релизы по SHA-256 или аттестации GitHub',
+      qrTitle: 'Сканировать QR-код — Ocarina Atlas',
+      close: 'Закрыть',
+    },
+    pl: {
+      versionTooltip: 'O Ocarina Atlas, autorzy i oficjalne repozytorium',
+      updatePill: 'Aktualizacja',
+      updatePillTooltip: 'Dostępna jest nowsza oficjalna wersja',
+      serverStopped: 'Zatrzymany',
+      serverStarting: 'Uruchamianie',
+      serverRunning: 'Działa',
+      emuNone: 'Brak Emu',
+      emuLiveSync: 'Synchr. na żywo',
+      emuNoneTooltip: 'Emulator: Nie wykryto',
+      emuLiveTooltip: 'Aktywna synchronizacja pamięci ({scene})',
+      emuDetectedTooltip: 'Wykryto {name} (PID {pid})',
+      heroStopped: 'Kliknij Uruchom mapę, aby otworzyć interaktywną mapę Hyrule w przeglądarce.',
+      heroStarting: 'Uruchamianie serwera Ocarina Atlas...',
+      heroRunning: 'Serwer mapy działa. Otwórz w przeglądarce lub podłącz drugi ekran.',
+      startMap: 'Uruchom mapę',
+      stopMap: 'Zatrzymaj mapę',
+      openMap: 'Otwórz mapę',
+      setupSync: 'Konfig. synchr. 1 kliknięciem',
+      syncDefault: 'Pozwala Ocarina Atlas śledzić Linka i automatycznie oznaczać Złote Skulltule.',
+      syncPtrace: 'ptrace_scope={scope}: uruchom "sudo sysctl kernel.yama.ptrace_scope=0" dla synchr. na żywo.',
+      copySysctl: 'Kopiuj sysctl',
+      copiedBang: 'Skopiowano!',
+      copied: 'Skopiowano',
+      lanTitle: 'Drugi ekran (LAN)',
+      lanModeOn: 'Tryb LAN: Wł.',
+      lanModeOff: 'Tryb LAN: Wył.',
+      lanModeTooltip: 'Przełącz dostęp LAN 0.0.0.0 vs tylko lokalny 127.0.0.1',
+      refresh: 'Odśwież',
+      refreshTooltip: 'Ponownie wyszukaj aktywne karty sieciowe Wi-Fi i Ethernet',
+      lanChecking: 'Sprawdzanie kart sieciowych...',
+      lanLocalOnly: 'Tryb tylko lokalny (127.0.0.1). Włącz tryb LAN dla tabletów/telefonów.',
+      lanNoInterface: 'Nie wykryto niewirtualnego interfejsu LAN IPv4.',
+      copyUrl: 'Kopiuj URL',
+      showQr: 'Pokaż QR',
+      lanHint: 'Otwórz ten adres lub zeskanuj kod QR na tablecie, iPadzie lub telefonie.',
+      drawerLabel: 'Ustawienia, Logi i O programie',
+      tabSettings: 'Ustawienia',
+      tabLogs: 'Logi',
+      tabAbout: 'O programie',
+      lockHint: 'Zatrzymaj serwer, aby edytować port lub hosta',
+      modeLan: 'LAN',
+      modeLocal: 'Lokalny',
+      copy: 'Kopiuj',
+      clear: 'Wyczyść',
+      mapPort: 'Port mapy',
+      rpcHost: 'Host RPC emulatora',
+      rpcPort: 'Port RPC emulatora',
+      reset: 'Resetuj',
+      allowLan: 'Zezwalaj na dostęp LAN',
+      autoOpen: 'Autootwieranie przeglądarki',
+      autoStart: 'Autostart serwera',
+      saveFolder: 'Folder zapisów',
+      autoDetect: 'Autowykrywanie',
+      addDots: 'Dodaj...',
+      remove: 'Usuń',
+      saveSlot: 'Slot zapisu',
+      autoLatest: 'Auto (Najnowszy)',
+      language: 'Język',
+      versionLabel: 'Wersja {ver}',
+      updateAvailable: 'Dostępna aktualizacja: v{ver}',
+      upToDate: 'Aktualna (v{ver})',
+      updateFailed: 'Sprawdzanie aktualizacji nie powiodło się',
+      checkingGithub: 'Sprawdzanie GitHub...',
+      checkUpdates: 'Sprawdź aktualizacje',
+      byAuthor: 'autor: {author}',
+      originalMap: 'Oryginalna mapa',
+      mapArtwork: 'Grafika mapy',
+      licenseText: 'Darmowe i otwarte oprogramowanie (GNU AGPL-3.0). Oficjalne wydania: github.com/antonioalvromero/Ocarina-Atlas — forki muszą zachować autorstwo i udostępniać kod.',
+      aboutFooter: 'Wersja {ver} • Weryfikuj oficjalne wydania przez SHA-256 lub poświadczenie GitHub',
+      qrTitle: 'Zeskanuj kod QR — Ocarina Atlas',
+      close: 'Zamknij',
+    },
+    tr: {
+      versionTooltip: 'Ocarina Atlas hakkında, emeği geçenler ve resmi depo',
+      updatePill: 'Güncelle',
+      updatePillTooltip: 'Yeni bir resmi sürüm mevcut',
+      serverStopped: 'Durduruldu',
+      serverStarting: 'Başlatılıyor',
+      serverRunning: 'Çalışıyor',
+      emuNone: 'Emu Yok',
+      emuLiveSync: 'Canlı Senkr.',
+      emuNoneTooltip: 'Emülatör: Algılanmadı',
+      emuLiveTooltip: 'Canlı bellek senkronizasyonu etkin ({scene})',
+      emuDetectedTooltip: '{name} algılandı (PID {pid})',
+      heroStopped: 'Tarayıcınızda etkileşimli Hyrule haritasını açmak için Haritayı Başlat’a tıklayın.',
+      heroStarting: 'Ocarina Atlas sunucusu başlatılıyor...',
+      heroRunning: 'Harita sunucusu çalışıyor. Tarayıcıda açın veya ikinci ekran bağlayın.',
+      startMap: 'Haritayı Başlat',
+      stopMap: 'Haritayı Durdur',
+      openMap: 'Haritayı Aç',
+      setupSync: 'Tek Tıkla Senkr. Kur',
+      syncDefault: 'Ocarina Atlas’ın Link’i takip etmesini ve Altın Skulltula’ları otomatik işaretlemesini sağlar.',
+      syncPtrace: 'ptrace_scope={scope}: canlı senkronizasyon için "sudo sysctl kernel.yama.ptrace_scope=0" çalıştırın.',
+      copySysctl: 'sysctl kopyala',
+      copiedBang: 'Kopyalandı!',
+      copied: 'Kopyalandı',
+      lanTitle: 'İkinci Ekran (LAN)',
+      lanModeOn: 'LAN Modu: Açık',
+      lanModeOff: 'LAN Modu: Kapalı',
+      lanModeTooltip: '0.0.0.0 LAN erişimi ile 127.0.0.1 yalnızca yerel arasında geçiş yap',
+      refresh: 'Yenile',
+      refreshTooltip: 'Etkin Wi-Fi ve Ethernet ağ bağdaştırıcılarını yeniden tara',
+      lanChecking: 'Ağ bağdaştırıcıları kontrol ediliyor...',
+      lanLocalOnly: 'Yalnızca yerel mod (127.0.0.1). Tablet/telefonlar için LAN Modunu açın.',
+      lanNoInterface: 'Sanal olmayan IPv4 LAN arayüzü algılanmadı.',
+      copyUrl: 'URL Kopyala',
+      showQr: 'QR Göster',
+      lanHint: 'Bu adresi açın veya tablet, iPad ya da telefonunuzda QR kodu tarayın.',
+      drawerLabel: 'Ayarlar, Günlükler ve Hakkında',
+      tabSettings: 'Ayarlar',
+      tabLogs: 'Günlükler',
+      tabAbout: 'Hakkında',
+      lockHint: 'Bağlantı noktası veya ana bilgisayarı düzenlemek için sunucuyu durdurun',
+      modeLan: 'LAN',
+      modeLocal: 'Yerel',
+      copy: 'Kopyala',
+      clear: 'Temizle',
+      mapPort: 'Harita Bağlantı Noktası',
+      rpcHost: 'Emülatör RPC Ana Bilgisayarı',
+      rpcPort: 'Emülatör RPC Bağlantı Noktası',
+      reset: 'Sıfırla',
+      allowLan: 'LAN erişimine izin ver',
+      autoOpen: 'Tarayıcıyı otomatik aç',
+      autoStart: 'Sunucuyu otomatik başlat',
+      saveFolder: 'Kayıt Klasörü',
+      autoDetect: 'Otomatik algıla',
+      addDots: 'Ekle...',
+      remove: 'Kaldır',
+      saveSlot: 'Kayıt Yuvası',
+      autoLatest: 'Otomatik (En son)',
+      language: 'Dil',
+      versionLabel: 'Sürüm {ver}',
+      updateAvailable: 'Güncelleme mevcut: v{ver}',
+      upToDate: 'Güncel (v{ver})',
+      updateFailed: 'Güncelleme kontrolü başarısız',
+      checkingGithub: 'GitHub kontrol ediliyor...',
+      checkUpdates: 'Güncellemeleri Denetle',
+      byAuthor: 'geliştiren: {author}',
+      originalMap: 'Orijinal Harita',
+      mapArtwork: 'Harita Çizimleri',
+      licenseText: 'Ücretsiz ve açık kaynak (GNU AGPL-3.0). Resmi derlemeler: github.com/antonioalvromero/Ocarina-Atlas — çatallar emeği geçenleri korumalı ve kaynak kodu paylaşmalıdır.',
+      aboutFooter: 'Sürüm {ver} • Resmi sürümleri SHA-256 veya GitHub doğrulamasıyla kontrol edin',
+      qrTitle: 'QR Kodu Tara — Ocarina Atlas',
+      close: 'Kapat',
+    },
+    uk: {
+      versionTooltip: 'Про Ocarina Atlas, автори та офіційний репозиторій',
+      updatePill: 'Оновити',
+      updatePillTooltip: 'Доступна новіша офіційна версія',
+      serverStopped: 'Зупинено',
+      serverStarting: 'Запуск',
+      serverRunning: 'Працює',
+      emuNone: 'Немає емул.',
+      emuLiveSync: 'Синхр.',
+      emuNoneTooltip: 'Емулятор: не виявлено',
+      emuLiveTooltip: 'Активна синхронізація пам’яті ({scene})',
+      emuDetectedTooltip: 'Виявлено {name} (PID {pid})',
+      heroStopped: 'Натисніть «Запустити мапу», щоб відкрити інтерактивну мапу Гайрулу в браузері.',
+      heroStarting: 'Запуск сервера Ocarina Atlas...',
+      heroRunning: 'Сервер мапи працює. Відкрийте в браузері або підключіть другий екран.',
+      startMap: 'Запустити мапу',
+      stopMap: 'Зупинити мапу',
+      openMap: 'Відкрити мапу',
+      setupSync: 'Налаштувати синхр. в 1 клік',
+      syncDefault: 'Дозволяє Ocarina Atlas стежити за Лінком та автоматично позначати Золотих Скуллтул.',
+      syncPtrace: 'ptrace_scope={scope}: виконайте "sudo sysctl kernel.yama.ptrace_scope=0" для синхр. наживо.',
+      copySysctl: 'Копіювати sysctl',
+      copiedBang: 'Скопійовано!',
+      copied: 'Скопійовано',
+      lanTitle: 'Другий екран (LAN)',
+      lanModeOn: 'Режим LAN: Увімк.',
+      lanModeOff: 'Режим LAN: Вимк.',
+      lanModeTooltip: 'Перемикання між доступом LAN 0.0.0.0 та лише локальним 127.0.0.1',
+      refresh: 'Оновити',
+      refreshTooltip: 'Повторно перевірити активні адаптери Wi-Fi та Ethernet',
+      lanChecking: 'Перевірка мережевих адаптерів...',
+      lanLocalOnly: 'Лише локальний режим (127.0.0.1). Увімкніть режим LAN для планшетів/телефонів.',
+      lanNoInterface: 'Невіртуальний інтерфейс IPv4 LAN не виявлено.',
+      copyUrl: 'Копіювати URL',
+      showQr: 'Показати QR',
+      lanHint: 'Відкрийте цю адресу або відскануйте QR-код на планшеті, iPad чи телефоні.',
+      drawerLabel: 'Налаштування, Журнал і Про програму',
+      tabSettings: 'Налаштування',
+      tabLogs: 'Журнал',
+      tabAbout: 'Про програму',
+      lockHint: 'Зупиніть сервер, щоб змінити порт або хост',
+      modeLan: 'LAN',
+      modeLocal: 'Локально',
+      copy: 'Копіювати',
+      clear: 'Очистити',
+      mapPort: 'Порт мапи',
+      rpcHost: 'RPC-хост емулятора',
+      rpcPort: 'RPC-порт емулятора',
+      reset: 'Скинути',
+      allowLan: 'Дозволити доступ по LAN',
+      autoOpen: 'Автовідкриття браузера',
+      autoStart: 'Автозапуск сервера',
+      saveFolder: 'Тека збережень',
+      autoDetect: 'Автовизначення',
+      addDots: 'Додати...',
+      remove: 'Видалити',
+      saveSlot: 'Слот збереження',
+      autoLatest: 'Авто (Останній)',
+      language: 'Мова',
+      versionLabel: 'Версія {ver}',
+      updateAvailable: 'Доступне оновлення: v{ver}',
+      upToDate: 'Актуальна версія (v{ver})',
+      updateFailed: 'Помилка перевірки оновлень',
+      checkingGithub: 'Перевірка GitHub...',
+      checkUpdates: 'Перевірити оновлення',
+      byAuthor: 'автор: {author}',
+      originalMap: 'Оригінальна мапа',
+      mapArtwork: 'Оформлення мапи',
+      licenseText: 'Вільне ПЗ з відкритим кодом (GNU AGPL-3.0). Офіційні збірки: github.com/antonioalvromero/Ocarina-Atlas — форки мають зберігати авторство та відкривати код.',
+      aboutFooter: 'Версія {ver} • Перевіряйте офіційні релізи через SHA-256 або атестацію GitHub',
+      qrTitle: 'Сканувати QR-код — Ocarina Atlas',
+      close: 'Закрити',
+    },
+  }
+
+  function t(key, vars) {
+    const dict = I18N[currentLang] || I18N.en
+    let text = dict[key] !== undefined ? dict[key] : (I18N.en[key] !== undefined ? I18N.en[key] : key)
+    if (vars) {
+      for (const [k, v] of Object.entries(vars)) {
+        text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v))
+      }
+    }
+    return text
+  }
+
+  function applyStaticTranslations() {
+    document.documentElement.lang = currentLang
+    $('versionBtn').title = t('versionTooltip')
+    $('updatePill').textContent = t('updatePill')
+    $('updatePill').title = t('updatePillTooltip')
+    $('openMapBtn').textContent = t('openMap')
+    $('setupSyncBtn').textContent = t('setupSync')
+    $('copyPtraceBtn').textContent = t('copySysctl')
+    $('lanCardTitle').textContent = t('lanTitle')
+    $('lanModeBtn').title = t('lanModeTooltip')
+    $('refreshLanBtn').textContent = t('refresh')
+    $('refreshLanBtn').title = t('refreshTooltip')
+    $('copyLanBtn').textContent = t('copyUrl')
+    $('showQrBtn').textContent = t('showQr')
+    $('lanHintText').textContent = t('lanHint')
+    $('drawerToggleBtn').textContent = `${drawerOpen ? '\u25BE' : '\u25B8'} ${t('drawerLabel')}`
+    $('tabBtnSettings').textContent = t('tabSettings')
+    $('tabBtnLogs').textContent = t('tabLogs')
+    $('tabBtnAbout').textContent = t('tabAbout')
+    $('settingsLockHint').textContent = t('lockHint')
+    $('copyLogsBtn').textContent = t('copy')
+    $('clearLogsBtn').textContent = t('clear')
+    $('portLabel').textContent = t('mapPort')
+    $('lichiiHostLabel').textContent = t('rpcHost')
+    $('lichiiPortLabel').textContent = t('rpcPort')
+    $('resetRpcBtn').textContent = t('reset')
+    $('lanCheckText').textContent = t('allowLan')
+    $('autoOpenCheckText').textContent = t('autoOpen')
+    $('autoStartCheckText').textContent = t('autoStart')
+    $('saveDirLabel').textContent = t('saveFolder')
+    $('addSaveDirBtn').textContent = t('addDots')
+    $('removeSaveDirBtn').textContent = t('remove')
+    $('saveSlotLabel').textContent = t('saveSlot')
+    $('languageLabel').textContent = t('language')
+    $('checkUpdatesBtn').textContent = t('checkUpdates')
+    $('aboutByAntonio').textContent = t('byAuthor', { author: 'antonioalvromero' })
+    $('aboutOriginalMap').textContent = t('originalMap')
+    $('aboutByLucas').textContent = t('byAuthor', { author: 'lucasriondel' })
+    $('aboutMapArtwork').textContent = t('mapArtwork')
+    $('aboutByNintenduo').textContent = t('byAuthor', { author: 'Nintend\u00FAo' })
+    $('aboutLicenseBox').textContent = t('licenseText')
+    $('qrModalTitle').textContent = t('qrTitle')
+    $('closeQrBtn').textContent = t('close')
+  }
 
   const $ = (id) => document.getElementById(id)
 
@@ -997,40 +2226,43 @@
   function setDrawerOpen(open) {
     drawerOpen = open
     $('drawerPanel').classList.toggle('open', open)
-    $('drawerToggleBtn').innerHTML = open
-      ? '&#9662; Settings, Logs &amp; About'
-      : '&#9656; Settings, Logs &amp; About'
+    $('drawerToggleBtn').textContent = `${open ? '\u25BE' : '\u25B8'} ${t('drawerLabel')}`
     void api.setDrawerOpen(open)
   }
 
   function renderState(s) {
     currentState = s
+    if (typeof s.language === 'string' && I18N[s.language]) {
+      currentLang = s.language
+    }
+    applyStaticTranslations()
+
     const isRunning = s.lifecycle === 'running'
     const isStarting = s.lifecycle === 'starting'
     const isStopped = s.lifecycle === 'stopped'
 
     $('versionBtn').textContent = `v${s.version}`
-    $('aboutFooter').textContent = `Version ${s.version} • Verify official releases via SHA-256 or GitHub attestation`
+    $('aboutFooter').textContent = t('aboutFooter', { ver: s.version })
 
     // Update pill
     $('updatePill').classList.toggle('visible', s.updateInfo?.status === 'update-available')
     if (s.updateInfo?.status === 'update-available') {
-      $('updateStatusText').textContent = `Update available: v${s.updateInfo.latestVersion}`
+      $('updateStatusText').textContent = t('updateAvailable', { ver: s.updateInfo.latestVersion })
       $('updateStatusText').style.color = 'var(--gold)'
     } else if (s.updateInfo?.status === 'up-to-date') {
-      $('updateStatusText').textContent = `Up to date (v${s.version})`
+      $('updateStatusText').textContent = t('upToDate', { ver: s.version })
       $('updateStatusText').style.color = 'var(--moss)'
     } else if (s.updateInfo?.status === 'error') {
-      $('updateStatusText').textContent = `Update check failed`
+      $('updateStatusText').textContent = t('updateFailed')
       $('updateStatusText').style.color = 'var(--ember)'
     } else {
-      $('updateStatusText').textContent = `Version ${s.version}`
+      $('updateStatusText').textContent = t('versionLabel', { ver: s.version })
       $('updateStatusText').style.color = 'var(--parchment-600)'
     }
 
     // Server pill
     $('serverDot').className = `dot ${isRunning ? 'moss' : isStarting ? 'gold' : ''}`
-    $('serverPillText').textContent = isRunning ? 'Running' : isStarting ? 'Starting' : 'Stopped'
+    $('serverPillText').textContent = isRunning ? t('serverRunning') : isStarting ? t('serverStarting') : t('serverStopped')
 
     // Emulator pill
     const tel = s.telemetry
@@ -1038,37 +2270,37 @@
     const rt = s.runtime
     if (liveMem) {
       $('emuDot').className = 'dot moss'
-      $('emuPillText').textContent = rt?.displayName || 'Live Sync'
-      $('emuPill').title = `Live memory sync active (${tel.sceneName || 'Hyrule'})`
+      $('emuPillText').textContent = rt?.displayName || t('emuLiveSync')
+      $('emuPill').title = t('emuLiveTooltip', { scene: tel.sceneName || 'Hyrule' })
     } else if (rt) {
       $('emuDot').className = 'dot gold'
       $('emuPillText').textContent = rt.displayName
-      $('emuPill').title = `${rt.displayName} detected (PID ${rt.pid})`
+      $('emuPill').title = t('emuDetectedTooltip', { name: rt.displayName, pid: rt.pid })
     } else {
       $('emuDot').className = 'dot'
-      $('emuPillText').textContent = 'No Emu'
-      $('emuPill').title = 'Emulator: Not detected'
+      $('emuPillText').textContent = t('emuNone')
+      $('emuPill').title = t('emuNoneTooltip')
     }
 
     // Hero card
     if (isRunning && s.localUrl) {
-      $('heroSummary').textContent = 'Map server is running. Open in your browser or connect a second screen.'
+      $('heroSummary').textContent = t('heroRunning')
       $('localUrlBtn').textContent = s.localUrl
       $('localUrlBtn').classList.remove('hidden')
     } else if (isStarting) {
-      $('heroSummary').textContent = 'Starting Ocarina Atlas server...'
+      $('heroSummary').textContent = t('heroStarting')
       $('localUrlBtn').classList.add('hidden')
     } else {
-      $('heroSummary').textContent = 'Click Start Map to open the interactive Hyrule map in your browser.'
+      $('heroSummary').textContent = t('heroStopped')
       $('localUrlBtn').classList.add('hidden')
     }
 
     const startBtn = $('startStopBtn')
     if (isStopped) {
-      startBtn.textContent = 'Start Map'
+      startBtn.textContent = t('startMap')
       startBtn.classList.remove('stop')
     } else {
-      startBtn.textContent = 'Stop Map'
+      startBtn.textContent = t('stopMap')
       startBtn.classList.add('stop')
     }
     $('openMapBtn').disabled = !isRunning || !s.localUrl
@@ -1082,30 +2314,32 @@
       $('copyPtraceBtn').style.display = needsPtraceHelp ? 'inline-flex' : 'none'
     } else if (needsPtraceHelp) {
       strip.className = 'sync-strip warn'
-      $('syncStripText').textContent = `ptrace_scope=${s.ptraceScope}: run "sudo sysctl kernel.yama.ptrace_scope=0" for live recomp sync.`
+      $('syncStripText').textContent = t('syncPtrace', { scope: s.ptraceScope })
       $('copyPtraceBtn').style.display = 'inline-flex'
     } else {
       strip.className = 'sync-strip'
-      $('syncStripText').textContent = 'Allows Ocarina Atlas to follow Link and mark Gold Skulltulas automatically.'
+      $('syncStripText').textContent = t('syncDefault')
       $('copyPtraceBtn').style.display = 'none'
     }
 
     // Second Screen (LAN) Card
     const isLan = s.host === '0.0.0.0' || s.host === '::'
-    $('lanModeBtn').textContent = isLan ? 'LAN Mode: On' : 'LAN Mode: Off'
+    $('lanModeBtn').textContent = isLan ? t('lanModeOn') : t('lanModeOff')
     $('lanModeBtn').classList.toggle('active', isLan)
-    $('modeBadge').textContent = isLan ? 'LAN' : 'Local'
+    $('modeBadge').textContent = isLan ? t('modeLan') : t('modeLocal')
 
     const container = $('lanUrlContainer')
     const lanUrls = s.lanUrls || []
     if (!isLan) {
       selectedLanUrl = ''
-      container.innerHTML = '<span class="lan-status-text">Local-only mode (127.0.0.1). Enable LAN Mode for tablets/phones.</span>'
+      container.innerHTML = `<span class="lan-status-text"></span>`
+      container.firstChild.textContent = t('lanLocalOnly')
       $('copyLanBtn').disabled = true
       $('showQrBtn').disabled = true
     } else if (lanUrls.length === 0) {
       selectedLanUrl = ''
-      container.innerHTML = '<span class="lan-status-text">No non-virtual IPv4 LAN interface detected.</span>'
+      container.innerHTML = `<span class="lan-status-text"></span>`
+      container.firstChild.textContent = t('lanNoInterface')
       $('copyLanBtn').disabled = true
       $('showQrBtn').disabled = true
     } else if (lanUrls.length === 1) {
@@ -1141,6 +2375,43 @@
     $('lanCheck').checked = isLan
     $('autoOpenCheck').checked = s.autoOpen
     $('autoStartCheck').checked = s.autoStart
+    $('languageSelect').value = currentLang
+    const dirSelect = $('customSaveDirSelect')
+    const savedDirs = Array.isArray(s.savedSaveDirs) ? s.savedSaveDirs : []
+    const currentDir = s.customSaveDir || ''
+    const allDirs = Array.from(new Set([...savedDirs, ...(currentDir ? [currentDir] : [])]))
+    dirSelect.innerHTML = ''
+    const autoDirOpt = document.createElement('option')
+    autoDirOpt.value = ''
+    autoDirOpt.textContent = t('autoDetect')
+    dirSelect.appendChild(autoDirOpt)
+    for (const dir of allDirs) {
+      const opt = document.createElement('option')
+      opt.value = dir
+      opt.textContent = dir
+      opt.title = dir
+      dirSelect.appendChild(opt)
+    }
+    dirSelect.value = currentDir
+    $('removeSaveDirBtn').disabled = !currentDir
+
+    const slotSelect = $('customSaveSlotSelect')
+    const defaultSlots = ['slot_00', 'slot_01', 'slot_02', 'slot_03', 'slot_04', 'slot_05']
+    const discoveredSlots = Array.isArray(s.telemetry?.availableSaveSlots) ? s.telemetry.availableSaveSlots : []
+    const allSlots = Array.from(new Set([...defaultSlots, ...discoveredSlots, ...(s.customSaveSlot ? [s.customSaveSlot] : [])]))
+    const currentVal = s.customSaveSlot || ''
+    slotSelect.innerHTML = ''
+    const autoOpt = document.createElement('option')
+    autoOpt.value = ''
+    autoOpt.textContent = t('autoLatest')
+    slotSelect.appendChild(autoOpt)
+    for (const slot of allSlots) {
+      const opt = document.createElement('option')
+      opt.value = slot
+      opt.textContent = slot
+      slotSelect.appendChild(opt)
+    }
+    slotSelect.value = currentVal
 
     const lockFields = !isStopped
     $('portInput').disabled = lockFields
@@ -1176,8 +2447,8 @@
   $('copyPtraceBtn').onclick = async () => {
     await api.copyText('sudo sysctl kernel.yama.ptrace_scope=0')
     const btn = $('copyPtraceBtn')
-    btn.textContent = 'Copied!'
-    setTimeout(() => { btn.textContent = 'Copy sysctl' }, 1400)
+    btn.textContent = t('copiedBang')
+    setTimeout(() => { btn.textContent = t('copySysctl') }, 1400)
   }
 
   $('lanModeBtn').onclick = () => {
@@ -1192,8 +2463,8 @@
     if (!selectedLanUrl) return
     await api.copyText(selectedLanUrl)
     const btn = $('copyLanBtn')
-    btn.textContent = 'Copied!'
-    setTimeout(() => { btn.textContent = 'Copy URL' }, 1400)
+    btn.textContent = t('copiedBang')
+    setTimeout(() => { btn.textContent = t('copyUrl') }, 1400)
   }
 
   $('showQrBtn').onclick = () => {
@@ -1221,9 +2492,30 @@
   $('lanCheck').onchange = () => void api.toggleLanMode($('lanCheck').checked)
   $('autoOpenCheck').onchange = () => void api.updateSettings({ autoOpen: $('autoOpenCheck').checked })
   $('autoStartCheck').onchange = () => void api.updateSettings({ autoStart: $('autoStartCheck').checked })
+  $('customSaveDirSelect').onchange = () => void api.updateSettings({ customSaveDir: $('customSaveDirSelect').value })
+  $('addSaveDirBtn').onclick = () => void api.browseSaveDir()
+  $('removeSaveDirBtn').onclick = () => void api.removeSaveDir($('customSaveDirSelect').value)
+  $('customSaveSlotSelect').onchange = () => void api.updateSettings({ customSaveSlot: $('customSaveSlotSelect').value })
+  $('languageSelect').onchange = () => {
+    const nextLang = $('languageSelect').value
+    if (I18N[nextLang]) {
+      currentLang = nextLang
+      if (currentState) {
+        currentState.language = nextLang
+        renderState(currentState)
+      } else {
+        applyStaticTranslations()
+      }
+    }
+    if (typeof api.setLanguage === 'function') {
+      void api.setLanguage(nextLang)
+    } else {
+      void api.updateSettings({ language: nextLang })
+    }
+  }
 
   $('checkUpdatesBtn').onclick = async () => {
-    $('updateStatusText').textContent = 'Checking GitHub...'
+    $('updateStatusText').textContent = t('checkingGithub')
     $('updateStatusText').style.color = 'var(--parchment-400)'
     await api.checkUpdates()
   }
@@ -1232,8 +2524,8 @@
     const text = $('logBox').innerText
     if (text) {
       await api.copyText(text)
-      $('copyLogsBtn').textContent = 'Copied'
-      setTimeout(() => { $('copyLogsBtn').textContent = 'Copy' }, 1200)
+      $('copyLogsBtn').textContent = t('copied')
+      setTimeout(() => { $('copyLogsBtn').textContent = t('copy') }, 1200)
     }
   }
 

@@ -69,6 +69,8 @@ Options:
   --local-only        Bind loopback only (127.0.0.1)
   --lichii-host <h>   Emulator/Lichii debug RPC host (default: ${DEFAULT_LICHII_HOST})
   --lichii-port <p>   Emulator/Lichii debug RPC port (default: ${DEFAULT_LICHII_PORT})
+  --save-dir <path>   Custom save folder path (overrides auto-detection)
+  --save-slot <slot>  Preferred save slot (e.g. slot_00)
   --no-browser        Do not auto-open the browser via xdg-open
   --cli, --no-gui     Force terminal CLI mode even when a display server is available
   --gui               Force local GUI launcher window
@@ -93,6 +95,8 @@ export function parseArgs(argv, env = process.env) {
     port: parsePort(env.PORT, DEFAULT_PORT, true),
     lichiiHost: env.LICHII_HOST?.trim() || env.FRITCHII_HOST?.trim() || DEFAULT_LICHII_HOST,
     lichiiPort: parsePort(env.LICHII_PORT || env.FRITCHII_PORT, DEFAULT_LICHII_PORT, false),
+    saveDir: env.CUSTOM_SAVE_DIR?.trim() || '',
+    saveSlot: env.CUSTOM_SAVE_SLOT?.trim() || '',
     noBrowser: false,
     cli: false,
     noGui: false,
@@ -143,6 +147,14 @@ export function parseArgs(argv, env = process.env) {
       const parsed = parsePort(val, -1, false)
       if (parsed < 1) throw new Error(`Invalid --lichii-port value: ${val}`)
       opts.lichiiPort = parsed
+    } else if (key === '--save-dir') {
+      const val = inlineVal ?? argv[++i]
+      if (!val || !val.trim()) throw new Error('--save-dir requires a value')
+      opts.saveDir = val.trim()
+    } else if (key === '--save-slot') {
+      const val = inlineVal ?? argv[++i]
+      if (!val || !val.trim()) throw new Error('--save-slot requires a value')
+      opts.saveSlot = val.trim()
     } else {
       throw new Error(`Unknown option: ${arg}`)
     }
@@ -782,6 +794,12 @@ async function main() {
   }
   if (nx2sariaSaveDir && !serverEnv.NX2SARIA_SAVE_DIR) {
     serverEnv.NX2SARIA_SAVE_DIR = nx2sariaSaveDir
+  }
+  if (opts.saveDir) {
+    serverEnv.CUSTOM_SAVE_DIR = opts.saveDir
+  }
+  if (opts.saveSlot) {
+    serverEnv.CUSTOM_SAVE_SLOT = opts.saveSlot
   }
 
   const serverChild = spawn(

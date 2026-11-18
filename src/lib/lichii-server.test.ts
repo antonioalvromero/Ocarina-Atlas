@@ -1,7 +1,9 @@
 import fs from 'node:fs'
+import type http from 'node:http'
 import net from 'node:net'
 import os from 'node:os'
 import path from 'node:path'
+import { PassThrough } from 'node:stream'
 import { describe, expect, it, vi } from 'vitest'
 import { dataset, formatFloorLabel } from './data'
 import {
@@ -19,6 +21,7 @@ import {
   getLichiiPort,
   getLichiiTelemetryState,
   getMinGuestHeapPtr,
+  handleSaveSlotApiRequest,
   GHOST_SHOP_COUPON_BOTTLE_ITEM_ID,
   GHOST_SHOP_COUPON_NUM_HASH,
   isValidSub36Buffer,
@@ -43,6 +46,9 @@ import {
   parseSaveBufHeartPieceBoolRange,
   parseSaveSlot,
   projectToPlaceMap,
+  resolveSaveSlotSelection,
+  setCustomSaveOverride,
+  setSelectedSaveSlot,
   resolveEffectiveScene,
   scanGdmContainerHashTableBuffer,
   validateMainBaseHeader,
@@ -774,6 +780,193 @@ describe('Lichii environment config helpers', () => {
       expect(explicitFound?.dir).toBe(explicitDir)
     } finally {
       homeSpy.mockRestore()
+      fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('gives CUSTOM_SAVE_DIR highest priority in getCandidateSaveDirs() and resolves all 4 folder levels with availableSaveSlots', () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'custom-save-levels-'))
+    const writeSlotCap = (slotDir: string, mtimeSec: number) => {
+      fs.mkdirSync(slotDir, { recursive: true })
+      const capPath = path.join(slotDir, 'caption.sav')
+      fs.writeFileSync(capPath, Buffer.alloc(64))
+      fs.utimesSync(capPath, mtimeSec, mtimeSec)
+    }
+
+    try {
+      const customRoot = path.join(tmpRoot, 'custom-dir')
+      const lichiiRoot = path.join(tmpRoot, 'lichii-dir')
+      const candidates = getCandidateSaveDirs({
+        CUSTOM_SAVE_DIR: customRoot,
+        LICHII_SAVE_DIR: lichiiRoot,
+      })
+      expect(candidates[0]).toBe(path.resolve(customRoot))
+      expect(candidates[1]).toBe(path.resolve(lichiiRoot))
+
+      // Level 1a: Game install root -> user/save/<uid>/slot_*
+      const heylistenRoot = path.join(tmpRoot, 'HeyListen')
+      const heylistenProfile = path.join(heylistenRoot, 'user', 'save', 'a1b2c3d4e5f60718293a4b5c6d7e8f90')
+      writeSlotCap(path.join(heylistenProfile, 'slot_02'), 1000)
+      writeSlotCap(path.join(heylistenProfile, 'slot_00'), 2000)
+      writeSlotCap(path.join(heylistenProfile, 'slot_01'), 1500)
+
+      const l1Hey = resolveSaveSlotSelection(getCandidateSaveDirs({ CUSTOM_SAVE_DIR: heylistenRoot }), null)
+      expect(l1Hey?.dir).toBe(path.join(heylistenProfile, 'slot_00'))
+      expect(l1Hey?.profileDir).toBe(heylistenProfile)
+      expect(l1Hey?.slotName).toBe('slot_00')
+      expect(l1Hey?.availableSaveSlots).toEqual(['slot_00', 'slot_01', 'slot_02'])
+
+      // Selecting an older valid slot returns that slot; invalid slot falls back to latest
+      const l1Selected = resolveSaveSlotSelection(getCandidateSaveDirs({ CUSTOM_SAVE_DIR: heylistenRoot }), 'slot_02')
+      expect(l1Selected?.dir).toBe(path.join(heylistenProfile, 'slot_02'))
+      expect(l1Selected?.slotName).toBe('slot_02')
+      const l1Invalid = resolveSaveSlotSelection(getCandidateSaveDirs({ CUSTOM_SAVE_DIR: heylistenRoot }), 'slot_99')
+      expect(l1Invalid?.dir).toBe(path.join(heylistenProfile, 'slot_00'))
+
+      // Level 1b: Longshot install root -> LongshotLauncher-data/user/save/<uid>/slot_*
+      const longshotInstallRoot = path.join(tmpRoot, 'LONGSHOT')
+      const longshotLauncherData = path.join(longshotInstallRoot, 'LongshotLauncher-data')
+      const longshotProfile = path.join(longshotLauncherData, 'user', 'save', '11112222333344445555666677778888')
+      writeSlotCap(path.join(longshotProfile, 'slot_00'), 1000)
+      writeSlotCap(path.join(longshotProfile, 'slot_03'), 3000)
+      expect(
+        resolveSaveSlotSelection(getCandidateSaveDirs({ CUSTOM_SAVE_DIR: longshotInstallRoot }), null)?.dir,
+      ).toBe(path.join(longshotProfile, 'slot_03'))
+      expect(
+        resolveSaveSlotSelection(getCandidateSaveDirs({ CUSTOM_SAVE_DIR: longshotLauncherData }), null)?.dir,
+      ).toBe(path.join(longshotProfile, 'slot_03'))
+
+      // Level 1c: OOT-PC root -> profile/save/<uid>/slot_*
+      const ootPcRoot = path.join(tmpRoot, 'OOT-PC')
+      const ootPcProfile = path.join(ootPcRoot, 'profile', 'save', 'fedcba9876543210fedcba9876543210')
+      writeSlotCap(path.join(ootPcProfile, 'slot_01'), 4000)
+      expect(
+        resolveSaveSlotSelection(getCandidateSaveDirs({ CUSTOM_SAVE_DIR: ootPcRoot }), null)?.dir,
+      ).toBe(path.join(ootPcProfile, 'slot_01'))
+
+      // Level 2: user/save or profile/save folder
+      expect(
+        resolveSaveSlotSelection(
+          getCandidateSaveDirs({ CUSTOM_SAVE_DIR: path.join(heylistenRoot, 'user', 'save') }),
+          null,
+        )?.availableSaveSlots,
+      ).toEqual(['slot_00', 'slot_01', 'slot_02'])
+
+      // Level 3: <uid> profile folder
+      expect(
+        resolveSaveSlotSelection(getCandidateSaveDirs({ CUSTOM_SAVE_DIR: heylistenProfile }), 'slot_01')?.dir,
+      ).toBe(path.join(heylistenProfile, 'slot_01'))
+
+      // Level 4: Direct slot_02 folder still exposes sibling slots in the resolved profile
+      const directSlot02 = path.join(heylistenProfile, 'slot_02')
+      const l4Direct = resolveSaveSlotSelection(getCandidateSaveDirs({ CUSTOM_SAVE_DIR: directSlot02 }), null)
+      expect(l4Direct?.dir).toBe(directSlot02)
+      expect(l4Direct?.profileDir).toBe(heylistenProfile)
+      expect(l4Direct?.slotName).toBe('slot_02')
+      expect(l4Direct?.availableSaveSlots).toEqual(['slot_00', 'slot_01', 'slot_02'])
+
+      // Switching slot when CUSTOM_SAVE_DIR points to direct slot_02
+      const l4Switched = resolveSaveSlotSelection(getCandidateSaveDirs({ CUSTOM_SAVE_DIR: directSlot02 }), 'slot_01')
+      expect(l4Switched?.dir).toBe(path.join(heylistenProfile, 'slot_01'))
+    } finally {
+      fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('supports setSelectedSaveSlot(), setCustomSaveOverride(), and POST /api/saves/slot live switching', async () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'save-slot-api-'))
+    const writeCaptionWithSkulltulas = (slotDir: string, skulltulaCount: number, mtimeSec: number) => {
+      fs.mkdirSync(slotDir, { recursive: true })
+      const cap = Buffer.alloc(64)
+      cap.writeUInt32LE(0x38, 8) // dataOff
+      cap.writeUInt32LE(0xdc941483, 0x28)
+      cap.writeUInt32LE(skulltulaCount, 0x2c)
+      const capPath = path.join(slotDir, 'caption.sav')
+      fs.writeFileSync(capPath, cap)
+      fs.utimesSync(capPath, mtimeSec, mtimeSec)
+    }
+
+    const invokeSaveSlotEndpoint = async (method: string, bodyText?: string) => {
+      const stream = new PassThrough()
+      const reqStream = stream as unknown as http.IncomingMessage
+      reqStream.method = method
+      reqStream.headers = {}
+      const chunks: Buffer[] = []
+      let statusCode = 200
+      const headers: Record<string, string | string[]> = {}
+      const res = {
+        setHeader(name: string, value: string | string[]) {
+          headers[name.toLowerCase()] = value
+        },
+        writeHead(code: number, hdrs?: Record<string, string>) {
+          statusCode = code
+          if (hdrs) {
+            for (const [k, v] of Object.entries(hdrs)) {
+              headers[k.toLowerCase()] = v
+            }
+          }
+          return this
+        },
+        end(chunk?: string | Buffer) {
+          if (chunk) chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+        },
+      } as unknown as http.ServerResponse
+
+      const promise = handleSaveSlotApiRequest(reqStream, res, '/api/saves/slot')
+      if (bodyText !== undefined) {
+        stream.end(bodyText)
+      } else {
+        stream.end()
+      }
+      const handled = await promise
+      return {
+        handled,
+        statusCode,
+        headers,
+        json: JSON.parse(Buffer.concat(chunks).toString('utf8')) as Record<string, unknown>,
+      }
+    }
+
+    try {
+      const gameRoot = path.join(tmpRoot, 'HeyListen')
+      const profileDir = path.join(gameRoot, 'user', 'save', 'abcdef0123456789abcdef0123456789')
+      writeCaptionWithSkulltulas(path.join(profileDir, 'slot_00'), 12, 1000)
+      writeCaptionWithSkulltulas(path.join(profileDir, 'slot_01'), 45, 2000)
+
+      setCustomSaveOverride(gameRoot, null)
+      const initial = await getLichiiTelemetryState()
+      expect(initial.activeSaveDir).toBe(profileDir)
+      expect(initial.activeSaveSlot).toBe('slot_01')
+      expect(initial.availableSaveSlots).toEqual(['slot_00', 'slot_01'])
+      expect(initial.skulltulaCount).toBe(45)
+
+      setSelectedSaveSlot('slot_00')
+      const switched = await getLichiiTelemetryState()
+      expect(switched.activeSaveSlot).toBe('slot_00')
+      expect(switched.skulltulaCount).toBe(12)
+
+      // POST /api/saves/slot switches slot live
+      const postRes = await invokeSaveSlotEndpoint('POST', JSON.stringify({ slot: 'slot_01' }))
+      expect(postRes.handled).toBe(true)
+      expect(postRes.statusCode).toBe(200)
+      expect(postRes.json).toEqual({
+        ok: true,
+        activeSaveDir: profileDir,
+        activeSaveSlot: 'slot_01',
+        availableSaveSlots: ['slot_00', 'slot_01'],
+      })
+
+      // Non-POST returns 405
+      const getRes = await invokeSaveSlotEndpoint('GET')
+      expect(getRes.handled).toBe(true)
+      expect(getRes.statusCode).toBe(405)
+
+      // Invalid JSON returns 400
+      const badJsonRes = await invokeSaveSlotEndpoint('POST', '{not-json')
+      expect(badJsonRes.handled).toBe(true)
+      expect(badJsonRes.statusCode).toBe(400)
+    } finally {
+      setCustomSaveOverride(null, null)
       fs.rmSync(tmpRoot, { recursive: true, force: true })
     }
   })

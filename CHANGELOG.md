@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-11-17
+
+### Fixed
+- **Windows Launcher High-DPI Scaling (`launcher/OcarinaAtlas.cs`):** Configured `AutoScaleDimensions = new SizeF(96F, 96F)` with `AutoScaleMode.Dpi` and `SuspendLayout()` / `ResumeLayout()` across `MainForm`, `UpdateDialog`, and the QR modal, scaled `ReflowLayout()` bounds and `BorderedPanel` corner radii by system DPI (`Theme.GetDpiScale`), and moved `AutoSize`-relative label alignment to `AlignAutoSizedPairs()` after layout so controls and text never clip on 125%–200%+ Windows display scaling.
+
 ## [2.3.0] - 2026-11-17
 
 ### Added

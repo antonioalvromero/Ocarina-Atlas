@@ -24,8 +24,8 @@ using System.Windows.Forms;
 [assembly: AssemblyCompany("antonioalvromero")]
 [assembly: AssemblyProduct("Ocarina Atlas")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 antonioalvromero")]
-[assembly: AssemblyVersion("2.3.0.0")]
-[assembly: AssemblyFileVersion("2.3.0.0")]
+[assembly: AssemblyVersion("2.3.1.0")]
+[assembly: AssemblyFileVersion("2.3.1.0")]
 
 namespace OcarinaAtlasLauncher
 {
@@ -596,6 +596,30 @@ namespace OcarinaAtlasLauncher
             {
                 form.HandleCreated += delegate { apply(); };
             }
+        }
+
+        public static float GetDpiScale(Control control = null)
+        {
+            try
+            {
+                using (Graphics g = control != null ? control.CreateGraphics() : Graphics.FromHwnd(IntPtr.Zero))
+                {
+                    if (g != null && g.DpiX > 0f)
+                    {
+                        return g.DpiX / 96f;
+                    }
+                }
+            }
+            catch
+            {
+                // Fallback to 1.0x (96 DPI).
+            }
+            return 1f;
+        }
+
+        public static int ScaleDpi(int value, float dpiScale)
+        {
+            return (int)Math.Round(value * dpiScale, MidpointRounding.AwayFromZero);
         }
     }
 
@@ -3222,7 +3246,8 @@ namespace OcarinaAtlasLauncher
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             Rectangle rect = new Rectangle(0, 0, Math.Max(1, Width - 1), Math.Max(1, Height - 1));
-            using (GraphicsPath path = CreateRoundedRectPath(rect, CornerRadius))
+            int scaledRadius = Theme.ScaleDpi(CornerRadius, e.Graphics.DpiX > 0f ? e.Graphics.DpiX / 96f : 1f);
+            using (GraphicsPath path = CreateRoundedRectPath(rect, scaledRadius))
             using (SolidBrush fillBrush = new SolidBrush(FillColor))
             using (Pen borderPen = new Pen(BorderColor, 1f))
             {
@@ -4029,9 +4054,13 @@ namespace OcarinaAtlasLauncher
             _ownerForm = ownerForm;
             _info = info;
 
+            SuspendLayout();
+
             Text = "Update Available \u2014 Ocarina Atlas";
             BackColor = Theme.Ink950;
             ForeColor = Theme.Parchment200;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Font = new Font("Segoe UI", 9f, FontStyle.Regular);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             StartPosition = FormStartPosition.CenterParent;
@@ -4099,7 +4128,7 @@ namespace OcarinaAtlasLauncher
             _statusLabel.ForeColor = Theme.Parchment400;
             _statusLabel.AutoSize = false;
             _statusLabel.Location = new Point(20, 314);
-            _statusLabel.Size = new Size(480, 18);
+            _statusLabel.Size = new Size(480, 20);
             _statusLabel.Visible = false;
             Controls.Add(_statusLabel);
 
@@ -4129,6 +4158,9 @@ namespace OcarinaAtlasLauncher
             _closeButton.DialogResult = DialogResult.Cancel;
             Controls.Add(_closeButton);
             CancelButton = _closeButton;
+
+            ResumeLayout(false);
+            PerformLayout();
 
             Shown += delegate
             {
@@ -4833,9 +4865,11 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "2.3.0";
+        public const string AppVersion = "2.3.1";
 
+        private const int BaseClientWidth = 540;
         private const int CollapsedClientHeight = 392;
+        private const int ExpandedMinClientHeight = 590;
         private const int ExpandedClientHeight = 640;
 
         private readonly LaunchOptions _options;
@@ -4843,6 +4877,7 @@ namespace OcarinaAtlasLauncher
         private readonly object _bridgeLock = new object();
         private readonly System.Windows.Forms.Timer _pollTimer;
         private readonly Icon _appIcon;
+        private float _dpiScale = 1f;
 
         private JobObject _jobObject;
         private Process _serverProcess;
@@ -4886,12 +4921,23 @@ namespace OcarinaAtlasLauncher
         private BorderedPanel _logContainer;
 
         // Header controls
+        private Label _titleLabel;
         private Label _versionLabel;
         private Label _updatePillLabel;
         private StatusDot _serverDot;
         private Label _serverStatusLabel;
         private StatusDot _heroLichiiDot;
         private Label _heroLichiiLabel;
+
+        // About tab controls aligned after DPI layout
+        private Label _atlasCreditTitle;
+        private Label _atlasCreditAuthor;
+        private LinkLabel _officialRepoLink;
+        private Label _originalCreditTitle;
+        private Label _originalCreditAuthor;
+        private LinkLabel _originalRepoLink;
+        private Label _artworkCreditTitle;
+        private Label _artworkCreditAuthor;
 
         // Primary Control + Sync Card controls
         private Label _heroSummaryLabel;
@@ -4953,17 +4999,25 @@ namespace OcarinaAtlasLauncher
             _appIcon = LoadAppIcon();
             this.Icon = _appIcon;
 
+            SuspendLayout();
+
             Text = "Ocarina Atlas \u2014 Ocarina of Time Map Tracker";
             BackColor = Theme.Ink950;
             ForeColor = Theme.Parchment200;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             Font = new Font("Segoe UI", 9f, FontStyle.Regular);
-            ClientSize = new Size(540, CollapsedClientHeight);
-            MinimumSize = new Size(540, CollapsedClientHeight);
+            ClientSize = new Size(BaseClientWidth, CollapsedClientHeight);
             StartPosition = FormStartPosition.CenterScreen;
-            AutoScaleMode = AutoScaleMode.Font;
             Theme.EnableDarkTitleBar(this);
 
             BuildLayout();
+            ResumeLayout(false);
+            PerformLayout();
+
+            _dpiScale = Theme.GetDpiScale(this);
+            AlignAutoSizedPairs();
+
             BuildTrayIcon();
             ApplyInitialOptions();
             RefreshRuntimeBadge();
@@ -4987,13 +5041,13 @@ namespace OcarinaAtlasLauncher
             _toolTip = new ToolTip();
 
             // 0. Borderless Header Bar (54px on Ink950)
-            Label titleLabel = new Label();
-            titleLabel.Text = "Ocarina Atlas";
-            titleLabel.Font = new Font("Georgia", 15f, FontStyle.Bold);
-            titleLabel.ForeColor = Theme.Parchment50;
-            titleLabel.AutoSize = true;
-            titleLabel.Location = new Point(18, 13);
-            Controls.Add(titleLabel);
+            _titleLabel = new Label();
+            _titleLabel.Text = "Ocarina Atlas";
+            _titleLabel.Font = new Font("Georgia", 15f, FontStyle.Bold);
+            _titleLabel.ForeColor = Theme.Parchment50;
+            _titleLabel.AutoSize = true;
+            _titleLabel.Location = new Point(18, 13);
+            Controls.Add(_titleLabel);
 
             _versionLabel = new Label();
             _versionLabel.Text = "v" + AppVersion;
@@ -5001,7 +5055,7 @@ namespace OcarinaAtlasLauncher
             _versionLabel.ForeColor = Theme.Parchment600;
             _versionLabel.AutoSize = true;
             _versionLabel.Cursor = Cursors.Hand;
-            _versionLabel.Location = new Point(titleLabel.Right + 8, 21);
+            _versionLabel.Location = new Point(176, 21);
             _versionLabel.Click += OnVersionLabelClick;
             _versionLabel.MouseEnter += delegate { _versionLabel.ForeColor = Theme.Gold; };
             _versionLabel.MouseLeave += delegate { _versionLabel.ForeColor = Theme.Parchment600; };
@@ -5009,7 +5063,7 @@ namespace OcarinaAtlasLauncher
             Controls.Add(_versionLabel);
 
             _updatePill = new BorderedPanel();
-            _updatePill.Location = new Point(_versionLabel.Right + 10, 16);
+            _updatePill.Location = new Point(226, 16);
             _updatePill.Size = new Size(64, 22);
             _updatePill.FillColor = Color.FromArgb(0x28, 0x20, 0x12);
             _updatePill.BorderColor = Theme.Gold;
@@ -5513,77 +5567,77 @@ namespace OcarinaAtlasLauncher
             _aboutTabPanel.Visible = false;
             _advancedDrawerPanel.Controls.Add(_aboutTabPanel);
 
-            Label atlasCreditTitle = new Label();
-            atlasCreditTitle.Text = "Ocarina Atlas";
-            atlasCreditTitle.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
-            atlasCreditTitle.ForeColor = Theme.Parchment50;
-            atlasCreditTitle.AutoSize = true;
-            atlasCreditTitle.Location = new Point(0, 4);
-            _aboutTabPanel.Controls.Add(atlasCreditTitle);
+            _atlasCreditTitle = new Label();
+            _atlasCreditTitle.Text = "Ocarina Atlas";
+            _atlasCreditTitle.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
+            _atlasCreditTitle.ForeColor = Theme.Parchment50;
+            _atlasCreditTitle.AutoSize = true;
+            _atlasCreditTitle.Location = new Point(0, 4);
+            _aboutTabPanel.Controls.Add(_atlasCreditTitle);
 
-            Label atlasCreditAuthor = new Label();
-            atlasCreditAuthor.Text = "by antonioalvromero";
-            atlasCreditAuthor.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
-            atlasCreditAuthor.ForeColor = Theme.Parchment300;
-            atlasCreditAuthor.AutoSize = true;
-            atlasCreditAuthor.Location = new Point(atlasCreditTitle.Right + 6, 4);
-            _aboutTabPanel.Controls.Add(atlasCreditAuthor);
+            _atlasCreditAuthor = new Label();
+            _atlasCreditAuthor.Text = "by antonioalvromero";
+            _atlasCreditAuthor.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            _atlasCreditAuthor.ForeColor = Theme.Parchment300;
+            _atlasCreditAuthor.AutoSize = true;
+            _atlasCreditAuthor.Location = new Point(92, 4);
+            _aboutTabPanel.Controls.Add(_atlasCreditAuthor);
 
-            LinkLabel officialRepoLink = new LinkLabel();
-            officialRepoLink.Text = "github.com/antonioalvromero/Ocarina-Atlas";
-            officialRepoLink.LinkColor = Theme.Gold;
-            officialRepoLink.ActiveLinkColor = Theme.Parchment50;
-            officialRepoLink.VisitedLinkColor = Theme.Gold;
-            officialRepoLink.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
-            officialRepoLink.AutoSize = true;
-            officialRepoLink.Location = new Point(Math.Max(214, atlasCreditAuthor.Right + 10), 4);
-            officialRepoLink.LinkClicked += delegate { OpenUrlInBrowser(UpdateManager.OfficialRepoUrl); };
-            _toolTip.SetToolTip(officialRepoLink, UpdateManager.OfficialRepoUrl);
-            _aboutTabPanel.Controls.Add(officialRepoLink);
+            _officialRepoLink = new LinkLabel();
+            _officialRepoLink.Text = "github.com/antonioalvromero/Ocarina-Atlas";
+            _officialRepoLink.LinkColor = Theme.Gold;
+            _officialRepoLink.ActiveLinkColor = Theme.Parchment50;
+            _officialRepoLink.VisitedLinkColor = Theme.Gold;
+            _officialRepoLink.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _officialRepoLink.AutoSize = true;
+            _officialRepoLink.Location = new Point(214, 4);
+            _officialRepoLink.LinkClicked += delegate { OpenUrlInBrowser(UpdateManager.OfficialRepoUrl); };
+            _toolTip.SetToolTip(_officialRepoLink, UpdateManager.OfficialRepoUrl);
+            _aboutTabPanel.Controls.Add(_officialRepoLink);
 
-            Label originalCreditTitle = new Label();
-            originalCreditTitle.Text = "Original Map";
-            originalCreditTitle.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
-            originalCreditTitle.ForeColor = Theme.Parchment200;
-            originalCreditTitle.AutoSize = true;
-            originalCreditTitle.Location = new Point(0, 28);
-            _aboutTabPanel.Controls.Add(originalCreditTitle);
+            _originalCreditTitle = new Label();
+            _originalCreditTitle.Text = "Original Map";
+            _originalCreditTitle.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
+            _originalCreditTitle.ForeColor = Theme.Parchment200;
+            _originalCreditTitle.AutoSize = true;
+            _originalCreditTitle.Location = new Point(0, 28);
+            _aboutTabPanel.Controls.Add(_originalCreditTitle);
 
-            Label originalCreditAuthor = new Label();
-            originalCreditAuthor.Text = "by lucasriondel";
-            originalCreditAuthor.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
-            originalCreditAuthor.ForeColor = Theme.Parchment400;
-            originalCreditAuthor.AutoSize = true;
-            originalCreditAuthor.Location = new Point(originalCreditTitle.Right + 6, 28);
-            _aboutTabPanel.Controls.Add(originalCreditAuthor);
+            _originalCreditAuthor = new Label();
+            _originalCreditAuthor.Text = "by lucasriondel";
+            _originalCreditAuthor.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            _originalCreditAuthor.ForeColor = Theme.Parchment400;
+            _originalCreditAuthor.AutoSize = true;
+            _originalCreditAuthor.Location = new Point(92, 28);
+            _aboutTabPanel.Controls.Add(_originalCreditAuthor);
 
-            LinkLabel originalRepoLink = new LinkLabel();
-            originalRepoLink.Text = "lucasriondel/oot-remake-map";
-            originalRepoLink.LinkColor = Theme.Moss;
-            originalRepoLink.ActiveLinkColor = Theme.Parchment50;
-            originalRepoLink.VisitedLinkColor = Theme.Moss;
-            originalRepoLink.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
-            originalRepoLink.AutoSize = true;
-            originalRepoLink.Location = new Point(Math.Max(214, originalCreditAuthor.Right + 10), 28);
-            originalRepoLink.LinkClicked += delegate { OpenUrlInBrowser(UpdateManager.OriginalRepoUrl); };
-            _toolTip.SetToolTip(originalRepoLink, UpdateManager.OriginalRepoUrl);
-            _aboutTabPanel.Controls.Add(originalRepoLink);
+            _originalRepoLink = new LinkLabel();
+            _originalRepoLink.Text = "lucasriondel/oot-remake-map";
+            _originalRepoLink.LinkColor = Theme.Moss;
+            _originalRepoLink.ActiveLinkColor = Theme.Parchment50;
+            _originalRepoLink.VisitedLinkColor = Theme.Moss;
+            _originalRepoLink.Font = new Font("Segoe UI", 8.25f, FontStyle.Bold);
+            _originalRepoLink.AutoSize = true;
+            _originalRepoLink.Location = new Point(214, 28);
+            _originalRepoLink.LinkClicked += delegate { OpenUrlInBrowser(UpdateManager.OriginalRepoUrl); };
+            _toolTip.SetToolTip(_originalRepoLink, UpdateManager.OriginalRepoUrl);
+            _aboutTabPanel.Controls.Add(_originalRepoLink);
 
-            Label artworkCreditTitle = new Label();
-            artworkCreditTitle.Text = "Map Artwork";
-            artworkCreditTitle.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
-            artworkCreditTitle.ForeColor = Theme.Parchment200;
-            artworkCreditTitle.AutoSize = true;
-            artworkCreditTitle.Location = new Point(0, 52);
-            _aboutTabPanel.Controls.Add(artworkCreditTitle);
+            _artworkCreditTitle = new Label();
+            _artworkCreditTitle.Text = "Map Artwork";
+            _artworkCreditTitle.Font = new Font("Segoe UI", 8.75f, FontStyle.Bold);
+            _artworkCreditTitle.ForeColor = Theme.Parchment200;
+            _artworkCreditTitle.AutoSize = true;
+            _artworkCreditTitle.Location = new Point(0, 52);
+            _aboutTabPanel.Controls.Add(_artworkCreditTitle);
 
-            Label artworkCreditAuthor = new Label();
-            artworkCreditAuthor.Text = "by Nintend\u00FAo";
-            artworkCreditAuthor.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
-            artworkCreditAuthor.ForeColor = Theme.Parchment400;
-            artworkCreditAuthor.AutoSize = true;
-            artworkCreditAuthor.Location = new Point(artworkCreditTitle.Right + 6, 52);
-            _aboutTabPanel.Controls.Add(artworkCreditAuthor);
+            _artworkCreditAuthor = new Label();
+            _artworkCreditAuthor.Text = "by Nintend\u00FAo";
+            _artworkCreditAuthor.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
+            _artworkCreditAuthor.ForeColor = Theme.Parchment400;
+            _artworkCreditAuthor.AutoSize = true;
+            _artworkCreditAuthor.Location = new Point(92, 52);
+            _aboutTabPanel.Controls.Add(_artworkCreditAuthor);
 
             BorderedPanel securityNoticePanel = new BorderedPanel();
             securityNoticePanel.Location = new Point(0, 80);
@@ -5730,6 +5784,26 @@ namespace OcarinaAtlasLauncher
             }
         }
 
+        private void AlignAutoSizedPairs()
+        {
+            int titleGap = Theme.ScaleDpi(8, _dpiScale);
+            int pillGap = Theme.ScaleDpi(10, _dpiScale);
+            int creditGap = Theme.ScaleDpi(6, _dpiScale);
+            int repoGap = Theme.ScaleDpi(10, _dpiScale);
+            int repoMinX = Theme.ScaleDpi(214, _dpiScale);
+
+            _versionLabel.Left = _titleLabel.Right + titleGap;
+            _updatePill.Left = _versionLabel.Right + pillGap;
+
+            _atlasCreditAuthor.Left = _atlasCreditTitle.Right + creditGap;
+            _officialRepoLink.Left = Math.Max(repoMinX, _atlasCreditAuthor.Right + repoGap);
+
+            _originalCreditAuthor.Left = _originalCreditTitle.Right + creditGap;
+            _originalRepoLink.Left = Math.Max(repoMinX, _originalCreditAuthor.Right + repoGap);
+
+            _artworkCreditAuthor.Left = _artworkCreditTitle.Right + creditGap;
+        }
+
         private void ReflowLayout()
         {
             _advancedToggleButton.Text = _advancedExpanded
@@ -5739,22 +5813,29 @@ namespace OcarinaAtlasLauncher
             int nonClientW = Size.Width - ClientSize.Width;
             int nonClientH = Size.Height - ClientSize.Height;
 
+            int minWidth = Theme.ScaleDpi(BaseClientWidth, _dpiScale);
+            int collapsedHeight = Theme.ScaleDpi(CollapsedClientHeight, _dpiScale);
+            int expandedMinHeight = Theme.ScaleDpi(ExpandedMinClientHeight, _dpiScale);
+            int expandedHeight = Theme.ScaleDpi(ExpandedClientHeight, _dpiScale);
+            int minDrawerHeight = Theme.ScaleDpi(180, _dpiScale);
+            int bottomMargin = Theme.ScaleDpi(14, _dpiScale);
+
             if (_advancedExpanded)
             {
                 _advancedDrawerPanel.Visible = true;
-                MinimumSize = new Size(540 + nonClientW, 590 + nonClientH);
-                if (ClientSize.Height < ExpandedClientHeight)
+                MinimumSize = new Size(minWidth + nonClientW, expandedMinHeight + nonClientH);
+                if (ClientSize.Height < expandedHeight)
                 {
-                    ClientSize = new Size(ClientSize.Width, ExpandedClientHeight);
+                    ClientSize = new Size(ClientSize.Width, expandedHeight);
                 }
-                int drawerHeight = Math.Max(180, ClientSize.Height - _advancedDrawerPanel.Top - 14);
+                int drawerHeight = Math.Max(minDrawerHeight, ClientSize.Height - _advancedDrawerPanel.Top - bottomMargin);
                 _advancedDrawerPanel.Height = drawerHeight;
             }
             else
             {
                 _advancedDrawerPanel.Visible = false;
-                MinimumSize = new Size(540 + nonClientW, CollapsedClientHeight + nonClientH);
-                ClientSize = new Size(ClientSize.Width, CollapsedClientHeight);
+                MinimumSize = new Size(minWidth + nonClientW, collapsedHeight + nonClientH);
+                ClientSize = new Size(ClientSize.Width, collapsedHeight);
             }
         }
 
@@ -6248,15 +6329,18 @@ namespace OcarinaAtlasLauncher
         {
             if (string.IsNullOrEmpty(_selectedLanUrl)) return;
 
-            Bitmap largeBmp = QrCodeEncoder.RenderBitmap(_selectedLanUrl, 280);
+            Bitmap largeBmp = QrCodeEncoder.RenderBitmap(_selectedLanUrl, Theme.ScaleDpi(280, _dpiScale));
             if (largeBmp == null) return;
 
             using (largeBmp)
             using (Form modal = new Form())
             {
+                modal.SuspendLayout();
                 modal.Text = "Scan QR Code \u2014 Ocarina Atlas";
                 modal.BackColor = Theme.Ink950;
                 modal.ForeColor = Theme.Parchment200;
+                modal.AutoScaleDimensions = new SizeF(96F, 96F);
+                modal.AutoScaleMode = AutoScaleMode.Dpi;
                 modal.Font = new Font("Segoe UI", 9f, FontStyle.Regular);
                 modal.FormBorderStyle = FormBorderStyle.FixedDialog;
                 modal.StartPosition = FormStartPosition.CenterParent;
@@ -6271,7 +6355,7 @@ namespace OcarinaAtlasLauncher
                 largeBox.Location = new Point(24, 16);
                 largeBox.Size = new Size(280, 280);
                 largeBox.BackColor = Color.White;
-                largeBox.SizeMode = PictureBoxSizeMode.CenterImage;
+                largeBox.SizeMode = PictureBoxSizeMode.Zoom;
                 largeBox.Image = largeBmp;
                 modal.Controls.Add(largeBox);
 
@@ -6290,6 +6374,8 @@ namespace OcarinaAtlasLauncher
                 modal.Controls.Add(closeBtn);
                 modal.CancelButton = closeBtn;
 
+                modal.ResumeLayout(false);
+                modal.PerformLayout();
                 modal.ShowDialog(this);
             }
         }

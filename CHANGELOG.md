@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-11-18
+
+### Fixed
+- **Modern Windows Folder Picker (`launcher/OcarinaAtlas.cs`, [#44](https://github.com/antonioalvromero/Ocarina-Atlas/issues/44)):** Replaced the legacy `FolderBrowserDialog` with the native Windows 10/11 `IFileOpenDialog` (`FOS_PICKFOLDERS`) resizable Explorer folder picker with an address bar for pasting paths directly (preserving `FolderBrowserDialog` fallback if COM is unavailable).
+
 ## [2.4.0] - 2026-11-18
 
 ### Added

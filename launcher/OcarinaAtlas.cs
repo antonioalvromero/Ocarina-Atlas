@@ -24,8 +24,8 @@ using System.Windows.Forms;
 [assembly: AssemblyCompany("antonioalvromero")]
 [assembly: AssemblyProduct("Ocarina Atlas")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 antonioalvromero")]
-[assembly: AssemblyVersion("2.4.0.0")]
-[assembly: AssemblyFileVersion("2.4.0.0")]
+[assembly: AssemblyVersion("2.4.1.0")]
+[assembly: AssemblyFileVersion("2.4.1.0")]
 
 namespace OcarinaAtlasLauncher
 {
@@ -4717,6 +4717,155 @@ namespace OcarinaAtlasLauncher
         Stopping
     }
 
+    internal static class ModernFolderPicker
+    {
+        private const uint FosPickFolders = 0x00000020;
+        private const uint FosForceFileSystem = 0x00000040;
+        private const uint FosPathMustExist = 0x00000800;
+        private const uint SigdnFileSysPath = 0x80058000;
+        private const int ErrorCancelled = unchecked((int)0x800704C7);
+
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+        private static extern int SHCreateItemFromParsingName(
+            [MarshalAs(UnmanagedType.LPWStr)] string pszPath,
+            IntPtr pbc,
+            ref Guid riid,
+            [MarshalAs(UnmanagedType.Interface)] out IShellItem ppv);
+
+        [ComImport]
+        [Guid("DC1C5A9C-E88A-4dde-A5A1-60F82A20AEF7")]
+        private class FileOpenDialogCom
+        {
+        }
+
+        [ComImport]
+        [Guid("42f85136-db7e-439c-85f1-e4075d135fc8")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IFileOpenDialog
+        {
+            [PreserveSig]
+            int Show(IntPtr hwndOwner);
+            void SetFileTypes(uint cFileTypes, IntPtr rgFilterSpec);
+            void SetFileTypeIndex(uint iFileType);
+            void GetFileTypeIndex(out uint piFileType);
+            void Advise(IntPtr pfde, out uint pdwCookie);
+            void Unadvise(uint dwCookie);
+            void SetOptions(uint fos);
+            void GetOptions(out uint pfos);
+            void SetDefaultFolder(IShellItem psi);
+            void SetFolder(IShellItem psi);
+            void GetFolder(out IShellItem ppsi);
+            void GetCurrentSelection(out IShellItem ppsi);
+            void SetFileName([MarshalAs(UnmanagedType.LPWStr)] string pszName);
+            void GetFileName([MarshalAs(UnmanagedType.LPWStr)] out string pszName);
+            void SetTitle([MarshalAs(UnmanagedType.LPWStr)] string pszTitle);
+            void SetOkButtonLabel([MarshalAs(UnmanagedType.LPWStr)] string pszText);
+            void SetFileNameLabel([MarshalAs(UnmanagedType.LPWStr)] string pszLabel);
+            void GetResult(out IShellItem ppsi);
+            void AddPlace(IShellItem psi, int fdap);
+            void SetDefaultExtension([MarshalAs(UnmanagedType.LPWStr)] string pszDefaultExtension);
+            void Close(int hr);
+            void SetClientGuid(ref Guid guid);
+            void ClearClientData();
+            void SetFilter(IntPtr pFilter);
+            void GetResults(out IntPtr ppenum);
+            void GetSelectedItems(out IntPtr ppsai);
+        }
+
+        [ComImport]
+        [Guid("43826d1e-e718-42ee-bc55-a1e261c37bfe")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IShellItem
+        {
+            void BindToHandler(IntPtr pbc, ref Guid bhid, ref Guid riid, out IntPtr ppv);
+            void GetParent(out IShellItem ppsi);
+            void GetDisplayName(uint sigdnName, out IntPtr ppszName);
+            void GetAttributes(uint sfgaoMask, out uint psfgaoAttribs);
+            void Compare(IShellItem psi, uint hint, out int piOrder);
+        }
+
+        public static string PickFolder(IWin32Window owner, string title, string initialDirectory)
+        {
+            IFileOpenDialog dialog = null;
+            IShellItem initialItem = null;
+            IShellItem resultItem = null;
+            try
+            {
+                dialog = (IFileOpenDialog)(new FileOpenDialogCom());
+                uint options;
+                dialog.GetOptions(out options);
+                dialog.SetOptions(options | FosPickFolders | FosForceFileSystem | FosPathMustExist);
+                if (!string.IsNullOrEmpty(title))
+                {
+                    dialog.SetTitle(title);
+                }
+
+                if (!string.IsNullOrEmpty(initialDirectory) && Directory.Exists(initialDirectory))
+                {
+                    Guid shellItemGuid = new Guid("43826d1e-e718-42ee-bc55-a1e261c37bfe");
+                    if (SHCreateItemFromParsingName(initialDirectory, IntPtr.Zero, ref shellItemGuid, out initialItem) == 0 && initialItem != null)
+                    {
+                        dialog.SetFolder(initialItem);
+                    }
+                }
+
+                IntPtr hwnd = owner != null ? owner.Handle : IntPtr.Zero;
+                int hr = dialog.Show(hwnd);
+                if (hr == ErrorCancelled)
+                {
+                    return null;
+                }
+                if (hr < 0)
+                {
+                    Marshal.ThrowExceptionForHR(hr);
+                }
+
+                dialog.GetResult(out resultItem);
+                if (resultItem == null)
+                {
+                    return null;
+                }
+
+                IntPtr pszPath;
+                resultItem.GetDisplayName(SigdnFileSysPath, out pszPath);
+                try
+                {
+                    return pszPath != IntPtr.Zero ? (Marshal.PtrToStringUni(pszPath) ?? string.Empty).Trim() : null;
+                }
+                finally
+                {
+                    if (pszPath != IntPtr.Zero)
+                    {
+                        Marshal.FreeCoTaskMem(pszPath);
+                    }
+                }
+            }
+            catch
+            {
+                using (FolderBrowserDialog fallback = new FolderBrowserDialog())
+                {
+                    fallback.Description = title;
+                    fallback.ShowNewFolderButton = false;
+                    if (!string.IsNullOrEmpty(initialDirectory) && Directory.Exists(initialDirectory))
+                    {
+                        fallback.SelectedPath = initialDirectory;
+                    }
+                    if (fallback.ShowDialog(owner) == DialogResult.OK)
+                    {
+                        return (fallback.SelectedPath ?? string.Empty).Trim();
+                    }
+                    return null;
+                }
+            }
+            finally
+            {
+                if (resultItem != null) Marshal.FinalReleaseComObject(resultItem);
+                if (initialItem != null) Marshal.FinalReleaseComObject(initialItem);
+                if (dialog != null) Marshal.FinalReleaseComObject(dialog);
+            }
+        }
+    }
+
     internal sealed class DarkComboBox : ComboBox
     {
         private const int WmPaint = 0x000F;
@@ -6481,7 +6630,7 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "2.4.0";
+        public const string AppVersion = "2.4.1";
 
         private const int BaseClientWidth = 540;
         private const int CollapsedClientHeight = 392;
@@ -8047,26 +8196,14 @@ namespace OcarinaAtlasLauncher
 
         private void OnAddSaveDirClick(object sender, EventArgs e)
         {
-            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+            string chosen = ModernFolderPicker.PickFolder(
+                this,
+                "Select your Ocarina of Time save folder (e.g. slot_00, user\\save, or game root)",
+                _launcherSettings.CustomSaveDir);
+            if (string.IsNullOrEmpty(chosen))
             {
-                dialog.Description = "Select your Ocarina of Time save folder (e.g. slot_00, user\\save, or game root)";
-                dialog.ShowNewFolderButton = false;
-                if (!string.IsNullOrEmpty(_launcherSettings.CustomSaveDir) &&
-                    Directory.Exists(_launcherSettings.CustomSaveDir))
-                {
-                    dialog.SelectedPath = _launcherSettings.CustomSaveDir;
-                }
-
-                if (dialog.ShowDialog(this) != DialogResult.OK)
-                {
-                    return;
-                }
-
-                string chosen = (dialog.SelectedPath ?? string.Empty).Trim();
-                if (string.IsNullOrEmpty(chosen))
-                {
-                    return;
-                }
+                return;
+            }
 
                 if (_launcherSettings.SavedSaveDirs == null)
                 {
@@ -8103,7 +8240,6 @@ namespace OcarinaAtlasLauncher
                     AppendLog("Save folder set to: " + chosen);
                     ApplySaveSelectionToServerAsync();
                 }
-            }
         }
 
         private void OnRemoveSaveDirClick(object sender, EventArgs e)

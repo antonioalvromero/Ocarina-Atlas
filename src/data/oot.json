@@ -239,7 +239,7 @@
       "kind": "zone",
       "name": "Hyrule Field",
       "region": "Central Hyrule",
-      "intro": "The Hyrule Field map marks two Pieces of Heart and two Gold Skulltulas. Two of them are underground, in grottos that open with a Bomb or the Megaton Hammer. In the one east of the Castle Town drawbridge, by the moat, a Business Scrub sells you a Piece for 100 Rupees if you go as a child and know the password, which the Fairy Thought on the tree next to it tells you as an adult; the other is in a chest beneath a rock overhang in the west, near Gerudo Valley, and you have to open it as a child. Of the Skulltulas, the one in the lone pine in the east drops when you roll into the trunk, and the one in the stone circle grotto, by Lon Lon Ranch, needs the Boomerang or the Hookshot.",
+      "intro": "The Hyrule Field map marks two Pieces of Heart and three Gold Skulltulas. Three of them are underground, in grottos that open with a Bomb or the Megaton Hammer. In the one east of the Castle Town drawbridge, by the moat, a Business Scrub sells you a Piece for 100 Rupees if you go as a child and know the password, which the Fairy Thought on the tree next to it tells you as an adult; the other is in a chest beneath a rock overhang in the west, near Gerudo Valley, and you have to open it as a child. Of the Skulltulas, the one in the lone pine in the east drops when you roll into the trunk, the one in the stone circle grotto, by Lon Lon Ranch, needs the Boomerang or the Hookshot, and the third appears as an adult in a crate in the grotto southeast of the ranch, if as a child you've read the Fairy Thought there and defeated the regular Skulltula.",
       "pin": {
         "x": 0.4475,
         "y": 0.6267
@@ -260,7 +260,7 @@
       "kind": "zone",
       "name": "Lon Lon Ranch",
       "region": "Central Hyrule",
-      "intro": "As a child you can get almost everything at Lon Lon Ranch: four Gold Skulltulas, a Piece of Heart and a Bottle, each marked on its map. Two of the Skulltulas only appear at night and need the Boomerang, in the house window and inside the stone tower at the back; the third, in the tree at the entrance, drops at any hour when you roll into the trunk, and the fourth appears as an adult in a crate in the grotto southeast of the ranch, if as a child you've read the Fairy Thought there and defeated the regular Skulltula. The Piece of Heart is at the back of the stone tower, behind some crates, and the Bottle is the prize of Talon's Super Cucco game, though you first have to wake him up at Hyrule Castle with the Cucco from the Weird Egg.",
+      "intro": "As a child you can get everything at Lon Lon Ranch: three Gold Skulltulas, a Piece of Heart and a Bottle, each marked on its map. Two of the Skulltulas only appear at night and need the Boomerang, in the house window and inside the stone tower at the back; the third, in the tree at the entrance, drops at any hour when you roll into the trunk. The Piece of Heart is at the back of the stone tower, behind some crates, and the Bottle is the prize of Talon's Super Cucco game, though you first have to wake him up at Hyrule Castle with the Cucco from the Weird Egg.",
       "pin": {
         "x": 0.3816,
         "y": 0.573
@@ -1384,11 +1384,11 @@
       "id": "lonlon-gs-02",
       "n": 19,
       "cat": "gs",
-      "place": "lonlon",
+      "place": "llanura",
       "at": {
         "map": "principal",
-        "x": 0.1398,
-        "y": 0.7037
+        "x": 0.6442,
+        "y": 0.7654
       },
       "name": "Crate in the grotto south of the ranch",
       "desc": "For this Gold Skulltula to appear as an adult, child Link must read the Fairy Thought in the underground grotto southeast of Lon Lon Ranch, near the pond, and defeat the regular Skulltula.\n\nOnce that's done, come back as an adult. At the back, against the wall, there's a wooden crate. **Break it by rolling into it** and a Gold Skulltula will come out: defeat it with your sword and grab the Gold Skulltula Token. As a curiosity, the Fairy Thought will have changed.",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { matchesAge, requirementLabel } from './data'
+import { dataset, matchesAge, requirementLabel } from './data'
 import type { Item } from './types'
 import { parseRichText } from './richText'
 
@@ -46,5 +46,18 @@ describe('requirementLabel', () => {
     expect(requirementLabel(['bombs', 'megaton-hammer'])).toBe('Bombs or Megaton Hammer')
     expect(requirementLabel('bombs')).toBe('Bombs')
     expect(requirementLabel('unknown-key')).toBe('unknown-key')
+  })
+})
+
+describe('dataset pin placements', () => {
+  it('places lonlon-gs-02 in Hyrule Field (llanura) at the grotto southeast of Lon Lon Ranch (Issue #48)', () => {
+    const skulltula = dataset.items.find((item) => item.id === 'lonlon-gs-02')
+    const thought = dataset.items.find((item) => item.id === 'llanura-thought-03')
+
+    expect(skulltula).toBeDefined()
+    expect(thought).toBeDefined()
+    expect(skulltula?.place).toBe('llanura')
+    expect(skulltula?.at).toEqual({ map: 'principal', x: 0.6442, y: 0.7654 })
+    expect(skulltula?.at).not.toEqual(thought?.at)
   })
 })

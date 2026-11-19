@@ -24,8 +24,8 @@ using System.Windows.Forms;
 [assembly: AssemblyCompany("antonioalvromero")]
 [assembly: AssemblyProduct("Ocarina Atlas")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 antonioalvromero")]
-[assembly: AssemblyVersion("2.5.0.0")]
-[assembly: AssemblyFileVersion("2.5.0.0")]
+[assembly: AssemblyVersion("2.5.1.0")]
+[assembly: AssemblyFileVersion("2.5.1.0")]
 
 namespace OcarinaAtlasLauncher
 {
@@ -6734,7 +6734,7 @@ namespace OcarinaAtlasLauncher
 
     internal sealed class MainForm : Form
     {
-        public const string AppVersion = "2.5.0";
+        public const string AppVersion = "2.5.1";
 
         private const int BaseClientWidth = 540;
         private const int CollapsedClientHeight = 392;

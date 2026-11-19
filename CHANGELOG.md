@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.5.1] - 2026-11-19
+
+### Fixed
+- **Gold Skulltula #19 Location (`src/data/oot.json`, `src/data/i18n/{es,fr,pt}.json`, [#48](https://github.com/antonioalvromero/Ocarina-Atlas/issues/48)):** Moved `lonlon-gs-02` (*"Crate in the grotto south of the ranch"*) from Lon Lon Ranch (`lonlon`) to its actual location in Hyrule Field (`llanura`) at the underground grotto southeast of the ranch (`x: 0.6442, y: 0.7654`), preserving its item ID for telemetry/save compatibility, and updated the Hyrule Field and Lon Lon Ranch intro descriptions across all guide locales.
+
 ## [2.5.0] - 2026-11-18
 
 ### Added

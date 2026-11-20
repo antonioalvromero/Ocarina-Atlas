@@ -1,0 +1,946 @@
+{
+  "places": {
+    "kokiri": {
+      "intro": "Der Kokiri-Wald, das Dorf, in dem das Abenteuer beginnt, verzeichnet auf seiner Karte drei Goldene Skulltulas und weiche Erde für eine Wundererbse. Zwei der Skulltulas erscheinen als Kind: die hinter dem Haus der Besserwisser-Brüder nur nachts und die in der weichen Erde neben dem Laden zu jeder Tageszeit mithilfe von Käfern. Pflanze in genau dieses Beet auch eine Wundererbse, denn als Erwachsener trägt sie dich auf einen Vorsprung mit Rubinen, und kehre nachts mit dem Fanghaken für die dritte Skulltula oben am Haus der Zwillinge zurück."
+    },
+    "perdido": {
+      "intro": "Fast alles in den Verlorenen Wäldern sammelst du als Kind: zwei Herzteile mit der Okarina, drei Goldene Skulltulas und zwei Beete für Wundererbsen. Es ist das Labyrinth, das den Kokiri-Wald mit der Heiligen Lichtung verbindet, und die Herzteile hängen von den Horror-Kids ab: Salias Lied für das mit der Flöte links vom Eingang und das Gedächtnisspiel bei der Zielscheibe rechts. Bring Käfer für die beiden Stellen mit weicher Erde mit – bei der Brücke zur Hylianischen Steppe und auf der Lichtung mit dem einzelnen Baum – und pflanze in beide eine Wundererbse: Als Erwachsener und nachts trägt dich die auf der Lichtung zum Vorsprung der dritten Skulltula."
+    },
+    "prado": {
+      "intro": "Eine einzige Goldene Skulltula – und zwar als Erwachsener – ist alles, was die Heilige Lichtung birgt, und die Karte markiert, wo sie im Labyrinth auf dem Weg zum Waldtempel erscheint. Sie zeigt sich auf halbem Weg an der rechten Wand, nachdem du den Moblins ausgewichen bist und noch vor der Treppe: Hol sie dir mit dem Fanghaken, den du ohnehin brauchst, um den Tempel zu betreten."
+    },
+    "llanura": {
+      "intro": "Die Karte der Hylianischen Steppe markiert zwei Herzteile und drei Goldene Skulltulas. Drei davon liegen unter der Erde in Grotten, die sich mit einer Bombe oder dem Stahlhammer öffnen lassen. In der Grotte östlich der Zugbrücke des Marktplatzes am Burggraben verkauft dir ein Deku-Händler ein Herzteil für 100 Rubine, wenn du als Kind kommst und das Passwort kennst, das dir als Erwachsener der Feengedanke am Baum daneben verrät; das andere liegt in einer Truhe unter einem Felsvorsprung im Westen nahe dem Gerudo-Tal, die du als Kind öffnen musst. Bei den Skulltulas fällt die aus der einzelnen Kiefer im Osten herunter, wenn du gegen den Stamm rollst, die in der Steinkreis-Grotte bei der Lon-Lon-Farm braucht den Bumerang oder den Fanghaken, und die dritte erscheint als Erwachsener in einer Kiste in der Grotte südöstlich der Farm, sofern du dort als Kind den Feengedanken gelesen und die normale Skulltula besiegt hast."
+    },
+    "lonlon": {
+      "intro": "Als Kind kannst du auf der Lon-Lon-Farm alles einsammeln: drei Goldene Skulltulas, ein Herzteil und eine Flasche, alle auf der Karte markiert. Zwei der Skulltulas erscheinen nur nachts und brauchen den Bumerang – am Hausfenster und im Steinturm hinten; die dritte im Baum am Eingang fällt zu jeder Tageszeit herunter, wenn du gegen den Stamm rollst. Das Herzteil liegt hinten im Steinturm hinter einigen Kisten, und die Flasche ist der Preis für Talons Super-Hühner-Spiel, wobei du ihn zuvor im Schloss Hyrule mit dem Huhn aus dem Seltsamen Ei wecken musst."
+    },
+    "ciudadela": {
+      "intro": "Drei Herzteile, zwei Flaschen und eine Goldene Skulltula: Das verbirgt der Marktplatz, mit einer Karte für Kind und einer für Erwachsener, da sich die Stadt verändert. Fast alles gilt für den jungen Link: Zwei der Herzteile gibt es nachts – in der Schatztruhen-Lotterie und indem du Richard, den entlaufenen kleinen Hund, zu seiner Besitzerin zurückbringst – und das dritte ist ein Preis auf der Krabbelminen-Bowlingbahn, die erst öffnet, nachdem du König Dodongo besiegt hast. Die Skulltula versteckt sich in einer Kiste im Wachhaus am Eingang, und die Flaschen sind die neue aus dem Remake – ein Geschenk des Ladenbesitzers am Weg zur Zitadelle der Zeit – sowie die vom Irrlicht-Sammler als Erwachsener für fünf Nachtschwärmer."
+    },
+    "castillo": {
+      "intro": "Auf den beiden Karten von Schloss Hyrule – dem Schlossgelände als Kind und dem Außenbereich von Ganons Schloss als Erwachsener – finden sich drei Goldene Skulltulas und zwei Große Feen. Zwei der Skulltulas erscheinen als Kind: die im Baum im Heckengarten und die in der Grotte, die du mit der Hymne des Sturms beim Baum am Graben öffnest, zusammen mit der Großen Fee der Wirbelattacke hinter einem Felsen am Ende der Sackgasse im Osten. Als Erwachsener bleiben die Skulltula auf dem zerfallenen Bogen, die du erst siehst, wenn du dich beim Durchqueren umdrehst, und die Große Fee der doppelten Verteidigung hinter einer Säule, die sich mit den Goldenen Handschuhen anheben lässt."
+    },
+    "kakariko": {
+      "intro": "Kakariko liegt am Fuße des Todesbergs hinter der Brücke von der Hylianischen Steppe und gehört zu den Orten mit den meisten Sammelobjekten auf der Karte. Fünf der sechs Goldenen Skulltulas erscheinen als Kind und nachts und sind mit Schwert oder Feen-Schleuder erreichbar; die sechste an der Felswand direkt neben dem Dach von Impas Haus gibt es als Erwachsener, nachts und mit dem Fanghaken. Die Herzteile verteilen sich auf beide Altersstufen, die Flasche schenkt dir das Hühnermädchen, wenn du ihr alle sieben Hühner zurückbringst, und im Skulltula-Haus wartet ein weiteres Herzteil, sobald du 50 Symbole gesammelt hast."
+    },
+    "cementerio": {
+      "intro": "Der Friedhof von Kakariko hat eine Karte für jedes Alter und beherbergt insgesamt vier Herzteile, zwei Goldene Skulltulas und eine Wundererbse. Als Kind und nachts gräbt Boris für 10 Rubine und fördert gelegentlich ein Herzteil zutage, und das Grab nahe dem Königsgrab verbirgt ein weiteres in seiner Krypta, das sich in diesem Alter nur nachts öffnen lässt. Als Erwachsener folgen das Rennen gegen Boris’ Geist – das beim zweiten Versuch das Herzteil einbringt (beim ersten gibt es den Fanghaken) – sowie der Vorsprung an der linken Wand, den du mit der als Kind gepflanzten Wundererbse erreichst. Die Skulltulas erscheinen nachts an der Mauer beim Eingang sowie als Kind zu jeder Tageszeit mit Käfern in der weichen Erde neben Boris’ Grab."
+    },
+    "sendero": {
+      "intro": "Entlang des Gebirgspfads von Kakariko bis zum Todeskrater markiert die Karte vier Goldene Skulltulas, ein Herzteil, eine Große Fee und eine Wundererbse. Räume als Kind den Felsen vor Dodongos Höhle mit einer Bombe oder der Donnerblume weg und nutze die weiche Erde davor: Käfer bringen eine Skulltula hervor und eine Wundererbse dient dir als Erwachsener als Abkürzung. Das Herzteil liegt auf dem Vorsprung über dem Höhleneingang, und die Große Fee für Magie und Dins Feuerinferno wartet auf dem Gipfel hinter der brüchigen Wand neben Methusa. Von den anderen drei Skulltulas erscheint die hinter der brüchigen Wand nahe Kakariko in beiden Altersstufen, und die beiden für den erwachsenen Link nachts stecken unter Felsen, die du zertrümmern musst – einen davon nur mit dem Stahlhammer."
+    },
+    "goron": {
+      "intro": "Goronia, in den Todesberg gehauen, hat nur drei Sammelobjekte auf der Karte: zwei Goldene Skulltulas und ein Herzteil, verteilt auf beide Altersstufen. Als Kind erreichst du die Skulltula im Felsenlabyrinth im oberen Stockwerk, indem du dir mit Bomben einen Weg freisprengst, und das Herzteil kommt aus der großen drehenden Vase in der Mitte: Entzünde ihre Fackeln, damit sie sich dreht, und wirf von der Planke ein Stockwerk höher eine Bombe hinein. Als Erwachsener bleibt nur noch die andere Skulltula unter einem Felsvorsprung an der Decke, den allein der Fanghaken erreicht."
+    },
+    "crater": {
+      "intro": "Im Todeskrater herrscht glühende Hitze; die Karte markiert dort drei Herzteile, zwei Goldene Skulltulas, eine Große Fee und eine Wundererbse. Du gelangst vom Gipfel des Todesbergs oder aus Goronia hinein; als Kind läuft wegen der Hitze ein Zeitlimit, als Erwachsener hast du mit der Goronen-Rüstung alle Zeit der Welt. Als Kind holst du dir die Skulltula aus der Kiste am Gipfeleingang, das Herzteil vom Deku-Händler für 100 Rubine und die Skulltula in der weichen Erde beim Bolero des Feuers, den du dort spielst – pflanze auch gleich die Wundererbse ein. Als Erwachsener bringt dich diese Pflanze auf den kuppelförmigen Felsen mit einem weiteren Herzteil; das dritte, das du auch als Kind holen kannst, liegt in einer Wandnische beim Hinabklettern an den Netzen vom Eingang, und die Große Fee, die deine Magie verdoppelt, wartet hinter Felsen, die nur der Stahlhammer zerbricht."
+    },
+    "rio": {
+      "intro": "Der Erbsenhändler sitzt am Eingang zum Zora-Fluss, und flussaufwärts markiert die Karte vier Herzteile und vier Goldene Skulltulas. Sprenge als Kind die Felsen am Eingang mit einer Bombe weg, kaufe ihm so viele Wundererbsen wie möglich ab und pflanze eine in die weiche Erde neben ihm. Alle vier Herzteile sind für den jungen Link: zwei auf Plattformen, die du im Gleitflug mit einem Huhn erreichst (oder mit dem Bumerang bei dem am Wasserfall), und zwei von den Fröschen auf dem Baumstumpf – eines für ihre Lieder und ihr Spiel, das andere für die Hymne des Sturms. Von den Skulltulas gehören zwei zum jungen Link – die in der weichen Erde beim Erbsenhändler mit Käfern und nachts die an der Wand neben dem Wasserfall – sowie zwei zum erwachsenen Link nachts, hoch oben an den Wänden mit dem Fanghaken."
+    },
+    "dominio": {
+      "intro": "Eines pro Alter: So teilen sich die beiden Sammelobjekte in Zoras Reich auf – ein Herzteil als Kind und eine Goldene Skulltula als Erwachsener, jeweils an ihrem Punkt auf der Karte. Für das Herzteil entzündest du mit einem Deku-Stab alle Fackeln der unteren Ebene, beginnend bei der am Fuß der Treppe, woraufhin die Truhe hinter dem Wasserfall erscheint. Als Erwachsener, wenn das Reich zugefroren ist, erscheint die Skulltula nachts ganz oben am gefrorenen Wasserfall und lässt sich mit dem Fanghaken oder einem Pfeil herunterholen."
+    },
+    "fuente": {
+      "intro": "Hinter König Zoras Thron birgt Zoras Quelle zwei Herzteile, drei Goldene Skulltulas und eine Große Fee, mit jeweils einer Karte pro Alter. Als Kind ist sie Jabu-Jabus Teich, als Erwachsener ein zugefrorener See auf dem Weg zur Eishöhle. Die Große Fee mit Farores Donnersturm lässt sich in beiden Altersstufen hinter der brüchigen Wand in der Südostecke erreichen, und zwei der Skulltulas erscheinen als Kind: die in der Kiefer in derselben Ecke sowie nachts und mit dem Bumerang die an der Wand des versunkenen Bogens. Als Erwachsener wartet ein Herzteil auf der entferntesten Eisscholle und ein weiteres am Grund mit Zora-Rüstung und Eisenstiefeln, und die dritte Skulltula erscheint nachts am Ende einer Höhle hinter zwei Blöcken mit Zora-Zeichen, die du mit den Silberhandschuhen anhebst."
+    },
+    "lago": {
+      "intro": "Der Hylia-See gehört zu den ergiebigsten Gebieten der Karte: fünf Goldene Skulltulas, drei Herzteile, eine Flasche und eine Wundererbse über beide Altersstufen hinweg. Als Kind liefert die weiche Erde direkt neben dem Labor mit Käfern eine Skulltula sowie eine Wundererbse, die dich als Erwachsener aufs Dach zu einem Herzteil trägt; ein weiteres gibt dir der Besitzer des Fischweihers für einen Fisch über 50 cm und das dritte der Seeforscher, wenn du mit der Goldenen Schuppe bis zum Grund seines Beckens tauchst. Die Flasche mit Rutos Brief liegt am Grund des Sees beim Tunnel zu Zoras Reich und erfordert die Silberne Schuppe. Von den Skulltulas sind drei für den jungen und zwei für den erwachsenen Link: die in der Kiste am Grund des Beckens mit den Eisenstiefeln sowie die in der Krone des großen Baums auf der Insel, nachts und mit dem Enterhaken."
+    },
+    "valle": {
+      "intro": "Um zur Gerudo-Festung zu gelangen, musst du das Gerudo-Tal überqueren; die Karte markiert dort vier Goldene Skulltulas, zwei Herzteile und eine Wundererbse. Eines der Herzteile liegt hinter dem großen Wasserfall, den du schwimmend erreichst, und das andere in einer Truhe auf einem Felsvorsprung in der Schlucht, zu dem du als Kind mit dem Huhn an der Brücke hinübergleitest. Auf der Plattform mit der Kuh am Fuß des Wasserfalls liefert die weiche Erde mit Käfern eine Skulltula und eine Wundererbse, die dich als Erwachsener ebenfalls in die Nähe des Wasserfall-Herzteils bringt. Die anderen drei Skulltulas erscheinen nachts: die beim Wasserstrahl neben dem Steg als Kind mit dem Bumerang sowie die am Zelt der Zimmerleute und am Felsbogen gegenüber als Erwachsener mit dem Fanghaken."
+    },
+    "fortaleza": {
+      "intro": "Alles, was die Gerudo-Festung verbirgt, ist für den erwachsenen Link gedacht: zwei Herzteile und zwei Goldene Skulltulas, die die Karte auf dem Schießstand und auf den Dächern verzeichnet. Durch die Rettung der vier Zimmerleute erhältst du den Gerudo-Pass, der das Bogenschießen zu Pferd freischaltet: Erziele tagsüber auf Epona 1.000 Punkte für ein Herzteil und kehre nachts mit dem Fanghaken für die Skulltula an der entfernten Zielscheibe zurück. Der obere Ausgang aus der Küche führt auf die Dächer, wo nachts die andere Skulltula wartet und auf dem höchsten Dach die Truhe mit dem zweiten Herzteil steht, die du vom Felsvorsprung darüber mit dem Enterhaken erreichst."
+    },
+    "desierto": {
+      "intro": "Die Gespensterwüste birgt nur eine einzige Goldene Skulltula – als Erwachsener, in der Kammer unter dem Steinmonument auf dem Weg zum Wüstenkoloss. Überquere zuerst den Sandfluss mit den Gleitstiefeln oder dem Enterhaken und folge den Fahnen; beim Monument steigst du durch die Lücke zwischen den Säulen ein, kletterst die Leiter hinab und schlägst die Skulltula vom Altar aus mit dem Schwert herunter."
+    },
+    "coloso": {
+      "intro": "Mit dem Requiem der Geister erreichst du den Wüstenkoloss als Kind; seine Karte markiert drei Goldene Skulltulas, ein Herzteil, eine Große Fee und eine Wundererbse. Als Erwachsener gelangst du durch die Gespensterwüste dorthin. Komm als Kind her, um Käfer in die weiche Erde am Eingang des Geistertempels zu setzen – das bringt eine Skulltula – und dort die Wundererbse zu pflanzen: Als Erwachsener trägt dich die Pflanze über die Spitze des großen Felsens, wo nachts eine weitere Skulltula sitzt, bis zum Steinbogen mit dem Herzteil. Die dritte Skulltula erscheint nachts hoch oben an der Felswand rechts vom Geistertempel und braucht den Fanghaken, und die Große Fee von Nayrus Umarmung hinter der brüchigen Wand nördlich der Oase lässt sich in beiden Altersstufen mit einer Bombe oder Krabbelmine öffnen."
+    },
+    "deku": {
+      "intro": "Im Deku-Baum erwartet dich der erste Dungeon des Spiels, den du als Kind gleich nach dem Verlassen des Kokiri-Walds mit Schwert und Schild betrittst. Die Karte umfasst seine fünf Ebenen von oben bis ins zweite Untergeschoss. Alle vier Goldenen Skulltulas fallen dem Schwert oder der Feen-Schleuder zum Opfer, die du darin findest, und im Remake lassen sich alle vier schon beim ersten Besuch einsammeln: Für die im hinteren Raum des Untergeschosses brauchst du weder Bomben noch Bumerang mehr – verbrenne das Spinnennetz einfach mit einem Deku-Stab. Königin Gohma im zweiten Untergeschoss hinterlässt den Herzcontainer: Betäube ihr Auge mit der Feen-Schleuder und schlage mit dem Schwert zu."
+    },
+    "dodongos": {
+      "intro": "Dodongos Höhle liegt am Gebirgspfad und öffnet sich als Kind, indem du den Felsen vor dem Eingang mit einer Donnerblume und dem Goronen-Armband sprengst. Die Karte zeigt die beiden Ebenen der Höhle. Vier der fünf Goldenen Skulltulas lassen sich gleich beim ersten Besuch als Kind holen; für die auf dem Vorsprung der Vogelscheuche musst du als Erwachsener mit Fanghaken und Vogelscheuchen-Polka oder mit dem Enterhaken zurückkehren. König Dodongo hinterlässt den Herzcontainer: eine Bombe ins Maul und dann mit dem Schwert angreifen."
+    },
+    "jabu": {
+      "intro": "In Lord Jabu-Jabus Bauch gelangst du als Kind von Zoras Quelle aus, indem du einen Fisch vor Jabu-Jabus Maul aussetzt, und im Inneren dreht sich fast alles um den Bumerang, den du schon früh findest. Die Karte umfasst alle drei Ebenen samt Untergeschoss. Die erste Goldene Skulltula erledigst du im Raum mit dem Wasserschalter mit dem Schwert; die anderen drei mit dem Bumerang – zwei davon zusammen im Untergeschoss des großen Raums mit den Löchern, wobei du von Hand zielen musst, da sie sich nicht anvisieren lassen. Barinade hinterlässt den Herzcontainer, ebenfalls durch Bumerangwürfe."
+    },
+    "bosque": {
+      "intro": "Der Waldtempel ist der erste Dungeon als Erwachsener: Du betrittst ihn von der Heiligen Lichtung aus mit dem Fanghaken, und genau dieser Fanghaken holt auch alle fünf Goldenen Skulltulas herunter und zieht dir die Symbole heran. Die Karte zeigt seine fünf Ebenen. Am besten sammelst du sie unterwegs ein, denn jede taucht in einem Raum entlang der Route auf: am Eingang, in der Haupthalle, in den beiden Innenhöfen und im drehenden Raum im Untergeschoss direkt vor dem Boss. Den Herzcontainer hinterlässt Phantom-Ganon, den du mit Feen-Bogen oder Fanghaken bekämpfst."
+    },
+    "fuego": {
+      "intro": "Den Feuertempel erreichst du als Erwachsener vom Todeskrater aus – mit der Goronen-Rüstung, um der Hitze standzuhalten. Seine Karte umfasst fünf Ebenen, von 1F bis 5F. Seine fünf Goldenen Skulltulas verlangen mehr als nur das Schwert: die Hymne der Zeit, Bomben, den Fanghaken und für zwei von ihnen die Vogelscheuchen-Polka, die du als Kind und als Erwachsener am Hylia-See komponierst. Sowohl die Skulltula hinter der Statue in der Eingangshalle als auch Volvagias Herzcontainer erfordern den Stahlhammer, also heb sie dir bis zum Schluss auf."
+    },
+    "agua": {
+      "intro": "Der Wassertempel ruht am Grund des Hylia-Sees und wird als Erwachsener mit Eisenstiefeln und Zora-Rüstung betreten, während du den Wasserstand mit Zeldas Wiegenlied änderst. Seine Karte zeigt die vier Ebenen von B1 bis 3F. Zwei der fünf Goldenen Skulltulas kannst du noch vor dem Kampf gegen Schatten-Link holen: die neben dem Gitter im Untergeschoss und die hinter der brüchigen Unterwasserwand; die anderen drei brauchen den Enterhaken aus diesem Kampf, weshalb es am bequemsten ist, ihn zuerst zu holen und danach den Mittelturm, den Strudelfluss und den Wasserfall mit den Felsen abzuklappern. Morpha hinterlässt am Ende den Herzcontainer."
+    },
+    "sombra": {
+      "intro": "Der Schattentempel unter dem Friedhof von Kakariko öffnet sich als Erwachsener mit der Nocturne des Schattens und Dins Feuerinferno, und im Inneren sind das Auge der Wahrheit und die Gleitstiefel von Anfang an unverzichtbar. Die Karte umfasst vier Untergeschosse. Seine fünf Goldenen Skulltulas erscheinen der Reihe nach entlang des Weges: im Raum mit den unsichtbaren Sensen, in dem mit den Deckenstacheln, in der Grube des Ventilator-Korridors, auf dem Vorsprung im Bootsraum und in den riesigen Schädeln; zwei holst du mit dem Fanghaken, die im Bootsraum braucht Enterhaken und Vogelscheuchen-Polka und die in den Schädeln Bomben. Den Herzcontainer hinterlässt Bongo Bongo, gegen den du Pfeile oder Fanghaken sowie das aktive Auge der Wahrheit nutzt."
+    },
+    "espiritu": {
+      "intro": "Der Geistertempel am Wüstenkoloss wird zweimal erkundet: zuerst als Kind, indem du nach dem Gespräch mit Naboru durch das kleine Loch kriechst, und danach als Erwachsener, wenn du den großen Block in der Eingangshalle mit den Silberhandschuhen beiseiteschiebst. Seine Karte zeigt vier Ebenen von 1F bis 4F. Drei der fünf Goldenen Skulltulas lassen sich bereits im Kind-Abschnitt holen – zwei mit Bumerang oder Feen-Schleuder und eine mit dem Schwert – und die anderen beiden im Erwachsenen-Abschnitt erfordern die Hymne der Zeit sowie den Enterhaken samt Vogelscheuchen-Polka. Für den Herzcontainer von Killa Ohmaz brauchst du den Spiegelschild, den du im Tempel selbst findest."
+    },
+    "pozo": {
+      "intro": "Den Grund des Brunnens betrittst du als Kind, sobald du den Brunnen in Kakariko mit der Hymne des Sturms in der Windmühle geleert hast. Im Inneren markiert die zweistöckige Karte drei Goldene Skulltulas, und alle drei erfordern den Bumerang sowie das Auge der Wahrheit, das du im Untergeschoss erhältst. Ohne das Auge siehst du weder falsche Wände noch unsichtbare Wege oder Falltüren; die drei Skulltulas warten hinter verschlossenen Türen – zwei im zentralen Bereich und eine im Raum mit dem Raubschleim."
+    },
+    "hielo": {
+      "intro": "Die Eishöhle betrittst du als Erwachsener von der zugefrorenen Zoras Quelle aus über die Eisschollen bis zur hinteren Höhle; hier erhältst du die Eisenstiefel. Ihre Karte markiert drei Goldene Skulltulas, die alle mit dem Fanghaken erreichbar sind. Eine sitzt im Raum mit der rotierenden Klinge zwischen den Stalagmiten; für die anderen beiden sammelst du dort die Silbernen Rubine, um den Raum mit der Dungeon-Karte zu öffnen, füllst dort Blaues Feuer in eine Flasche und schmilzt damit die beiden roten Eiswände im Klingenraum: Dahinter liegen der Kompass-Raum und der Raum mit dem verschiebbaren Eisblock."
+    },
+    "gerudo": {
+      "intro": "Die Gerudo-Trainingsarena ist der Prüfungsdungeon der Gerudo-Festung, den du als Erwachsener mit dem Gerudo-Pass betrittst. Sie enthält weder Goldene Skulltulas noch Herzteile, daher gibt es auf dieser Karte keine Sammelobjekte abzuhaken; ihre Belohnung sind die Eispfeile."
+    },
+    "ganon": {
+      "intro": "Ganons Schloss erhebt sich als Erwachsener dort, wo einst Schloss Hyrule stand, und ist der letzte Dungeon des Spiels. Es enthält weder Goldene Skulltulas noch Herzteile, daher gibt es auf dieser Karte keine Sammelobjekte abzuhaken. Draußen am Zugangsweg warten allerdings die Große Fee der doppelten Verteidigung und eine Goldene Skulltula auf einem zerfallenen Bogen: Diese sind auf der Karte von Schloss Hyrule verzeichnet."
+    }
+  },
+  "items": {
+    "kokiri-gs-01": {
+      "name": "Hinter dem Haus der Besserwisser-Brüder",
+      "desc": "Das Haus der Besserwisser-Brüder auf dem Hügel gegenüber von Midos Haus und neben dem Wald-Trainingsplatz verbirgt diese Goldene Skulltula auf der Rückseite seines Baumstamms. Sie kommt nur nachts und nur als Kind heraus.\n\nKlettere den Hügel hinauf und gehe um das Haus herum zur Rückseite."
+    },
+    "kokiri-gs-02": {
+      "name": "Käfer in der weichen Erde beim Laden",
+      "desc": "Direkt hinter dem Kokiri-Laden gibt es ein Stück weiche Erde, in dem sich als Kind eine Goldene Skulltula versteckt, und alles, was du brauchst, um sie hervorzulocken, ist eine Flasche mit Käfern.\n\nSobald du **die Flasche mit Käfern auf das Beet leerst**, springt die Skulltula aus dem Boden: Besiege sie mit dem Schwert und schnapp dir das Goldene-Skulltula-Symbol. Das funktioniert zu jeder Tageszeit."
+    },
+    "kokiri-gs-03": {
+      "name": "Rückseite des Hauses der Zwillinge",
+      "desc": "Für diese Goldene Skulltula musst du als Erwachsener nachts in den Kokiri-Wald zurückkehren, denn sie hängt hoch oben an der Rückseite des Hauses der Zwillinge – dem mit dem Doppelgiebel nahe dem Weg zur Lichtung des Deku-Baums.\n\nDein Schwert reicht nicht so hoch, aber **der Fanghaken holt sie von unten herunter**, und ein zweiter Schuss auf das Symbol zieht es zu dir."
+    },
+    "kokiri-bean-01": {
+      "name": "Weiche Erde hinter dem Laden",
+      "desc": "Eine der Wundererbsen, die du beim Erbsenhändler am Zora-Fluss kaufst, gehört hierher in die weiche Erde direkt neben dem Kokiri-Laden; am besten pflanzt du sie als Kind ein, damit sie bei deiner Rückkehr bereit ist.\n\nAls Erwachsener **trägt dich das Blatt der Pflanze auf einen kleinen Vorsprung mit einem Ring aus grünen Rubinen** rund um einen roten. Dasselbe Beet birgt auch die Käfer-Skulltula, sodass du als Kind beides in einem Rutsch erledigen kannst.",
+      "hint": "Pflanze sie als Kind ein und nutze sie als Erwachsener."
+    },
+    "perdido-heart-01": {
+      "name": "Salias Lied für das Horror-Kid",
+      "desc": "Sobald du vom Kokiri-Wald aus die Verlorenen Wälder betrittst, führt der erste Weg links zu einem Horror-Kid, das auf einem hohen Baumstumpf Flöte spielt und verschwindet, wenn du dich ihm einfach näherst.\n\n**Klettere daher auf den niedrigen Baumstumpf vor ihm** und spiele Salias Lied auf deiner Okarina: Das Horror-Kid freundet sich mit dir an und schenkt dir ein Herzteil."
+    },
+    "perdido-heart-02": {
+      "name": "Gedächtnisspiel mit der Okarina",
+      "desc": "Der Bereich mit der Schleuder-Zielscheibe – der erste Weg rechts vom Eingang aus dem Kokiri-Wald – verbirgt ein Gedächtnisspiel mit zwei Horror-Kids. Gehe die Treppe voraus hinunter zum Baum mit der Zielscheibe und **gehe rechts daran vorbei, um auf den kleinen Baumstumpf zu klettern**.\n\nAnschließend musst du auf deiner Okarina nachspielen, was sie vorspielen – in drei Runden mit fünf, sechs und acht Noten. Verfehlst du eine Note, beginnt die Runde mit einer anderen Melodie von vorn, und die Preise steigern sich: Rubine in den ersten beiden Runden und das Herzteil in der dritten."
+    },
+    "perdido-gs-01": {
+      "name": "Käfer in der weichen Erde an der Brücke",
+      "desc": "Am flötespielenden Horror-Kid vorbei – dem ersten Weg links vom Eingang aus dem Kokiri-Wald – biegst du erneut links ab und gelangst zum Bereich mit der Brücke zur Hylianischen Steppe. Du erkennst ihn am Mythenstein und am Deku-Händler hinten, der die größere Deku-Stab-Tasche verkauft.\n\nDie weiche Erde liegt gleich am Weg, wenn du ankommst: **Schütte eine Flasche Käfer darauf**, erledige die auftauchende Goldene Skulltula mit dem Schwert und nimm das Symbol."
+    },
+    "perdido-gs-02": {
+      "name": "Käfer in der weichen Erde auf der Lichtung",
+      "desc": "Um dieses Beet zu erreichen, folge in den Verlorenen Wäldern der Route rechts, links, rechts, links und biege dann, statt zur Heiligen Lichtung weiterzugehen, noch einmal links ab. Dort liegt die Lichtung mit dem einzelnen Baum, zwei Deku-Händlern und einem Loch im Gras.\n\n**Setze dort die Käfer rechts auf der weichen Erde neben einem der Händler aus**, besiege die erscheinende Goldene Skulltula mit dem Schwert und schnapp dir das Symbol."
+    },
+    "perdido-gs-03": {
+      "name": "Vorsprung bei der Waldbühne",
+      "desc": "Um den hohen Vorsprung dieser Goldenen Skulltula zu erreichen, musst du als Kind vorarbeiten, denn der einzige Weg hinauf ist die Pflanze auf der Lichtung mit dem einzelnen Baum. Gehe in den Verlorenen Wäldern rechts, links, rechts, links und links und pflanze die Wundererbse rechts in der weichen Erde neben einem Deku-Händler.\n\nKehre als Erwachsener nachts zurück, **fahre mit der Pflanze hinauf zum Vorsprung** und besiege die Skulltula mit dem Schwert."
+    },
+    "perdido-bean-01": {
+      "name": "Weiche Erde an der Brücke",
+      "desc": "Wenn du vom Eingang der Verlorenen Wälder zweimal links abbiegst, gelangst du zum Bereich mit der Brücke zur Hylianischen Steppe; die weiche Erde dort eignet sich ideal, um als Kind eine Wundererbse zu pflanzen.\n\nKehre als Erwachsener zurück, **lass dich von der Pflanze bis zur Brücke** zwischen Kokiri-Wald und Hylianischer Steppe tragen und springe hinauf: eine praktische Abkürzung während der Tauschquest, wenn der Schimmelpilz nach drei Minuten verdirbt.",
+      "hint": "Pflanze sie als Kind ein und nutze sie als Erwachsener."
+    },
+    "perdido-bean-02": {
+      "name": "Weiche Erde bei den zwei Deku-Händlern",
+      "desc": "Zwei Deku-Händler und ein einzelner Baum stehen auf der Lichtung der Verlorenen Wälder, die du vom Eingang aus über rechts, links, rechts, links und links erreichst; dort befindet sich ein Stück weiche Erde, in das du als Kind eine Wundererbse pflanzen kannst. Es liegt rechts hinter einem der Händler, und Käfer locken daraus eine Goldene Skulltula hervor.\n\nAls Erwachsener **fährst du mit der Pflanze hinauf zum hohen Vorsprung der Lichtung**, wo nachts eine weitere Goldene Skulltula wartet.",
+      "hint": "Pflanze sie als Kind ein und nutze sie als Erwachsener."
+    },
+    "prado-gs-01": {
+      "name": "Rechte Wand vor der Treppe",
+      "desc": "Das Labyrinth der Heiligen Lichtung verbirgt diese Goldene Skulltula, allerdings erscheint sie nur als Erwachsener. Bahne dir deinen Weg vorbei an den Moblins und schau auf halber Strecke an die rechte Wand.\n\n**Triff die Skulltula mit dem Fanghaken** und feuere ihn ein zweites Mal ab, um das Goldene-Skulltula-Symbol einzusammeln."
+    },
+    "llanura-heart-01": {
+      "name": "Deku-Händler am Burggraben",
+      "desc": "Verlasse den Marktplatz über die Zugbrücke und folge der Mauer am Rand des Burggrabens nach Osten. Neben einem Baum siehst du ein Loch, das du mit einer Bombe oder dem Stahlhammer öffnen kannst: Spring hinein und sprich mit dem Deku-Händler darin.\n\nEr verkauft nur an jene, die das Passwort kennen. Um es zu erfahren, geh als erwachsener Link zum Baum daneben und lies den Feengedanken. Komm dann als Kind zurück, sprich mit dem Deku-Händler und **wähle „Verkauf mir was, ja?“**: Er bietet dir das Herzteil für 100 Rubine an.\n\nKaufe es als Kind, denn als Erwachsener hat er es bereits an den Link der Vergangenheit verkauft.",
+      "hint": "Es kostet 100 Rubine."
+    },
+    "llanura-heart-02": {
+      "name": "Paradoxon der Truhe aus der Vergangenheit",
+      "desc": "Am westlichen Rand der Hylianischen Steppe, nahe dem Eingang zum Gerudo-Tal, färbt sich der Boden rötlich. Gehe den Abhang hinunter in eine Senke unter einem Felsvorsprung und halte hinten Ausschau nach der Truhe.\n\nDas muss als Kind geschehen: Als Erwachsener steht die Truhe bereits offen und leer, und ein Feengedanke erklärt, dass sie nie verschlossen war. **Öffne die Truhe als Kind**, und das Herzteil gehört dir.",
+      "hint": "Lies als Erwachsener den Feengedanken, um zu erfahren, warum sie leer ist."
+    },
+    "llanura-gs-01": {
+      "name": "Einzelne Kiefer im Osten",
+      "desc": "Im Osten der Hylianischen Steppe, zwischen Zora-Fluss und Kokiri-Wald, steht eine einzelne Kiefer auf einer Anhöhe neben einem Bach. Darin versteckt sich eine Goldene Skulltula.\n\n**Rolle gegen den Stamm**, um sie herunterzuwerfen, erledige sie mit dem Schwert und nimm das Symbol.",
+      "hint": "Sie steht auf einer Anhöhe neben einem Bach."
+    },
+    "llanura-gs-02": {
+      "name": "Steinkreis-Grotte bei der Farm",
+      "desc": "Im Wäldchen südwestlich der Lon-Lon-Farm, nahe dem Ausgang zum Hylia-See, bedeckt ein Steinkreis am Boden eine Grotte. Öffne sie mit **einer Bombe oder einem Schlag mit dem Stahlhammer auf den Kreis** und springe hinab.\n\nSobald du landest, fällt eine große Skulltula von der Decke: Besiege sie mit dem Schwert. Die goldene sitzt an der Wand; erreiche sie mit dem Fanghaken oder dem Bumerang, der dir auch gleich das Symbol bringt."
+    },
+    "lonlon-heart-01": {
+      "name": "Steinturm im hinteren Bereich",
+      "desc": "Ganz hinten auf der Lon-Lon-Farm, direkt hinter der Pferdekoppel, steht ein Steinturm, der als Silo dient. In einer seiner Ecken verdecken Kisten eine Öffnung: **Schiebe die Kisten beiseite und krieche durch den Gang** bis ans Ende, wo das Herzteil wartet."
+    },
+    "lonlon-gs-01": {
+      "name": "Baum auf dem Weg zur Koppel",
+      "desc": "Gleich nach dem Betreten der Lon-Lon-Farm steht im linken Seitenhof ein Baum, in dem sich eine Goldene Skulltula versteckt: **Rolle gegen den Stamm, um sie zu Boden zu werfen**, besiege sie und sammle das Symbol ein."
+    },
+    "lonlon-gs-02": {
+      "name": "Kiste in der Grotte südlich der Farm",
+      "desc": "Damit diese Goldene Skulltula als Erwachsener erscheint, muss der junge Link den Feengedanken in der unterirdischen Grotte südöstlich der Lon-Lon-Farm nahe dem Teich lesen und die normale Skulltula besiegen.\n\nIst das erledigt, kehre als Erwachsener zurück. Hinten an der Wand steht eine Holzkiste. **Zerbrich sie, indem du dagegenrollst**, und eine Goldene Skulltula kommt heraus: Besiege sie mit dem Schwert und nimm das Symbol. Als kleines Detail hat sich der Feengedanke verändert.",
+      "hint": "Besiege die Skulltula in der Vergangenheit, um die goldene in der Zukunft zu finden."
+    },
+    "lonlon-gs-03": {
+      "name": "Fenster des Hauses",
+      "desc": "Wenn du nachts an Talons Haus auf der Lon-Lon-Farm neben dem Eingangsbogen hinaufschaust, siehst du eine Goldene Skulltula im oberen Fenster – zu hoch für dein Schwert.\n\n**Wirf von unten den Bumerang nach ihr**: Er besiegt sie und bringt dir im selben Wurf das Symbol zurück. Tagsüber ist die Wand leer."
+    },
+    "lonlon-gs-04": {
+      "name": "Im Steinturm",
+      "desc": "Der Steinturm hinten auf der Lon-Lon-Farm hinter der Koppel birgt nachts eine Goldene Skulltula im Inneren. Gehe durch die Turmtür hinein und schau nach oben: Sie sitzt hoch an der Wand über dem Heubüschel unter dem Fenster.\n\nNur der Bumerang reicht bis dorthin: **Wirf ihn vom Boden des Turms aus**, damit er die Skulltula besiegt und dir im selben Wurf das Symbol bringt. Die Feen-Schleuder tötet sie zwar, aber das Symbol bleibt oben hängen."
+    },
+    "ciudadela-heart-01": {
+      "name": "Schatztruhen-Lotterie",
+      "desc": "Die Schatztruhen-Lotterie liegt links vom Marktplatz-Eingang in einer Seitenstraße. Sie öffnet nur nachts und kostet 10 Rubine pro Versuch. Der Besitzer gibt dir einen Schlüssel: Jeder der fünf Räume hat zwei Truhen, und nur eine enthält den Schlüssel für den nächsten; wählst du falsch, ist das Spiel vorbei.\n\nLege das Auge der Wahrheit über das Ausrüstungsmenü an, um den Inhalt jeder Truhe zu sehen. **Meistere alle fünf Räume und öffne die große Truhe im Preisraum**, um das Herzteil zu erhalten.",
+      "hint": "Empfohlen: Auge der Wahrheit."
+    },
+    "ciudadela-heart-02": {
+      "name": "Der entlaufene Welpe",
+      "desc": "Richard ist der kleine weiße Hund, der nachts in einer der Hintergassen des Marktplatzes herumläuft, wo sich ein Mann aus dem Fenster seines Hauses lehnt. Sprich mit Richard, damit er dir folgt.\n\nGeh mit Richard im Schlepptau zum **Eingang des Marktplatzes von der Hylianischen Steppe aus**. Seine Besitzerin schenkt dir das Herzteil.",
+      "hint": "Das Herzteil gibt es nur beim ersten Mal; danach Rubine."
+    },
+    "ciudadela-heart-03": {
+      "name": "Krabbelminen-Bowlingbahn",
+      "desc": "Die Krabbelminen-Bowlingbahn liegt an der Westseite des Marktplatzes und öffnet erst, nachdem du König Dodongo besiegt hast.\n\nSprich mit der Betreiberin: Bevor du zahlst, nennt sie dir den aktuellen Preis, und jede Runde kostet 10 Rubine. Du musst drei Durchgänge mit 10 Krabbelminen schaffen, indem du sie hinter der Linie loslässt, sodass sie das Ziel hinten treffen – vorbei an Hindernissen wie einem Huhn.\n\nDer Preis wechselt von Runde zu Runde, also **spiele weiter, bis sie das Herzteil ankündigt**, und gewinne diese Runde.",
+      "hint": "10 Rubine pro Spiel; der Preis wird vor dem Bezahlen genannt."
+    },
+    "ciudadela-gs-01": {
+      "name": "Wachhaus",
+      "desc": "Direkt neben der Zugbrücke am Eingang zum Marktplatz liegt das Wachhaus – ein Raum voller Krüge, in dem sich eine Goldene Skulltula in einer Holzkiste versteckt.\n\nGehe zur Rückwand und **rolle gegen die Kiste ganz rechts**, also rechts vom Soldaten, wenn du vor ihm stehst."
+    },
+    "castillo-gs-01": {
+      "name": "Baum im Heckengarten",
+      "desc": "Das Gelände von Schloss Hyrule kannst du nur als Kind erkunden. Gehe den Weg Richtung Schloss hinauf und betritt seitlich den Garten aus Hecken und Blumen vor dir. Durchquere ihn nach Westen bis zur äußersten Ecke an der Schlossmauer, wo ein einzelner Baum steht.\n\n**Rolle gegen den Stamm**, um die Goldene Skulltula herunterzuwerfen, besiege sie und sammle das Symbol ein."
+    },
+    "castillo-gs-02": {
+      "name": "Grotte der Hymne des Sturms",
+      "desc": "Um der Wache am Tor von Schloss Hyrule auszuweichen, klettere die Ranken hinauf und lass dich bei der Eingangsbrücke in den Graben fallen. Schwimme unter der Brücke nach Osten und steige die Steinstufen hinauf: Direkt dort an der Außenmauer steht ein Baum mit einem Erdkreis an seinen Wurzeln.\n\n**Spiele auf diesem Kreis die Hymne des Sturms**, um ein Loch zu öffnen. Die Grotte hat brüchige Wände, die du mit Bomben aufsprengst: Hinter einer davon sitzt die Goldene Skulltula. Der Bumerang besiegt sie und bringt dir das Symbol."
+    },
+    "castillo-fairy-01": {
+      "name": "Große Fee: Wirbelattacke",
+      "desc": "Am östlichen Rand des Geländes von Schloss Hyrule, entlang der rechten Mauer, führt eine Sackgasse zu einem Felsen am Ende. Damit dich die Wache nicht aufhält, klettere die Ranken an der Mauer hoch.\n\nAm Ende des Weges **sprengst du den Felsen mit einer Bombe weg und kriechst durch die Lücke** zur Feen-Quelle. Spiele Zeldas Wiegenlied auf dem Triforce-Symbol und stimme der Opfergabe von 50 Rubinen zu: Die Große Fee verstärkt deine Wirbelattacke mit einer magischen Schockwelle.",
+      "hint": "Sie verlangt eine Opfergabe von 50 Rubinen und verstärkt die Wirbelattacke mit einer Schockwelle."
+    },
+    "kakariko-heart-01": {
+      "name": "Kleines Dach hinter Impas Haus",
+      "desc": "Das Herzteil liegt gut sichtbar auf einem kleinen rot gedeckten Dach hinter Impas Haus, direkt an der Felswand. Lass dich vom blauen Dach des Hauses **auf das kleine Dach dahinter fallen** und hebe es auf. Von dort kommst du auch hinunter in den Kuhstall.\n\nAls Kind sprichst du auf dem Gipfel des Todesbergs mit Methusa, und die Eule setzt dich auf Impas Dach ab. Als Erwachsener brauchst du den Fanghaken.",
+      "hint": "Als Erwachsener mit dem Fanghaken vom Dach des Skulltula-Hauses aus."
+    },
+    "kakariko-heart-02": {
+      "name": "Windmühle",
+      "desc": "In der Windmühle ganz hinten im Dorf wartet das Herzteil oben auf einem Möbelstück auf dem oberen Laufsteg.\n\nAls Erwachsener gelangst du durch Boris’ Grab auf dem Friedhof dorthin. Nach dem Rennen ist die Ausgangstreppe eingestürzt: **Feuere den Fanghaken auf das Ziel über der Tür** und folge dem Gang. Du kommst oben in der Windmühle neben der drehenden Plattform heraus; klettere auf das Möbelstück an der Wand und nimm das Herzteil.",
+      "hint": "Als Erwachsener gelangst du durch Boris’ Grab hinein."
+    },
+    "kakariko-heart-03": {
+      "name": "Der Mann auf dem Dach",
+      "desc": "Der Mann auf dem Dach sitzt oben auf **dem Magie-Laden neben dem Wachturm gegenüber der Windmühle**, und du musst ihn nur erreichen und ansprechen, um das Herzteil zu erhalten.\n\nAls Erwachsener genügt der Fanghaken: Stelle dich auf das Geländer gegenüber der Windmühle und ziehe dich aufs Dach.",
+      "hint": "Als Erwachsener brauchst du den Fanghaken."
+    },
+    "kakariko-gs-01": {
+      "name": "Haus im Bau",
+      "desc": "Während die Zimmerleute als Kind nachts am Rohbau arbeiten, hängt die Goldene Skulltula an der Ziegelwand der Baustelle über dem Boden. **Gehe die Bretterrampe hinauf zum Gerüstlaufsteg**, und sie sitzt direkt vor dir an der Wand.\n\nDein Schwert genügt, um sie zu besiegen – weitere Gegenstände brauchst du für das Symbol nicht."
+    },
+    "kakariko-gs-02": {
+      "name": "Baum am Eingang",
+      "desc": "Die große Kiefer nahe dem Eingang von der Hylianischen Steppe im unteren Teil des Dorfes verbirgt nachts eine Goldene Skulltula, die als Kind zu Boden fällt, wenn du **gegen den Stamm der Kiefer rollst**. Sobald sie unten liegt, erledige sie und sammle das Symbol ein."
+    },
+    "kakariko-gs-03": {
+      "name": "Wachturm",
+      "desc": "Auf halber Höhe der Leiter des Wachturms in der Dorfmitte hängt nachts eine Goldene Skulltula, die du von unten angreifst: **Schieße sie mit der Feen-Schleuder ab oder schicke eine Krabbelmine die Leiter hinauf**.\n\nIst sie besiegt, klettere die Leiter hoch: Das Symbol bleibt auf halber Höhe hängen, sodass du es einsammeln kannst, ohne ganz nach oben zu müssen.",
+      "hint": "Erledige sie, bevor du den Turm zum Mann auf dem Dach hochkletterst."
+    },
+    "kakariko-gs-04": {
+      "name": "Haus am Gebirgstor",
+      "desc": "Auf dem Weg hinauf zum Tor des Todesbergs im oberen Teil des Dorfes siehst du hinter dem Wachturm ein Haus direkt daneben. Gehe als Kind und nachts **über den Grasweg an der Rückseite um das Haus herum** und suche die Wände nach der Goldenen Skulltula ab. Sie sitzt in Bodennähe, sodass du sie ohne Hilfsmittel mit dem Schwert besiegen und das Symbol nehmen kannst."
+    },
+    "kakariko-gs-05": {
+      "name": "Skulltula-Haus",
+      "desc": "Das Skulltula-Haus, die Heimat der verfluchten Familie, ist das erste Haus rechts nach dem Eingang von der Hylianischen Steppe und trägt Spinnweben über der Tür. Als Kind und nachts erscheint die Goldene Skulltula an **der Vorderseite des Hauses links neben den Eingangsstufen** in Bodennähe; tagsüber siehst du dort bereits ihr Netz.\n\nFalls es Tag ist, spiele die Hymne der Sonne, um die Nacht herbeizurufen. Mit dem Schwert ist sie rasch erledigt, danach brauchst du nur noch das Symbol aufzuheben."
+    },
+    "kakariko-gs-06": {
+      "name": "Über Impas Haus",
+      "desc": "Für diese Goldene Skulltula musst du als Erwachsener und nachts zurückkehren: Sie sitzt an der Felswand direkt neben dem blauen Dach von Impas Haus, dem großen Gebäude am Südrand des Dorfes. Du brauchst den Fanghaken.\n\nGehe seitlich um das Haus herum zur Felswand dahinter, an der Ranken wachsen, und **klettere daran bis zum blauen Dach hinauf**. Von oben siehst du die Skulltula am Felsen neben dem Dach: Hol sie mit dem Fanghaken herunter, der dir auch das Symbol bringt."
+    },
+    "cementerio-heart-01": {
+      "name": "Grab-Tour mit Boris",
+      "desc": "Als Kind und nachts bietet Boris der Totengräber auf dem Friedhof seine „Herzklopfende Grab-Tour“ an. Kommst du tagsüber an, spiele dort die Hymne der Sonne: Es wird Nacht und Boris erscheint sofort. Nimm an und bleibe auf dem mittleren Platz, denn wenn du zu weit wegläufst, endet die Tour.\n\nStelle dich neben einen der Erdhügel und **bitte ihn zu graben: Jeder Versuch kostet 10 Rubine**. Manchmal stößt er auf etwas Hartes und verlangt 5 weitere Rubine zum Weitergraben, wobei zufällig entweder ein Stein oder das Herzteil auftaucht. Bleibe dran, bis es erscheint – die Stelle ist völlig zufällig.",
+      "hint": "10 Rubine pro Hügel; manchmal verlangt er 5 weitere zum Weitergraben."
+    },
+    "cementerio-heart-02": {
+      "name": "Rennen gegen Boris",
+      "desc": "Boris’ Grab ist der Grabstein mit Blumen, aus dem Rauch aufsteigt, im eingezäunten Bereich links einige Stufen hinauf. Ziehe als Erwachsener und nachts **daran, um das Loch zu öffnen, und steige in die Katakomben hinab**. Folge dort seinem Geist bis ans Ende, ohne ihn aus den Augen zu verlieren; das erste Rennen bringt dir den Fanghaken ein.\n\nDas Herzteil gibt es beim zweiten Mal. Verlasse den Raum mit dem Fanghaken über das Ziel über der eingestürzten Treppe (du kommst in der Windmühle von Kakariko heraus), kehre zum Friedhof zurück, steige erneut durch das nun offene Loch hinab und erreiche das Ziel in höchstens einer Minute.",
+      "hint": "Das erste Rennen bringt den Fanghaken; das Herzteil gibt es beim zweiten."
+    },
+    "cementerio-heart-03": {
+      "name": "Grab nahe dem Königsgrab",
+      "desc": "Nahe dem Königsgrab im oberen Teil des Friedhofs: Stelle dich mit dem Rücken zum Königsgrab Richtung Ausgang; unter den Grabsteinen links von dir ist es **der erste ganz links**. Als Erwachsener öffnet er sich immer, als Kind nur nachts (tagsüber hält dich der Junge auf, der über die Gräber wacht; die Hymne der Sonne erspart das Warten).\n\nZiehe am Grabstein und steige hinab: Die Truhe mit dem Herzteil steht ohne Gegner ganz hinten in der Krypta.",
+      "hint": "Als Kind lässt sich das Grab nur nachts öffnen."
+    },
+    "cementerio-heart-04": {
+      "name": "Vorsprung an der Mauer",
+      "desc": "Hoch oben an der linken Mauer des Friedhofs, über Boris’ Grab und der weichen Erde, gibt es einen Vorsprung, auf dem das Herzteil gut sichtbar auf einer Steinsäule liegt; von unten kommst du ohne Hilfe nicht hinauf.\n\nWenn du als Kind eine Wundererbse in die weiche Erde pflanzt, **steigst du als Erwachsener auf das Blatt und lässt dich zum Vorsprung hinauftragen**. Oben angekommen, schnappst du dir das Herzteil von der Säule.",
+      "hint": "Das Herzteil liegt gut sichtbar auf einer Säule an der Mauer."
+    },
+    "cementerio-gs-01": {
+      "name": "Friedhofsmauer",
+      "desc": "Nachts erscheint hoch oben in der schmalen Gasse zwischen Boris’ Hütte und der Steinmauer mit dem Eisenzaun beim Friedhofseingang eine Goldene Skulltula. Tagsüber markiert dort ein goldenes Netz die Stelle, an der sie auftaucht.\n\n**Besiege sie mit dem Fanghaken oder dem Bumerang und hole dir damit auch das Symbol.**"
+    },
+    "cementerio-gs-02": {
+      "name": "Käfer in der weichen Erde",
+      "desc": "Geh als Kind zu beliebiger Tageszeit mit einer Flasche Käfern zur weichen Erde in der linken hinteren Ecke des Friedhofs an der Mauer neben Boris’ Grab und **lass sie dort frei, damit eine Goldene Skulltula herauskommt**. Erledige sie, sobald sie auftaucht, und nimm das Symbol.",
+      "hint": "Es ist dasselbe Beet, in das du die Wundererbse pflanzt."
+    },
+    "cementerio-bean-01": {
+      "name": "Weiche Erde auf dem Friedhof",
+      "desc": "Unterhalb des hohen Vorsprungs an der linken Friedhofsmauer neben Boris’ Grab liegt die weiche Erde, in die du **als Kind eine Wundererbse pflanzen** solltest. Wenn du als Erwachsener zurückkehrst, trägt dich das Blatt hinauf zum Vorsprung mit dem Herzteil.",
+      "hint": "Pflanze sie als Kind ein und nutze sie als Erwachsener."
+    },
+    "sendero-heart-01": {
+      "name": "Vorsprung über Dodongos Höhle",
+      "desc": "Über dem Eingang zu Dodongos Höhle befindet sich der Vorsprung mit diesem Herzteil, gut sichtbar in einer Felsnische. Dafür musst du als Kind eine Wundererbse in die weiche Erde pflanzen.\n\nFahre als Erwachsener mit der Pflanze und springe ab, sobald sie am Vorsprung vorbeikommt, um das Herzteil einzusammeln."
+    },
+    "sendero-gs-01": {
+      "name": "Käfer in der weichen Erde vor der Höhle",
+      "desc": "Die weiche Erde für diese Goldene Skulltula liegt direkt vor Dodongos Höhle.\n\nSobald der Eingang freigeräumt ist, **leerst du die Käfer aus der Flasche auf die weiche Erde**; besieg die auftauchende Goldene Skulltula sofort mit dem Schwert und nimm das Symbol.",
+      "hint": "Im selben Beet kannst du eine Wundererbse pflanzen."
+    },
+    "sendero-gs-02": {
+      "name": "Brüchige Wand nahe Kakariko",
+      "desc": "Wenn du Kakariko Richtung Gebirge verlässt, taucht noch vor Dodongos Höhle rechts am Pfad eine Wand aus brüchigen Felsen auf, die sich vom Rest abhebt: Dahinter hörst du die Skulltula.\n\n**Öffne die Wand mit einer Bombe oder als Erwachsener mit dem Stahlhammer**, tritt in die Nische und besiege die Goldene Skulltula, die in Schwerthöhe an der Rückwand sitzt."
+    },
+    "sendero-gs-03": {
+      "name": "Über Dodongos Höhle",
+      "desc": "Auf dem umzäunten Vorsprung neben der Abzweigung nach Goronia, von dem du als Kind die Donnerblume auf Dodongos Höhle hinabwirfst, liegen ein paar Felsen an der Wand. Diese Goldene Skulltula erscheint darunter, wenn du als Erwachsener nachts zurückkehrst.\n\n**Zertrümmere die Felsen mit dem Stahlhammer oder einer Bombe** – nur damit lassen sie sich zerstören –, besiege dann die Skulltula und nimm ihr Symbol."
+    },
+    "sendero-gs-04": {
+      "name": "Steinschlag-Pfad",
+      "desc": "Hinter Dodongos Höhle steigt der Pfad zu jenem Abschnitt an, auf dem vulkanische Brocken herabregnen, und endet an der Netzwand zum Gipfel. Diese Goldene Skulltula erscheint als Erwachsener und nachts am Fuß dieser Wand.\n\nWenn du beim Aufstieg vor der Wand stehst, liegt rechts neben dem Felsbogen ein Steinhaufen, den Bomben nicht brechen können: **Schlage mit dem Stahlhammer darauf**, erledige die Skulltula unter den Trümmern und sammle das Symbol ein."
+    },
+    "sendero-bean-01": {
+      "name": "Weiche Erde bei Dodongos Höhle",
+      "desc": "Bevor du hier eine Wundererbse pflanzt, musst du als Kind den Felsen vor Dodongos Höhle mithilfe der Donnerblume darüber und dem Goronen-Armband entfernen. Pflanze sie danach in die weiche Erde vor dem Eingang.\n\nAls Erwachsener fährt die Pflanze am Vorsprung des Herzteils vorbei und trägt dich hinauf bis zum Steinschlag-Abschnitt: **eine Abkürzung, die den Felsen auf dem Pfad umgeht**.",
+      "hint": "Pflanze sie als Kind ein und nutze sie als Erwachsener."
+    },
+    "sendero-fairy-01": {
+      "name": "Große Fee: Magie",
+      "desc": "Ganz oben auf dem Gipfel des Todesbergs wartet Methusa nahe dem Eingang zum Todeskrater. **Die brüchige Felswand links neben ihr lässt sich mit einer Bombe** oder als Erwachsener mit dem Stahlhammer einreißen; dahinter liegt die Feen-Quelle.\n\nSpiele drinnen Zeldas Wiegenlied auf dem Triforce-Symbol. Die Große Fee bittet dich um eine Opfergabe von 25 Rubinen: Nimm an, und sie schenkt dir die Magieleiste sowie Dins Feuerinferno. Wenn du als Kind hinaufkletterst, bring den Hylia-Schild für den Steinschlag-Abschnitt mit.",
+      "hint": "Sie verlangt eine Opfergabe von 25 Rubinen. Belohnung: Magieleiste und Dins Feuerinferno."
+    },
+    "goron-heart-01": {
+      "name": "Drehende Vase",
+      "desc": "Die große Vase mit Gesichtern in der Mitte der untersten Ebene von Goronia beginnt erst zu rotieren, wenn du als Kind **die Fackeln rundherum entzündest**. Dafür eignen sich Dins Feuerinferno oder ein brennender Deku-Stab – etwa aus Darunias Raum, den du mit Zeldas Wiegenlied an seiner Tür öffnest. Die Fackeln bleiben auch bei späteren Besuchen an.\n\nGeh dann ein Stockwerk höher, tritt auf die Holzplanke über der Vase und lass eine Bombe hineinfallen oder wirf mit dem Goronen-Armband eine Donnerblume hinein. Sie spuckt das Herzteil samt 10 Rubinen auf den Boden.",
+      "hint": "Bleibt sie auf einem anderen Gesicht stehen, gibt es andere Preise: Versuche es einfach erneut."
+    },
+    "goron-gs-01": {
+      "name": "Felsenlabyrinth",
+      "desc": "Der Raum mit dem Felsenlabyrinth liegt auf der obersten Ebene von Goronia – dort, wo der Eingang vom Gebirgspfad ist – und als Kind bahnst du dir mit Bomben einen Weg durch die Blöcke.\n\nGanz hinten neben zwei Truhen steht eine Holzkiste mit der Goldenen Skulltula darin: **Rolle gegen die Kiste, um sie zu zerbrechen**, besiege die Skulltula mit dem Schwert und nimm das Symbol."
+    },
+    "goron-gs-02": {
+      "name": "Felsvorsprung an der Decke",
+      "desc": "Gehe als Erwachsener in Goronia ein Stockwerk über der untersten Ebene gegen den Uhrzeigersinn um die Plattform herum. Schau vor dem Tunneleingang nach oben: Die Goldene Skulltula sitzt an der Unterseite des Felsvorsprungs an der Decke.\n\n**Hol sie mit dem Fanghaken herunter**, der dir dabei gleich das Symbol bringt."
+    },
+    "crater-heart-01": {
+      "name": "Nische in der Kraterwand",
+      "desc": "Betrittst du den Todeskrater vom Gipfel des Todesbergs aus, blickt der Eingangsvorsprung auf eine gewaltige Wand hinab zur Plattform des Boleros des Feuers. Am Rand hängen Kletternetze: **Klettere daran hinab**, und etwas weiter unten findest du das Herzteil in einer Wandnische zwischen zwei Netzen.\n\nAls Kind setzt dir die Hitze rasch zu. Als Erwachsener hast du mit der Goronen-Rüstung keinerlei Eile.",
+      "hint": "Als Kind läuft ein Hitze-Timer: Beeil dich."
+    },
+    "crater-heart-02": {
+      "name": "Kuppelfelsen im Krater",
+      "desc": "Spiele als Kind **den Bolero des Feuers auf der Okarina** und pflanze im Krater eine Wundererbse in die weiche Erde neben der Plattform.\n\nKehre als Erwachsener in der Goronen-Rüstung zurück, **fahre auf dem Blatt mit und springe ab, sobald es über einen der hohen Felsen fliegt**: Oben wartet das Herzteil.",
+      "hint": "Du musst zuerst den Bolero des Feuers erlernen."
+    },
+    "crater-gs-01": {
+      "name": "Kiste am Gipfeleingang",
+      "desc": "Betrittst du den Krater als Kind vom Gipfel des Todesbergs statt aus Goronia, siehst du wenige Schritte nach dem Eingang links zwei Holzkisten an der Felswand neben einem Krug. Die Goldene Skulltula steckt in der Kiste neben dem Krug.\n\n**Zerbrich die Kisten, indem du dagegenrollst**, besiege die Skulltula und sammle das Symbol ein.",
+      "hint": "Nutze Nayrus Umarmung, falls du die Hitze nicht aushältst."
+    },
+    "crater-gs-02": {
+      "name": "Käfer in der weichen Erde bei der Bolero-Plattform",
+      "desc": "Diese Goldene Skulltula verlangt eine Zeitreise, denn sie erscheint nur als Kind, während du den Bolero des Feuers erst als Erwachsener lernst. Als Kind erreichst du die weiche Erde wenige Schritte von der Bolero-Plattform nur durch dieses Lied.\n\nDu erscheinst auf der Plattform: **Lass die Käfer in der weichen Erde daneben frei**, besiege die Skulltula und schnapp dir das Symbol ohne zu trödeln, da die Hitze deine Herzen schwinden lässt.",
+      "hint": "Als Kind zieht dir die Hitze nach und nach Herzen ab: Beeil dich."
+    },
+    "crater-bean-01": {
+      "name": "Weiche Erde im Krater",
+      "desc": "Neben der Plattform des Boleros des Feuers im Zentrum des Kraters liegt ein Stück weiche Erde, das du als Kind nur mit diesem Lied erreichst. **Pflanze die Wundererbse ein und verschwinde sofort wieder** – etwa mit einem anderen Warp-Lied –, weil die Hitze ein Zeitlimit setzt.\n\nKehre als Erwachsener zurück: Die Pflanze fliegt über den Kuppelfelsen mit einem Herzteil, danach an der Kletterwand des anderen vorbei und trägt dich auch zum Gipfeleingang hinauf.",
+      "hint": "Pflanze sie als Kind ein und nutze sie als Erwachsener."
+    },
+    "crater-fairy-01": {
+      "name": "Große Fee: Doppelte Magie",
+      "desc": "Von Darunias Raum in Goronia gelangst du als Erwachsener in den unteren Bereich des Kraters. Hast du gerade Volvagia besiegt, setzt dich der blaue Warp auf der mittleren Plattform ab: Überquere die Kettenbrücke nach Westen und folge diesem Ufer. Zwei Steinhaufen versperren einen Durchgang in der Wand: **Zertrümmere sie mit dem Stahlhammer**.\n\nTritt in der Quelle auf das Symbol und spiele Zeldas Wiegenlied. Die Große Fee der Weisheit bittet um eine Opfergabe von 200 Rubinen für die Quelle: Nimm an, und sie verdoppelt deine Magieleiste.",
+      "hint": "Sie verlangt eine Opfergabe von 200 Rubinen. Belohnung: verdoppelt deine Magieleiste."
+    },
+    "rio-heart-01": {
+      "name": "Säule mitten im Fluss",
+      "desc": "Das Herzteil liegt auf einer hohen, von Wasser umgebenen Plattform mitten im Zora-Fluss; als Kind erreichst du es im Gleitflug mit einem Huhn vom bewaldeten Bereich daneben. Dorthin kletterst du ohne Huhn an Ranken hinauf, doch oben zwischen den Farnen links führt ein Loch in eine Grotte mit einer Truhe und einem Huhn. **Verlasse die Grotte mit dem Huhn im Arm über die Blume, renne an die Kante und gleite hinüber zur Plattform.**\n\nAls Erwachsener gelangst du mit der Wundererbse oder den Gleitstiefeln dorthin.",
+      "hint": "Als Erwachsener mit der gepflanzten Wundererbse oder den Gleitstiefeln."
+    },
+    "rio-heart-02": {
+      "name": "Vorsprung am Wasserfall",
+      "desc": "Am Ende des Zora-Flusses, neben dem Wasserfall, der den Eingang zu Zoras Reich verbirgt, steht eine freistehende Plattform mit dem Herzteil.\n\nSchnapp dir am Anfang des Flusses neben dem Erbsenhändler das Huhn und trage es flussaufwärts mit dir. Beim Wasserfall kletterst du auf den höchsten Punkt, **springst mit ihm ab und gleitest zur Plattform hinüber**.",
+      "hint": "Als Erwachsener erreichst du sie nur mit den Gleitstiefeln."
+    },
+    "rio-heart-03": {
+      "name": "Froschspiel",
+      "desc": "Die Frösche für dieses Herzteil – der berühmte Froschchor – sitzen auf Baumstümpfen im Teich einer in den Fels gehauenen Grotte auf halber Strecke des Zora-Flusses. Geh als Kind hin, sprich sie an und sie bitten dich, etwas auf der Okarina zu spielen. Für jedes neue Lied gibt es Rubine:\n- Zeldas Wiegenlied\n- Eponas Lied\n- Salias Lied\n- Hymne der Sonne\n- Hymne der Zeit\n\nHast du alle gespielt, schlagen sie ihr Spiel vor: Über einem Frosch erscheint ein Käfer und **du spielst rasch seine Note, damit er hochspringt und ihn frisst**. Schaffst du die gesamte Abfolge fehlerfrei, gehört das Herzteil dir; bei einem Fehler kannst du es erneut versuchen.",
+      "hint": "Merk dir, welche Note zu welchem Frosch gehört."
+    },
+    "rio-heart-04": {
+      "name": "Die Frösche im Regen",
+      "desc": "Auf halber Strecke des Zora-Flusses findest du in einer Höhle einen Baumstumpf mit fünf Fröschen. Spiele dort die **Hymne des Sturms** auf der Okarina. Danach belohnen dich die Frösche mit einem Herzteil."
+    },
+    "rio-gs-01": {
+      "name": "Käfer in der weichen Erde beim Erbsenhändler",
+      "desc": "Neben dem Erbsenhändler am Anfang des Zora-Flusses verbirgt ein Stück weiche Erde eine Goldene Skulltula, die du mit einer Flasche Käfern hervorlockst.\n\n**Leere die Flasche Käfer auf die weiche Erde**: Die Skulltula kriecht aus dem Boden. Besiege sie mit dem Schwert und nimm das Symbol."
+    },
+    "rio-gs-02": {
+      "name": "Wand am Wasserfall",
+      "desc": "Am Ende des Zora-Flusses beim Wasserfall erscheint diese Goldene Skulltula nur nachts und als Kind.\n\nKlettere vom bewachsenen Vorsprung neben dem Wasserfall den Felsen hinab zum unteren Ufer am Wasser.\n\nDie Skulltula sitzt an der Wand des niedrigen Felsens an diesem Ufer. Geh nah heran und schlage mit dem Schwert zu."
+    },
+    "rio-gs-03": {
+      "name": "Über den erhöhten Grotten",
+      "desc": "Hoch oben an der Felswand über dem Plateau mit den Grotten in der Mitte des Zora-Flusses erscheint nachts eine Goldene Skulltula, und der Fanghaken erreicht sie nur, wenn du auf das Plateau selbst kletterst.\n\nAls Erwachsener kletterst du an der Rankenwand zwischen den Felsen am Wasser hinauf. Geh oben bis zur Kante und **feuere den Fanghaken an den oberen Teil der Wand**, um sie zu besiegen und das Symbol einzuholen.",
+      "hint": "Vom unteren Pfad aus bräuchtest du den Enterhaken."
+    },
+    "rio-gs-04": {
+      "name": "Über der Brücke",
+      "desc": "Über der letzten Brücke des Zora-Flusses, in der Höhle vor dem Wasserfall zu Zoras Reich, ragt eine sehr hohe Felswand empor, an der sich nachts eine Goldene Skulltula niederlässt.\n\n**Triff sie direkt von der Brücke aus mit dem Fanghaken** und sammle das Symbol ein."
+    },
+    "rio-bean-01": {
+      "name": "Weiche Erde beim Erbsenhändler",
+      "desc": "Gleich beim Betreten des Zora-Flusses versperren zwei brüchige Felsen den Weg; sprenge sie mit einer Bombe weg.\n\nDirekt dahinter sitzt an einem Zaun der Erbsenhändler, und als Kind lohnt es sich, ihm einige Wundererbsen abzukaufen: Die erste kostet 10 Rubine, jede weitere wird um 10 teurer. **Pflanze eine davon über dein Inventar in die weiche Erde neben ihm**.",
+      "hint": "Pflanze sie als Kind ein und nutze sie als Erwachsener."
+    },
+    "dominio-gs-01": {
+      "name": "Gefrorener Wasserfall",
+      "desc": "Als Erwachsener, wenn Zoras Reich zugefroren ist, erscheint nachts ganz oben am gefrorenen Wasserfall – wo als Kind das Tauchspiel stattfand – die Goldene Skulltula. Du erreichst die Stelle über den Gang auf der Ebene von König Zora, der zu einer hohen Galerie führt.\n\nSchau über die Kante nach links: Sie sitzt an einer von gefrorenen Pflanzen bedeckten Säule dicht an der Wand. **Hol sie dir mit dem Fanghaken oder schieße sie mit einem Pfeil herunter**, um das Symbol einzusammeln."
+    },
+    "fuente-heart-01": {
+      "name": "Entfernteste Eisscholle",
+      "desc": "Das Herzteil liegt auf der entferntesten Eisscholle in der zugefrorenen Zoras Quelle, abseits des Weges zur Eishöhle. Als Erwachsener betrittst du die Quelle durch den Gang hinter dem eingefrorenen Thron von König Zora.\n\n**Springe von Scholle zu Scholle bis zur letzten**: Die Eisblöcke sind rutschig, also schätze jeden Sprung genau ab. Fällst du ins Wasser, schwimme zum Anfang zurück und klettere erneut hinauf."
+    },
+    "fuente-heart-02": {
+      "name": "Grund der Quelle",
+      "desc": "Dieses Herzteil wartet am Grund von Zoras Quelle inmitten mehrerer Grüner Rubine. Als Erwachsener brauchst du dafür zweierlei: die Zora-Rüstung, die dir König Zora nach seiner Befreiung schenkt, um unter Wasser zu atmen, sowie die Eisenstiefel zum Abtauchen.\n\nSteige mit angelegter Zora-Rüstung ins Wasser, **ziehe die Eisenstiefel an und sinke bis zum Grund**, nimm das Herzteil und lege die Stiefel wieder ab, um aufzutauchen."
+    },
+    "fuente-gs-01": {
+      "name": "Wand über dem versunkenen Bogen",
+      "desc": "Sobald du Zoras Quelle von Zoras Reich aus betrittst, folge dem Ufer bis zu einem zerfallenen Steinbogen, der halb im Wasser liegt und an die mit Ranken bewachsene Felswand grenzt. Klettere auf den Bogen: Nachts erscheint an dieser Wand eine Goldene Skulltula, die du als Kind mit dem Bumerang erreichst.",
+      "hint": "Den Bumerang erhältst du in Lord Jabu-Jabus Bauch."
+    },
+    "fuente-gs-02": {
+      "name": "Kiefer in der Südostecke",
+      "desc": "In der Südostecke von Zoras Quelle – dort, wo am Fuß der Klippe Kiefern stehen, neben der Wand zur Feen-Quelle – verbirgt ein Baum als Kind zu jeder Tageszeit eine Goldene Skulltula.\n\nDu musst nicht einmal schwimmen: Gehe von der Opferschale vor Lord Jabu-Jabu rechts hinunter und folge dem Erdweg am Ufer. **Rolle gegen die Kiefer**, um die Skulltula herunterzuwerfen, besiege sie mit dem Schwert und nimm das Symbol."
+    },
+    "fuente-gs-03": {
+      "name": "Höhle hinter den Zora-Blöcken",
+      "desc": "Gehe als Erwachsener ganz in die Südostecke von Zoras Quelle, wo zwei schwarze Steinblöcke mit Zora-Zeichen einen Höhleneingang versperren. **Hebe sie mit den Silberhandschuhen hoch** und tritt ein.\n\nDrinnen hängen unsichtbare Skulltulas von der Decke; weiche ihnen aus oder mache sie mit dem Auge der Wahrheit sichtbar. Klettere ganz hinten die Ranken hoch und tritt auf einen äußeren Vorsprung hinaus.\n\nDie Goldene Skulltula **erscheint nur nachts**. Sie zeigt sich über einem Höhleneingang auf dem Vorsprung, und du holst sie mit dem Fanghaken samt Symbol herunter.",
+      "hint": "Drinnen hängen vier unsichtbare Skulltulas von der Decke."
+    },
+    "fuente-fairy-01": {
+      "name": "Große Fee: Farores Donnersturm",
+      "desc": "Gehe von der Opferschale vor Lord Jabu-Jabu zu Fuß am rechten, zerfallenen Ufer entlang bis in die Südostecke mit den Bäumen am Fuß der Klippe. Dort verbirgt sich hinter einem brüchigen Abschnitt der Felswand die Feen-Quelle.\n\n**Lege eine Bombe oder Krabbelmine an die brüchige Wand**, um den Weg zu öffnen. Spiele drinnen Zeldas Wiegenlied auf dem Triforce-Symbol am Boden. Bevor sie dir Farores Donnersturm verleiht, verlangt die Große Fee eine Opfergabe von 100 Rubinen, die in die Quelle geworfen werden – bring sie also mit.",
+      "hint": "Sie verlangt eine Opfergabe von 100 Rubinen: Bring sie mit."
+    },
+    "lago-heart-01": {
+      "name": "Tauchen im Labor",
+      "desc": "Im Labor am See, dem Gebäude am Ufer, befindet sich ein tiefes Becken; das Herzteil ist die Belohnung dafür, bis zum Boden zu tauchen und ihn zu berühren – das gelingt nur mit der Goldenen Schuppe, dem Preis vom Fischweiher.\n\nEs spielt keine Rolle, ob du als Kind oder als Erwachsener kommst: Springe ins Wasser, **tauche hinab, bis du den Beckenboden berührst**, und sobald du wieder herauskletterst, überreicht dir der Forscher das Herzteil.",
+      "hint": "Die Goldene Schuppe ist der Angelpreis als Erwachsener."
+    },
+    "lago-heart-02": {
+      "name": "Dach des Labors",
+      "desc": "Pflanze als Kind eine Wundererbse in die weiche Erde neben dem Labor am Hylia-See und kehre als Erwachsener zurück. Fahre auf dem Blatt mit: Es zieht eine Schleife über den See und setzt dich auf dem Holzbalkon des Laborturms ab.\n\n**Klettere die Leiter hinauf zum Ausguck ganz oben**, wo das Herzteil liegt.",
+      "hint": "Pass auf die Krähen auf dem Dach auf: Sie können dich hinunterstoßen."
+    },
+    "lago-heart-03": {
+      "name": "Angeln als Kind",
+      "desc": "Der Fischweiher liegt auf einer kleinen Insel im Hylia-See, und der Besitzer leiht dir für 10 Rubine eine Angel. Behalte deinen Fang, sprich anschließend mit dem Besitzer und sage, dass du aufhörst: Er misst deinen größten Fisch, und **wenn er über 50 cm lang ist, schenkt er dir als Kind das Herzteil**.\n\nDie **größten Fische** tummeln sich meist **in der Mitte des Teichs**.",
+      "hint": "Jeder Versuch kostet 10 Rubine; den Preis gibt es für einen Fisch über 50 cm."
+    },
+    "lago-gs-01": {
+      "name": "Käfer in der weichen Erde beim Labor",
+      "desc": "Direkt an der Wand des Labors am See, neben einigen Fässern und Säcken, liegt ein Stück weiche Erde. Als Kind kommt zu jeder Tageszeit die Goldene Skulltula heraus, sobald du **eine Flasche Käfer über dem Beet öffnest**: Die Käfer kriechen ins Loch und sie klettert aus dem Boden. Dein Schwert reicht aus, um sie zu besiegen und das Symbol zu behalten."
+    },
+    "lago-gs-02": {
+      "name": "Laborwand",
+      "desc": "Hinter dem Labor am See führt eine Brücke hinaus. Sobald du sie als Kind nachts betrittst, schau nach rechts: Am runden Turm des Gebäudes neben einem Rohr sitzt diese Goldene Skulltula, zu hoch für dein Schwert.\n\n**Wirf direkt von der Brücke aus den Bumerang nach ihr**: Er holt sie herunter und bringt dir das Symbol."
+    },
+    "lago-gs-03": {
+      "name": "Höhle am Westufer",
+      "desc": "Folge als Kind dem Westufer des Hylia-Sees nach Süden bis ganz ans Ende, wo eine Felsnische Krüge, ein Fass und einen Feengedanken an der Wand birgt. Steige von dort ins Wasser und schwimme zum benachbarten Ufer: In der Felswand erkennst du eine niedrige Öffnung mit einem Steinsturz.\n\n**Krieche durch diese Öffnung** und du gelangst in eine kleine, dunkle Höhle. Die Goldene Skulltula sitzt an der gegenüberliegenden Wand; besiege sie mit dem Schwert und nimm das Symbol.",
+      "hint": "Krieche durch das Loch, um die Goldene Skulltula zu finden."
+    },
+    "lago-gs-04": {
+      "name": "Kiste am Grund des Laborbeckens",
+      "desc": "Das Becken im Labor am See verbirgt am Grund eine Holzkiste mit einer Goldenen Skulltula darin. Um als Erwachsener hinunterzugelangen, lege die Eisenstiefel an und springe ins Wasser.\n\n**Rolle unten gegen die Kiste, um sie zu zerbrechen**, erledige die Skulltula und hole dir das Symbol mit dem Fanghaken."
+    },
+    "lago-gs-05": {
+      "name": "Baum auf der großen Insel",
+      "desc": "Auf der größten Insel im See – der mit der Plattform für die Serenade des Wassers – steht ein riesiger Baum mit hohler Krone. Als Erwachsener **zielst du mit dem Enterhaken auf die Baumkrone, um dich hinaufzuziehen**; der Fanghaken reicht nicht aus.\n\nDie Goldene Skulltula erscheint dort nur nachts in der Krone: Ist es Tag, spiele einfach die Hymne der Sonne, und sie taucht auf. Besiege sie mit dem Schwert und sammle das Symbol ein."
+    },
+    "lago-bean-01": {
+      "name": "Weiche Erde beim Labor",
+      "desc": "Pflanze als Kind eine Wundererbse in die weiche Erde direkt an der Wand des Labors am See – genau dort, wo auch die Käfer-Skulltula steckt. Wenn du als Erwachsener zurückkehrst, ist dort eine Pflanze mit buntem Blätterring gewachsen.\n\n**Steige auf die Blätter, und sie fliegen dich** über den See bis zum Dach des Labors.",
+      "hint": "Pflanze sie als Kind ein und nutze sie als Erwachsener."
+    },
+    "valle-heart-01": {
+      "name": "Hinter dem Wasserfall",
+      "desc": "Hinter dem großen Wasserfall im Gerudo-Tal befindet sich am Flussufer am Grund der Schlucht eine kleine, in den Fels gehauene Kammer über dem Wasser. Um dorthin zu kommen, begib dich hinunter zur Ecke mit der Kuh am Fuß des Wasserfalls – entweder im Gleitflug mit dem Huhn oder indem du in den Fluss springst und ans Ufer schwimmst.\n\nFolge von dort dem Ufer Richtung Wasserfall, gehe am Mythenstein vorbei und springe über die nassen Felsen hinter dem stürzenden Wasser. **Steige dann die in den Fels gehauenen Stufen hinauf** in die Kammer, wo das Herzteil wartet.",
+      "hint": "Reißt dich die Strömung mit, landest du im Hylia-See."
+    },
+    "valle-heart-02": {
+      "name": "Truhe auf dem Schluchtvorsprung",
+      "desc": "Gehe im Gerudo-Tal hinter der Brücke auf der Seite des Zimmerleute-Zelts an den Rand der Schlucht neben den dunklen Steinhaufen am Felsbogen. Weiter unten, auf halber Höhe zum Fluss, liegt ein schmaler Vorsprung mit einer Truhe.\n\nAls Kind **gleitest du mit dem Huhn** hinunter zur Truhe.\n\nAls Erwachsener **lässt du dich von der Kante auf den Vorsprung fallen** und öffnest die Truhe.\n\nFür den Rückweg folgst du dem Vorsprung und springst in den Fluss: Die Strömung trägt dich zum Hylia-See.",
+      "hint": "Die Truhe steht an der Felswand."
+    },
+    "valle-gs-01": {
+      "name": "Wasserstrahl am Steg",
+      "desc": "Betrittst du das Gerudo-Tal von der Hylianischen Steppe aus, kommst du zuerst an einen kleinen Holzsteg über einem Becken. Nachts sitzt die Goldene Skulltula unter den Planken an der Ziegelwand neben dem Wasserstrahl, der ins Becken fällt.\n\nLass dich seitlich vom Steg ins Wasser fallen, klettere unten aufs steinerne Ufer und **wirf den Bumerang nach ihr**, um sie herunterzuholen und das Symbol mitzunehmen. Klettere danach zurück zum Steg."
+    },
+    "valle-gs-02": {
+      "name": "Käfer in der weichen Erde bei der Kuh",
+      "desc": "Am Fuß des großen Wasserfalls am oberen Flussabschnitt liegt eine Ecke mit einer Kuh, einer Gerudo und einem Stück weicher Erde. Als Kind erreichst du sie, indem du mit dem Huhn von der Klippenkante links der großen Brücke hinuntergleitest (du kannst auf einem Vorsprung zwischenlanden und neu abspringen), oder indem du in den Fluss springst und herausschwimmst.\n\n**Lass dort die Käfer aus der Flasche auf die weiche Erde los** und besiege die auftauchende Goldene Skulltula, um das Symbol zu erhalten."
+    },
+    "valle-gs-03": {
+      "name": "Hinter dem Zelt",
+      "desc": "Hinter der Brücke, auf der Seite des Tals Richtung Gerudo-Festung, steht das Zelt der Zimmerleute. Um als Erwachsener hinüberzugelangen, genügt ein Sprung mit Epona über die eingestürzte Brücke; auch der Enterhaken oder die reparierte Brücke nach Rettung der Zimmerleute funktionieren.\n\nGehe nachts um das Zelt herum zu den Ruinen dahinter. Die Goldene Skulltula klettert auf halber Höhe an der behauenen Steinwand: **Hol sie mit dem Fanghaken herunter, der dir gleich das Symbol bringt**."
+    },
+    "valle-gs-04": {
+      "name": "Felsbogen gegenüber dem Zelt",
+      "desc": "Auf dem Weg vom Zelt der Zimmerleute zur Gerudo-Festung spannt sich ein großer natürlicher Bogen aus rötlichem Fels mit zwei dunklen Steinhaufen an seinem Fuß. Nachts klettert eine Goldene Skulltula an der Innenseite des Bogens.\n\nStelle dich zwischen die Steinhaufen, schau hoch zur Spitze des Bogens, bis du sie entdeckst, und **schieße den Fanghaken auf sie, um sie herunterzuholen**: Sobald sie besiegt ist, zieht der Fanghaken dir das Symbol heran."
+    },
+    "valle-bean-01": {
+      "name": "Weiche Erde in der Gerudo-Schlucht",
+      "desc": "Diese weiche Erde teilt sich ihren Platz mit der Kuh und der Gerudo am Fuß des großen Wasserfalls und beherbergt auch die Käfer-Skulltula. Gleite als Kind mit dem Huhn von der großen Brücke hinab oder schwimme aus dem Fluss ans Ufer und pflanze die Wundererbse.\n\nAls Erwachsener schwebt das Blatt die Wasserfälle hinunter und wieder hinauf, vorbei an zwei Roten Rubinen, und **auf halber Höhe des großen Wasserfalls springst du durch das Wasser** in die Nische mit dem Herzteil.",
+      "hint": "Pflanze sie als Kind ein und nutze sie als Erwachsener."
+    },
+    "fortaleza-heart-01": {
+      "name": "Bogenschießen zu Pferd – 1.000 Punkte",
+      "desc": "Der Gerudo-Pass, den du für die Rettung der vier Zimmerleute erhältst, öffnet den Reit-Schießstand. Komm tagsüber – nachts lässt dich die Betreiberin nicht spielen – und bring Epona mit. Jeder Durchgang kostet 30 Rubine.\n\nEpona galoppiert die Strecke von selbst ab, und du hast 20 Pfeile für die Zielscheiben und Krüge; jeder Krug und jeder Volltreffer zählt 100 Punkte. **Erreiche 1.000 Punkte, um das Herzteil zu gewinnen**; ab 1.400 Punkten bekommst du außerdem den Riesigen Köcher.",
+      "hint": "Jedes Spiel kostet 30 Rubine; bei 1.400 Punkten gibt es den Riesigen Köcher."
+    },
+    "fortaleza-gs-01": {
+      "name": "Zielscheibe auf dem Schießstand",
+      "desc": "Mit dem Gerudo-Pass kannst du den Reit-Schießstand betreten, und nachts sitzt eine Goldene Skulltula an der großen runden Zielscheibe auf einem Pfahl am Ende der Strecke. Reite oder gehe den gesamten Parcours bis zum runden Bereich ganz hinten.\n\n**Feuere den Fanghaken auf sie, sobald du freie Sicht hast**, um die Skulltula zu besiegen und das Symbol einzuholen; siehst du sie von vorn nicht, geh um die Scheibe herum."
+    },
+    "fortaleza-gs-02": {
+      "name": "Oberes Dach",
+      "desc": "Nachts erscheint die Goldene Skulltula auf den seitlichen Dächern der Gerudo-Festung, wenige Schritte von der Herzteil-Truhe entfernt: Sie sitzt an der Ziegelwand des Gebäudeblocks neben der Felswand.\n\nGehe dafür als Erwachsener durch die Tür zum Küchengang, durchquere ihn ungesehen und nimm den oberen Ausgang hinten, der auf die Dächer führt. Stelle dich vor diese Wand und **schieße den Fanghaken auf sie** oder springe mit dem Schwert dagegen, um das Symbol zu erhalten."
+    },
+    "desierto-gs-01": {
+      "name": "Im Monument",
+      "desc": "Um das Steinmonument in der Gespensterwüste zu erreichen, überquere als Erwachsener den Sandfluss und folge den Fahnen. Steige am Monument durch die Lücke zwischen den Säulen ein und klettere die Leiter in den Raum darunter hinab.\n\nDie Goldene Skulltula sitzt an der Rückwand über dem Altar: **Klettere auf den Altar und schlage sie mit dem Schwert herunter**. Wenn du die Fackeln mit Feuerpfeilen oder Dins Feuerinferno entzündest, erscheint eine Truhe mit einem Deku-Samen."
+    },
+    "coloso-heart-01": {
+      "name": "Steinbogen beim Tempel",
+      "desc": "Nahe dem Eingang zum Geistertempel spannt sich ein Steinbogen, den nur die Wundererbsen-Pflanze erreicht; die Vorbereitung beginnt also als Kind. Reise mit dem Requiem der Geister zum Wüstenkoloss und pflanze eine Wundererbse in die weiche Erde links vom Tempeleingang.\n\nAls Erwachsener schwebt das Blatt über zwei Felsplattformen und endet über dem Bogen: **Springe darüber ab und schnapp dir das Herzteil**."
+    },
+    "coloso-gs-01": {
+      "name": "Käfer in der weichen Erde beim Tempel",
+      "desc": "Spiele als Kind das Requiem der Geister, um zum Wüstenkoloss zu reisen, und gehe von der Ankunftsplattform zu den Stufen des Geistertempels: Die weiche Erde liegt gleich links vom Eingang an der Felswand.\n\n**Lass in genau diesem Beet** – in das du auch die Wundererbse pflanzt – **Käfer aus einer Flasche frei**, und die Goldene Skulltula kommt sofort heraus: Besiege sie mit dem Schwert und nimm das Symbol."
+    },
+    "coloso-gs-02": {
+      "name": "Spitze des großen Felsens",
+      "desc": "Nahe der Feen-Quelle ragt ein großer Felsen empor, dessen Spitze mit einer kraterförmigen Mulde die zweite Plattform ist, über die die Wundererbse vom Geistertempel fliegt. Fahre als Erwachsener auf dem Blatt mit und **springe beim Erreichen des Felsens auf die Spitze hinab in die Mulde**.\n\nDie Goldene Skulltula erscheint dort nur nachts: Ist es Tag, spiele die Hymne der Sonne, und sie taucht auf. Erledige sie mit dem Schwert und schnapp dir das Symbol."
+    },
+    "coloso-gs-03": {
+      "name": "Felswand neben dem Tempel",
+      "desc": "Nachts erscheint diese Goldene Skulltula des Wüstenkolosses hoch oben an der Felswand rechts vom Geistertempel.\n\nSuche die Skulltula und **triff sie mit dem Fanghaken**, um sie zu besiegen und das Goldene-Skulltula-Symbol einzusammeln."
+    },
+    "coloso-bean-01": {
+      "name": "Weiche Erde beim Tempel",
+      "desc": "Du musst als Kind mit dem Requiem der Geister hierherkommen, um die Wundererbse einzupflanzen: Die weiche Erde liegt links vom Eingang zum Geistertempel, und Käfer locken dort zugleich eine Goldene Skulltula hervor.\n\nAls Erwachsener **trägt dich die Pflanze über zwei Felsplattformen zum Steinbogen** mit dem Herzteil, und auf der zweiten Plattform wartet nachts die andere Goldene Skulltula.",
+      "hint": "Pflanze sie als Kind ein und nutze sie als Erwachsener."
+    },
+    "coloso-fairy-01": {
+      "name": "Große Fee: Nayrus Umarmung",
+      "desc": "Nördlich der Oase – vom Geistertempel aus jenseits des Teichs – verbirgt eine brüchige Felswand zwischen den Palmen die Feen-Quelle. Du kannst sie sowohl als Kind nach dem Requiem der Geister als auch als Erwachsener nach der Gespensterwüste öffnen.\n\n**Sprenge den brüchigen Felsen mit einer Bombe, einer Krabbelmine oder dem Stahlhammer**, tritt ein, stelle dich auf das Triforce-Symbol und spiele Zeldas Wiegenlied. Die Große Fee bittet um eine Opfergabe von 300 Rubinen für die Quelle: Nimm an, und sie schenkt dir Nayrus Umarmung.",
+      "hint": "Sie verlangt eine Opfergabe von 300 Rubinen."
+    },
+    "deku-gs-01": {
+      "name": "Kompass-Raum",
+      "desc": "Der Kompass-Raum im obersten Stockwerk des Deku-Baums verbirgt diese Goldene Skulltula in einer abgelegenen Ecke. Tritt auf den Schalter, um die Plattformen anzuheben, und springe statt zum Kompass in die seitliche Nische links.\n\n**An der Rückwand hinter der kleinen Truhe** ist sie leicht zu erreichen: Besiege sie mit dem Schwert und schnapp dir das Goldene-Skulltula-Symbol."
+    },
+    "deku-gs-02": {
+      "name": "Ranken im Untergeschoss",
+      "desc": "Wenn du auf das große Spinnennetz in der Mitte der Haupthalle springst, durchbrichst du es und landest im Wasser des Untergeschosses. Im runden Becken rechts wartet diese Goldene Skulltula an der Rankenwand, die zurück in die Haupthalle führt.\n\nDu musst sie aus der Ferne treffen: **Hol sie vom Wasser aus mit der Feen-Schleuder oder dem Bumerang herunter** und klettere dann die Ranken hinauf zum Symbol.",
+      "hint": "Die Feen-Schleuder erhältst du genau in diesem Dungeon."
+    },
+    "deku-gs-03": {
+      "name": "Gitter im Untergeschoss",
+      "desc": "Im ersten Untergeschoss des Deku-Baums endet ein Wasserkanal an einem Gittertor, an dem diese Goldene Skulltula hängt.\n\nKlettere auf die runde Plattform im Wasser gegenüber dem Gitter, **schieße sie mit der Feen-Schleuder herunter** und schnapp dir das Goldene-Skulltula-Symbol."
+    },
+    "deku-gs-04": {
+      "name": "Hinterer Raum",
+      "desc": "Entzünde im ersten Untergeschoss des Deku-Baums hinter dem Raum der Gohma-Larven einen Deku-Stab an der Fackel und **verbrenne das Spinnennetz an der Rückwand**. Dahinter führt ein Tunnel zu einer Rankenwand.\n\nPass auf die große Skulltula auf, die sie bewacht: Warte, bis sie sich umdreht, und schlage auf ihren Rücken. **Hol anschließend die Goldene Skulltula mit der Feen-Schleuder herunter** und klettere die Ranken hinauf zum Symbol.",
+      "hint": "Du kannst sie bereits beim ersten Besuch holen."
+    },
+    "deku-heart-01": {
+      "name": "Herzcontainer – Gohma",
+      "desc": "Nachdem du die drei Deku-Kerle in der Reihenfolge 2, 3, 1 besiegt hast, öffnet sich im zweiten Untergeschoss der Raum von Königin Gohma; schau beim Betreten sofort an die Decke, denn der Boss lässt sich von dort herabfallen.\n\n**Sobald sich ihr Auge rot färbt, schieße es mit der Feen-Schleuder ab** oder wirf eine Deku-Nuss, um sie zu betäuben, und schlage dann mit dem Schwert oder einem Deku-Stab auf ihr Auge. Klettert sie an die Decke, um Eier zu legen, zerstöre sie, bevor Larven schlüpfen. Nach ihrem Fall hinterlässt sie den Herzcontainer.",
+      "hint": "Ein Schleuderschuss ins Auge holt sie auch von der Decke herunter."
+    },
+    "dodongos-gs-01": {
+      "name": "Hinter der Wand der Baby-Dodongos",
+      "desc": "Nachdem du den Beamos umgangen hast, sprengst du mit einer Donnerblume die brüchige Wand rechts in der Haupthalle und betrittst den Korridor der Baby-Dodongos, wo gleich zu Beginn rechts eine weitere brüchige Wand liegt.\n\nÖffne sie mit einer Bombe oder **locke einen Baby-Dodongo heran und besiege ihn direkt an der Wand**, da seine Explosion sie ebenfalls sprengt.\n\nDahinter warten einige Flederbeißer und die Goldene Skulltula.",
+      "hint": "Sie teilt sich den Gang mit der auf dem Vogelscheuchen-Vorsprung."
+    },
+    "dodongos-gs-02": {
+      "name": "Ranken an der großen Treppe",
+      "desc": "Die große Treppe im linken Flügel – im Raum voller Donnerblumen – senkt sich erst, wenn du die einzelne Donnerblume in die Lücke der Reihe setzt, sodass alle in einer Kettenreaktion detonieren; beginne also damit.\n\nSteige die Treppe hinauf, klettere die Leiter hoch und folge dem Vorsprung bis zur Tür hinten. Kurz davor befindet sich **eine bekletterbare Gitterwand mit einer normalen und der Goldenen Skulltula**: Erledige beide mit der Feen-Schleuder (als Erwachsener mit Feen-Bogen oder Fanghaken) und klettere hinauf zum Symbol."
+    },
+    "dodongos-gs-03": {
+      "name": "Säule inmitten der Dodongos",
+      "desc": "Wenn du im ersten Stock den Raum mit der Bombentaschen-Truhe verlässt, sprengst du die brüchige Wand mit einer Bombe und gehst weiter zum Vorsprung über dem Hauptraum. Dort liegt nahe dem Riesenschädel eine weitere brüchige Wand: **Öffne sie mit einer Bombe und betritt die Höhle voller Dodongos**.\n\nDie Goldene Skulltula sitzt an einer Felssäule mitten im Raum, umgeben von Dodongos. Weiche ihnen aus oder besiege sie und schlage die Skulltula mit dem Schwert herunter, um das Symbol einzusammeln.",
+      "hint": "Dein Schwert genügt: Du kannst sie beim ersten Besuch holen."
+    },
+    "dodongos-gs-04": {
+      "name": "Armos-Raum hinter dem Maul",
+      "desc": "Lass von der Brücke im zweiten Stock eine Bombe in jedes Auge des Riesenschädels in der Haupthalle fallen, damit er sein Maul öffnet, und tritt hindurch. Durchquere den Raum mit den Feuer-Flederbeißern und geh hinauf zum Block-Korridor.\n\nVerschiebe die Blöcke, um auf die Holzbalken zu klettern, und lass dich hinten in den umzäunten Bereich fallen. **Spreng dort die brüchige Wand mit Bomben auf** und folge dem Tunnel. Dich erwartet eine Armos-Statue, die bei deiner Annäherung erwacht; die Goldene Skulltula sitzt an der Wand dahinter."
+    },
+    "dodongos-gs-05": {
+      "name": "Vorsprung der Vogelscheuche",
+      "desc": "Kehre als Erwachsener, nachdem du die Vogelscheuchen-Polka gelernt hast, in den Korridor der Baby-Dodongos zurück – denselben wie bei der Skulltula hinter der Wand. Bleibe nahe dem Anfang des Gangs vor einem hohen Vorsprung an der Wand.\n\n**Spiele dort die Vogelscheuchen-Polka, damit Pierre auf dem Vorsprung erscheint**: Ziehe dich mit dem Fanghaken zu ihm, klettere hoch, besiege die Goldene Skulltula mit dem Schwert und nimm das Symbol.",
+      "hint": "Mit dem Enterhaken brauchst du die Vogelscheuche nicht."
+    },
+    "dodongos-heart-01": {
+      "name": "Herzcontainer – König Dodongo",
+      "desc": "Für König Dodongos Bau brauchst du keinen Master-Schlüssel: Geh nach der Armos-Höhle zurück in den Blockraum und schiebe einen Block auf den großen Bodenschalter, um das Gittertor zu öffnen. Zerschlage im nächsten Raum die Krüge mit Bomben und **sprenge die brüchige Stelle im Boden, um hinabzuspringen**.\n\nJedes Mal, wenn er sein Maul zum Einatmen öffnet, wirf eine Bombe hinein und schlage auf ihn ein, solange er betäubt ist. Rollt er sich zusammen, weiche zur Seite aus oder blocke mit dem Schild, und nimm den Herzcontainer, bevor du in den blauen Warp trittst.",
+      "hint": "Gehen dir die Bomben aus, helfen die Donnerblumen im Raum."
+    },
+    "jabu-gs-01": {
+      "name": "Raum mit dem Wasserschalter",
+      "desc": "Springe in dasselbe Loch wie Ruto und folge den Räumen im Untergeschoss bis zum Raum mit dem Becken und dem Wasserschalter. Die Goldene Skulltula sitzt an der Wand in einer Nische ganz oben an den Ranken, über einem Vorsprung mit drei Krügen.\n\n**Setze Ruto auf dem Schalter ab, damit der Wasserspiegel steigt**. Schwimme zu den Ranken, klettere auf den Vorsprung und erledige die Skulltula mit dem Schwert, um das Symbol zu erhalten.",
+      "hint": "Ruto muss auf dem Schalter bleiben, damit das Wasser steigt."
+    },
+    "jabu-gs-02": {
+      "name": "Untergeschoss des großen Raums, untere",
+      "desc": "Kehre mit dem Bumerang in den großen Raum mit den Löchern zurück, in dem du Ruto getroffen hast. Sobald der grüne Tentakel besiegt ist, zieht sich die Säule über seinem Loch hinten rechts zurück: **Springe in dieses Loch** und wirf Ruto vorher hinunter, falls du sie trägst.\n\nUnten treiben Quallen umher, und an zwei aneinandergrenzenden Wänden sitzen zwei Goldene Skulltulas; dies ist die untere. Da du sie nicht anvisieren kannst, ziele mit dem Bumerang von Hand: Er holt sie herunter und bringt dir auf dem Rückweg das Symbol.",
+      "hint": "Hol sie am besten gleich zusammen mit ihrer Partnerin darüber."
+    },
+    "jabu-gs-03": {
+      "name": "Untergeschoss des großen Raums, obere",
+      "desc": "Unter dem großen Raum mit den Löchern – im Untergeschoss, in das du durch das zuvor vom grünen Tentakel verdeckte Loch fällst – sitzen an benachbarten Wänden im Norden und Nordwesten zwei Goldene Skulltulas. Am besten holst du beide auf einmal, da beide den Bumerang brauchen.\n\nHier geht es um die obere: **Ziele mit dem Bumerang von Hand auf sie**, da sich auch diese nicht anvisieren lässt, und wirf ihn nach ihrem Fall noch einmal, um das Goldene-Skulltula-Symbol einzuholen."
+    },
+    "jabu-gs-04": {
+      "name": "Ranken vor dem Boss",
+      "desc": "Den Raum vor Barinade erreichst du vom zweiten Raum des Dungeons aus – dem mit der Grube, die dich beim Hineinspringen fallen lässt –, indem du eine Kiste auf den Schalter stellst, der die Tür öffnet.\n\nRäume zuerst die elektrischen Quallen mit dem Bumerang weg und suche die **Rankensäule, die zum Kristallschalter hinaufführt**: Dort sitzt die Goldene Skulltula. Besiege sie mit dem Bumerang und klettere hinauf zum Symbol."
+    },
+    "jabu-heart-01": {
+      "name": "Herzcontainer – Barinade",
+      "desc": "Barinades Tür ganz hinten im Rankenraum wird von einem Schalter hinter einem Kristall versperrt: Klettere die Wand hinauf, visiere den Schalter an und **wirf den Bumerang so, dass er im Bogen dahinter trifft**.\n\nDurchtrenne drinnen mit dem Bumerang die drei Tentakel an der Decke, weiche den Stromstößen aus und erledige die freigesetzten Quallen. Betäube Barinade anschließend mit dem Bumerang und greife mit dem Schwert an, wiederhole das bei der zweiten Quallenwelle und nimm den Herzcontainer mit, bevor du den blauen Warp betrittst."
+    },
+    "bosque-gs-01": {
+      "name": "Ranken am Eingang",
+      "desc": "Der erste Raum des Tempels liegt unter freiem Himmel mit zwei Bäumen und zwei angreifenden Wolfos; die Goldene Skulltula wartet hoch oben nahe der Truhe mit dem Kleinen Schlüssel.\n\nBesiege die Wolfos, **klettere rechts an den Ranken bis in die Baumkrone** und erledige sie vom Ast aus mit dem Fanghaken (Feen-Bogen oder Bombe klappen ebenfalls); der Fanghaken zieht dir das Symbol direkt heran."
+    },
+    "bosque-gs-02": {
+      "name": "Haupthalle",
+      "desc": "Nach der Zwischensequenz mit den Irrlicht-Schwestern erreichst du die Haupthalle – den großen Raum mit den vier Fackeln und dem Aufzug. Diese Goldene Skulltula wartet rechts neben der Treppe an der gegenüberliegenden Tür.\n\n**Gehe diese Treppe hinauf und drehe dich nach rechts**, um sie hoch an der Wand zu sehen; besiege sie mit dem Fanghaken und feuere ihn ein zweites Mal ab, um das Symbol einzusammeln.",
+      "hint": "Schau genau hinter den Wänden nach."
+    },
+    "bosque-gs-03": {
+      "name": "Balkon über der Buntglastür",
+      "desc": "Auf dem Absatz an der Buntglastür im Bereich des Wasserkanals im Waldtempel musst du die Vogelscheuchen-Polka spielen: Pierre erscheint auf dem kleinen Balkon über der Tür. **Ziehe dich mit dem Fanghaken zu ihm**, besiege die Goldene Skulltula auf dem Balkonboden und nimm das Symbol.",
+      "hint": "Pierre erscheint nur, wenn du die Vogelscheuchen-Polka spielst."
+    },
+    "bosque-gs-04": {
+      "name": "Vorsprung im westlichen Innenhof",
+      "desc": "Sobald du den verdrehten Korridor begradigt und den Master-Schlüssel geholt hast, lass dich durch das Loch im Boden dieses Raums in den Wasserraum darunter fallen, steige dessen Treppe hinauf und tritt auf den steinernen Steg hoch über dem westlichen Innenhof.\n\n**Lass dich am Ende des Stegs kurz vor der Tür links auf die bemooste Steinplattform fallen**. Schau nach oben: Die Goldene Skulltula sitzt an der Wand, bereit für den Fanghaken, der dir auch das Symbol bringt. Mit dem Enterhaken erreichst du sie sogar vom Boden des Innenhofs aus.",
+      "hint": "Schau an den oberen Rand der Steinwand."
+    },
+    "bosque-gs-05": {
+      "name": "Drehender Raum im Untergeschoss",
+      "desc": "Sind alle vier Irrlicht-Schwestern besiegt, fährt dich der Aufzug in der Haupthalle hinab ins Untergeschoss – einen Raum mit drehbaren Wänden, der zur Boss-Tür führt.\n\nFür diese Goldene Skulltula musst du die Wände nicht einmal bewegen: **Folge gleich nach dem Aussteigen dem Rundgang und betritt die offene Nische mit den Krügen**. Eine große Skulltula fällt von der Decke; erledige sie und schau hoch an die Wand, wo die goldene wartet. Hol sie mit dem Fanghaken herunter, der dir zugleich das Symbol bringt."
+    },
+    "bosque-heart-01": {
+      "name": "Herzcontainer – Phantom-Ganon",
+      "desc": "Der Master-Schlüssel öffnet die Tür ganz hinten im drehenden Raum im Untergeschoss; steige die Treppe hinauf und du gelangst in den Gemälderaum. Phantom-Ganon reitet in ein Bild hinein und mehrere Reiter stürmen heraus: Der echte verursacht Hufgetrappel und öffnet beim Erreichen des Rahmens ein violettes Portal.\n\nSobald der echte herauskommt, **schieße einen Pfeil auf ihn oder triff ihn mit dem Fanghaken**; drei Pfeile werfen ihn aus dem Sattel. Schlage anschließend seine Energiekugeln mit dem Schwert oder einer leeren Flasche zurück, bis ihn eine trifft und er zu Boden geht; greife ihn an und wiederhole das bis zum Sieg."
+    },
+    "fuego-gs-01": {
+      "name": "Raum des Zeitblocks",
+      "desc": "Oben an der Treppe in der Haupthalle öffnet ein Kleiner Schlüssel die rechte Tür zum großen Lavaraum. Links oben an einer Wand schwebt ein Zeitblock: Stelle dich auf die Plattform direkt davor, **tritt auf die gravierte Bodenplatte und spiele die Hymne der Zeit**. Der Block senkt sich herab, sodass du über ihn zur oberen Tür klettern kannst.\n\nSchütze dich drinnen mit dem Schild vor den fliegenden Bodenplatten und besiege den Raubschleim: Schnappt er dich, stiehlt er deinen Hylia-Schild (du bekommst ihn zurück, wenn du ihn besiegst). Hol danach die Goldene Skulltula von der Wand.",
+      "hint": "Halte beim Betreten des großen Lavaraums links Ausschau."
+    },
+    "fuego-gs-02": {
+      "name": "Wand im Felsenlabyrinth",
+      "desc": "Diese Goldene Skulltula versteckt sich hinter einem Wandabschnitt im Labyrinth der rollenden Felsen. Du gelangst über das Metallgitter dorthin; halte dich von dort aus an der Außenwand und weiche den Felsen aus, bis du am Ende eines Gangs nahe einer Goronen-Zelle eine brüchige Felsstelle erreichst.\n\nDie Stelle ist deutlich zu erkennen, du musst also nicht herumprobieren: **Lege eine Bombe oder Krabbelmine daran** und hol dir im Tunnel dahinter die Goldene Skulltula. Befreie bei der Gelegenheit gleich den Goronen in der Zelle nebenan."
+    },
+    "fuego-gs-03": {
+      "name": "Gitter hinter der Vogelscheuche",
+      "desc": "Wenn du den Raum mit der dich verfolgenden Feuerwand verlässt, führt dich die obere Tür zurück ins Felsenlabyrinth – diesmal von oben. Stelle dich auf die Plattform direkt vor der Tür und **spiele die Vogelscheuchen-Polka, damit Pierre auf der hohen Plattform erscheint**.\n\nZiehe dich mit dem Fanghaken zu ihm und schieße von dort auf das Ziel daneben auf einer Plattform, die wie ein Aufzug nach oben fährt. Gehe durch die Tür und klettere die Gitter hoch: Oben angekommen wartet die Goldene Skulltula an der Wand und fällt dem Fanghaken zum Opfer.",
+      "hint": "Die Vogelscheuchen-Polka komponierst du als Kind und als Erwachsener am Hylia-See."
+    },
+    "fuego-gs-04": {
+      "name": "Achteckiger Raum ganz oben",
+      "desc": "Klettere ganz nach oben an dem Gitter, das du über die Vogelscheuche erreichst – dort, wo auch die andere Goldene Skulltula dieses Bereichs sitzt – und geh durch die Tür oben. Sie führt in einen großen achteckigen Lavaraum mit einer von Feuer umgebenen Plattform mit drei Truhen.\n\nSchau beim Eintreten einfach nach rechts: **Sie sitzt wenige Schritte von der Tür entfernt an der Wand** neben der Lava. Erledige sie mit dem Fanghaken und nimm das Symbol.",
+      "hint": "Gleich neben der am Gitter."
+    },
+    "fuego-gs-05": {
+      "name": "Hinter der Statue in der Eingangshalle",
+      "desc": "Heb dir diese bis zum Schluss auf, sobald du den Stahlhammer und den letzten Kleinen Schlüssel hast – den vom Goronen im Zeitblock-Raum hinter dem Hammer. Dieser Gorone verrät dir, dass hinter der dreiteiligen Steinstatue am Eingang eine Geheimtür liegt: **Zerschlage die Statue rechts in der Eingangshalle mit dem Hammer** und öffne die Tür mit dem Schlüssel.\n\nBesiege im ersten Raum die Flammen-Schnecken, um den nächsten zu öffnen. Wehre im zweiten die fliegenden Bodenplatten ab, erledige den Raubschleim und zertrümmere mit dem Hammer den Steinhaufen, der die Goldene Skulltula verbirgt.",
+      "hint": "Zerschlage sowohl die Statue in der Eingangshalle als auch den Steinhaufen mit dem Hammer."
+    },
+    "fuego-heart-01": {
+      "name": "Herzcontainer – Volvagia",
+      "desc": "Volvagia steckt seinen Kopf aus den Löchern der Plattform: **Schlage sofort mit dem Stahlhammer darauf und setze mit dem Schwert oder dem Hammer nach**, solange er betäubt ist. Steigt er in die Luft, weiche seinen Flammen und den herabfallenden Felsen anhand ihrer Schatten aus.\n\nNach dem Sieg erscheint der Herzcontainer neben dem blauen Warp.",
+      "hint": "Du kannst ihn nur verletzen, wenn er den Kopf aus der Lava steckt."
+    },
+    "agua-gs-01": {
+      "name": "Neben dem Gitter im Untergeschoss",
+      "desc": "Öffne beim niedrigsten Wasserstand des Tempels mit einem Kleinen Schlüssel die Tür am Fuß des Mittelturms. Spiele drinnen vor dem Triforce-Symbol Zeldas Wiegenlied, um das Wasser steigen zu lassen, ziehe die Eisenstiefel an und sinke durch das Bodenloch in den Raum im Untergeschoss.\n\n**Triff den Kristallschalter hoch an der Wand mit dem Fanghaken**: Mehrere Gegner erscheinen. Besiege sie, lege die Stiefel ab, um zum Truhenvorsprung aufzutauchen, und hol die Goldene Skulltula an der Wand neben dem Gitter mit dem Fanghaken herunter."
+    },
+    "agua-gs-02": {
+      "name": "Strudelfluss",
+      "desc": "Steige nach dem Kampf gegen Schatten-Link die Treppe hinter der Enterhaken-Truhe hinauf und lass dich im nächsten Raum durch den vergitterten Schacht fallen. Folge dem überfluteten Tunnel bis zu einem unterirdischen Fluss mit Strudeln und halte dich von ihnen fern, da sie dich hineinziehen.\n\n**Ziehe im Strudelbereich die Eisenstiefel an und gehe am Grund entlang**, während du den Strömungen ausweichst. Die Goldene Skulltula sitzt über dem Wasser hoch an der Felswand: Ziele mit dem Enterhaken nach oben, um sie zu besiegen und das Symbol einzuholen.",
+      "hint": "Achte auf die Skulltula über dem Wasser."
+    },
+    "agua-gs-03": {
+      "name": "Im Mittelturm",
+      "desc": "Senke den Wasserstand des Tempels mit Zeldas Wiegenlied auf die unterste oder mittlere Stufe und geh durch die Tür am Fuß des Mittelturms. Ziehe dich drinnen vom Erdgeschoss mit dem Enterhaken am Ziel an der Wand auf einen Vorsprung auf halber Höhe.\n\n**Schau von dort hoch an der Wand entlang**: Dort sitzt die Goldene Skulltula, und derselbe Enterhaken besiegt sie und bringt dir das Symbol. Du musst das Wasser im Turm zuvor nicht anheben, kannst aber nach Bedarf hochklettern."
+    },
+    "agua-gs-04": {
+      "name": "Wasserfall mit rollenden Felsen",
+      "desc": "Im nördlichen Untergeschoss, das du mit dem Enterhaken erreichst, durchquerst du den Arachno-Raum und das Blockrätsel; tritt im nächsten Raum auf den Schalter und springe über die Geysire zur anderen Tür. Dahinter liegt ein Kanal, in dem Felsen einen Wasserfall hinabrollen, direkt neben dem Raum mit dem Master-Schlüssel.\n\nGehe vor den Felsen im Seitengang in Deckung, wo eine Killermuschel wartet, und **schau von dort Richtung Westen zum Wasserfall**: Die Goldene Skulltula sitzt an dieser Wand. Der Enterhaken erreicht sie aus der Distanz und zieht das Symbol heran."
+    },
+    "agua-gs-05": {
+      "name": "Hinter der brüchigen Unterwasserwand",
+      "desc": "Diese Goldene Skulltula befindet sich in einem Raum an der Ostseite des ersten Stocks. Bei mittlerem Wasserstand – nachdem du vor dem Triforce im Mittelturm Zeldas Wiegenlied gespielt hast – ziehst du die Eisenstiefel an und gehst den überfluteten Ostkorridor bis zu einer brüchigen Wand unter Wasser entlang: **Sprenge sie mit Bomben oder zertrümmere sie mit dem Stahlhammer**.\n\nDahinter liegt ein Raum mit Gegnern. Die Skulltula sitzt auf einem Mosaik an der Wand neben der Treppe in Schwerthöhe: Schlage sie mit dem Schwert herunter und hebe das Symbol auf.",
+      "hint": "Du brauchst Bomben und den mittleren Wasserstand."
+    },
+    "agua-heart-01": {
+      "name": "Herzcontainer – Morpha",
+      "desc": "Gehe mit dem Master-Schlüssel bei höchstem Wasserstand in den dritten Stock (3F) und ziehe dich mit dem Enterhaken am Ziel an der goldenen Säule im Norden hinauf. Steige die Treppe hoch und laufe die wasserüberströmte Rampe hinauf, wobei du den herabgleitenden Stachelfallen ausweichst.\n\nTritt auf die mittleren Plattformen, damit Morpha erscheint, und **ziehe dich sofort an den äußeren Rand des Raums weg vom Wasser zurück**, da dich seine Tentakel greifen. Ziehe seinen Kern mit dem Enterhaken heraus, schlage mit dem Schwert zu und hebe nach dem Kampf den Herzcontainer auf, bevor du den blauen Warp betrittst."
+    },
+    "sombra-gs-01": {
+      "name": "Raum mit unsichtbaren Sensen",
+      "desc": "Nachdem du im großen Abgrundraum mit den Gleitstiefeln zur Stalfos-Plattform gelangt bist und ihn besiegt hast, wende dich nach links und aktiviere das Auge der Wahrheit: Ein Weg aus unsichtbaren Plattformen zu einer Tür erscheint.\n\nAuf der anderen Seite liegt der runde Raum mit Krügen und Sensen, die nur mit dem Auge sichtbar sind. Weiche ihnen aus, schieße die Feuer-Flederbeißer mit dem Bogen ab und erledige den Raubschleim mit dem Schwert: **Sobald der Raum gesäubert ist, öffnet sich die Tür zu einer kleinen Kammer mit der Goldenen Skulltula an der Wand** in Schwertreichweite.",
+      "hint": "Die sich öffnende Nische enthält außerdem zwei Truhen, eine davon unsichtbar."
+    },
+    "sombra-gs-02": {
+      "name": "Wand im Zellenkorridor",
+      "desc": "Im Raum mit den von der Decke fallenden Stacheln enthüllt das Auge der Wahrheit einen in der Wand verborgenen Block: Ziehe ihn als Schutzschirm unter die Stacheln und klettere darauf, um in den oberen Bereich zu gelangen. **Die Goldene Skulltula sitzt hoch an der Wand des Zellenkorridors**, und vom Laufsteg aus erreicht sie der Fanghaken.",
+      "hint": "Klettere auf den Block, um sie vom Laufsteg aus zu erreichen."
+    },
+    "sombra-gs-03": {
+      "name": "Grube im Ventilator-Korridor",
+      "desc": "Gehe hinter dem Raum mit dem Riesenschädel-Krug – wo eine hineingeworfene Bombe einen Kleinen Schlüssel fallen lässt – weiter in den nächsten Raum: Suche mit dem Auge der Wahrheit das Ziel an der Decke, ziehe dich mit dem Fanghaken auf die obere Ebene und öffne dort die verschlossene Tür.\n\nDahinter liegt der Ventilator-Korridor. Ziehe die Eisenstiefel an, damit dich der Wind nicht wegweht, und gehe bis zur Grube mit den Gittern: **Die Goldene Skulltula sitzt an der Grubenwand**. Beuge dich über den Rand und hol sie mit dem Fanghaken samt Symbol herunter.",
+      "hint": "Mit den Eisenstiefeln kann dich der Wind nicht wegblasen."
+    },
+    "sombra-gs-04": {
+      "name": "Hoher Vorsprung im Bootsraum",
+      "desc": "Ziehe gleich beim Betreten des Bootsraums den Block links heraus, schiebe ihn in der Bodenrille bis zum Holzsteg und klettere hinauf. Die Goldene Skulltula sitzt an der Wand eines vergitterten Vorsprungs daneben.\n\nDu musst **auf dem Steg die Vogelscheuchen-Polka spielen und dich mit dem Enterhaken zu Pierre ziehen**: Er setzt dich auf dem Vorsprung direkt neben der Skulltula ab, wo du sie mit dem Schwert besiegst.",
+      "hint": "Du musst die Vogelscheuchen-Polka kennen, um hinaufzugelangen."
+    },
+    "sombra-gs-05": {
+      "name": "In den riesigen Schädeln",
+      "desc": "Wenn das Boot sinkt, verbrenne das Spinnennetz über der Tür mit einem Feuerpfeil und durchquere den Bodengrapscher-Raum mit dem Auge der Wahrheit bis zur Tür mit dem Shiekah-Auge.\n\nDrinnen warten die riesigen Schädel. Klettere die Leiter hoch zum Balkon und **wirf Bomben in die Schädel**: Sobald der zweite zerbirst, fällt das Goldene-Skulltula-Symbol heraus.",
+      "hint": "Die Tür am Ufer ist von einem Netz verdeckt: Verbrenne es mit einem Feuerpfeil."
+    },
+    "sombra-heart-01": {
+      "name": "Herzcontainer – Bongo Bongo",
+      "desc": "Ziehe im Kampf die Gleitstiefel an, damit du auf der Trommel nicht herumhüpfst, und **betäube Bongo Bongos Hände mit Pfeilen oder dem Fanghaken**. Schieße anschließend bei aktivem Auge der Wahrheit auf sein Auge und schlage mit dem Schwert zu.\n\nDanach hinterlässt er dir den Herzcontainer."
+    },
+    "espiritu-gs-01": {
+      "name": "Metallzaun im Flederbeißer-Raum",
+      "desc": "Als Kind gelangst du hinein, indem du mit Naboru sprichst und durch das kleine Loch in der Eingangshalle kriechst.\n\nWeiter hinten erreichst du den Raum mit den Flederbeißern und dem Deckengrapscher. Sammle die Silbernen Rubine, damit sich der Zaun als Brücke absenkt: Auf der anderen Seite **sitzt die Goldene Skulltula am Drahtgitter der rechten Wand**. Der Bumerang besiegt sie und bringt dir das Symbol.",
+      "hint": "Mit den fünf Silbernen Rubinen senkt sich der Zaun als Brücke."
+    },
+    "espiritu-gs-02": {
+      "name": "Boden im Raum der großen Statue",
+      "desc": "Sobald du den Raum mit der großen Statue erreichst, geh die seitliche Treppe ins untere Stockwerk hinab und laufe hinter die Statue.\n\nIm schmalen Durchgang zwischen ihrer Flanke und der Wand auf der Ostseite **sitzt die Goldene Skulltula in Bodenhöhe an der Wand**. Ein Schwerthieb genügt, um sie zu besiegen und das Symbol aufzuheben."
+    },
+    "espiritu-gs-03": {
+      "name": "Über der Tür an der Treppe",
+      "desc": "Im Kind-Abschnitt des Tempels löst du den Blockraum, indem du den Block mit dem Sonnengesicht in den Lichtstrahl schiebst: Es erscheint eine Truhe mit einem Kleinen Schlüssel für die verkettete Tür oben an der nächsten Treppe. Schon beim Durchschreiten der Tür zu dieser Treppe hörst du die Skulltula.\n\nGeh nicht hinauf, ohne dich umzudrehen: Hinter dir siehst du sie **über der Tür, durch die du gerade gekommen bist**. Als Kind erledigt der Bumerang sie samt Symbol, als Erwachsener der Fanghaken.",
+      "hint": "Noch vor dem Kampf gegen den Eisenprinzen."
+    },
+    "espiritu-gs-04": {
+      "name": "Hinter dem Zeitblock im Raum der rollenden Felsen",
+      "desc": "Der Erwachsenen-Abschnitt beginnt damit, dass du den großen Block in der Eingangshalle mit den Silberhandschuhen beiseiteschiebst. Im folgenden runden Raum erledigst du den Beamos (eine Krabbelmine genügt) und triffst den Kristallschalter an der Decke mit dem Fanghaken, um die Türen zu öffnen.\n\nDie rechte Tür führt in den Raum mit den rollenden Felsen. Weiche ihnen bis zu den beiden Zeitblöcken in den Wandnischen aus: Der erste verbirgt nichts, aber **spiele neben dem zweiten die Hymne der Zeit**; sobald er sich verschiebt, legt er hinten in seiner Nische die Goldene Skulltula frei. Besiege sie mit dem Schwert und nimm das Symbol.",
+      "hint": "Der Block verschiebt sich nur um ein Feld, er verschwindet nicht."
+    },
+    "espiritu-gs-05": {
+      "name": "Nordwest-Vorsprung im Statuenraum",
+      "desc": "Die Goldene Skulltula befindet sich auf dem hohen nordwestlichen Vorsprung im Raum der großen Göttinnenstatue, in der Ecke, wo eine Vogelscheuche erscheint.\n\nZiehe dich als Erwachsener mit dem Enterhaken am Ziel am Handgelenk der Statue auf ihre Handfläche. **Spiele von dort die Vogelscheuchen-Polka**: Die Vogelscheuche erscheint oben auf dem Vorsprung, sodass du dich mit dem Enterhaken zu ihr ziehen kannst. Dort liegt die Skulltula gleich neben ihr am Boden; besiege sie mit dem Schwert und nimm das Symbol.",
+      "hint": "Spiele die Vogelscheuchen-Polka von der Handfläche der Statue aus."
+    },
+    "espiritu-heart-01": {
+      "name": "Herzcontainer – Killa Ohmaz",
+      "desc": "Reflektiere gegen Killa Ohmaz zunächst Koumes Feuer auf Kotake und Kotakes Eis auf Koume.\n\nSobald beide verschmelzen, **absorbiere dreimal hintereinander denselben Zauber und schleudere ihn auf Killa Ohmaz zurück**; geht sie zu Boden, schlage mit dem Schwert zu. Der Herzcontainer erscheint in der Mitte der Plattform.",
+      "hint": "Für den Master-Schlüssel brauchst du Zeldas Wiegenlied, den Bogen und den Fanghaken."
+    },
+    "pozo-gs-01": {
+      "name": "Linker Raum im zentralen Bereich",
+      "desc": "Du brauchst das Auge der Wahrheit aus dem Untergeschoss und einen Kleinen Schlüssel. Mit aktivem Auge erscheinen verborgene Truhen in Wandnischen des Brunnens, und eine davon enthält einen Schlüssel.\n\nDu betrittst den zentralen Bereich durch die falsche Wand gegenüber dem Eingang und musst um das X am Boden – ein Loch – herumgehen. **Öffne die verschlossene Tür links**, besiege die Deku-Baba in der Raummitte und suche die Goldene Skulltula hoch an der Wand über einer Nische mit Kerzen: Der Bumerang holt sie herunter und bringt das Symbol zurück.",
+      "hint": "Zwei weitere Schlüssel liegen in verborgenen Nischen im Eingangskorridor."
+    },
+    "pozo-gs-02": {
+      "name": "Hohe Ecke im Grubenraum",
+      "desc": "Die verschlossene Tür rechts im zentralen Bereich, den du durch die falsche Wand gegenüber dem Eingang erreichst, führt in einen Raum mit Flederbeißern und einer großen Grube. Du brauchst einen Kleinen Schlüssel – etwa den aus dem Sarg im Gibdo-Raum – und das Auge der Wahrheit.\n\nBesiege die Flederbeißer und **aktiviere das Auge, um die Goldene Skulltula hoch in einer Ecke neben einer Fackel zu sehen**. Schnapp sie dir mit dem Bumerang.",
+      "hint": "Du brauchst einen Schlüssel und das Auge der Wahrheit."
+    },
+    "pozo-gs-03": {
+      "name": "Raum des Raubschleims",
+      "desc": "Folge dem äußeren Korridor rund um das Zentrum des Brunnens bis in die Nordostecke, wo an einer Tür ein Schild warnt: „Vorsicht vor dem Abgrund!“ Nimm es ernst, denn direkt darunter liegt eine Falle, die dich ganz nach unten stürzen lässt.\n\nDer nächste Raum hat verborgene Löcher im Boden, also **aktiviere das Auge der Wahrheit und achte beim Überqueren auf jeden Schritt**.\n\nErledige die Feuer-Flederbeißer mit dem Bumerang und sprenge den Beamos mit einer Bombe. Die Tür auf der anderen Seite führt in den Raum des Raubschleims: Sobald er besiegt ist, sitzt die Goldene Skulltula an der Rückwand zwischen zwei Fackeln in Bumerang-Reichweite, der dir auch das Symbol bringt.",
+      "hint": "Vorsicht, wohin du trittst!"
+    },
+    "hielo-gs-01": {
+      "name": "Raum der rotierenden Klinge",
+      "desc": "Besiege die Polar-Auras im ersten Raum, um das Gitter zu öffnen, und geh weiter in den großen runden Raum mit der rotierenden Eisklinge.\n\n**Suche die Ecke mit den Eis-Stalagmiten, in der der verborgene Silberne Rubin liegt**: Die Goldene Skulltula sitzt oben an der Wand zwischen den Eisplatten über einem Stalagmiten. Hol sie mit dem Fanghaken herunter.",
+      "hint": "Die Silbernen Rubine öffnen den Raum mit dem Blauen Feuer."
+    },
+    "hielo-gs-02": {
+      "name": "Kompass-Raum",
+      "desc": "Sammle im Raum der rotierenden Klinge die Silbernen Rubine, um den Weg zum Kartenraum zu öffnen, und fülle dort Blaues Feuer in eine Flasche. Kehre in den Klingenraum zurück und schmilz damit eine der beiden roten Eiswände – diejenige, die in einen Gang mit Stachelfallen führt.\n\nAm Ende liegt der Kompass-Raum voller Stalagmiten. Erledige die Eis-Flederbeißer und **schau hoch an die Rückwand neben einem roten Eisblock**: Dort sitzt die Goldene Skulltula. Hol sie dir mit dem Fanghaken."
+    },
+    "hielo-gs-03": {
+      "name": "Eisblock-Raum",
+      "desc": "Erledige im Raum, in dem du einen Eisblock verschieben musst, die Eis-Flederbeißer und drehe dich zurück zum Eingang: **Die Goldene Skulltula sitzt hoch an der Wand links von der Tür, durch die du hereinkommst**. Von den Steinsäulen aus ist sie leichter zu entdecken; hol sie vom Boden aus mit dem Fanghaken herunter und nimm das Symbol."
+    },
+    "castillo-fairy-02": {
+      "name": "Große Fee: Doppelte Verteidigung",
+      "desc": "Du erreichst den Außenbereich von Ganons Schloss vom zerstörten Marktplatz aus, und die Sackgasse rechts endet dort, wo als Kind die Quelle der Wirbelattacke lag. Jetzt versperrt eine schwarze Steinsäule mit goldenen Gravuren den Eingang: **Hebe sie mit den Goldenen Handschuhen an**, die du in der Schattenprüfung des Schlosses erhältst.\n\nSpiele drinnen auf dem Triforce-Symbol Zeldas Wiegenlied und wirf die geforderte Opfergabe von 500 Rubinen in die Quelle. Die Große Fee des Mutes verdoppelt deine Verteidigung: Deine Herzen erhalten einen Goldrand und du erleidest nur noch halben Schaden.",
+      "hint": "Sie verlangt eine Opfergabe von 500 Rubinen; die Säule am Eingang hebst du mit den Goldenen Handschuhen an."
+    },
+    "kakariko-bottle-01": {
+      "name": "Die sieben entlaufenen Hühner",
+      "desc": "Dem Hühnermädchen beim Gehege sind sieben Hühner entwischt; bringst du sie ihr als Kind zurück, schenkt sie dir eine Leere Flasche: **Hebe jedes Huhn auf und wirf es ins Gehege**. Sprichst du mit ihr, sagt sie dir, wie viele noch fehlen, und gibt Hinweise; Hühner im Gehege bleiben dort, selbst wenn du Häuser betrittst.\n\nEines läuft direkt neben ihr herum, eines nahe dem Eingang, eines am Tor zum Todesberg und eines hinter dem Zaun des Skulltula-Hauses. Das fünfte steckt in einer Kiste, gegen die du rollst; die letzten beiden befinden sich im eingezäunten Bereich hinter dem Magie-Laden, den du im Gleitflug erreichst."
+    },
+    "lonlon-bottle-01": {
+      "name": "Talons Super-Hühner",
+      "desc": "Zuerst musst du den schlafenden Talon im Schloss Hyrule mit dem Huhn wecken, das aus dem Seltsamen Ei schlüpft, damit er zur Lon-Lon-Farm zurückkehrt. Betritt auf der Farm tagsüber sein Haus – nachts schläft Talon.\n\nFür 10 Rubine fordert er dich heraus, **in 30 Sekunden seine drei Super-Hühner unter allen Hühnern im Raum zu finden**: Hebe die Hühner auf, und er sagt dir, wenn du ein richtiges erwischt hast. Schaffst du es, bekommst du beim ersten Mal eine Flasche Lon-Lon-Milch.",
+      "hint": "Ein Spiel kostet 10 Rubine."
+    },
+    "lago-bottle-01": {
+      "name": "Rutos Brief",
+      "desc": "Am Grund des Hylia-Sees, nahe dem Ausgang des Unterwassertunnels aus Zoras Reich, liegt eine Flasche mit einem Brief von Prinzessin Ruto. Als Kind kannst du nur mit der Silbernen Schuppe so tief tauchen, dem Preis aus dem Tauchspiel in Zoras Reich.\n\n**Tauche neben den aus dem Wasser ragenden Steinsäulen bis zum Grund** und nimm die Flasche.",
+      "hint": "Du kannst den See auch tauchend von Zoras Reich aus erreichen."
+    },
+    "ciudadela-bottle-01": {
+      "name": "Der Irrlicht-Sammler",
+      "desc": "Als Erwachsener ist das alte Wachhaus am Eingang des Marktplatzes der Laden des Irrlicht-Sammlers. Für jeden Nachtschwärmer zahlt er dir 30 Rubine und schreibt dir 100 Punkte gut; bei 500 Punkten – also nach dem fünften – schenkt er dir eine Leere Flasche. Machst du bis 1.000 Punkte weiter, gibt es einen Goldenen Rubin im Wert von 200 Rubinen.\n\nNachtschwärmer erscheinen auf der Hylianischen Steppe, wenn du auf Epona reitest und über bestimmte Geisterzäune springst: **Schieße sie vom Pferd aus mit Pfeilen ab und fange jede Seele in einer Leeren Flasche**.",
+      "hint": "Er zahlt 30 Rubine pro Nachtschwärmer; die Flasche gibt es ab 500 Punkten."
+    },
+    "ciudadela-bottle-02": {
+      "name": "Der Käfer des Ladenbesitzers",
+      "desc": "Betritt auf dem Marktplatz den Magie-Laden im Gebäude neben dem Weg zur Zitadelle der Zeit. Dem Ladenbesitzer ist ein Käfer entwischt: Sag ihm, dass du hilfst, und er gibt dir eine Leere Flasche zum Einfangen.\n\nRüste die Flasche aus und **fange den Käfer ein, während er über den Ladenboden flitzt**. Zum Dank füllt er sie dir mit einem Roten Elixier, und die Flasche darfst du behalten."
+    },
+    "dominio-heart-01": {
+      "name": "Fackel-Truhe",
+      "desc": "Hinter dem Wasserfall auf der untersten Ebene von Zoras Reich erscheint eine Truhe mit dem Herzteil, wenn du als Kind alle Fackeln dort gleichzeitig entzündest: Entzünde einen Deku-Stab an einer Fackel in König Zoras Kammer.\n\nGehe hinunter und **entzünde zuerst die Fackel am Fuß der Treppe**, die nicht wieder erlischt, dann die vier kurzlebigen, wobei du den Stab an jeder Fackel neu entfachst. Es sind die vor dem Zora-Laden, die am Teich mit dem Steinkreis und die beiden hinter dem Wasserfall, die du dicht an der Wand erreichst.",
+      "hint": "Dins Feuerinferno hilft bei den Fackeln hinter dem Wasserfall."
+    },
+    "fortaleza-heart-02": {
+      "name": "Truhe auf dem Dach",
+      "desc": "Die Truhe steht auf dem höchsten Dach der Gerudo-Festung, dicht an der Felswand jenseits eines Abgrunds. Aus den inneren Gängen führt eine Leiter **neben deiner Zelle** hinaus auf einen Felsvorsprung über den Dächern; folge ihm bis zur Kante, von der aus du die Truhe siehst.\n\n**Ziele von dort mit dem Enterhaken auf die Truhe**, um die Beute zu erreichen.",
+      "hint": "Nutze den Enterhaken, um die Truhe zu erreichen."
+    },
+    "kakariko-heart-04": {
+      "name": "Belohnung für 50 Skulltulas",
+      "desc": "Kehre mit 50 Goldene-Skulltula-Symbolen ins Skulltula-Haus zurück und **sprich mit dem verfluchten reichen Mann**, um das Herzteil zu erhalten.",
+      "hint": "Du brauchst 50 Goldene-Skulltula-Symbole."
+    },
+    "castillo-gs-03": {
+      "name": "Zerfallener Torbogen",
+      "desc": "Als Erwachsener führt der rechte Weg außerhalb von Ganons Schloss – der zur Feen-Quelle – unter einem zerfallenen Steinbogen hindurch, der einst der Eingang zu Schloss Hyrule war.\n\n**Gehe durch den Bogen und drehe dich um**: Die Goldene Skulltula sitzt hoch oben auf seiner Rückseite, außer Reichweite deines Schwerts. Hol sie mit dem Fanghaken herunter."
+    },
+    "cementerio-thought-01": {
+      "name": "Zerbrochener Sockel im Königsgrab",
+      "desc": "Betritt auf dem Friedhof das Königsgrab, indem du Zeldas Wiegenlied auf dem Triforce spielst, und gehe bis in den letzten Raum mit dem Steinmonument, das die Hymne der Sonne lehrt.\n\nDort steht über der grünen Flüssigkeit ein zerbrochener Sockel mit dem Gedanken einer Fee, die sich nicht mehr an die ins Monument gemeißelte Melodie erinnert und sie noch einmal hören möchte, um sie nicht zu vergessen. **Spiele die Hymne der Sonne neben der Markierung.**",
+      "hint": "Spiele die Hymne der Sonne neben der Markierung."
+    },
+    "coloso-thought-01": {
+      "name": "Treppe des Geistertempels",
+      "desc": "Am Wüstenkoloss, auf dem Vorsprung, auf dem du die Silberhandschuhe erhältst, zwischen den beiden Fackelhaltern, befindet sich der Gedanke an der niedrigen Mauer am Rand. Die Fee schwärmt von der atemberaubenden Aussicht, erträgt aber die trockene Luft nicht und wünscht sich einen ordentlichen Regenguss. Spielst du hier die Hymne des Sturms, werden deine Magie und Herzen aufgefüllt.",
+      "hint": "Spiele die Hymne des Sturms vor der Markierung."
+    },
+    "hielo-thought-01": {
+      "name": "Eistunnel neben dem Kompass-Raum",
+      "desc": "Fülle in der Eishöhle, sobald du den Kompass hast, eine Flasche mit dem Blauen Feuer dort und schmilz den roten Eisblock daneben. Folge dem vereisten Tunnel dahinter, der zum Stachelfallen-Korridor und zum Eisblock-Raum führt: An seiner Wand siehst du diesen Feengedanken. Die Flügel der Fee sind vereist, und sie würde alles dafür geben, ein wenig in der Sonne zu sein. **Spiele die Hymne der Sonne neben der Markierung.**",
+      "hint": "Spiele die Hymne der Sonne neben der Markierung."
+    },
+    "lago-thought-01": {
+      "name": "Krug-Nische am Westufer",
+      "desc": "Folge am Hylia-See dem Westufer fast bis ganz nach Süden: Dieser Gedanke befindet sich in einer Felsnische mit Krügen, Säcken und Fässern. Die Fee verrät, ihr Geheimversteck beim Versteckspiel sei ein Ort, den andere Feen weder werfen noch zerbrechen können. **Zerschlage die Krüge in der Nische**: Aus einem kommt eine Fee, und ein paar Rubine gibt es ebenfalls.",
+      "hint": "Zerschlage die Krüge in der Nische: In einem versteckt sich eine Fee."
+    },
+    "llanura-thought-01": {
+      "name": "Ruinen bei der Zugbrücke",
+      "desc": "Verlasse den Marktplatz über die Zugbrücke und geh nach Osten zur Anhöhe über dem Fluss: Zwischen den Ruinen einer bemoosten Steinmauer befindet sich der erste Feengedanke, und Navi nutzt die Gelegenheit, sie dir zu erklären. Die Fee erzählt, wenn jemandem etwas von einem Baum fällt, sei das kein Zufall – sie verstecke Dinge in den Ästen. **Rolle gegen Baumstämme**, um herabzuschütteln, was darin steckt; die Kiefer daneben lässt einen Blauen Rubin fallen.",
+      "hint": "Rolle gegen Bäume: Manchmal fällt etwas aus den Ästen."
+    },
+    "llanura-thought-02": {
+      "name": "Truhenhöhle beim Gerudo-Tal",
+      "desc": "Im Westen der Hylianischen Steppe, im kargen Abschnitt Richtung Gerudo-Tal, liegt in der nördlichen Felswand eine flache Höhle mit einer Truhe. Die Fee, die ihren Gedanken hier hinterließ, sagt dem Jungen mit der Zipfelmütze, der Schatz sei für ihn und sie habe ihn nicht abgeschlossen. Als Erwachsener kommst du zu spät: Die Truhe ist offen und leer. **Kehre als Kind zurück und öffne die Truhe**, denn dann enthält sie ein Herzteil.",
+      "hint": "Kehre als Kind zurück und öffne die Truhe in der Höhle."
+    },
+    "llanura-thought-03": {
+      "name": "Mythenstein-Grotte südlich der Farm",
+      "desc": "Südöstlich der Lon-Lon-Farm, neben einem kleinen Teich, verdeckt ein Ring aus Büschen eine Grotte, die sich mit einem Schlag des Stahlhammers in der Mitte öffnet. Drinnen hängen eine Skulltula an der Wand über einer Holzkiste sowie ein Mythenstein, und der Gedanke ist an der Felswand. Die Fee fand hier einen glänzenden goldenen Käfer, doch das Ungeziefer an der Wand sprang sie an, bevor sie ihn fangen konnte. **Besiege als Kind die Wand-Skulltula und rolle als Erwachsener gegen die Holzkiste darunter**: Darin steckt der goldene Käfer – eine Goldene Skulltula.",
+      "hint": "Zerbrich die Holzkiste unter der großen Skulltula."
+    },
+    "llanura-thought-04": {
+      "name": "Baum am Loch des Deku-Händlers",
+      "desc": "Verlasse den Marktplatz über die Zugbrücke und geh nach Osten am Grasstreifen zwischen Mauer und Fluss entlang: Dieser Gedanke steht an einem Baum direkt an der Mauer, und wenige Schritte weiter liegt ein Loch mit einem Deku-Händler, der nur an jene verkauft, die das Passwort kennen. Die Fee meint, sie habe es endlich herausgefunden, und es sei weder „Gar nicht übel...“ noch „Ich mach die Auszahlung.“ gewesen. Als Erwachsener hat er nichts mehr, also **komm als Kind und sag ihm „Verkauf mir was, ja?“**: Er verkauft dir ein Herzteil für 100 Rubine.",
+      "hint": "Sag „Verkauf mir was, ja?“ zum Deku-Händler im Loch nebenan."
+    },
+    "llanura-thought-05": {
+      "name": "Ruinen am Zaun der Farm",
+      "desc": "Gehe auf der Hylianischen Steppe außen um die Lon-Lon-Farm herum bis zur Südwestecke: Direkt am Holzzaun stehen die Ruinen einer efeubewachsenen Ziegelmauer, und der Gedanke befindet sich unten an der Mauer. Die Fee sagt, sie liebe den Blick auf die Steppe bei Tag und bei Nacht und wünsche sich, ohne Warten zwischen beiden wechseln zu können. **Spiele die Hymne der Sonne**, und sie füllt deine Herzen und Magie auf.",
+      "hint": "Spiele die Hymne der Sonne, um zwischen Tag und Nacht zu wechseln."
+    },
+    "llanura-thought-06": {
+      "name": "Felsnische im Nordwesten der Steppe",
+      "desc": "Ganz im Nordwesten der Hylianischen Steppe am Fluss gibt es eine Felsnische mit Fässern, Säcken und einem Tisch; dieser Gedanke steht an der Wand an ihrem Eingang. Die Fee sagt, Killeranas machten ihr Angst, weil sie riesig sind, Wurzeln schlagen und tun, als gehöre ihnen die Steppe – doch wie jede Pflanze vertragen sie kein Feuer. **Verbrenne die Killeranas mit Dins Feuerinferno**."
+    },
+    "lonlon-thought-01": {
+      "name": "Mauer des Farmgartens",
+      "desc": "Gehe auf der Lon-Lon-Farm hinter Haus und Stall herum zum Garten: Der Gedanke steht an der efeubewachsenen Ziegelmauer zwischen Kisten, Fässern und einem Holzkarren. Die Fee sagt, die kleine Melodie, die jener Junge spielt, sei wunderschön und mache die Kühe ganz verrückt. Gemeint ist Eponas Lied, doch neben der Markierung passiert nichts: **Spiele es vor einer Kuh**, und sie gibt dir Lon-Lon-Milch.",
+      "hint": "Spiele Eponas Lied vor einer Kuh."
+    },
+    "pozo-thought-01": {
+      "name": "Sarg im Gibdo-Raum",
+      "desc": "Steige im Grund des Brunnens nach B1 hinab und betritt den Gibdo-Raum mit den in Spinnweben gehüllten Särgen, die du mit einem an den Fackeln entzündeten Deku-Stab freibrennst. Dieser Feengedanke steht an der Seite eines der aufrechten Särge: Die Fee vermisst das Lied jenes Mannes über das „Immer im Kreis“ und wünscht sich, jemand hier würde es kennen. **Spiele die Hymne des Sturms neben dem Sarg**, um Magie und Herzen aufzufüllen.",
+      "hint": "Spiele die Hymne des Sturms neben dem Sarg."
+    },
+    "sendero-thought-01": {
+      "name": "Blätterkreis nahe Goronia",
+      "desc": "Wenn du den Gebirgspfad hinaufsteigst, gibt es wenige Schritte vor dem Eingang nach Goronia rechts einen Felsvorsprung mit einem Bodenloch samt Pflanze, und an der Wand daneben diesen Gedanken. Die Fee sagt, an ruhigen Tagen tanzten die Blätter am Boden langsam im Kreis, doch an stürmischen Tagen wirbelten sie so schnell, als würden sie gleich abheben. **Spiele die Hymne des Sturms auf dem Kreis**, um ins Loch zu gelangen.",
+      "hint": "Spiele die Hymne des Sturms auf dem Blätterkreis."
+    },
+    "sombra-thought-01": {
+      "name": "Wand im Raum der Deckenstacheln",
+      "desc": "Auf B3 des Schattentempels liegt der Raum, in dem dich der verborgene Block vor den von der Decke fallenden Stacheln schützt. Hinter der Zelle mit der Roten-Rubin-Truhe siehst du neben einem Loch in der Wand diesen Feengedanken. Die Fee sagt, sie liebe Orte, an denen der Wind kräftig weht, und **dass dieser Ort wirklich eine ordentliche Windböe vertragen könnte**."
+    },
+    "crater-heart-03": {
+      "name": "Deku-Händler im Krater",
+      "desc": "Gehe im Todeskrater als Kind vom Gipfeleingang des Todesbergs nach Westen Richtung der auf der Karte markierten Feen-Quelle. Neben einem Kletternetz an der Wand springt ein Deku-Händler aus dem Boden und greift dich an.\n\nNähere dich ihm, weiche seinen Schüssen aus und triff ihn. Sobald er aufgibt, sprich ihn an: **Er verkauft dir das Herzteil für 100 Rubine**.",
+      "hint": "Als Kind verkauft er es dir für 100 Rubine, nachdem du ihn getroffen hast."
+    },
+    "cementerio-thought-02": {
+      "name": "Ruinen am Eingang des Königsgrabs",
+      "desc": "Gehe auf dem Friedhof bis zur Triforce-Platte, die das Königsgrab öffnet: Dieser Gedanke befindet sich zwischen den zerbrochenen Steinen des Eingangs.\n\nDie Fee erzählt, wie sie am Grund eines Grabes landete, ein grausiges Monster auf sie zukam und stehen blieb, als sie ein Lied sang, das es blendete – doch sie erinnert sich nicht mehr an den Namen. **Es ist die Hymne der Sonne: Spiele sie, um Zombies zu lähmen.**",
+      "hint": "Die Hymne der Sonne lähmt Zombies."
+    },
+    "llanura-thought-07": {
+      "name": "Ruinen am Ausgang zum Hylia-See",
+      "desc": "Am Südende der Hylianischen Steppe, nahe dem Weg hinunter zum Hylia-See, stehen Steinruinen zwischen den Bäumen: Der Gedanke steht an einer der Säulen.\n\nDie Fee fleht, niemand solle je mit einem Stock nach einem Schmetterling schlagen – und erst recht nicht, ohne sich zu bewegen. **Berühre einen Schmetterling mit einem Deku-Stab, ohne dich vom Fleck zu bewegen: Er verwandelt sich in eine Fee.**",
+      "hint": "Berühre einen Schmetterling mit einem Deku-Stab: Er wird zu einer Fee."
+    },
+    "llanura-thought-08": {
+      "name": "Felsnische am Eingang zum Zora-Fluss",
+      "desc": "Am Ostrand der Hylianischen Steppe, etwas südlich vom Eingang zum Zora-Fluss, liegt eine Felsnische mit Fässern, einem Tisch, einer Bank und den Resten eines Lagerfeuers: Der Gedanke steht an der Felswand.\n\nDie Fee liebt es, Rubine in hübschen Mustern auszulegen. Sie versteckt sie in Gruben, Löchern und auch unter Wasser und hat nichts dagegen, wenn sie jemand mitnimmt. **Halte in Gruben, Löchern und unter Wasser Ausschau nach Mustern aus Rubinen.**",
+      "hint": "Suche in Gruben, Löchern und unter Wasser nach Mustern aus Rubinen."
+    },
+    "llanura-thought-09": {
+      "name": "Felsen am Burggraben westlich der Zugbrücke",
+      "desc": "Verlasse den Marktplatz über die Zugbrücke und geh nach Westen am Ufer des Burggrabens entlang: Gegenüber der Mauer, aus der das Wasser strömt, liegen einige große Felsen, und dieser Gedanke befindet sich daneben.\n\nDie Fee sagt, niemand werde je ahnen, dass sie ihr ganzes Vermögen in einer Holzkiste versteckt hat.",
+      "hint": "Die Fee sagt, sie habe ihr ganzes Vermögen in einer Holzkiste versteckt."
+    },
+    "llanura-thought-10": {
+      "name": "Karren am Gemüsebeet nahe Kakariko",
+      "desc": "Im Nordosten der Hylianischen Steppe, unweit des Weges hinauf nach Kakariko, steht ein Holzkarren an einer niedrigen Steinmauer: Der Gedanke steht auf seinen Planken.\n\nDie Fee meint, der Ort wirke einsam, als gäbe es dort nur Unkraut, doch wenn man genau hinsieht, huschen heimlich kleine Wesen herum. **Geh hinunter zum Gemüsebeet: Zwischen den Pflanzen krabbeln Käfer.**",
+      "hint": "Zwischen den Pflanzen im Gemüsebeet nebenan krabbeln Käfer."
+    }
+  }
+}

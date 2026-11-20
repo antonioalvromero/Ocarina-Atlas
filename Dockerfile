@@ -1,12 +1,20 @@
-FROM oven/bun:1.4 AS base
+FROM node:24-slim AS builder
 WORKDIR /app
 
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 COPY . .
-RUN bun --bun vite build
+RUN npm run server:build
+
+FROM node:24-slim AS runtime
+WORKDIR /app
 
 ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
+
+COPY --from=builder /app/dist ./dist
+
 EXPOSE 3000
-CMD ["bun", "--bun", "vite", "preview"]
+CMD ["node", "dist/standalone-server.mjs"]

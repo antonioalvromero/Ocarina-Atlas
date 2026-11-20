@@ -1,6 +1,7 @@
 import { ExternalLink, Info, ShieldCheck, X } from 'lucide-react'
-import { useEffect } from 'react'
+import { useRef } from 'react'
 import { useI18n } from '../lib/i18n'
+import { useModalFocusTrap } from '../lib/useModalFocusTrap'
 
 export const OFFICIAL_GITHUB_URL = 'https://github.com/antonioalvromero/Ocarina-Atlas'
 export const ORIGINAL_MAP_GITHUB_URL = 'https://github.com/lucasriondel/oot-remake-map'
@@ -12,17 +13,9 @@ export type CreditsModalProps = {
 
 function CreditsDialog({ onClose }: { onClose: () => void }) {
   const { t } = useI18n()
+  const dialogRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        event.stopPropagation()
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  useModalFocusTrap(true, dialogRef, onClose)
 
   return (
     <div
@@ -31,9 +24,12 @@ function CreditsDialog({ onClose }: { onClose: () => void }) {
       role="presentation"
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="credits-modal-title"
+        data-overlay-open="true"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
         className="flex max-h-[min(88dvh,640px)] w-full max-w-md flex-col overflow-hidden rounded-xl border border-[#e8c04a]/40 bg-ink-900 text-parchment-200 shadow-2xl"
       >

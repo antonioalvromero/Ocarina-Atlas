@@ -6,10 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [2.5.1] - 2026-11-19
+## [2.6.0] - 2026-11-20
+
+### Added
+- **Global Search (`Ctrl+K` / `/`) & Pin Deep-Links:** Instant accent-insensitive search across all 32 places and 184 collectibles in 15 languages, plus `?pin=<id>` deep-links and a **Copy link** button on item cards.
+- **Dynamic Island Nearest-Item Tracker:** Opt-in **Nearest item** toggle inside the Dynamic Island that smoothly animates a translucent glass capsule next to the orb when a reachable collectible is within `57m`, showing its icon, live distance, and a live arrow relative to Link's facing direction.
+- **15-Language Complete Guides (Lazy-Loaded):** Added full guide translations (places, collectibles, and hints) for all 14 non-English languages, split into on-demand chunks for fast initial loads.
+- **Spoiler Shield (Hints First):** Added **Spoiler shield** toggles in **Stats**, zone sidebars, and the Dynamic Island to hide full walkthroughs and screenshots on uncompleted items until revealed.
+- **JSON Backup & Per-Save-Slot Profiles:** Added **Export JSON** / **Import JSON** in **Stats** and automatic per-slot isolation for custom pins, manual reveals, and owned gear across save slots.
+- **Linux AppImage In-Place Auto-Updater:** Added `.sha256`-verified self-updating directly inside `OcarinaAtlas-Linux-x64.AppImage`.
+
+### Changed
+- **Architecture, Performance & Accessibility:** Modularized the telemetry backend (`src/lib/lichii/*`) and Windows launcher (`launcher/win/*`), added `GameAdapter` and guide schema validation, eliminated the 8 Hz All-Floors re-render overhead, added Biome linting + server/UI tests in CI, and improved modal focus trapping, hierarchical `Escape`, WCAG AA contrast, and 44px touch targets.
+- **Security & Privacy Hardening:** Removed leftover third-party analytics (`stats.gousse.cool`) inherited from the upstream `lucasriondel/oot-remake-map` repository (identified during a security audit), restricted `POST /api/saves/slot` to loopback with anti-CSRF/UNC checks, capped `/api/sync/state` and SSE clients, and hardened ZIP extraction/redirect validation in both launchers.
 
 ### Fixed
-- **Gold Skulltula #19 Location (`src/data/oot.json`, `src/data/i18n/{es,fr,pt}.json`, [#48](https://github.com/antonioalvromero/Ocarina-Atlas/issues/48)):** Moved `lonlon-gs-02` (*"Crate in the grotto south of the ranch"*) from Lon Lon Ranch (`lonlon`) to its actual location in Hyrule Field (`llanura`) at the underground grotto southeast of the ranch (`x: 0.6442, y: 0.7654`), preserving its item ID for telemetry/save compatibility, and updated the Hyrule Field and Lon Lon Ranch intro descriptions across all guide locales.
+- **Updater Auto-Relaunch (Windows & Linux):** Fixed launchers not reopening after applying an update in-place and sped up Windows file swapping.
+- **Map & Pin Data Accuracy ([#48](https://github.com/antonioalvromero/Ocarina-Atlas/issues/48), [#50](https://github.com/antonioalvromero/Ocarina-Atlas/issues/50)):** Moved `lonlon-gs-02` to Hyrule Field (`llanura`, `0.6442, 0.7654`), marked `lonlon-thought-01` (*Wall of the ranch garden*) as child-only, calibrated `llanura-heart-01` (`child`, `0.647, 0.1344`), `llanura-heart-02` (`0.2545, 0.3576`), and `llanura-thought-02` (`0.2445, 0.3576`), and updated Hyrule Field and Lon Lon Ranch intro counts across guide locales.
+- **UI & Disconnect Polish:** Prevented duplicate floating pin popovers on split/half-screen viewports, replaced transient `Failed to fetch` errors on server stop with clean `Disconnected` state, and localized remaining UI labels (`NewPinPopover`, `NotFound`, `PlayerPin`, Save Slot, `HeyListen`).
 
 ## [2.5.0] - 2026-11-18
 

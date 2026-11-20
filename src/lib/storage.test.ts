@@ -3,17 +3,23 @@ import { renderToString } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { INITIAL_VIEW } from './coords'
 import {
+  activeProfileSlot,
   addPin,
   ageFilterSlot,
+  applyExplorationPreset,
   applyRemoteSyncState,
+  exportProgressBackup,
   hideDoneSlot,
+  importProgressBackup,
   initRemoteSync,
   isSyncableKey,
   itemCountVisibleSlot,
+  nearestFinderSlot,
   officialDoneSlot,
   officialRevealedSlot,
   officialVisibleSlot,
   ownedPrereqsSlot,
+  parseAndValidateProgressBackup,
   pinsSlot,
   prereqAutoSyncSlot,
   prereqFilterEnabledSlot,
@@ -21,6 +27,8 @@ import {
   removePin,
   resetSyncForTests,
   setInList,
+  spoilerFreeSlot,
+  switchSaveProfile,
   toggleInList,
   updatePin,
   useStored,
@@ -41,6 +49,7 @@ function fakeWindow() {
       key: (index: number) => Array.from(entries.keys())[index] ?? null,
       getItem: (key: string) => entries.get(key) ?? null,
       setItem: (key: string, value: string) => void entries.set(key, value),
+      removeItem: (key: string) => void entries.delete(key),
     },
   }
 }
@@ -134,6 +143,42 @@ describe('with localStorage', () => {
     expect(read(hideDoneSlot)).toBe(true)
     win.localStorage.setItem('oot-map:v1:hide-done', '"yes"')
     expect(read(hideDoneSlot)).toBe(false)
+  })
+
+  it('stores spoilerFreeSlot with default false and strict boolean parsing', () => {
+    expect(read(spoilerFreeSlot)).toBe(false)
+    write(spoilerFreeSlot, true)
+    expect(win.localStorage.getItem('oot-map:v1:spoiler-free')).toBe('true')
+    expect(read(spoilerFreeSlot)).toBe(true)
+    win.localStorage.setItem('oot-map:v1:spoiler-free', '"yes"')
+    expect(read(spoilerFreeSlot)).toBe(false)
+  })
+
+  it('stores nearestFinderSlot with default false, strict boolean parsing, and syncable key', () => {
+    expect(isSyncableKey('nearest-finder')).toBe(true)
+    expect(read(nearestFinderSlot)).toBe(false)
+    write(nearestFinderSlot, true)
+    expect(win.localStorage.getItem('oot-map:v1:nearest-finder')).toBe('true')
+    expect(read(nearestFinderSlot)).toBe(true)
+    win.localStorage.setItem('oot-map:v1:nearest-finder', '"yes"')
+    expect(read(nearestFinderSlot)).toBe(false)
+  })
+
+  it('applies discovery and full exploration presets across officialVisibleSlot and spoilerFreeSlot', () => {
+    expect(read(officialVisibleSlot)).toBe(false)
+    expect(read(spoilerFreeSlot)).toBe(false)
+
+    applyExplorationPreset('discovery')
+    expect(read(officialVisibleSlot)).toBe(false)
+    expect(read(spoilerFreeSlot)).toBe(true)
+
+    applyExplorationPreset('full')
+    expect(read(officialVisibleSlot)).toBe(true)
+    expect(read(spoilerFreeSlot)).toBe(false)
+
+    applyExplorationPreset('discovery')
+    expect(read(officialVisibleSlot)).toBe(false)
+    expect(read(spoilerFreeSlot)).toBe(true)
   })
 
   it('survives a storage that refuses writes', () => {
@@ -238,6 +283,7 @@ describe('PC↔tablet remote sync', () => {
     expect(isSyncableKey('official-revealed')).toBe(true)
     expect(isSyncableKey('hidden-categories')).toBe(true)
     expect(isSyncableKey('hide-done')).toBe(true)
+    expect(isSyncableKey('spoiler-free')).toBe(true)
     expect(isSyncableKey('item-count-visible')).toBe(true)
     expect(isSyncableKey('age-filter')).toBe(true)
     expect(isSyncableKey('age')).toBe(true)
@@ -343,5 +389,191 @@ describe('PC↔tablet remote sync', () => {
     expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/sync/state')
     expect(fetchMock.mock.calls[1]?.[0]).toBe('/api/sync/state')
     expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({ method: 'PUT' })
+  })
+})
+
+describe('JSON backup export/import & save-slot profile isolation', () => {
+  beforeEach(() => {
+    resetSyncForTests()
+    vi.stubGlobal('window', fakeWindow())
+  })
+
+  it('exports syncable entries while excluding view/zoom/profile metadata', () => {
+    switchSaveProfile('slot_01')
+    write(officialDoneSlot, ['deku-gs-01'])
+    addPin('kokiri', 'principal', 'Secret Grotto', { x: 0.25, y: 0.75 }, 'other')
+    write(zoomSlot, 2.5)
+    write(viewSlot('world'), { cx: 0.5, cy: 0.5, zoom: 2 })
+
+    const backup = exportProgressBackup()
+    expect(backup.format).toBe('ocarina-atlas-backup')
+    expect(backup.version).toBe(1)
+    expect(backup.activeProfile).toBe('slot_01')
+    expect(typeof backup.exportedAt).toBe('string')
+    expect(backup.entries['oot-map:v1:official-done']).toBe(JSON.stringify(['deku-gs-01']))
+    expect(backup.entries['oot-map:v1:pins:kokiri:principal']).toContain('Secret Grotto')
+    expect(backup.entries['oot-map:v1:view-zoom']).toBeUndefined()
+    expect(backup.entries['oot-map:v1:view:world']).toBeUndefined()
+    expect(backup.entries['oot-map:v1:active-profile']).toBeUndefined()
+    expect(backup.entries['oot-map:v1:profiles']).toBeUndefined()
+  })
+
+  it('validates and normalizes backup payloads and rejects corrupt or oversized payloads', () => {
+    const valid = parseAndValidateProgressBackup(
+      JSON.stringify({
+        format: 'ocarina-atlas-backup',
+        version: 1,
+        exportedAt: '2026-11-20T00:00:00.000Z',
+        activeProfile: 'slot_02',
+        entries: {
+          'official-done': JSON.stringify(['kokiri-gs-01']),
+          'oot-map:v1:hide-done': JSON.stringify(true),
+        },
+      }),
+    )
+    expect(valid.activeProfile).toBe('slot_02')
+    expect(valid.entries['oot-map:v1:official-done']).toBe(JSON.stringify(['kokiri-gs-01']))
+    expect(valid.entries['oot-map:v1:hide-done']).toBe('true')
+
+    expect(() => parseAndValidateProgressBackup('{bad json')).toThrow()
+    expect(() =>
+      parseAndValidateProgressBackup({
+        format: 'wrong',
+        version: 1,
+        exportedAt: '2026-11-20T00:00:00.000Z',
+        activeProfile: 'default',
+        entries: {},
+      }),
+    ).toThrow()
+    expect(() =>
+      parseAndValidateProgressBackup({
+        format: 'ocarina-atlas-backup',
+        version: 2,
+        exportedAt: '2026-11-20T00:00:00.000Z',
+        activeProfile: 'default',
+        entries: {},
+      }),
+    ).toThrow()
+    expect(() =>
+      parseAndValidateProgressBackup({
+        format: 'ocarina-atlas-backup',
+        version: 1,
+        exportedAt: '2026-11-20T00:00:00.000Z',
+        activeProfile: 'default',
+        entries: [],
+      }),
+    ).toThrow()
+    expect(() =>
+      parseAndValidateProgressBackup({
+        format: 'ocarina-atlas-backup',
+        version: 1,
+        exportedAt: '2026-11-20T00:00:00.000Z',
+        activeProfile: 'default',
+        entries: { 'oot-map:v1:view-zoom': '2' },
+      }),
+    ).toThrow()
+    expect(() =>
+      parseAndValidateProgressBackup({
+        format: 'ocarina-atlas-backup',
+        version: 1,
+        exportedAt: '2026-11-20T00:00:00.000Z',
+        activeProfile: 'default',
+        entries: { 'oot-map:v1:official-done': 123 },
+      }),
+    ).toThrow()
+    expect(() =>
+      parseAndValidateProgressBackup({
+        format: 'ocarina-atlas-backup',
+        version: 1,
+        exportedAt: '2026-11-20T00:00:00.000Z',
+        activeProfile: 'default',
+        entries: { 'oot-map:v1:official-done': '{not-json' },
+      }),
+    ).toThrow()
+    expect(() =>
+      parseAndValidateProgressBackup({
+        format: 'ocarina-atlas-backup',
+        version: 1,
+        exportedAt: '2026-11-20T00:00:00.000Z',
+        activeProfile: 'default',
+        entries: { 'oot-map:v1:official-done': '{"not":"array"}' },
+      }),
+    ).toThrow()
+
+    const oversized = 'x'.repeat(2 * 1024 * 1024 + 10)
+    expect(() => parseAndValidateProgressBackup(oversized)).toThrow()
+  })
+
+  it('imports validated backup, switches activeProfile, and schedules LAN sync', async () => {
+    vi.useFakeTimers()
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ version: 4, updatedAt: Date.now(), entries: {} }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = importProgressBackup({
+      format: 'ocarina-atlas-backup',
+      version: 1,
+      exportedAt: '2026-11-20T00:00:00.000Z',
+      activeProfile: 'slot_01',
+      entries: {
+        'oot-map:v1:official-done': JSON.stringify(['jabu-gs-01']),
+        'oot-map:v1:spoiler-free': JSON.stringify(true),
+      },
+    })
+
+    expect(result).toEqual({ importedKeys: 2, activeProfile: 'slot_01' })
+    expect(read(activeProfileSlot)).toBe('slot_01')
+    expect(read(officialDoneSlot)).toEqual(['jabu-gs-01'])
+    expect(read(spoilerFreeSlot)).toBe(true)
+
+    await vi.advanceTimersByTimeAsync(200)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/sync/state')
+  })
+
+  it('isolates playthrough-specific keys per save slot while preserving global preferences', () => {
+    write(officialVisibleSlot, true)
+    write(hideDoneSlot, true)
+    write(spoilerFreeSlot, true)
+    write(zoomSlot, 3.2)
+
+    expect(read(activeProfileSlot)).toBe('default')
+    expect(switchSaveProfile(null)).toBe('default')
+    expect(switchSaveProfile('   ')).toBe('default')
+
+    expect(switchSaveProfile('slot_00')).toBe('slot_00')
+    write(officialDoneSlot, ['deku-gs-01'])
+    write(officialRevealedSlot, ['deku-gs-01'])
+    write(ownedPrereqsSlot, ['bombs'])
+    addPin('kokiri', 'principal', 'Slot 0 Pin', { x: 0.2, y: 0.3 }, 'other')
+
+    // Switch to brand-new slot_01: playthrough keys are clean, global UI prefs persist.
+    expect(switchSaveProfile('slot_01')).toBe('slot_01')
+    expect(read(activeProfileSlot)).toBe('slot_01')
+    expect(read(officialDoneSlot)).toEqual([])
+    expect(read(officialRevealedSlot)).toEqual([])
+    expect(read(ownedPrereqsSlot)).toEqual([])
+    expect(read(pinsSlot('kokiri', 'principal'))).toEqual([])
+    expect(read(officialVisibleSlot)).toBe(true)
+    expect(read(hideDoneSlot)).toBe(true)
+    expect(read(spoilerFreeSlot)).toBe(true)
+    expect(read(zoomSlot)).toBe(3.2)
+
+    // Add slot_01-specific progress and switch back to slot_00.
+    write(officialDoneSlot, ['espiritu-gs-01'])
+    addPin('kokiri', 'principal', 'Slot 1 Pin', { x: 0.8, y: 0.7 }, 'gs')
+
+    expect(switchSaveProfile('slot_00')).toBe('slot_00')
+    expect(read(officialDoneSlot)).toEqual(['deku-gs-01'])
+    expect(read(officialRevealedSlot)).toEqual(['deku-gs-01'])
+    expect(read(ownedPrereqsSlot)).toEqual(['bombs'])
+    expect(read(pinsSlot('kokiri', 'principal')).map((p) => p.name)).toEqual(['Slot 0 Pin'])
+
+    // Switch back to slot_01 and verify its state was preserved.
+    expect(switchSaveProfile('slot_01')).toBe('slot_01')
+    expect(read(officialDoneSlot)).toEqual(['espiritu-gs-01'])
+    expect(read(pinsSlot('kokiri', 'principal')).map((p) => p.name)).toEqual(['Slot 1 Pin'])
   })
 })

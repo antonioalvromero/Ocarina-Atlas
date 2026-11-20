@@ -103,6 +103,67 @@ function copyTextLf(srcPath, destPath) {
   fs.writeFileSync(destPath, content, 'utf8')
 }
 
+function ensureLinuxPackagerDeps() {
+  const localBuilderDir = path.join(APPIMAGE_SRC_DIR, 'node_modules', 'electron-builder')
+  const rootBuilderDir = path.join(ROOT_DIR, 'node_modules', 'electron-builder')
+  if (fs.existsSync(localBuilderDir) || fs.existsSync(rootBuilderDir)) {
+    return
+  }
+  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+  runStep(
+    'Installing Linux AppImage packager dependencies (launcher/linux-appimage)',
+    npmCmd,
+    ['install', '--no-audit', '--no-fund'],
+    { cwd: APPIMAGE_SRC_DIR },
+  )
+}
+
+function resolveElectronVersion() {
+  const candidates = [
+    path.join(APPIMAGE_SRC_DIR, 'node_modules', 'electron', 'package.json'),
+    path.join(ROOT_DIR, 'node_modules', 'electron', 'package.json'),
+  ]
+  for (const pkgPath of candidates) {
+    if (fs.existsSync(pkgPath)) {
+      const pkg = readJson(pkgPath)
+      if (pkg && typeof pkg.version === 'string' && pkg.version.trim()) {
+        return normalizeSemver(pkg.version)
+      }
+    }
+  }
+  const packagerPkgPath = path.join(APPIMAGE_SRC_DIR, 'package.json')
+  if (fs.existsSync(packagerPkgPath)) {
+    const packagerPkg = readJson(packagerPkgPath)
+    const rawRange = packagerPkg?.devDependencies?.electron
+    if (typeof rawRange === 'string') {
+      return normalizeSemver(rawRange.replace(/^[\^~>=<]+/, ''))
+    }
+  }
+  throw new Error(
+    'Unable to resolve Electron version from launcher/linux-appimage or root node_modules',
+  )
+}
+
+function resolveElectronBuilderBin() {
+  const binName = process.platform === 'win32' ? 'electron-builder.cmd' : 'electron-builder'
+  const candidates = [
+    path.join(APPIMAGE_SRC_DIR, 'node_modules', '.bin', binName),
+    path.join(APPIMAGE_SRC_DIR, 'node_modules', '.bin', 'electron-builder'),
+    path.join(APPIMAGE_SRC_DIR, 'node_modules', 'electron-builder', 'cli.js'),
+    path.join(ROOT_DIR, 'node_modules', '.bin', binName),
+    path.join(ROOT_DIR, 'node_modules', '.bin', 'electron-builder'),
+    path.join(ROOT_DIR, 'node_modules', 'electron-builder', 'cli.js'),
+  ]
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate
+    }
+  }
+  throw new Error(
+    `Missing electron-builder CLI in ${path.join(APPIMAGE_SRC_DIR, 'node_modules', '.bin', 'electron-builder')} or root node_modules`,
+  )
+}
+
 function main() {
   const opts = parseBuildArgs(process.argv.slice(2))
 
@@ -115,10 +176,12 @@ function main() {
   assertExists(htmlSrc, 'Electron launcher HTML')
   assertExists(BRIDGE_C_SRC, 'Linux Longshot RPC bridge C source')
 
+  if (!opts.skipAppImage) {
+    ensureLinuxPackagerDeps()
+  }
+
   const rootPkg = readJson(path.join(ROOT_DIR, 'package.json'))
-  const electronPkgPath = path.join(ROOT_DIR, 'node_modules', 'electron', 'package.json')
-  assertExists(electronPkgPath, 'installed electron package.json')
-  const electronPkg = readJson(electronPkgPath)
+  const electronVersion = resolveElectronVersion()
 
   const normalizedVersion = normalizeSemver(rootPkg.version)
 
@@ -228,7 +291,7 @@ function main() {
     build: {
       appId: 'io.github.antonioalvromero.ocarinaatlas',
       productName: 'Ocarina Atlas',
-      electronVersion: electronPkg.version,
+      electronVersion,
       directories: {
         buildResources: 'build',
         output: '../release',
@@ -259,13 +322,26 @@ function main() {
   )
 
   if (!opts.skipAppImage) {
-    const electronBuilderCli = path.join(ROOT_DIR, 'node_modules', 'electron-builder', 'cli.js')
-    assertExists(electronBuilderCli, 'electron-builder CLI')
-    runStep(
-      `Packaging Linux x64 AppImage (${APPIMAGE_NAME})`,
-      process.execPath,
-      [electronBuilderCli, '--linux', 'AppImage', '--x64', '--projectDir', STAGE_DIR],
-    )
+    ensureLinuxPackagerDeps()
+    const electronBuilderBin = resolveElectronBuilderBin()
+    const builderArgs = ['--linux', 'AppImage', '--x64', '--projectDir', STAGE_DIR]
+    if (
+      electronBuilderBin.endsWith('.js') ||
+      electronBuilderBin.endsWith('.cjs') ||
+      electronBuilderBin.endsWith('.mjs')
+    ) {
+      runStep(
+        `Packaging Linux x64 AppImage (${APPIMAGE_NAME})`,
+        process.execPath,
+        [electronBuilderBin, ...builderArgs],
+      )
+    } else {
+      runStep(
+        `Packaging Linux x64 AppImage (${APPIMAGE_NAME})`,
+        electronBuilderBin,
+        builderArgs,
+      )
+    }
     assertExists(APPIMAGE_PATH, 'Linux x64 AppImage')
     fs.chmodSync(APPIMAGE_PATH, 0o755)
   }

@@ -5,7 +5,16 @@ import path from 'node:path'
 
 export const SYNC_KEY_PREFIX = 'oot-map:v1:'
 export const MAX_SYNC_BODY_BYTES = 256 * 1024
+export const MAX_SYNC_KEYS = 256
+export const MAX_SYNC_STATE_BYTES = 2 * 1024 * 1024
 const MAX_SYNC_KEY_LENGTH = 256
+
+export class SyncStateLimitError extends RangeError {
+  constructor(message: string) {
+    super(message)
+    this.name = 'SyncStateLimitError'
+  }
+}
 
 export type SyncState = {
   version: number
@@ -78,13 +87,21 @@ function parsePersistedState(raw: unknown): SyncState | null {
 
   if (!isPlainObject(raw.entries)) return null
   const entries: Record<string, string> = {}
+  let keyCount = 0
   for (const [key, val] of Object.entries(raw.entries)) {
+    if (keyCount >= MAX_SYNC_KEYS) break
     if (isValidSyncKey(key) && typeof val === 'string' && Buffer.byteLength(val, 'utf8') <= MAX_SYNC_BODY_BYTES) {
       entries[key] = val
+      keyCount++
     }
   }
 
-  return { version, updatedAt, entries }
+  const candidate: SyncState = { version, updatedAt, entries }
+  if (Buffer.byteLength(JSON.stringify(candidate), 'utf8') > MAX_SYNC_STATE_BYTES) {
+    return { version, updatedAt, entries: {} }
+  }
+
+  return candidate
 }
 
 function ensureLoaded(): string {
@@ -168,11 +185,21 @@ export function updateSyncState(patchEntries: Record<string, string | null>): Sy
     return cloneSyncState(currentState)
   }
 
-  currentState = {
+  if (Object.keys(nextEntries).length > MAX_SYNC_KEYS) {
+    throw new SyncStateLimitError(`Sync state exceeds maximum of ${MAX_SYNC_KEYS} keys`)
+  }
+
+  const nextState: SyncState = {
     version: currentState.version + 1,
     updatedAt: Date.now(),
     entries: nextEntries,
   }
+
+  if (Buffer.byteLength(JSON.stringify(nextState), 'utf8') > MAX_SYNC_STATE_BYTES) {
+    throw new SyncStateLimitError(`Sync state exceeds maximum size of ${MAX_SYNC_STATE_BYTES} bytes`)
+  }
+
+  currentState = nextState
 
   const snapshot = cloneSyncState(currentState)
   schedulePersist(targetPath, snapshot)
@@ -293,6 +320,63 @@ function extractPatchEntries(body: unknown): Record<string, string | null> | nul
   return patch
 }
 
+function getHeaderValue(req: http.IncomingMessage, name: string): string | null {
+  const raw = req.headers?.[name]
+  if (typeof raw === 'string') return raw
+  if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'string') return raw[0]
+  return null
+}
+
+/** Returns true if the request declares a JSON Content-Type (`application/json`). */
+export function isJsonContentType(req: http.IncomingMessage): boolean {
+  const raw = getHeaderValue(req, 'content-type')
+  if (!raw) return false
+  const mediaType = raw.split(';', 1)[0]?.trim().toLowerCase() ?? ''
+  return mediaType === 'application/json'
+}
+
+/**
+ * Returns true if browser fetch metadata or Origin header indicates a cross-site request.
+ * Requests without `Origin` and `Sec-Fetch-Site` (e.g. non-browser local clients) are allowed.
+ */
+export function isCrossSiteRequest(req: http.IncomingMessage): boolean {
+  const secFetchSite = getHeaderValue(req, 'sec-fetch-site')?.trim().toLowerCase()
+  if (secFetchSite === 'cross-site') {
+    return true
+  }
+
+  const origin = getHeaderValue(req, 'origin')?.trim()
+  if (origin) {
+    if (origin.toLowerCase() === 'null') {
+      return true
+    }
+    let parsedOrigin: URL
+    try {
+      parsedOrigin = new URL(origin)
+      if (parsedOrigin.protocol !== 'http:' && parsedOrigin.protocol !== 'https:') {
+        return true
+      }
+    } catch {
+      return true
+    }
+
+    const hostHeader = getHeaderValue(req, 'host')?.trim()
+    if (!hostHeader) {
+      return true
+    }
+    try {
+      const expectedHost = new URL(`${parsedOrigin.protocol}//${hostHeader}`).host.toLowerCase()
+      if (parsedOrigin.host.toLowerCase() !== expectedHost) {
+        return true
+      }
+    } catch {
+      return true
+    }
+  }
+
+  return false
+}
+
 /** Handles `GET`/`HEAD`/`PUT`/`POST /api/sync/state` requests. Returns true if the route matched. */
 export async function handleSyncApiRequest(
   req: http.IncomingMessage,
@@ -315,6 +399,16 @@ export async function handleSyncApiRequest(
     return true
   }
 
+  if (isCrossSiteRequest(req)) {
+    sendJson(res, 403, { error: 'Cross-site requests are not allowed' })
+    return true
+  }
+
+  if (!isJsonContentType(req)) {
+    sendJson(res, 415, { error: 'Content-Type must be application/json' })
+    return true
+  }
+
   let parsedBody: unknown
   try {
     parsedBody = await readJsonBody(req, MAX_SYNC_BODY_BYTES)
@@ -333,7 +427,15 @@ export async function handleSyncApiRequest(
     return true
   }
 
-  const nextState = updateSyncState(patch)
-  sendJson(res, 200, nextState)
+  try {
+    const nextState = updateSyncState(patch)
+    sendJson(res, 200, nextState)
+  } catch (err) {
+    if (err instanceof SyncStateLimitError) {
+      sendJson(res, 413, { error: err.message })
+      return true
+    }
+    sendJson(res, 400, { error: 'Invalid sync entries payload' })
+  }
   return true
 }

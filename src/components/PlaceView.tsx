@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Check, EyeOff, Info, Maximize2, Minimize2, Trash2, X } from 'lucide-react'
+import { ArrowLeft, Check, EyeOff, Info, Link2, Maximize2, Minimize2, Search, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { dataset, formatFloorLabel, isUnplaced, itemsOfPlace, matchesAge, startMapOf } from '../lib/data'
 import { floorToGrid, gridPoint, layoutFloors } from '../lib/floorGrid'
@@ -25,6 +25,7 @@ import {
   prereqFilterEnabledSlot,
   removePin,
   setInList,
+  spoilerFreeSlot,
   toggleInList,
   updatePin,
   useStored,
@@ -48,9 +49,18 @@ import { LichiiStatusPanel } from './LichiiStatusPanel'
 import { MapViewport, type MapViewportHandle, type Projection } from './MapViewport'
 import { MergeNotice } from './MergeNotice'
 import { NewPinPopover } from './NewPinPopover'
-import { CustomPinList, OfficialList, OfficialToggle, RevealedList, Section } from './Panels'
+import {
+  CustomPinList,
+  OfficialList,
+  OfficialToggle,
+  RevealedList,
+  Section,
+  SpoilerFreeToggle,
+  SpoilerShieldBadgesAndHint,
+} from './Panels'
 import { CustomMarker, DraftMarker, MergeTrail, OfficialMarker } from './Pins'
 import { LivePlayerPin } from './PlayerPin'
+import { QuickSearchModal, type QuickSearchTarget } from './QuickSearchModal'
 
 type Selection = { kind: 'custom'; id: string; mapId: string } | { kind: 'item'; id: string } | null
 
@@ -113,17 +123,81 @@ function ItemCount({ placeId, progress, total }: { placeId: string; progress: nu
   )
 }
 
+function CopyPinLinkButton({ placeSlug, itemId }: { placeSlug: string; itemId: string }) {
+  const { t } = useI18n()
+  const [copied, setCopied] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
+
+  const handleCopy = useCallback(async () => {
+    if (typeof window === 'undefined') return
+    const url = `${window.location.origin}/${placeSlug}?pin=${encodeURIComponent(itemId)}`
+    let ok = false
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url)
+        ok = true
+      }
+    } catch {
+      // Fall through to execCommand fallback below.
+    }
+    if (!ok && typeof document !== 'undefined') {
+      try {
+        const ta = document.createElement('textarea')
+        ta.value = url
+        ta.setAttribute('readonly', '')
+        ta.style.position = 'fixed'
+        ta.style.opacity = '0'
+        document.body.appendChild(ta)
+        ta.select()
+        ok = document.execCommand('copy')
+        document.body.removeChild(ta)
+      } catch {
+        ok = false
+      }
+    }
+    if (ok) {
+      setCopied(true)
+      if (timerRef.current) clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => setCopied(false), 2000)
+    }
+  }, [placeSlug, itemId])
+
+  const label = copied ? t('search.linkCopied') || 'Link copied' : t('search.copyLink') || 'Copy link'
+  return (
+    <button
+      type="button"
+      onClick={() => void handleCopy()}
+      className={`inline-flex cursor-pointer items-center gap-1 rounded border px-2 py-1 text-xs transition-colors ${
+        copied
+          ? 'border-moss/60 bg-moss/15 text-moss'
+          : 'border-ink-600 bg-ink-800 text-parchment-200 hover:border-parchment-400 hover:text-parchment-50'
+      }`}
+    >
+      {copied ? <Check size={12} strokeWidth={3} /> : <Link2 size={12} />}
+      {label}
+    </button>
+  )
+}
+
 function Sidebar({
   place,
   progress,
   total,
   onEnterFullscreen,
+  onOpenSearch,
   children,
 }: {
   place: Place
   progress: number
   total: number
   onEnterFullscreen?: () => void
+  onOpenSearch?: () => void
   children: ReactNode
 }) {
   const { t, tPlace, tRegion, tPlaceIntro } = useI18n()
@@ -136,6 +210,20 @@ function Sidebar({
             <ArrowLeft size={13} /> {t('place.atlas')}
           </Link>
           <div className="flex items-center gap-1.5">
+            {onOpenSearch && (
+              <button
+                type="button"
+                onClick={onOpenSearch}
+                aria-label={t('search.open') || 'Search'}
+                title={t('search.open') || 'Search'}
+                className="inline-flex cursor-pointer items-center gap-1 rounded border border-ink-600 bg-ink-800/90 px-2 py-0.5 text-xs font-medium text-parchment-200 transition-colors hover:border-parchment-400 hover:bg-ink-700 hover:text-parchment-50"
+              >
+                <Search size={12} className="text-[#e8c04a]" aria-hidden />
+                <kbd className="rounded border border-ink-600 bg-ink-950/80 px-1 py-px font-sans text-[10px] text-parchment-400 max-sm:hidden">
+                  Ctrl+K
+                </kbd>
+              </button>
+            )}
             <LanguageSelector />
             {onEnterFullscreen && (
               <button
@@ -309,9 +397,14 @@ function PinPopoverFrame({
   const pt = projection.project(at)
   const left = Math.min(Math.max(12, pt.x - width / 2), Math.max(12, projection.size.width - width - 12))
   const placeAbove = pt.y > projection.size.height * 0.55
+  const bottomOffset = Math.max(12, projection.size.height - pt.y + 18)
+  const topOffset = Math.min(Math.max(12, pt.y + 18), Math.max(12, projection.size.height - 200))
+  const maxHeight = placeAbove
+    ? Math.max(140, Math.min(360, projection.size.height - bottomOffset - 12))
+    : Math.max(140, Math.min(360, projection.size.height - topOffset - 12))
   const style = placeAbove
-    ? { left, bottom: Math.max(12, projection.size.height - pt.y + 18), width }
-    : { left, top: Math.min(Math.max(12, pt.y + 18), Math.max(12, projection.size.height - 200)), width }
+    ? { left, bottom: bottomOffset, width, maxHeight }
+    : { left, top: topOffset, width, maxHeight }
 
   return (
     <div
@@ -328,6 +421,7 @@ function PinPopoverFrame({
 }
 
 function ItemPinPopover({
+  placeSlug,
   item,
   at,
   projection,
@@ -337,6 +431,7 @@ function ItemPinPopover({
   evalOptions,
   onClose,
 }: {
+  placeSlug: string
   item: Item
   at: Fraction
   projection: Projection
@@ -348,6 +443,11 @@ function ItemPinPopover({
 }) {
   const { t, tItemName } = useI18n()
   const { icon: Icon, color } = categoryStyle(item.cat)
+  const spoilerFree = useStored(spoilerFreeSlot)
+  const [solutionRevealed, setSolutionRevealed] = useState(false)
+  useEffect(() => {
+    setSolutionRevealed(false)
+  }, [item.id])
   const itemName = tItemName(item.id, item.name)
   return (
     <PinPopoverFrame at={at} projection={projection} title={itemName}>
@@ -392,9 +492,33 @@ function ItemPinPopover({
             {t('panel.hideAgain')}
           </button>
         )}
+        <CopyPinLinkButton placeSlug={placeSlug} itemId={item.id} />
       </div>
       <div className="mt-2 -mx-2">
-        <ItemDetail item={item} ownedExpanded={ownedExpanded} evalOptions={evalOptions} />
+        {spoilerFree && !done && !solutionRevealed ? (
+          <SpoilerShieldBadgesAndHint
+            item={item}
+            ownedExpanded={ownedExpanded}
+            evalOptions={evalOptions}
+            onRevealSolution={() => setSolutionRevealed(true)}
+          />
+        ) : (
+          <>
+            <ItemDetail item={item} ownedExpanded={ownedExpanded} evalOptions={evalOptions} />
+            {spoilerFree && !done && solutionRevealed && (
+              <div className="px-2 pb-1">
+                <button
+                  type="button"
+                  onClick={() => setSolutionRevealed(false)}
+                  className="inline-flex cursor-pointer items-center gap-1 rounded border border-ink-600 bg-ink-800 px-2 py-1 text-xs text-parchment-200 transition-colors hover:border-parchment-400 hover:text-parchment-50"
+                >
+                  <EyeOff size={12} aria-hidden />
+                  <span>{t('spoiler.hideSolution')}</span>
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </PinPopoverFrame>
   )
@@ -526,12 +650,12 @@ function MappedPlace({
   initialItemId?: string
   initialMapId?: string
 }) {
-  const { t, tPlace } = useI18n()
+  const { t, tPlace, tItemName } = useI18n()
   const navigate = useNavigate()
   const hasFloorGrid = place.kind === 'dungeon' && place.maps.length > 1
   const [showAllFloors, setShowAllFloors] = useState(false)
   const allFloors = hasFloorGrid && showAllFloors
-  const tracker = useLichiiTracker({ trackPosition: allFloors })
+  const tracker = useLichiiTracker({ trackPosition: false })
   const isLiveMemory = isLiveMemoryState(tracker.state)
   const hasPlayerPin = isLiveMemory || tracker.state.source === 'save'
   const isPlayerInPlace =
@@ -564,6 +688,23 @@ function MappedPlace({
   )
   const [draft, setDraft] = useState<FloorDraft | null>(null)
   const [merge, setMerge] = useState<Merge | null>(null)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const openSearch = useCallback(() => setSearchOpen(true), [])
+  const closeSearch = useCallback(() => setSearchOpen(false), [])
+  const handleSearchNavigate = useCallback(
+    (target: QuickSearchTarget) => {
+      if (target.kind === 'place') {
+        void navigate({ to: '/$zone', params: { zone: target.slug } })
+      } else {
+        void navigate({
+          to: '/$zone',
+          params: { zone: target.placeSlug },
+          search: { pin: target.itemId },
+        })
+      }
+    },
+    [navigate],
+  )
   const mainRef = useRef<HTMLElement>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const viewport = useRef<MapViewportHandle>(null)
@@ -588,7 +729,7 @@ function MappedPlace({
     }
   }, [isFullscreen, isCompactViewport])
 
-  const showPinPopover = isFullscreen || isCompactViewport
+  const showPinPopover = isFullscreen
 
   useEffect(() => {
     if (!showPinPopover || !selection || typeof document === 'undefined') return
@@ -606,6 +747,7 @@ function MappedPlace({
   const pins = useStored(pinsSlot(place.id, map.id))
   const showOfficial = useStored(officialVisibleSlot)
   const hideDone = useStored(hideDoneSlot)
+  const spoilerFree = useStored(spoilerFreeSlot)
   const hidden = useStored(hiddenCategoriesSlot)
   const age = useStored(ageFilterSlot)
   const prereqFilterEnabled = useStored(prereqFilterEnabledSlot)
@@ -627,8 +769,34 @@ function MappedPlace({
 
   const selectedCustom = selection?.kind === 'custom' ? selection.id : null
   const selectedItem = selection?.kind === 'item' ? selection.id : null
+  const selectedOfficialItem = useMemo(
+    () => (selectedItem ? items.find((item) => item.id === selectedItem) ?? null : null),
+    [selectedItem, items],
+  )
 
+  const doneIds = useStored(officialDoneSlot)
   const { done, count } = useOfficialProgress(items)
+
+  const lastAppliedPinRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (!initialItem || lastAppliedPinRef.current === initialItem.id) return
+    lastAppliedPinRef.current = initialItem.id
+    if (initialItem.at?.map) {
+      const targetFloor = place.maps.find((candidate) => candidate.id === initialItem.at?.map)
+      if (targetFloor) {
+        setMap(targetFloor)
+        setShowAllFloors(false)
+      }
+    }
+    setSelection({ kind: 'item', id: initialItem.id })
+    if (!showOfficial && !revealed.has(initialItem.id)) {
+      setInList(officialRevealedSlot, initialItem.id, true)
+    }
+    if (initialItem.at) {
+      const targetAt = initialItem.at
+      setTimeout(() => viewport.current?.centerOn(targetAt), 0)
+    }
+  }, [initialItem, place.maps, showOfficial, revealed])
   const grid = useMemo(() => layoutFloors(place.maps), [place.maps])
   const inView = useMemo(
     () => items.filter((item) => (allFloors ? item.at : item.at?.map === map.id)),
@@ -869,6 +1037,18 @@ function MappedPlace({
     viewport.current?.centerOn(at)
   }, [])
 
+  const floorPlayer = useMemo(
+    () =>
+      isPlayerInPlace && playerMapId
+        ? {
+            mapId: playerMapId,
+            live: isLiveMemory,
+            onClick: centerOnPlayerPoint,
+          }
+        : null,
+    [isPlayerInPlace, playerMapId, isLiveMemory, centerOnPlayerPoint],
+  )
+
   function jumpToPlayer() {
     const targetPlace = dataset.places.find(
       (p) => p.id === tracker.state.placeId || p.slug === tracker.state.placeSlug,
@@ -899,6 +1079,7 @@ function MappedPlace({
       if (!anchor) return null
       return (
         <ItemPinPopover
+          placeSlug={place.slug}
           item={item}
           at={anchor}
           projection={projection}
@@ -982,23 +1163,7 @@ function MappedPlace({
             selectedCustom={selectedCustom}
             selectedItem={selectedItem}
             merge={merge}
-            player={
-              isPlayerInPlace && playerMapId && tracker.state.mapFraction
-                ? {
-                    mapId: playerMapId,
-                    at: tracker.state.mapFraction,
-                    yaw: tracker.state.position?.yaw,
-                    position3d: tracker.state.position,
-                    live: isLiveMemory,
-                    onClick: () => {
-                      const cell = grid.cells.find((c) => c.map.id === playerMapId)
-                      if (cell && tracker.state.mapFraction) {
-                        viewport.current?.centerOn(floorToGrid(cell, tracker.state.mapFraction))
-                      }
-                    },
-                  }
-                : null
-            }
+            player={floorPlayer}
             onSelectCustom={(id, floorId) => toggleSelection({ kind: 'custom', id, mapId: floorId })}
             onSelectItem={(id) => toggleSelection({ kind: 'item', id })}
           />
@@ -1163,7 +1328,13 @@ function MappedPlace({
       </div>
 
       {!isFullscreen && (
-        <Sidebar place={place} progress={count} total={items.length} onEnterFullscreen={() => void enterFullscreen()}>
+        <Sidebar
+          place={place}
+          progress={count}
+          total={items.length}
+          onEnterFullscreen={() => void enterFullscreen()}
+          onOpenSearch={openSearch}
+        >
           {allFloors ? (
             <>
               <Section title={t('place.yourPins')}>
@@ -1190,6 +1361,15 @@ function MappedPlace({
           )}
           <Section title={t('place.officialPins')} aside={<OfficialToggle on={showOfficial} />}>
             <HideDoneToggle on={hideDone} />
+            <SpoilerFreeToggle on={spoilerFree} />
+            {selectedOfficialItem && (
+              <div className="mb-2 flex items-center justify-between gap-2 rounded-md border border-ink-700 bg-ink-950/60 px-2.5 py-1.5">
+                <span className="truncate text-xs text-parchment-200">
+                  {tItemName(selectedOfficialItem.id, selectedOfficialItem.name)}
+                </span>
+                <CopyPinLinkButton placeSlug={place.slug} itemId={selectedOfficialItem.id} />
+              </div>
+            )}
             {showOfficial ? (
               <OfficialList
                 onMap={onMap}
@@ -1214,12 +1394,19 @@ function MappedPlace({
           </Section>
         </Sidebar>
       )}
+      <QuickSearchModal
+        open={searchOpen}
+        onOpen={openSearch}
+        onClose={closeSearch}
+        onNavigate={handleSearchNavigate}
+        doneIds={doneIds}
+      />
     </main>
   )
 }
 
 function MaplessPlace({ place, initialItemId }: { place: Place; initialItemId?: string }) {
-  const { t } = useI18n()
+  const { t, tItemName } = useI18n()
   const navigate = useNavigate()
   const tracker = useLichiiTracker({ trackPosition: false })
   const isLiveMemory = isLiveMemoryState(tracker.state)
@@ -1227,11 +1414,60 @@ function MaplessPlace({ place, initialItemId }: { place: Place; initialItemId?: 
   const [selected, setSelected] = useState<string | null>(() =>
     initialItemId && items.some((item) => item.id === initialItemId) ? initialItemId : null,
   )
+  const [searchOpen, setSearchOpen] = useState(false)
+  const openSearch = useCallback(() => setSearchOpen(true), [])
+  const closeSearch = useCallback(() => setSearchOpen(false), [])
+  const handleSearchNavigate = useCallback(
+    (target: QuickSearchTarget) => {
+      if (target.kind === 'place') {
+        void navigate({ to: '/$zone', params: { zone: target.slug } })
+      } else {
+        void navigate({
+          to: '/$zone',
+          params: { zone: target.placeSlug },
+          search: { pin: target.itemId },
+        })
+      }
+    },
+    [navigate],
+  )
   const hidden = useStored(hiddenCategoriesSlot)
   const age = useStored(ageFilterSlot)
   const showOfficial = useStored(officialVisibleSlot)
   const hideDone = useStored(hideDoneSlot)
+  const spoilerFree = useStored(spoilerFreeSlot)
+  const prereqFilterEnabled = useStored(prereqFilterEnabledSlot)
+  const ownedPrereqs = useStored(ownedPrereqsSlot)
+  const revealedIds = useStored(officialRevealedSlot)
+  const revealed = useMemo(() => new Set(revealedIds), [revealedIds])
+  const ownedExpanded = useMemo(() => expandOwnedRequirements(ownedPrereqs), [ownedPrereqs])
+  const detailOwnedExpanded =
+    prereqFilterEnabled || ownedPrereqs.length > 0 ? ownedExpanded : undefined
+  const doneIds = useStored(officialDoneSlot)
   const { done, count } = useOfficialProgress(items)
+  const selectedOfficialItem = useMemo(
+    () => (selected ? items.find((item) => item.id === selected) ?? null : null),
+    [selected, items],
+  )
+
+  const lastAppliedPinRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (!initialItemId || lastAppliedPinRef.current === initialItemId) return
+    const matched = items.find((item) => item.id === initialItemId)
+    if (!matched) return
+    lastAppliedPinRef.current = matched.id
+    setSelected(matched.id)
+    if (!showOfficial && !revealed.has(matched.id)) {
+      setInList(officialRevealedSlot, matched.id, true)
+    }
+  }, [initialItemId, items, showOfficial, revealed])
+  const revealedItems = useMemo(
+    () =>
+      items.filter(
+        (item) => revealed.has(item.id) && (!hideDone || !done.has(item.id) || item.id === selected),
+      ),
+    [items, revealed, hideDone, done, selected],
+  )
   const beanEvalOptions = useMemo(
     () =>
       tracker.prereqAutoSync && tracker.state.authoritativeBeans && tracker.state.collectedBeanIds
@@ -1294,11 +1530,20 @@ function MaplessPlace({ place, initialItemId }: { place: Place; initialItemId?: 
           onRetry={tracker.refresh}
         />
       </div>
-      <Sidebar place={place} progress={count} total={items.length}>
+      <Sidebar place={place} progress={count} total={items.length} onOpenSearch={openSearch}>
         {items.length > 0 && (
           <Section title={t('place.officialPins')} aside={<OfficialToggle on={showOfficial} />}>
             <HideDoneToggle on={hideDone} />
-            {showOfficial && (
+            <SpoilerFreeToggle on={spoilerFree} />
+            {selectedOfficialItem && (
+              <div className="mb-2 flex items-center justify-between gap-2 rounded-md border border-ink-700 bg-ink-950/60 px-2.5 py-1.5">
+                <span className="truncate text-xs text-parchment-200">
+                  {tItemName(selectedOfficialItem.id, selectedOfficialItem.name)}
+                </span>
+                <CopyPinLinkButton placeSlug={place.slug} itemId={selectedOfficialItem.id} />
+              </div>
+            )}
+            {showOfficial ? (
               <OfficialList
                 onMap={[]}
                 unplaced={items.filter(
@@ -1311,10 +1556,37 @@ function MaplessPlace({ place, initialItemId }: { place: Place; initialItemId?: 
                 onSelect={(item) => setSelected((id) => (id === item.id ? null : item.id))}
                 evalOptions={beanEvalOptions}
               />
+            ) : revealedItems.length > 0 ? (
+              <RevealedList
+                items={revealedItems}
+                done={done}
+                selectedId={selected}
+                onSelect={(item) => setSelected((id) => (id === item.id ? null : item.id))}
+                ownedExpanded={detailOwnedExpanded}
+                evalOptions={beanEvalOptions}
+              />
+            ) : (
+              <div className="rounded-md border border-ink-700 bg-ink-950/60 p-3 text-xs text-parchment-400">
+                <p>{t('place.maplessOfficialHiddenHint')}</p>
+                <button
+                  type="button"
+                  onClick={() => write(officialVisibleSlot, true)}
+                  className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded bg-parchment-200 px-2.5 py-1 text-xs font-medium text-ink-950 transition-colors hover:bg-parchment-50"
+                >
+                  {t('panel.showOfficialPins')}
+                </button>
+              </div>
             )}
           </Section>
         )}
       </Sidebar>
+      <QuickSearchModal
+        open={searchOpen}
+        onOpen={openSearch}
+        onClose={closeSearch}
+        onNavigate={handleSearchNavigate}
+        doneIds={doneIds}
+      />
     </main>
   )
 }

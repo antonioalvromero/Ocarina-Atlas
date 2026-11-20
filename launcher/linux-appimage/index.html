@@ -766,7 +766,10 @@
         </div>
         <div class="settings-footer">
           <span id="updateStatusText">Version 2.3.0</span>
-          <button id="checkUpdatesBtn" class="gold-link">Check for Updates</button>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button id="applyUpdateBtn" class="gold-link" style="display:none;">Install Update</button>
+            <button id="checkUpdatesBtn" class="gold-link">Check for Updates</button>
+          </div>
         </div>
       </div>
 
@@ -821,6 +824,7 @@
   let drawerOpen = false
   let activeTab = 'settings'
   let currentLang = 'en'
+  let updateInProgress = false
 
   const I18N = {
     en: {
@@ -888,6 +892,12 @@
       updateFailed: 'Update check failed',
       checkingGithub: 'Checking GitHub...',
       checkUpdates: 'Check for Updates',
+      installUpdate: 'Install Update',
+      fetchingChecksum: 'Fetching .sha256 checksum...',
+      downloadingUpdate: 'Downloading update ({pct}%)...',
+      downloadingUpdateIndeterminate: 'Downloading update...',
+      verifyingSha256: 'Verifying SHA-256...',
+      updateVerifiedRestarting: 'SHA-256 verified! Restarting...',
       byAuthor: 'by {author}',
       originalMap: 'Original Map',
       mapArtwork: 'Map Artwork',
@@ -1965,6 +1975,7 @@
     $('removeSaveDirBtn').textContent = t('remove')
     $('saveSlotLabel').textContent = t('saveSlot')
     $('languageLabel').textContent = t('language')
+    $('applyUpdateBtn').textContent = t('installUpdate')
     $('checkUpdatesBtn').textContent = t('checkUpdates')
     $('aboutByAntonio').textContent = t('byAuthor', { author: 'antonioalvromero' })
     $('aboutOriginalMap').textContent = t('originalMap')
@@ -2244,20 +2255,24 @@
     $('versionBtn').textContent = `v${s.version}`
     $('aboutFooter').textContent = t('aboutFooter', { ver: s.version })
 
-    // Update pill
-    $('updatePill').classList.toggle('visible', s.updateInfo?.status === 'update-available')
-    if (s.updateInfo?.status === 'update-available') {
-      $('updateStatusText').textContent = t('updateAvailable', { ver: s.updateInfo.latestVersion })
-      $('updateStatusText').style.color = 'var(--gold)'
-    } else if (s.updateInfo?.status === 'up-to-date') {
-      $('updateStatusText').textContent = t('upToDate', { ver: s.version })
-      $('updateStatusText').style.color = 'var(--moss)'
-    } else if (s.updateInfo?.status === 'error') {
-      $('updateStatusText').textContent = t('updateFailed')
-      $('updateStatusText').style.color = 'var(--ember)'
-    } else {
-      $('updateStatusText').textContent = t('versionLabel', { ver: s.version })
-      $('updateStatusText').style.color = 'var(--parchment-600)'
+    // Update pill & in-place self-updater status
+    const hasUpdate = s.updateInfo?.status === 'update-available'
+    $('updatePill').classList.toggle('visible', hasUpdate)
+    $('applyUpdateBtn').style.display = hasUpdate ? 'inline-block' : 'none'
+    if (!updateInProgress) {
+      if (hasUpdate) {
+        $('updateStatusText').textContent = t('updateAvailable', { ver: s.updateInfo.latestVersion })
+        $('updateStatusText').style.color = 'var(--gold)'
+      } else if (s.updateInfo?.status === 'up-to-date') {
+        $('updateStatusText').textContent = t('upToDate', { ver: s.version })
+        $('updateStatusText').style.color = 'var(--moss)'
+      } else if (s.updateInfo?.status === 'error') {
+        $('updateStatusText').textContent = t('updateFailed')
+        $('updateStatusText').style.color = 'var(--ember)'
+      } else {
+        $('updateStatusText').textContent = t('versionLabel', { ver: s.version })
+        $('updateStatusText').style.color = 'var(--parchment-600)'
+      }
     }
 
     // Server pill
@@ -2427,11 +2442,36 @@
     selectTab('about')
   }
 
-  $('updatePill').onclick = () => {
-    if (currentState?.updateInfo?.releaseUrl) {
-      void api.openExternal(currentState.updateInfo.releaseUrl)
+  async function triggerUpdateAction() {
+    if (updateInProgress) return
+    const info = currentState?.updateInfo
+    if (!info) return
+    if (info.canSelfUpdate && typeof api.applyUpdate === 'function') {
+      updateInProgress = true
+      $('updatePill').disabled = true
+      $('applyUpdateBtn').disabled = true
+      $('checkUpdatesBtn').disabled = true
+      $('updateStatusText').textContent = t('fetchingChecksum')
+      $('updateStatusText').style.color = 'var(--gold)'
+      const res = await api.applyUpdate()
+      if (!res || res.ok === false) {
+        updateInProgress = false
+        $('updatePill').disabled = false
+        $('applyUpdateBtn').disabled = false
+        $('checkUpdatesBtn').disabled = false
+        $('updatePill').textContent = t('updatePill')
+        $('updateStatusText').textContent = res?.error || t('updateFailed')
+        $('updateStatusText').style.color = 'var(--ember)'
+      }
+      return
+    }
+    if (info.releaseUrl) {
+      void api.openExternal(info.releaseUrl)
     }
   }
+
+  $('updatePill').onclick = () => void triggerUpdateAction()
+  $('applyUpdateBtn').onclick = () => void triggerUpdateAction()
 
   $('localUrlBtn').onclick = () => void api.openMap()
   $('openMapBtn').onclick = () => void api.openMap()
@@ -2540,6 +2580,40 @@
 
   api.onState(renderState)
   api.onLog(appendLogLine)
+  if (typeof api.onUpdateProgress === 'function') {
+    api.onUpdateProgress((progress) => {
+      if (!progress || typeof progress !== 'object') return
+      if (progress.stage === 'fetching-checksum') {
+        $('updatePill').textContent = t('fetchingChecksum')
+        $('updateStatusText').textContent = t('fetchingChecksum')
+        $('updateStatusText').style.color = 'var(--gold)'
+      } else if (progress.stage === 'downloading') {
+        const msg =
+          typeof progress.percent === 'number'
+            ? t('downloadingUpdate', { pct: progress.percent })
+            : t('downloadingUpdateIndeterminate')
+        $('updatePill').textContent = msg
+        $('updateStatusText').textContent = msg
+        $('updateStatusText').style.color = 'var(--gold)'
+      } else if (progress.stage === 'verifying') {
+        $('updatePill').textContent = t('verifyingSha256')
+        $('updateStatusText').textContent = t('verifyingSha256')
+        $('updateStatusText').style.color = 'var(--gold)'
+      } else if (progress.stage === 'complete') {
+        $('updatePill').textContent = t('updateVerifiedRestarting')
+        $('updateStatusText').textContent = t('updateVerifiedRestarting')
+        $('updateStatusText').style.color = 'var(--moss)'
+      } else if (progress.stage === 'error') {
+        updateInProgress = false
+        $('updatePill').disabled = false
+        $('applyUpdateBtn').disabled = false
+        $('checkUpdatesBtn').disabled = false
+        $('updatePill').textContent = t('updatePill')
+        $('updateStatusText').textContent = progress.error || t('updateFailed')
+        $('updateStatusText').style.color = 'var(--ember)'
+      }
+    })
+  }
 
   void api.getInitialState().then((initial) => {
     renderState(initial)

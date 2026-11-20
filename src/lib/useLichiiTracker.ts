@@ -2,6 +2,7 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { dataset } from './data'
 import type { LichiiTelemetryState } from './lichii-types'
 import {
+  activeProfileSlot,
   applyRemoteSyncState,
   initRemoteSync,
   officialDoneSlot,
@@ -9,6 +10,7 @@ import {
   ownedPrereqsSlot,
   prereqAutoSyncSlot,
   read,
+  switchSaveProfile,
   useStored,
   write,
   type Slot,
@@ -768,6 +770,14 @@ function processAutoPrerequisites(next: LichiiTelemetryState): void {
 }
 
 export function applyTelemetryState(data: LichiiTelemetryState) {
+  if (data.activeSaveSlot) {
+    const previousProfile = read(activeProfileSlot)
+    const nextProfile = switchSaveProfile(data.activeSaveSlot)
+    if (previousProfile !== nextProfile) {
+      resetAllCategorySyncStates(true)
+      lastPrereqSyncSignature = null
+    }
+  }
   if (!canSyncTelemetryProgress(data)) {
     resetAllCategorySyncStates(true)
     lastPrereqSyncSignature = null
@@ -804,6 +814,19 @@ export function getTrackerSnapshotForTests(): StoreState {
   return storeState
 }
 
+export function isTransientFetchDisconnect(err: unknown): boolean {
+  if (err instanceof TypeError) return true
+  if (!(err instanceof Error)) return false
+  const msg = err.message.toLowerCase()
+  return (
+    err.name === 'AbortError' ||
+    msg.includes('failed to fetch') ||
+    msg.includes('networkerror') ||
+    msg.includes('load failed') ||
+    msg.includes('fetch failed')
+  )
+}
+
 async function pollOnce() {
   if (typeof window === 'undefined' || pollInFlight) return
   pollInFlight = true
@@ -828,14 +851,17 @@ async function pollOnce() {
   } catch (err) {
     resetAllCategorySyncStates(true)
     lastPrereqSyncSignature = null
+    const transient = isTransientFetchDisconnect(err)
     commitStoreState({
       ...storeState,
       telemetry: {
         ...INITIAL_TELEMETRY,
+        emulator: storeState.telemetry.emulator,
+        skulltulaCount: storeState.telemetry.skulltulaCount,
         collectedSkulltulaIds: [],
         updatedAt: Date.now(),
       },
-      lastError: err instanceof Error ? err.message : 'Connection failed',
+      lastError: transient ? null : err instanceof Error ? err.message : 'Connection failed',
     })
   } finally {
     pollInFlight = false

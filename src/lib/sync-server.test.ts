@@ -9,16 +9,25 @@ import {
   getSyncState,
   handleSyncApiRequest,
   MAX_SYNC_BODY_BYTES,
+  MAX_SYNC_KEYS,
+  MAX_SYNC_STATE_BYTES,
   resetSyncStateForTests,
   resolveSyncFilePath,
   subscribeSyncUpdates,
+  SyncStateLimitError,
   updateSyncState,
   type SyncState,
 } from './sync-server'
 
-function createMockReq(method: string, bodyChunks: Array<string | Buffer> = []): http.IncomingMessage {
+function createMockReq(
+  method: string,
+  bodyChunks: Array<string | Buffer> = [],
+  headers?: http.IncomingHttpHeaders,
+): http.IncomingMessage {
   const emitter = new EventEmitter() as http.IncomingMessage
   emitter.method = method
+  emitter.headers =
+    headers ?? (method === 'PUT' || method === 'POST' ? { 'content-type': 'application/json' } : {})
   emitter.destroy = () => emitter
 
   queueMicrotask(() => {
@@ -254,5 +263,114 @@ describe('sync-server', () => {
     const delMock = createMockRes()
     await handleSyncApiRequest(createMockReq('DELETE'), delMock.res, '/api/sync/state')
     expect(delMock.getStatus()).toBe(405)
+  })
+
+  it('enforces MAX_SYNC_KEYS and MAX_SYNC_STATE_BYTES caps in updateSyncState and HTTP API', async () => {
+    const initialBatch: Record<string, string> = {}
+    for (let i = 0; i < MAX_SYNC_KEYS; i++) {
+      initialBatch[`oot-map:v1:key-${i}`] = '1'
+    }
+    const atLimit = updateSyncState(initialBatch)
+    expect(Object.keys(atLimit.entries)).toHaveLength(MAX_SYNC_KEYS)
+
+    // Adding one more key exceeds MAX_SYNC_KEYS and does not mutate state.
+    expect(() => updateSyncState({ 'oot-map:v1:overflow-key': '1' })).toThrow(SyncStateLimitError)
+    expect(Object.keys(getSyncState().entries)).toHaveLength(MAX_SYNC_KEYS)
+
+    // HTTP API surfaces SyncStateLimitError as 413.
+    const keyOverflowRes = createMockRes()
+    await handleSyncApiRequest(
+      createMockReq('PUT', [JSON.stringify({ entries: { 'oot-map:v1:overflow-key': '1' } })]),
+      keyOverflowRes.res,
+      '/api/sync/state',
+    )
+    expect(keyOverflowRes.getStatus()).toBe(413)
+
+    // Reset and test total serialized byte cap (MAX_SYNC_STATE_BYTES).
+    resetSyncStateForTests()
+    const chunkValue = 'x'.repeat(240 * 1024)
+    const chunksNeeded = Math.floor(MAX_SYNC_STATE_BYTES / (240 * 1024))
+    for (let i = 0; i < chunksNeeded; i++) {
+      updateSyncState({ [`oot-map:v1:blob-${i}`]: chunkValue })
+    }
+    expect(() => updateSyncState({ 'oot-map:v1:blob-overflow': chunkValue })).toThrow(SyncStateLimitError)
+
+    const sizeOverflowRes = createMockRes()
+    await handleSyncApiRequest(
+      createMockReq('POST', [JSON.stringify({ entries: { 'oot-map:v1:blob-overflow': chunkValue } })]),
+      sizeOverflowRes.res,
+      '/api/sync/state',
+    )
+    expect(sizeOverflowRes.getStatus()).toBe(413)
+  })
+
+  it('requires application/json Content-Type and rejects cross-site write requests on /api/sync/state', async () => {
+    const payload = JSON.stringify({ entries: { 'oot-map:v1:official-done': '["gs-1"]' } })
+
+    // Missing Content-Type -> 415
+    const missingCt = createMockRes()
+    await handleSyncApiRequest(createMockReq('PUT', [payload], {}), missingCt.res, '/api/sync/state')
+    expect(missingCt.getStatus()).toBe(415)
+
+    // Wrong Content-Type -> 415
+    const textCt = createMockRes()
+    await handleSyncApiRequest(
+      createMockReq('POST', [payload], { 'content-type': 'text/plain' }),
+      textCt.res,
+      '/api/sync/state',
+    )
+    expect(textCt.getStatus()).toBe(415)
+
+    // Cross-site Sec-Fetch-Site -> 403
+    const crossFetch = createMockRes()
+    await handleSyncApiRequest(
+      createMockReq('PUT', [payload], {
+        'content-type': 'application/json',
+        'sec-fetch-site': 'cross-site',
+      }),
+      crossFetch.res,
+      '/api/sync/state',
+    )
+    expect(crossFetch.getStatus()).toBe(403)
+
+    // Cross-site Origin mismatch -> 403
+    const crossOrigin = createMockRes()
+    await handleSyncApiRequest(
+      createMockReq('POST', [payload], {
+        'content-type': 'application/json',
+        host: '192.168.1.50:3000',
+        origin: 'https://evil.example',
+      }),
+      crossOrigin.res,
+      '/api/sync/state',
+    )
+    expect(crossOrigin.getStatus()).toBe(403)
+
+    // Origin: null -> 403
+    const nullOrigin = createMockRes()
+    await handleSyncApiRequest(
+      createMockReq('PUT', [payload], {
+        'content-type': 'application/json',
+        host: '127.0.0.1:3000',
+        origin: 'null',
+      }),
+      nullOrigin.res,
+      '/api/sync/state',
+    )
+    expect(nullOrigin.getStatus()).toBe(403)
+
+    // Same-origin with charset parameter -> 200
+    const validRes = createMockRes()
+    await handleSyncApiRequest(
+      createMockReq('PUT', [payload], {
+        'content-type': 'application/json; charset=utf-8',
+        host: '192.168.1.50:3000',
+        origin: 'http://192.168.1.50:3000',
+        'sec-fetch-site': 'same-origin',
+      }),
+      validRes.res,
+      '/api/sync/state',
+    )
+    expect(validRes.getStatus()).toBe(200)
   })
 })

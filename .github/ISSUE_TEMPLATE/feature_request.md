@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an enhancement for live Lichii tracking, UI/UX, or Windows launcher usability
+about: Suggest an enhancement for live emulator/recomp tracking, UI/UX, or Windows/Linux launcher usability
 title: "[Feature]: "
 labels: ["enhancement"]
 assignees: []
@@ -12,7 +12,7 @@ Describe the problem or workflow improvement you want to address.
 
 ## Proposed Solution
 
-Describe how you envision this feature working in the map UI, telemetry backend, or Windows launcher.
+Describe how you envision this feature working in the map UI, telemetry backend, or Windows/Linux launcher.
 
 ## Alternatives Considered
 

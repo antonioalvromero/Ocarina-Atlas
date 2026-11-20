@@ -1247,13 +1247,13 @@
       "place": "llanura",
       "at": {
         "map": "principal",
-        "x": 0.6974,
-        "y": 0.1171
+        "x": 0.647,
+        "y": 0.1344
       },
       "name": "Business Scrub by the moat",
       "desc": "Leave Hyrule Castle Town across the drawbridge and follow the wall east along the edge of the moat. Next to a tree you'll see a hole you can open with a Bomb or the Megaton Hammer: drop in and talk to the Business Scrub inside.\n\nHe only sells to those who know the password. To learn it, go to the tree next door as adult Link and read the Fairy Thought. Then come back as a child, talk to the Business Scrub and **choose \"Sell somethin', will ya?\"**: he'll offer you the Piece of Heart for 100 Rupees.\n\nBuy it as a child, because as an adult he has already sold it to the Link of the past.",
       "hint": "It costs 100 Rupees.",
-      "age": "both",
+      "age": "child",
       "night": false,
       "requires": [
         [
@@ -1273,8 +1273,8 @@
       "place": "llanura",
       "at": {
         "map": "principal",
-        "x": 0.1842,
-        "y": 0.3667
+        "x": 0.2545,
+        "y": 0.3576
       },
       "name": "Paradox of the chest from the past",
       "desc": "At the western end of Hyrule Field, near the entrance to Gerudo Valley, the ground turns to reddish dirt. Head down the slope into a hollow beneath a rock overhang and look for the chest at the back.\n\nIt has to be as a child: as an adult the chest is already open and empty, and a Fairy Thought explains that it was never locked. **Open the chest as a child** and the Piece of Heart is yours.",
@@ -4861,8 +4861,8 @@
       "place": "llanura",
       "at": {
         "map": "principal",
-        "x": 0.1579,
-        "y": 0.3667
+        "x": 0.2445,
+        "y": 0.3576
       },
       "name": "Chest cave by Gerudo Valley",
       "desc": "In the west of Hyrule Field, in the arid stretch leading to Gerudo Valley, there's a shallow cave in the northern rock face with a chest inside. The fairy who left her thought here tells the kid in the pointy hat that the treasure is for him and that she didn't lock it. As an adult you're too late: the chest is open and empty. **Come back as a child and open the chest**, which then does hold a Piece of Heart.",
@@ -4971,7 +4971,7 @@
       "name": "Wall of the ranch garden",
       "desc": "In Lon Lon Ranch, go around behind the house and the stable to the garden: the thought is on the ivy-covered brick wall, among some crates, barrels and a wooden cart. The fairy says the little tune that boy plays is very pretty and has the cows going crazy. It's Epona's Song, but playing it next to the mark does nothing: **play it to a cow** and she'll give you Lon Lon Milk.",
       "hint": "Play Epona's Song to a cow.",
-      "age": null,
+      "age": "child",
       "night": false,
       "requires": [],
       "images": [

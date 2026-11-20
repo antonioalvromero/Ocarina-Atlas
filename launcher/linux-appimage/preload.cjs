@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld('ocarinaAtlas', {
   removeSaveDir: (dir) => ipcRenderer.invoke('launcher:remove-save-dir', dir),
   resetRpcDefaults: () => ipcRenderer.invoke('launcher:reset-rpc-defaults'),
   checkUpdates: () => ipcRenderer.invoke('launcher:check-updates'),
+  applyUpdate: (opts) => ipcRenderer.invoke('apply-update', opts),
   clearLogs: () => ipcRenderer.invoke('launcher:clear-logs'),
   setDrawerOpen: (open) => ipcRenderer.invoke('launcher:set-drawer-open', open),
   onState: (callback) => {
@@ -30,5 +31,11 @@ contextBridge.exposeInMainWorld('ocarinaAtlas', {
     const listener = (_event, entry) => callback(entry)
     ipcRenderer.on('launcher:log', listener)
     return () => ipcRenderer.removeListener('launcher:log', listener)
+  },
+  onUpdateProgress: (callback) => {
+    if (typeof callback !== 'function') return () => {}
+    const listener = (_event, progress) => callback(progress)
+    ipcRenderer.on('launcher:update-progress', listener)
+    return () => ipcRenderer.removeListener('launcher:update-progress', listener)
   },
 })

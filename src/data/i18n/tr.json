@@ -1,0 +1,946 @@
+{
+  "places": {
+    "kokiri": {
+      "intro": "Maceranın başladığı köy olan Kokiri Ormanı haritasında üç Altın Skulltula ve bir Sihirli Fasulye için yumuşak toprak bulunur. Skulltula’lardan ikisi çocukken ortaya çıkar: Her Şeyi Bilen Kardeşler’in Evi’nin arkasındaki yalnızca gece, dükkânın yanındaki yumuşak toprakta bulunan ise günün her saatinde ve böceklerle. Aynı toprağa bir fasulye de ekin; çünkü yetişkinken sizi Rupilerin bulunduğu bir çıkıntıya çıkarır ve İkizler Evi’nin tepesindeki üçüncü Skulltula için gece Kanca ile geri dönün."
+    },
+    "perdido": {
+      "intro": "Kayıp Ormanlar’daki neredeyse her şey çocukken toplanır: Okarina ile iki Kalp Parçası, üç Altın Skulltula ve Sihirli Fasulyeler için iki yumuşak toprak. Kokiri Ormanı ile Kutsal Orman Çayırı’nı birbirine bağlayan bu labirentte Kalp Parçaları Skull Kid’lere bağlıdır: girişin solundaki flütlü olana Saria’nın Şarkısı, sağdaki hedefin yanındakilerle ise hafıza oyunu. İki yumuşak toprak için — Hyrule Ovası’na giden köprünün yanındaki ve tek ağaçlı açıklıktaki — yanınızda böcek getirin ve ikisine de birer fasulye ekin: yetişkinken ve gece vakti açıklıktaki bitki sizi üçüncü Skulltula’nın bulunduğu çıkıntıya çıkarır."
+    },
+    "prado": {
+      "intro": "Kutsal Orman Çayırı yalnızca tek bir Altın Skulltula barındırır, o da yetişkinken ortaya çıkar; harita bunun Orman Tapınağı’na giden labirentte nerede belirdiğini gösterir. Moblin’lerden kaçındıktan sonra, merdivenlerden önce labirentin ortasındaki sağ duvarda belirir: onu tapınağa girmek için de gereken Kanca ile düşürün."
+    },
+    "llanura": {
+      "intro": "Hyrule Ovası haritası iki Kalp Parçası ve üç Altın Skulltula işaretler. Bunlardan üçü yer altındaki, Bomba veya Megaton Çekici ile açılan mağaralardadır. Kale Şehri asma köprüsünün doğusunda, hendeğin yanındaki mağarada bir İşçi Deku, çocukken gelip parolayı biliyorsanız 100 Rupi karşılığında bir Kalp Parçası satar; parolayı yanındaki ağaçtaki Peri Düşüncesi yetişkinken söyler. Diğer parça batıda, Gerudo Vadisi yakınlarındaki bir kaya çıkıntısının altındaki sandıktadır ve çocukken açmanız gerekir. Skulltula’lara gelince: doğudaki tek çam ağacındaki gövdeye yuvarlanınca düşer; Lon Lon Çiftliği yanındaki taş çember mağarasındaki Bumerang veya Kanca gerektirir; üçüncüsü ise çiftliğin güneydoğusundaki mağarada, çocukken oradaki Peri Düşüncesi’ni okuyup normal Skulltula’yı yendiyseniz yetişkinken bir sandığın içinde belirir."
+    },
+    "lonlon": {
+      "intro": "Lon Lon Çiftliği’ndeki her şeyi çocukken alabilirsiniz: üç Altın Skulltula, bir Kalp Parçası ve bir Şişe, hepsi haritada işaretlidir. Skulltula’lardan ikisi yalnızca gece ortaya çıkar ve Bumerang gerektirir: evin penceresindeki ve arkadaki taş kulenin içindeki. Üçüncüsü, girişteki ağaçta, günün her saatinde gövdeye yuvarlanınca düşer. Kalp Parçası arkadaki taş kulenin içinde, bazı sandıkların arkasındadır; Şişe ise Talon’un Süper Cucco oyununun ödülüdür, ancak önce onu Hyrule Kalesi’nde Garip Yumurta’dan çıkan Cucco ile uyandırmanız gerekir."
+    },
+    "ciudadela": {
+      "intro": "Üç Kalp Parçası, iki Şişe ve bir Altın Skulltula: Hyrule Kale Şehri’nde bulunanlar bunlardır; şehir değiştiği için çocuk ve yetişkin haritaları ayrıdır. Neredeyse hepsi çocuk Link içindir: Parçalardan ikisi gece alınır — Hazine Sandığı Dükkânı’ndan ve kayıp köpek yavrusu Richard’ı sahibine geri götürerek — üçüncüsü ise Kral Dodongo’yu yendikten sonra açılan Bombchu Bovling Salonu’nun ödülüdür. Skulltula girişteki nöbetçi kulübesinde bir sandığın içindedir; Şişeler ise yeniden yapıma özgü yeni şişe (Zaman Tapınağı’na giden yolun yanındaki dükkâncıdan hediye) ve yetişkinken beş Büyük Poe karşılığında Poe Koleksiyoncusu’ndan alınandır."
+    },
+    "castillo": {
+      "intro": "Hyrule Kalesi’nin iki haritası — çocukken kale bahçesi ve yetişkinken Ganon’un Kalesi’nin dışı — arasında üç Altın Skulltula ve iki Büyük Peri bulunur. Skulltula’lardan ikisi çocukken ortaya çıkar: çit bahçesindeki ağaçta olan ve hendeğin yanındaki ağacın dibinde Fırtına Şarkısı ile açılan mağaradaki; ayrıca doğudaki çıkmaz yolun sonundaki kayanın arkasında Döner Saldırı Büyük Perisi vardır. Yetişkinken geriye yalnızca yıkık kemerin üzerindeki Skulltula (geçerken arkanıza dönmezseniz göremezsiniz) ve Altın Eldivenler ile kaldırılan bir sütunun altındaki Çift Savunma Büyük Perisi kalır."
+    },
+    "kakariko": {
+      "intro": "Kakariko Köyü, Hyrule Ovası’ndan gelen köprünün hemen ötesinde, Ölüm Dağı’nın eteğinde yer alır ve haritada en çok toplanabilir barındıran noktalardan biridir. Altı Altın Skulltula’sından beşi çocukken ve gece vakti kılıç veya Sapan ile toplanır; altıncısı ise Impa’nın Evi’nin çatısının hemen yanındaki kaya duvarında, yetişkinken, gece ve Kanca ile alınır. Kalp Parçaları iki yaşa dağılmıştır; Şişe, yedi Cucco’sunu geri getirdiğinizde Cucco Kadını’ndan gelir ve Skulltula Evi’nde 50 jeton topladığınızda sizi bekleyen bir Kalp Parçası daha vardır."
+    },
+    "cementerio": {
+      "intro": "Kakariko Mezarlığı’nın her iki yaş için ayrı bir haritası vardır ve toplamda dört Kalp Parçası, iki Altın Skulltula ve bir Sihirli Fasulye barındırır. Çocukken ve gece vakti Dampé 10 Rupi karşılığında kazar ve zaman zaman bir Kalp Parçası çıkarır; Kraliyet Ailesi Mezarı’nın yanındaki mezarın mahzeninde ise o yaşta yalnızca gece açılan bir başka parça gizlidir. Yetişkinken Dampé’nin hayaletiyle yapılan yarış (ilk yarış Kanca’yı, ikincisi Kalp Parçası’nı verir) ve çocukken ekilen fasulyeyle ulaşılan sol duvardaki çıkıntı gelir. Skulltula’lar gece girişteki duvarda ve çocukken günün her saatinde böceklerle Dampé’nin Mezarı’nın yanındaki yumuşak toprakta ortaya çıkar."
+    },
+    "sendero": {
+      "intro": "Kakariko’dan Krater’e uzanan Ölüm Dağı Patikası boyunca harita dört Altın Skulltula, bir Kalp Parçası, bir Büyük Peri ve bir Sihirli Fasulye işaretler. Çocukken Dodongo Mağarası’nın önündeki kayayı bir Bomba veya Bomba Çiçeği ile temizleyin ve önünde kalan yumuşak topraktan yararlanın: bir Skulltula için böcek ve yetişkinken kestirme olacak bir fasulye. Kalp Parçası mağara girişinin üstündeki çıkıntıdadır; büyü ve Din’in Ateşi Büyük Perisi ise zirvede, Kaepora Gaebora’nın yanındaki çatlak duvarın arkasındadır. Diğer üç Skulltula’dan Kakariko yanındaki çatlak duvarda olan her iki yaşta da ortaya çıkar; yetişkin Link için gece beliren diğer ikisi ise kırmanız gereken kayaların altındadır ve bunlardan biri yalnızca Megaton Çekici ile kırılır."
+    },
+    "goron": {
+      "intro": "Ölüm Dağı’nın içine oyulmuş Goron Şehri haritasında yalnızca üç toplanabilir bulunur: iki Altın Skulltula ve bir Kalp Parçası, iki yaşa paylaştırılmıştır. Çocukken üst kattaki kaya labirentindeki Skulltula’ya Bombalarla yol açarak ulaşılır; Kalp Parçası ise ortadaki büyük dönen küpten çıkar: dönmesi için meşalelerini yakın ve üst kattaki kalastan içine bir Bomba bırakın. Yetişkinken geriye yalnızca tavandaki kayalık bir çıkıntının altında duran ve sadece Kanca ile ulaşılabilen diğer Skulltula kalır."
+    },
+    "crater": {
+      "intro": "Sıcaklığın hüküm sürdüğü Ölüm Dağı Krateri haritasında üç Kalp Parçası, iki Altın Skulltula, bir Büyük Peri ve bir Sihirli Fasulye işaretlidir. Buraya dağın zirvesinden veya Goron Şehri’nden girersiniz; çocukken sıcaklık size süre sınırı koyar, yetişkinken Goron Kıyafeti ile acele etmenize gerek kalmaz. Çocukken zirve girişindeki sandıktaki Skulltula’yı, İşçi Deku’nun 100 Rupi’ye sattığı Kalp Parçası’nı ve Ateş Bolerosu’nu çalarak ulaşılan yumuşak topraktaki Skulltula’yı alırsınız: fasulyeyi de oraya ekin. Yetişkinken o bitki sizi başka bir Parçanın bulunduğu kubbe biçimli kayaya bırakır; çocukken de alınabilen üçüncü parça girişten ağlardan inerken duvardaki bir oyuktadır ve büyünüzü ikiye katlayan Büyük Peri yalnızca Megaton Çekici ile kırılabilen kayaların arkasında bekler."
+    },
+    "rio": {
+      "intro": "Fasulye Satıcısı Zora Nehri’nin girişindedir ve nehir boyunca yukarıda harita dört Kalp Parçası ile dört Altın Skulltula işaretler. Çocukken girişteki kayaları bir Bomba ile geçin, ondan alabildiğiniz kadar fasulye alın ve yanındaki yumuşak toprağa bir tane ekin. Dört Kalp Parçası’nın hepsi çocuk Link içindir: ikisi bir Cucco ile süzülerek ulaşılan platformlarda (şelaledeki için Bumerang da olur) ve ikisi kütükteki kurbağalardan — biri şarkılarını çalıp oyunlarını kazanarak, diğeri Fırtına Şarkısı ile. Skulltula’lardan ikisi çocuk Link içindir: Fasulye Satıcısı’nın yanındaki yumuşak toprakta böceklerle ve gece şelalenin yanındaki duvarda; diğer ikisi ise yetişkin Link için gece vakti duvarların yükseklerinde ve Kanca ile."
+    },
+    "dominio": {
+      "intro": "Her yaşa bir tane: Zora Bölgesi’ndeki iki toplanabilir böyle paylaştırılmıştır — çocukken bir Kalp Parçası ve yetişkinken bir Altın Skulltula, her biri haritada kendi noktasında. Parça için merdivenlerin dibindeki meşaleden başlayarak alt kattaki tüm meşaleleri bir Deku Sopası ile yakın; sandığı şelalenin arkasında belirir. Yetişkinken, bölge donmuş hâldeyken, Skulltula gece vakti donmuş şelalenin tepesinde belirir ve onu Kanca ya da bir okla düşürürsünüz."
+    },
+    "fuente": {
+      "intro": "Kral Zora’nın tahtının arkasındaki Zora Çeşmesi, her yaş için ayrı bir haritayla iki Kalp Parçası, üç Altın Skulltula ve bir Büyük Peri barındırır. Çocukken burası Jabu-Jabu’nun göletidir, yetişkinken ise Buz Mağarası’na giden donmuş bir göl. Farore’nin Rüzgârı’nı veren Büyük Peri her iki yaşta da güneydoğu köşesindeki çatlak duvarın arkasından açılır ve Skulltula’lardan ikisi çocukken belirir: aynı köşedeki çam ağacındaki ve gece vakti Bumerang ile alınan batık kemer duvarındaki. Yetişkinken bir Parça en uzaktaki buz kütlesinde, diğeri ise Zora Kıyafeti ve Demir Çizmeler ile gölün dibinde bekler; üçüncü Skulltula ise gece vakti Gümüş Eldivenler ile kaldırılan Zora işaretli iki bloğun kapattığı mağaranın öbür ucunda ortaya çıkar."
+    },
+    "lago": {
+      "intro": "Hylia Gölü haritadaki en dolu bölgelerden biridir: iki yaşa yayılmış beş Altın Skulltula, üç Kalp Parçası, bir Şişe ve bir Sihirli Fasulye. Çocukken laboratuvarın hemen yanındaki yumuşak toprak böceklerle bir Skulltula ve yetişkinken sizi Parçalardan birinin bulunduğu çatıya çıkaran bir fasulye verir; başka bir Parça 50 cm’den büyük bir balık karşılığında Balık Tutma Göleti sahibinden, üçüncüsü ise Altın Pul ile havuzunun dibine dalarsanız Göl Bilim İnsanı’ndan gelir. Ruto’nun Mektubu’nu içeren Şişe, Zora Bölgesi’ne giden tünelin yanında gölün dibindedir ve Gümüş Pul gerektirir. Skulltula’lardan üçü çocuk Link, ikisi yetişkin Link içindir: Demir Çizmeler ile havuzun dibindeki sandıkta olan ve gece Uzun Kanca ile adadaki büyük ağacın tepesinde olan."
+    },
+    "valle": {
+      "intro": "Gerudo Kalesi’ne ulaşmak için Gerudo Vadisi’ni geçmeniz gerekir ve haritasında dört Altın Skulltula, iki Kalp Parçası ve bir Sihirli Fasulye işaretlidir. Parçalardan biri yüzerek ulaşılan büyük şelalenin arkasındadır; diğeri ise kanyondaki bir çıkıntıda bulunan sandıktadır ve çocukken köprünün yanındaki Cucco ile süzülerek ulaşılır. Şelalenin dibindeki ineğin platformunda bulunan yumuşak toprak böceklerle bir Skulltula ve yetişkinken sizi şelale Parçasına da yaklaştıran bir fasulye verir. Diğer üç Skulltula gece belirir: yürüyüş yolunun yanındaki su oluğundaki çocukken ve Bumerang ile; marangozların çadırındaki ve karşısındaki kaya kemerindeki ise yetişkinken ve Kanca ile."
+    },
+    "fortaleza": {
+      "intro": "Gerudo Kalesi’nin barındırdığı her şey yetişkin Link içindir: iki Kalp Parçası ve iki Altın Skulltula; harita bunları okçuluk poligonuna ve çatılara yerleştirir. Dört marangozu kurtarmak size atlı okçuluk poligonunu açan Gerudo Kartı’nı kazandırır: gündüz Epona sırtında 1.000 puan toplayarak bir Parça kazanın, gece ise uzaktaki hedefteki Skulltula için Kanca ile geri dönün. Mutfağın yüksek çıkışı sizi çatılara götürür; gece diğer Skulltula oradadır ve en yüksek çatıda, üstündeki kaya çıkıntısından Uzun Kanca ile ulaşılan ikinci Parçanın sandığı bulunur."
+    },
+    "desierto": {
+      "intro": "Lanetli Çorak Topraklar yalnızca yetişkinken alınan tek bir Altın Skulltula barındırır; Çöl Heykeli’ne giden yoldaki taş anıtın altındaki odadadır. Burayı geçmek için kum nehrini Süzülen Çizmeler veya Uzun Kanca ile aşın ve bayrakları takip edin; anıtta sütunların arasındaki boşluktan içeri girin, merdivenden inin ve Skulltula’yı sunaktan kılıcınızla düşürün."
+    },
+    "coloso": {
+      "intro": "Ruh Ağıtı ile Çöl Heykeli’ne çocukken ulaşırsınız; haritasında üç Altın Skulltula, bir Kalp Parçası, bir Büyük Peri ve bir Sihirli Fasulye işaretlidir. Yetişkinken oraya Lanetli Çorak Topraklar’ı geçerek gidersiniz. Ruh Tapınağı’nın girişindeki yumuşak toprağa böcek bırakmak (bir Skulltula verir) ve fasulyeyi ekmek için çocukken gidin: yetişkinken bitki sizi gece başka bir Skulltula’nın durduğu büyük kayanın tepesinden geçirerek Kalp Parçası’nın bulunduğu taş kemere taşır. Üçüncü Skulltula gece Ruh Tapınağı’nın sağındaki kaya duvarında yüksekte belirir ve Kanca ile alınır; vahanın kuzeyindeki çatlak duvarın arkasındaki Nayru’nun Sevgisi Büyük Perisi ise her iki yaşta da bir Bomba veya Bombchu ile açılır."
+    },
+    "deku": {
+      "intro": "Deku Ağacının İçi oyunun ilk zindanıdır; çocukken kılıç ve kalkanı alıp Kokiri Ormanı’ndan çıkar çıkmaz girilir. Harita en üst kattan ikinci bodruma kadar beş katını kapsar. Dört Altın Skulltula’sı kılıçla veya içeride bulduğunuz Sapan ile alınır ve yeniden yapımda dördü de bu ilk ziyarette toplanabilir: bodrumun arka odasındaki artık Bomba veya Bumerang gerektirmez, ağı bir Deku Sopası ile yakmanız yeterlidir. İkinci bodrumdaki Kraliçe Gohma Kalp Kabı’nı düşürür: gözünü Sapan ile sersemletin ve kılıçla vurun."
+    },
+    "dodongos": {
+      "intro": "Dodongo Mağarası Ölüm Dağı Patikası üzerindedir ve çocukken girişteki kayayı bir Bomba Çiçeği ve Goron Bilekliği ile patlatarak açılır. Haritası mağaranın iki katını gösterir. Beş Altın Skulltula’sından dördü ilk ziyarette, çocukken alınır; korkuluk çıkıntısındaki için yetişkinken Kanca ve Korkuluk Şarkısı ya da Uzun Kanca ile geri dönmek gerekir. Kral Dodongo Kalp Kabı’nı düşürür: ağzına bir Bomba ve ardından kılıç."
+    },
+    "jabu": {
+      "intro": "Jabu-Jabu’nun Karnı’na çocukken Zora Çeşmesi’nden, Jabu-Jabu’nun ağzının önüne bir balık bırakarak girersiniz ve içeride neredeyse her şey başlarda aldığınız Bumerang etrafında döner. Haritada bodrum dâhil üç katı bulunur. İlk Altın Skulltula su anahtarı odasında kılıçla alınır; diğer üçü ise Bumerang ile — bunlardan ikisi delikli büyük odanın bodrumunda yan yanadır ve kilitlenemedikleri için elle nişan almanız gerekir. Barinade de Kalp Kabı’nı yine Bumerang atışlarıyla düşürür."
+    },
+    "bosque": {
+      "intro": "Orman Tapınağı ilk yetişkin zindanıdır: Kutsal Orman Çayırı’ndan Kanca ile girersiniz ve aynı Kanca beş Altın Skulltula’sını düşürüp jetonları size çeker. Haritası beş katını kapsar. İlerlerken toplamak en iyisidir çünkü her biri yol üzerindeki bir odada bulunur: giriş, lobi, iki avlu ve patron odasından hemen önceki bodrumdaki dönen oda. Kalp Kabı’nı, elinizde Yay veya Kanca ile Hayalet Ganon düşürür."
+    },
+    "fuego": {
+      "intro": "Ateş Tapınağı’na yetişkinken, sıcağa dayanmak için Goron Kıyafeti giyerek Ölüm Dağı Krateri’nden ulaşırsınız. Haritasında 1F’ten 5F’e kadar beş kat bulunur. Beş Altın Skulltula’sı kılıçtan fazlasını ister: Zaman Şarkısı, Bombalar, Kanca ve bunlardan ikisi için Hylia Gölü’nde çocukken ve yetişkinken bestelediğiniz Korkuluk Şarkısı. Lobideki heykelin arkasındaki Skulltula ve Volvagia’nın Kalp Kabı’nın ikisi de Megaton Çekici’ni bekler, bu yüzden onları sona bırakın."
+    },
+    "agua": {
+      "intro": "Su Tapınağı Hylia Gölü’nün dibindedir; yetişkinken Demir Çizmeler ve Zora Kıyafeti ile girilir, su seviyesi Zelda’nın Ninnisi ile değiştirilir. Haritası B1’den 3F’e dört katı gösterir. Beş Altın Skulltula’sından ikisi Kara Link’i yenmeden önce toplanabilir: bodrumdaki ızgaranın yanındaki ve su altındaki çatlak duvarın arkasındaki. Diğer üçü o dövüşün size kazandırdığı Uzun Kanca’yı gerektirir; bu yüzden en kolay yol önce onu alıp ardından orta sütunu, girdaplı nehri ve kayalı şelaleyi sırayla temizlemektir. Sonda Morpha Kalp Kabı’nı düşürür."
+    },
+    "sombra": {
+      "intro": "Kakariko Mezarlığı’nın altındaki Gölge Tapınağı yetişkinken Gölge Noktürnü ve Din’in Ateşi ile açılır; içeride Gerçeğin Merceği ve Süzülen Çizmeler baştan itibaren şarttır. Haritasında dört bodrum katı bulunur. Beş Altın Skulltula’sı rota sırasıyla karşınıza çıkar: görünmez tırpanlı odada, tavanda dikenlerin olduğu odada, pervaneli koridorun çukurunda, tekne odasındaki çıkıntıda ve dev kafataslarının içinde. İkisi Kanca ile alınır, tekne odasındaki Uzun Kanca ve Korkuluk Şarkısı ister, kafataslarındaki ise Bombalar. Kalp Kabı’nı, oklar veya Kanca ve aktif Gerçeğin Merceği ile Bongo Bongo düşürür."
+    },
+    "espiritu": {
+      "intro": "Çöl Heykeli’ndeki Ruh Tapınağı iki kez keşfedilir: önce çocukken, Nabooru ile konuştuktan sonra küçük delikten süzülerek; ardından yetişkinken, lobideki büyük bloğu Gümüş Eldivenler ile kenara iterek. Haritası 1F’ten 4F’e dört katı gösterir. Beş Altın Skulltula’sından üçü çocuk bölümünde toplanabilir — ikisi Bumerang veya Sapan ile, biri kılıçla — yetişkin bölümündeki diğer ikisi ise Zaman Şarkısı ile Korkuluk Şarkısı eşliğinde Uzun Kanca gerektirir. Twinrova’nın Kalp Kabı için tapınağın kendi içinden aldığınız Ayna Kalkan gerekir."
+    },
+    "pozo": {
+      "intro": "Kakariko Köyü’ndeki kuyuyu Yel Değirmeni’nde Fırtına Şarkısı’nı çalarak kuruttuktan sonra Kuyunun Dibi’ne çocukken girersiniz. İçeride iki katlı haritası üç Altın Skulltula işaretler ve hepsi Bumerang ile bodrumda kazanılan Gerçeğin Merceği’ni gerektirir. Mercek olmadan sahte duvarları, görünmez yolları veya tuzak kapaklarını göremezsiniz; üç Skulltula kilitli kapıların arkasında bekler — ikisi orta alanda, biri Like Like odasında."
+    },
+    "hielo": {
+      "intro": "Buz Mağarası’na yetişkinken donmuş Zora Çeşmesi’nden, buz kütlelerini takip ederek arkadaki mağaraya giderek girersiniz ve Demir Çizmeler’i burada alırsınız. Haritası üç Altın Skulltula işaretler ve üçü de Kanca ile alınır. Biri dönen bıçaklı odada, dikitlerin arasındadır; diğer ikisi için o odadaki Gümüş Rupileri toplayarak Zindan Haritası odasını açın, orada bir Şişeyi Mavi Ateş ile doldurun ve bıçaklı odadaki iki kırmızı buz duvarını eritmek için kullanın: arkalarında Pusula odası ve kayan buz bloğu odası vardır."
+    },
+    "gerudo": {
+      "intro": "Gerudo Eğitim Alanı, Gerudo Kalesi’nin sınav zindanıdır ve yetişkinken Gerudo Kartı ile girilir. Altın Skulltula veya Kalp Parçası barındırmaz, bu yüzden bu haritada işaretlenecek toplanabilir yoktur; ödülü Buz Okları’dır."
+    },
+    "ganon": {
+      "intro": "Ganon’un Kalesi, yetişkinken eskiden Hyrule Kalesi’nin durduğu yerde yükselir ve oyunun son zindanıdır. Altın Skulltula veya Kalp Parçası barındırmaz, bu yüzden bu haritada işaretlenecek toplanabilir yoktur. Dışarıda, giriş yolunun yanında Çift Savunma Büyük Perisi ve yıkık bir kemerde Altın Skulltula vardır: bunlar Hyrule Kalesi haritasında yer alır."
+    }
+  },
+  "items": {
+    "kokiri-gs-01": {
+      "name": "Her Şeyi Bilen Kardeşler’in Evi’nin arkası",
+      "desc": "Büyük Mido’nun Evi’nin karşısındaki tepede, Orman Eğitim Merkezi’nin yanında yer alan Her Şeyi Bilen Kardeşler’in Evi, gövdesinin arkasında bu Altın Skulltula’yı gizler. Yalnızca gece ve yalnızca çocukken ortaya çıkar.\n\nTepeye tırmanın ve evin arkasına dolaşın."
+    },
+    "kokiri-gs-02": {
+      "name": "Dükkânın yanındaki yumuşak toprakta böcekler",
+      "desc": "Kokiri Dükkânı’nın hemen arkasında çocukken bir Altın Skulltula gizleyen yumuşak toprak vardır ve onu ortaya çıkarmak için tek gereken bir şişe böcektir.\n\n**Böcek şişesini toprağın üzerine boşaltır boşaltmaz** Skulltula yerden fırlar: onu kılıcınızla yenin ve Altın Skulltula Jetonu’nu alın. Günün her saatinde çalışır."
+    },
+    "kokiri-gs-03": {
+      "name": "İkizler Evi’nin arkası",
+      "desc": "Bu Altın Skulltula için Kokiri Ormanı’na yetişkinken ve gece geri dönmeniz gerekir; çünkü Büyük Deku Ağacı Çayırı’na giden yolun yanındaki çift tepeli çatılı İkizler Evi’nin arkasında yüksekte tutunur.\n\nKılıcınız o kadar yükseğe yetişmez, ancak **Kanca onu aşağıdan indirebilir** ve jetona yapacağınız ikinci bir atış onu size getirir."
+    },
+    "kokiri-bean-01": {
+      "name": "Dükkânın arkasındaki yumuşak toprak",
+      "desc": "Zora Nehri’ndeki Fasulye Satıcısı’ndan aldığınız Sihirli Fasulyelerden biri buraya, Kokiri Dükkânı’nın hemen yanındaki yumuşak toprağa ekilir; geri döndüğünüzde hazır olması için çocukken ekmeniz en iyisidir.\n\nYetişkinken bitkinin yaprağı **sizi bir kırmızı Rupi etrafında yeşil Rupilerden oluşan bir halkanın bulunduğu küçük bir çıkıntıya bırakır**. Aynı toprak böcekli Skulltula’yı da barındırır, böylece çocukken iki işi tek seferde halledebilirsiniz.",
+      "hint": "Çocukken ekin ve yetişkinken kullanın."
+    },
+    "perdido-heart-01": {
+      "name": "Skull Kid için Saria’nın Şarkısı",
+      "desc": "Kokiri Ormanı’ndan Kayıp Ormanlar’a girer girmez soldaki ilk yol, yüksek bir kütüğün üzerinde flüt çalan bir Skull Kid’e çıkar; doğrudan yanına yürürseniz ortadan kaybolur.\n\nBu yüzden **önündeki alçak kütüğe çıkın** ve Okarinanızda Saria’nın Şarkısı’nı çalın: Skull Kid arkadaşınız olur ve size bir Kalp Parçası verir."
+    },
+    "perdido-heart-02": {
+      "name": "Okarina ile hafıza oyunu",
+      "desc": "Kokiri Ormanı’ndan girerken sağdaki ilk yol olan Sapan hedefi alanı, iki Skull Kid ile oynanan bir hafıza oyununu gizler. İlerideki merdivenlerden hedef ağacına inin ve **sağından geçerek küçük kütüğün üzerine çıkın**.\n\nArdından onların çaldığını Okarinanızda beş, altı ve sekiz notalık üç turda tekrarlamanız gerekir. Bir nota kaçırırsanız tur farklı bir melodiyle baştan başlar ve ödüller giderek artar: ilk ikisinde Rupiler, üçüncüsünde Kalp Parçası."
+    },
+    "perdido-gs-01": {
+      "name": "Köprü yanındaki yumuşak toprakta böcekler",
+      "desc": "Kokiri Ormanı’ndan girerken soldaki ilk yol olan flüt çalan Skull Kid’i geçtikten sonra tekrar sola dönün; Hyrule Ovası’na giden köprünün bulunduğu alana ulaşırsınız. Burayı Dedikodu Taşı’ndan ve arkada daha büyük Deku Sopası çantası satan İşçi Deku’dan tanıyacaksınız.\n\nYumuşak toprak varır varmaz yolun hemen kenarındadır: **üzerine bir şişe böcek dökün** ve Altın Skulltula yüzeye çıktığında onu kılıcınızla bitirip Altın Skulltula Jetonu’nu alın."
+    },
+    "perdido-gs-02": {
+      "name": "Tek ağaçlı açıklıktaki yumuşak toprakta böcekler",
+      "desc": "Bu toprağa ulaşmak için Kayıp Ormanlar’da sağ, sol, sağ, sol rotasını izleyin ve ardından Kutsal Orman Çayırı’na yönelmek yerine bir kez daha sola dönün. Tek bir ağacın, iki İşçi Deku’nun ve çimende bir deliğin bulunduğu açıklıktır.\n\nOraya vardığınızda **böcekleri sağdaki, İşçi Deku’lardan birinin yanındaki yumuşak toprağa bırakın** ve Altın Skulltula çıktığında onu kılıcınızla yenip Altın Skulltula Jetonu’nu alın."
+    },
+    "perdido-gs-03": {
+      "name": "Orman Sahnesi yanındaki çıkıntı",
+      "desc": "Bu Altın Skulltula’nın durduğu yüksek çıkıntıya ulaşmak çocukken biraz hazırlık gerektirir, çünkü yukarı çıkmanın tek yolu tek ağaçlı açıklıktaki bitkidir. Açıklığa ulaşmak için Kayıp Ormanlar’da sağ, sol, sağ, sol ve sol yönlerine dönün, ardından fasulyeyi sağdaki, bir İşçi Deku’nun yanındaki yumuşak toprağa ekin.\n\nYetişkinken gece geri döndüğünüzde **bitkiye binerek çıkıntıya çıkın** ve Skulltula’yı kılıcınızla yenin."
+    },
+    "perdido-bean-01": {
+      "name": "Köprü yanındaki yumuşak toprak",
+      "desc": "Kayıp Ormanlar girişinden iki kez sola dönmek sizi Hyrule Ovası’na giden köprünün bulunduğu alana götürür ve buradaki yumuşak toprak çocukken bir Sihirli Fasulye ekmek için iyi bir yerdir.\n\nYetişkinken döndüğünüzde **bitkinin sizi Kokiri Ormanı ile Hyrule Ovası arasındaki köprüye kadar çıkarmasına izin verin** ve üzerine atlayın: Garip Mantar’ın üç dakikada bozulduğu takas zinciri sırasında çok kullanışlı bir kestirmedir.",
+      "hint": "Çocukken ekin ve yetişkinken kullanın."
+    },
+    "perdido-bean-02": {
+      "name": "İki İşçi Deku’nun yanındaki yumuşak toprak",
+      "desc": "Girişten sağ, sol, sağ, sol ve sol dönerek ulaştığınız Kayıp Ormanlar açıklığında iki İşçi Deku ile tek bir ağaç bulunur ve orada çocukken bir Sihirli Fasulye ekebileceğiniz yumuşak toprak vardır. Sağda, Deku’lardan birinin arkasındadır ve böcekler oradan bir Altın Skulltula çıkarır.\n\nYetişkinken **bitkiye binerek açıklığın yüksek çıkıntısına çıkın**; orada gece başka bir Altın Skulltula bulunur.",
+      "hint": "Çocukken ekin ve yetişkinken kullanın."
+    },
+    "prado-gs-01": {
+      "name": "Merdivenlerden önceki sağ duvar",
+      "desc": "Kutsal Orman Çayırı’nın labirenti bu Altın Skulltula’yı gizler, ancak yalnızca yetişkinken ortaya çıkar. Moblin’lerden kaçınarak ilerleyin ve orta noktaya ulaştığınızda sağdaki duvara bakın.\n\n**Skulltula’ya Kanca ile vurun** ve Altın Skulltula Jetonu’nu çekmek için tekrar ateşleyin."
+    },
+    "llanura-heart-01": {
+      "name": "Hendeğin yanındaki İşçi Deku",
+      "desc": "Asma köprüden Hyrule Kale Şehri’nden çıkın ve hendeğin kıyısı boyunca doğuya doğru duvarı takip edin. Bir ağacın yanında Bomba veya Megaton Çekici ile açabileceğiniz bir delik göreceksiniz: içine inin ve içerideki İşçi Deku ile konuşun.\n\nYalnızca parolayı bilenlere satış yapar. Parolayı öğrenmek için yetişkin Link olarak yanındaki ağaca gidin ve Peri Düşüncesi’ni okuyun. Ardından çocukken geri dönün, İşçi Deku ile konuşun ve **\"Sell somethin', will ya?\" seçeneğini seçin**: size 100 Rupi karşılığında Kalp Parçası’nı teklif edecektir.\n\nÇocukken satın alın, çünkü yetişkinken onu geçmişteki Link’e çoktan satmış olur.",
+      "hint": "100 Rupi tutar."
+    },
+    "llanura-heart-02": {
+      "name": "Geçmişten gelen sandık paradoksu",
+      "desc": "Hyrule Ovası’nın batı ucunda, Gerudo Vadisi girişine yakın bir yerde zemin kızılımsı toprağa dönüşür. Yamaçtan aşağı inerek bir kaya çıkıntısının altındaki oyuğa girin ve arkadaki sandığı arayın.\n\nBunu çocukken yapmanız gerekir: yetişkinken sandık zaten açık ve boştur ve bir Peri Düşüncesi hiç kilitli olmadığını açıklar. **Sandığı çocukken açın** ve Kalp Parçası sizin olsun.",
+      "hint": "Neden boş olduğunu öğrenmek için yetişkinken Peri Düşüncesi’ni okuyun."
+    },
+    "llanura-gs-01": {
+      "name": "Doğudaki tek çam ağacı",
+      "desc": "Hyrule Ovası’nın doğusunda, Zora Nehri ile Kokiri Ormanı arasında, bir derenin yanındaki tümseğin tepesinde tek bir çam ağacı durur. İçinde bir Altın Skulltula gizlenir.\n\nYere düşürmek için **gövdeye yuvarlanın**, kılıcınızla işini bitirin ve Altın Skulltula Jetonu’nu alın.",
+      "hint": "Bir derenin yanındaki tümseğin tepesindedir."
+    },
+    "llanura-gs-02": {
+      "name": "Çiftlik yanındaki taş çember mağarası",
+      "desc": "Lon Lon Çiftliği’nin güneybatısındaki korulukta, Hylia Gölü çıkışının yanında, yerdeki bir taş çemberi bir mağarayı örter. **Çemberin üzerinde bir Bomba veya Megaton Çekici darbesiyle** açın ve delikten aşağı inin.\n\nGirer girmez tavandan Büyük bir Skulltula düşer: onu kılıcınızla yenin. Altın olanı duvardadır; ona Kanca veya Bumerang ile ulaşın, ikisi de Altın Skulltula Jetonu’nu size getirir."
+    },
+    "lonlon-heart-01": {
+      "name": "Arkadaki taş kule",
+      "desc": "Lon Lon Çiftliği’nin arkasında, at ahırının hemen gerisinde silo görevi gören bir taş kule vardır. Köşelerinden birinde bazı sandıklar bir açıklığı kapatır: **sandıkları kenara itin ve açıklıktan sürünerek** Kalp Parçası’nın beklediği sona ulaşın."
+    },
+    "lonlon-gs-01": {
+      "name": "Ahıra giden yoldaki ağaç",
+      "desc": "Lon Lon Çiftliği’ne girer girmez soldaki yan bahçede içinde bir Altın Skulltula gizli bir ağaç vardır: **onu yere düşürmek için gövdeye yuvarlanın**, yenin ve Altın Skulltula Jetonu’nu alın."
+    },
+    "lonlon-gs-02": {
+      "name": "Çiftliğin güneyindeki mağarada sandık",
+      "desc": "Bu Altın Skulltula’nın yetişkinken ortaya çıkması için çocuk Link’in Lon Lon Çiftliği’nin güneydoğusunda, göletin yakınındaki yer altı mağarasında bulunan Peri Düşüncesi’ni okuması ve normal Skulltula’yı yenmesi gerekir.\n\nBunu yaptıktan sonra yetişkinken geri dönün. Arkada, duvara dayalı tahta bir sandık vardır. **İçine yuvarlanarak kırın** ve içinden bir Altın Skulltula çıkacaktır: onu kılıcınızla yenin ve Altın Skulltula Jetonu’nu alın. İlginç bir ayrıntı olarak Peri Düşüncesi de değişmiş olacaktır.",
+      "hint": "Gelecekte altın olanı bulmak için geçmişteki Skulltula’yı öldürün."
+    },
+    "lonlon-gs-03": {
+      "name": "Evin penceresi",
+      "desc": "Gece vakti Lon Lon Çiftliği’nde giriş kemerinin yanındaki Talon’un evine yukarı bakarsanız, üst kat penceresinde kılıcınız için fazla yüksekte bir Altın Skulltula görürsünüz.\n\n**Ona aşağıdan Bumerang fırlatın**: aynı atışta onu yener ve Altın Skulltula Jetonu’nu size getirir. Gündüz o duvar boştur."
+    },
+    "lonlon-gs-04": {
+      "name": "Taş kulenin içi",
+      "desc": "Lon Lon Çiftliği’nin arkasında, ahırın gerisindeki taş kule gece vakti içinde bir Altın Skulltula barındırır. Kule kapısından içeri girin ve yukarı bakın: duvarda yüksekte, pencerenin altında sarkan saman öbeğinin üzerindedir.\n\nOna yalnızca Bumerang ulaşabilir: **kulenin zemininden fırlatın**, aynı atışta Skulltula’yı yener ve Altın Skulltula Jetonu’nu size getirir. Sapan onu öldürür ama jeton yukarıda kalır."
+    },
+    "ciudadela-heart-01": {
+      "name": "Hazine Sandığı Dükkânı",
+      "desc": "Hazine Sandığı Dükkânı, Hyrule Kale Şehri meydanına girerken soldaki bir ara sokaktadır. Yalnızca gece açılır ve oyun başına 10 Rupi alır. Sahibi size bir anahtar verir: beş odanın her birinde iki sandık vardır ve yalnızca biri bir sonraki odanın anahtarını taşır; yanlış seçerseniz oyun biter.\n\nHer sandığın içinde ne olduğunu görmek için Ekipman sekmesinden Gerçeğin Merceği’ni kuşanın. **Beş odanın tamamını geçin ve ödül odasındaki büyük sandığı açarak** Kalp Parçası’nı alın.",
+      "hint": "Önerilen: Gerçeğin Merceği."
+    },
+    "ciudadela-heart-02": {
+      "name": "Kayıp köpek yavrusu",
+      "desc": "Richard, gece vakti Hyrule Kale Şehri’nin bir adamın evinin penceresinden sarkıp baktığı arka sokaklarından birinde koşturan küçük beyaz köpektir. Sizi takip etmesi için Richard ile konuşun.\n\nRichard peşinizdeyken **Hyrule Ovası’ndan gelen meydan girişine** gidin. Sahibi size Kalp Parçası’nı verecektir.",
+      "hint": "Parçayı yalnızca ilk seferde verir; sonrakilerde Rupi."
+    },
+    "ciudadela-heart-03": {
+      "name": "Bombchu Bovling Salonu",
+      "desc": "Bombchu Bovling Salonu, Hyrule Kale Şehri’ndeki Pazar meydanının batı tarafındadır ve Kral Dodongo’yu yenmeden açılmaz.\n\nGörevliyle konuşun: ödeme yapmadan önce hangi ödülün oynandığını söyler ve her oyun 10 Rupi’dir. 10 Bombchu ile üç aşamayı geçmeniz gerekir; onları çizginin gerisinden bırakarak arada Cucco gibi engeller varken arkadaki hedefe ulaştırmalısınız.\n\nÖdül oyundan oyuna değişir, bu yüzden **Kalp Parçası’nı duyurana kadar oynamaya devam edin** ve o oyunu kazanın.",
+      "hint": "Oyun başına 10 Rupi; ödül ödeme yapmadan önce duyurulur."
+    },
+    "ciudadela-gs-01": {
+      "name": "Nöbetçi Kulübesi",
+      "desc": "Hyrule Kale Şehri’nin girişinde, asma köprünün yanında nöbetçi kulübesi bulunur; küplerle dolu bu binada tahta bir sandığın içinde gizli bir Altın Skulltula vardır.\n\nArka duvara gidin ve **en sağdaki sandığa yuvarlanın** — askere yüzünüz dönükken sağında kalan sandık."
+    },
+    "castillo-gs-01": {
+      "name": "Çit bahçesindeki ağaç",
+      "desc": "Hyrule Kalesi bahçesini yalnızca çocukken keşfedebilirsiniz. Kaleye doğru patikadan çıkın ve bir kenardan önünüzdeki çit ve çiçek bahçesine girin. Batıya doğru geçip kale duvarının dibindeki, tek bir ağacın bulunduğu uzak köşeye gidin.\n\nAltın Skulltula’yı düşürmek için **gövdeye yuvarlanın**; onu yenin ve jetonu toplayın."
+    },
+    "castillo-gs-02": {
+      "name": "Fırtına Şarkısı mağarası",
+      "desc": "Hyrule Kalesi kapısındaki muhafızdan kaçınmak için sarmaşıklara tırmanın ve giriş köprüsünün yanındaki hendeğe inin. Köprünün altından doğuya yüzün ve taş basamaklardan çıkın: hemen orada, dış duvarın yanında dibinde toprak çemberi bulunan bir ağaç vardır.\n\nBir delik açmak için **o çemberin üzerinde Fırtına Şarkısı’nı çalın**. Mağarada Bombalarla patlatabileceğiniz çatlak duvarlar vardır: birinin arkasında Altın Skulltula bulunur. Bumerang onu öldürür ve jetonu size getirir."
+    },
+    "castillo-fairy-01": {
+      "name": "Büyük Peri: Döner Saldırı",
+      "desc": "Hyrule Kalesi bahçesinin doğu ucunda, sağ duvarı takip eden ve sonunda bir kaya bulunan çıkmaz bir yol vardır. Muhafızın sizi durdurmaması için duvardaki sarmaşıklara tırmanın.\n\nYolun sonunda **kayayı bir Bomba ile patlatın ve boşluktan sürünerek** Büyük Peri Çeşmesi’ne girin. Triforce amblemi üzerinde Zelda’nın Ninnisi’ni çalın ve 50 Rupi’lik bağışı kabul edin: Büyük Peri Döner Saldırınızı büyülü bir şok dalgasıyla güçlendirecektir.",
+      "hint": "50 Rupi bağış ister ve Döner Saldırı’yı şok dalgasıyla güçlendirir."
+    },
+    "kakariko-heart-01": {
+      "name": "Impa’nın Evi’nin arkasındaki küçük çatı",
+      "desc": "Parça, Impa’nın Evi’nin arkasında dağa yaslanmış küçük kırmızı kiremitli bir çatıda açıkça durur. Evin mavi çatısından **arkasındaki küçük çatıya atlayın** ve alın. Oradan ineğin ahırına inebilirsiniz.\n\nÇocukken Ölüm Dağı’nın tepesinde Kaepora Gaebora ile konuşun, baykuş sizi Impa’nın çatısına bırakır. Yetişkinken Kanca gerekir.",
+      "hint": "Yetişkinken Skulltula Evi’nin çatısından Kanca ile geçin."
+    },
+    "kakariko-heart-02": {
+      "name": "Yel Değirmeni",
+      "desc": "Köyün arkasındaki Yel Değirmeni’nin içinde parça yukarıda, üst yürüyüş yolundaki bir mobilyanın üzerinde bekler.\n\nYetişkinken oraya Mezarlık’taki Dampé’nin Mezarı üzerinden ulaşırsınız. Yarışı bittiğinde çıkış merdivenleri kırıktır: **kapının üstündeki hedefe Kanca fırlatın** ve koridoru takip edin. Yel Değirmeni’nin tepesinde, dönen platformun yanında çıkarsınız; duvara dayalı mobilyaya çıkıp parçayı alın.",
+      "hint": "Yetişkinken Dampé’nin Mezarı üzerinden girersiniz."
+    },
+    "kakariko-heart-03": {
+      "name": "Çatıdaki adam",
+      "desc": "Çatıdaki adam **gözetleme kulesinin yanında ve Yel Değirmeni’nin karşısındaki İksir Dükkânı’nın** tepesinde oturur; Kalp Parçası’nı almak için yanına ulaşıp onunla konuşmanız yeterlidir.\n\nYetişkinken Kanca yeterlidir: Yel Değirmeni’nin karşısındaki korkulukta durun ve çatıya kanca atın.",
+      "hint": "Yetişkinken Kanca gerekir."
+    },
+    "kakariko-gs-01": {
+      "name": "İnşaat hâlindeki ev",
+      "desc": "Marangozlar inşaat hâlindeki evi yaparken, çocukken ve gece vakti Altın Skulltula şantiyenin tuğla duvarında yerden yukarıda asılı durur. **Kalas rampadan iskele yürüyüş yoluna çıkın**, duvarda tam karşınızda olacaktır.\n\nOnu öldürmek için kılıcınız yeterlidir, yani jetonu almak için başka hiçbir şeye ihtiyacınız yoktur."
+    },
+    "kakariko-gs-02": {
+      "name": "Girişteki ağaç",
+      "desc": "Köyün alt kısmında, Hyrule Ovası girişinin yakınındaki büyük çam ağacı, gece vakti çocukken **çamın gövdesine yuvarlanırsanız** yere düşen bir Altın Skulltula gizler. Yere indiğinde işini bitirin ve jetonu toplayın."
+    },
+    "kakariko-gs-03": {
+      "name": "Gözetleme kulesi",
+      "desc": "Köyün ortasındaki gözetleme kulesinin merdiveninin yarısında gece vakti bir Altın Skulltula asılı durur; ona aşağıdan saldırın: **Sapan ile vurun veya merdivenden yukarı bir Bombchu gönderin**.\n\nÖldüğünde merdivene tırmanın: jeton yarı yolda kalır ve en tepeye çıkmadan onu alabilirsiniz.",
+      "hint": "Çatıdaki adama doğru kuleye tırmanmadan önce ondan kurtulun."
+    },
+    "kakariko-gs-04": {
+      "name": "Dağ kapısının yanındaki ev",
+      "desc": "Köyün üst kısmında Ölüm Dağı kapısına çıkarken gözetleme kulesini geçince hemen yanında bir ev göreceksiniz. Çocukken ve gece vakti **arkadaki çimenli patikadan evin etrafını dolaşın** ve Altın Skulltula’yı bulana kadar duvarlarını kontrol edin. Yer hizasındadır, bu yüzden hiçbir eşyaya gerek kalmadan kılıcınızla indirebilir ve jetonu alabilirsiniz."
+    },
+    "kakariko-gs-05": {
+      "name": "Skulltula Evi",
+      "desc": "Lanetli ailenin yaşadığı Skulltula Evi, Hyrule Ovası’ndan girerken sağdaki ilk evdir ve kapısının üzerinde örümcek ağları vardır. Çocukken ve gece vakti Altın Skulltula **evin ön cephesinde, giriş basamaklarının solunda** yer hizasında belirir; gündüz orada ağını zaten görebilirsiniz.\n\nGündüzse geceyi getirmek için Güneş Şarkısı’nı çalın. Kılıcınız işini anında bitirir, geriye sadece jetonu toplamak kalır."
+    },
+    "kakariko-gs-06": {
+      "name": "Impa’nın Evi’nin üstü",
+      "desc": "Köyün güney ucundaki büyük ev olan Impa’nın Evi’nin mavi çatısının hemen yanındaki kaya duvarında bulunan bu Altın Skulltula için yetişkinken ve gece geri dönmeniz gerekir. Kanca gerekir.\n\nEvin bir yanından dolaşarak arkasındaki sarmaşıklı kaya duvarına gidin ve **sarmaşıklara tırmanarak mavi çatıya çıkın**. Yukarıdan çatının yanındaki kayada Skulltula’yı göreceksiniz: onu Kanca ile indirin, jetonu da size getirir."
+    },
+    "cementerio-heart-01": {
+      "name": "Dampé ile mezar kazma turu",
+      "desc": "Çocukken ve gece vakti mezar bekçisi Dampé, Mezarlık’ta \"Yürek Hoplatan Mezar Kazma Turu\"nu sunar. Gündüz gelirseniz orada Güneş Şarkısı’nı çalın: gece çöker ve Dampé hemen dışarı çıkar. Kabul edin ve orta meydanda kalın, çünkü uzaklaşırsanız tur biter.\n\nToprak tümseklerinden birinin yanında durun ve **kazmasını isteyin: her deneme 10 Rupi’dir**. Bazen sert bir şeye çarpar ve devam etmek için 5 Rupi daha ister; rastgele ya bir taş ya da parça çıkabilir. Ortaya çıkana kadar devam edin. Konumu tamamen rastgeledir.",
+      "hint": "Tümsek başına 10 Rupi; bazen kazmaya devam etmek için 5 daha ister."
+    },
+    "cementerio-heart-02": {
+      "name": "Dampé’ye karşı yarış",
+      "desc": "Dampé’nin Mezarı, soldaki çitli alanda birkaç basamak yukarıda bulunan, çiçekli ve duman tüten mezar taşıdır. Yetişkinken ve gece vakti **deliği açmak için onu çekin ve yer altı mezarlarına inin**. Aşağıda hayaletini gözden kaybetmeden sona kadar takip edin; ilk yarış size Kanca’yı verir.\n\nKalp Parçası ikincisinde gelir. Kırık merdivenlerin üstündeki hedeften Kanca ile çıkın (Kakariko Yel Değirmeni’nde çıkarsınız), Mezarlık’a geri dönün, açık kalan delikten tekrar inin ve bitişe bir dakika veya daha kısa sürede ulaşın.",
+      "hint": "İlk yarış Kanca’yı verir; parça ikincisinde gelir."
+    },
+    "cementerio-heart-03": {
+      "name": "Kraliyet Ailesi Mezarı yanındaki mezar",
+      "desc": "Mezarlık’ın üst kısmındaki Kraliyet Ailesi Mezarı’nın yakınında: sırtınızı mezara dönüp çıkışa bakın; solunuzdaki mezar taşları arasında **soldan başlayarak ilkidir**. Yetişkinken her zaman açılır; çocukken yalnızca gece (gündüz mezarları bekleyen çocuk sizi durdurur; Güneş Şarkısı beklemekten kurtarır).\n\nMezar taşını çekin ve delikten inin: Kalp Parçası’nın bulunduğu sandık mahzenin arkasındadır ve onu koruyan düşman yoktur.",
+      "hint": "Çocukken mezar yalnızca gece açılır."
+    },
+    "cementerio-heart-04": {
+      "name": "Duvardaki çıkıntı",
+      "desc": "Mezarlık’ın sol duvarında yüksekte, Dampé’nin Mezarı’nın ve yumuşak toprağın üzerinde, bir taş sütunun üstünde açıkça duran Kalp Parçası’nın bulunduğu bir çıkıntı vardır ve aşağıdan yardım olmadan ulaşamazsınız.\n\nÇocukken o yumuşak toprağa bir Sihirli Fasulye ekerseniz, yetişkinken geri döndüğünüzde **yaprağa çıkın ve sizi çıkıntıya kadar taşımasına izin verin**. Yukarı çıktığınızda parçayı sütundan alın.",
+      "hint": "Parça duvardaki bir sütunun üzerinde açıkça durur."
+    },
+    "cementerio-gs-01": {
+      "name": "Mezarlık duvarı",
+      "desc": "Gece vakti Mezarlık girişinin yanında, Dampé’nin Kulübesi ile demir parmaklıklı taş duvar arasındaki dar aralıkta yüksekte bir Altın Skulltula ortaya çıkar. Gündüz o noktada nerede belireceğini gösteren altın bir ağ görürsünüz.\n\n**Onu Kanca veya Bumerang ile yenin ve jetonu da onunla geri getirin.**"
+    },
+    "cementerio-gs-02": {
+      "name": "Yumuşak toprakta böcekler",
+      "desc": "Bir şişe Böcek ile çocukken, günün her saatinde Mezarlık’ın sol arka köşesinde, duvarın dibinde ve Dampé’nin Mezarı’nın yanındaki yumuşak toprağa gidin ve **bir Altın Skulltula çıkması için böcekleri üzerine bırakın**. Çıkar çıkmaz öldürün ve jetonu toplayın.",
+      "hint": "Sihirli Fasulye’yi ektiğiniz toprakla aynıdır."
+    },
+    "cementerio-bean-01": {
+      "name": "Mezarlık yumuşak toprağı",
+      "desc": "Mezarlık’ın sol duvarındaki yüksek çıkıntının altında, Dampé’nin Mezarı’nın yanında, **çocukken bir Sihirli Fasulye ekmenizi** önerdiğimiz yumuşak toprak bulunur. Yetişkinken geri döndüğünüzde yaprak sizi Kalp Parçası’nı barındıran çıkıntıya taşır.",
+      "hint": "Çocukken ekin ve yetişkinken kullanın."
+    },
+    "sendero-heart-01": {
+      "name": "Dodongo Mağarası’nın üstündeki çıkıntı",
+      "desc": "Dodongo Mağarası girişinin üstünde, kayadaki bir oyukta açıkça görünen bu Kalp Parçası’nın çıkıntısı yer alır. Çocukken yumuşak toprağa bir Sihirli Fasulye ekmeniz gerekir.\n\nYetişkinken fasulye bitkisine binin ve çıkıntının yanından geçerken atlayıp Kalp Parçası’nı alın."
+    },
+    "sendero-gs-01": {
+      "name": "Mağara yanındaki yumuşak toprakta böcekler",
+      "desc": "Bu Altın Skulltula’nın yumuşak toprağı Dodongo Mağarası’nın önündedir.\n\nGirişi temizledikten sonra **şişedeki böcekleri yumuşak toprağa bırakın** ve Altın Skulltula fırlar fırlamaz onu kılıcınızla yenip jetonu toplayın.",
+      "hint": "Aynı toprağa bir Sihirli Fasulye de ekebilirsiniz."
+    },
+    "sendero-gs-02": {
+      "name": "Kakariko yakınındaki çatlak duvar",
+      "desc": "Kakariko Köyü’nden dağa doğru çıkarken, Dodongo Mağarası’na varmadan önce patikanın sağ tarafında geri kalanla uyuşmayan çatlak kayalardan oluşan bir duvar vardır: arkasındaki Skulltula’nın sesini duyabilirsiniz.\n\n**Duvarı bir Bomba ile veya yetişkinken Megaton Çekici ile açın**, oyuğa girin ve arka duvarda kılıç hizasında duran Altın Skulltula’yı yenin."
+    },
+    "sendero-gs-03": {
+      "name": "Dodongo Mağarası’nın üstü",
+      "desc": "Çocukken Dodongo Mağarası’nın üzerine Bomba Çiçeği bıraktığınız, Goron Şehri sapak yolunun yanındaki korkuluklu çıkıntıda duvara yaslı birkaç kaya vardır. Bu Altın Skulltula yetişkinken ve gece geri döndüğünüzde bunların altında belirir.\n\n**Kayaları yalnızca onları kırabilen Megaton Çekici veya bir Bomba ile parçalayın**, ardından Skulltula’yı yenin ve jetonunu toplayın."
+    },
+    "sendero-gs-04": {
+      "name": "Düşen kayalar patikası",
+      "desc": "Dodongo Mağarası’nı geçtikten sonra patika, volkanik kayaların yağdığı bölüme tırmanır ve zirveye çıkan ağ duvarında son bulur. Bu Altın Skulltula yetişkinken ve gece vakti o duvarın dibinde ortaya çıkar.\n\nDuvara dönükken, tırmanırken sağda, kaya kemerinin yanında Bombaların kıramadığı bir kaya yığını vardır: **ona Megaton Çekici ile vurun** ve kayalar parçalandığında Skulltula’nın işini bitirip jetonu toplayın."
+    },
+    "sendero-bean-01": {
+      "name": "Dodongo Mağarası’ndaki yumuşak toprak",
+      "desc": "Buraya bir Sihirli Fasulye ekmeden önce, çocukken yukarıdaki Bomba Çiçeği ve Goron Bilekliği ile Dodongo Mağarası’nı kapatan kayayı kaldırmanız gerekir. Ardından fasulyeyi girişin önündeki yumuşak toprağa ekin.\n\nYetişkinken bitki Kalp Parçası çıkıntısının üzerinden geçer ve sizi düşen kayalar bölümüne çıkarır: **patikayı kapatan kayayı atlayan bir kestirme**.",
+      "hint": "Çocukken ekin ve yetişkinken kullanın."
+    },
+    "sendero-fairy-01": {
+      "name": "Büyük Peri: büyü",
+      "desc": "En tepede, Ölüm Dağı’nın zirvesinde, Kaepora Gaebora Krater girişinin yakınında tünemiş bekler. **Solundaki çatlak kaya duvarı bir Bomba ile** veya yetişkinken Megaton Çekici ile yıkılabilir ve çeşme arkasındadır.\n\nİçeride Triforce amblemi üzerinde Zelda’nın Ninnisi’ni çalın. Büyük Peri sizden 25 Rupi bağış isteyecektir: kabul edin, size Büyü Göstergesi’ni ve Din’in Ateşi’ni verecektir. Çocukken tırmanıyorsanız düşen kayalar bölümü için Hylian Kalkanı’nı yanınıza alın.",
+      "hint": "25 Rupi bağış ister. Ödül: Büyü Göstergesi ve Din’in Ateşi."
+    },
+    "goron-heart-01": {
+      "name": "Dönen küp",
+      "desc": "Goron Şehri’nin en alt katının ortasındaki yüzlü büyük küp yalnızca çocukken **etrafındaki meşaleleri yaktığınızda** dönmeye başlar. Din’in Ateşi ya da örneğin kapısında Zelda’nın Ninnisi çalınca açılan Darunia’nın odasında yakılmış bir Deku Sopası iş görür. Daha sonra geri dönseniz bile yanık kalırlar.\n\nArdından bir üst kata çıkın, küpün üzerine uzanan tahta kalasta yürüyün ve tepesinden içine bir Bomba bırakın ya da Goron Bilekliği ile içine bir Bomba Çiçeği atın. Parçayı 10 Rupi ile birlikte yere düşürecektir.",
+      "hint": "Başka bir yüzde durursa başka ödüller verir: alana kadar tekrar deneyin."
+    },
+    "goron-gs-01": {
+      "name": "Kaya labirenti",
+      "desc": "Kaya labirenti odası Goron Şehri’nin en üst katında, Ölüm Dağı Patikası girişinin bulunduğu kattadır ve çocukken Bombalarla blokların arasından yol açarak geçersiniz.\n\nUzak uçta, iki sandığın yanında içinde Altın Skulltula bulunan tahta bir sandık vardır: **kırmak için sandığa yuvarlanın**, Skulltula’yı kılıcınızla yenin ve jetonu toplayın."
+    },
+    "goron-gs-02": {
+      "name": "Tavandaki kaya çıkıntısı",
+      "desc": "Yetişkinken Goron Şehri’nde, en alt seviyenin bir kat üstünde, platformun etrafında saat yönünün tersine dolaşın. Tünele girmeden önce yukarı bakın: Altın Skulltula tavandaki kaya çıkıntısının alt yüzündedir.\n\n**Onu Kanca ile indirin**, jetonu da yanında size getirir."
+    },
+    "crater-heart-01": {
+      "name": "Krater duvarındaki delik",
+      "desc": "Ölüm Dağı’nın zirvesinden Krater’e girerken, giriş çıkıntısı Ateş Bolerosu platformuna doğru inen büyük bir duvara bakar. O çıkıntının kenarından tırmanma ağları sarkar: **onlardan aşağı inin** ve biraz aşağıda, iki ağ arasında duvardaki bir delikte parçayı bulacaksınız.\n\nÇocukken sıcaklık sizi çabucak yakar. Yetişkinken Goron Kıyafeti ile aceleye gerek yoktur.",
+      "hint": "Çocukken sıcaklık sayacı vardır: hızlı olun."
+    },
+    "crater-heart-02": {
+      "name": "Krater’deki kubbeli kaya",
+      "desc": "Çocukken **okarinada Ateş Bolerosu’nu çalın** ve Krater’e vardığınızda platformun yanındaki yumuşak toprağa bir fasulye ekin.\n\nYetişkinken Goron Kıyafeti giyerek geri dönün, **yaprağa binin ve yüksek kayalardan birinin üzerinden geçerken atlayın**: parça tepede bekliyor.",
+      "hint": "Ateş Bolerosu’nu öğrenmeniz gerekir."
+    },
+    "crater-gs-01": {
+      "name": "Zirve girişindeki sandık",
+      "desc": "Krater’e çocukken Goron Şehri yerine Ölüm Dağı zirvesinden girerseniz, girişten birkaç adım ötede, solda, bir küpün yanında kaya duvarına yaslı iki tahta sandık görürsünüz. Altın Skulltula küpün yanındakinin içindedir.\n\n**İçlerine yuvarlanarak sandıkları kırın**, Skulltula’yı yenin ve jetonu toplayın.",
+      "hint": "Sıcağa dayanamıyorsanız Nayru’nun Sevgisi’ni kullanın."
+    },
+    "crater-gs-02": {
+      "name": "Bolero platformu yanındaki yumuşak toprakta böcekler",
+      "desc": "Bu Altın Skulltula sizi zamanda yolculuk yapmaya zorlar, çünkü yalnızca çocukken çıkar ve Ateş Bolerosu yetişkinken öğrenilir. Çocukken, Bolero platformundan birkaç adım ötedeki bu yumuşak toprağa ulaşmanın tek yolu o şarkıyı çalmaktır.\n\nPlatformda belirirsiniz: **yanındaki yumuşak toprağa böcekleri bırakın**, Skulltula’yı yenin ve oyalanmadan jetonu toplayın, çünkü sıcaklık kalplerinizi tüketmeye devam eder.",
+      "hint": "Çocukken sıcaklık kalplerinizi yavaş yavaş tüketir: oyalanmayın."
+    },
+    "crater-bean-01": {
+      "name": "Krater’deki yumuşak toprak",
+      "desc": "Krater’in orta bölgesindeki Ateş Bolerosu platformunun yanında, çocukken yalnızca o şarkıyı çalarak ulaşabileceğiniz yumuşak bir toprak vardır. **Sihirli Fasulye’yi ekin ve hemen ayrılın** — örneğin başka bir ışınlanma şarkısıyla — çünkü sıcaklık size süre sınırı koyar.\n\nYetişkinken geri döndüğünüzde bitki bir Kalp Parçası’nın bulunduğu kubbeli kayanın üzerinden ve ardından diğerinin tırmanılabilir duvarının yanından geçer. Sizi ayrıca zirve girişi bölgesine kadar çıkarır.",
+      "hint": "Çocukken ekin ve yetişkinken kullanın."
+    },
+    "crater-fairy-01": {
+      "name": "Büyük Peri: çift büyü",
+      "desc": "Goron Şehri’ndeki Darunia’nın odasından yetişkinken Krater’in alt kısmına inersiniz. Volvagia’yı yeni yendiyseniz mavi ışınlanma sizi orta platforma bırakır: zincir köprüden batıya geçin ve o kıyı boyunca ilerleyin. İki kaya yığını duvardaki bir geçidi kapatır: **onları Megaton Çekici ile yıkın**.\n\nÇeşmede amblemin üzerine çıkın ve Zelda’nın Ninnisi’ni çalın. Bilgelik Büyük Perisi çeşme için 200 Rupi bağış isteyecektir: kabul edin, Büyü Göstergenizi ikiye katlayacaktır.",
+      "hint": "200 Rupi bağış ister. Ödül: Büyü Göstergenizi ikiye katlar."
+    },
+    "rio-heart-01": {
+      "name": "Nehrin ortasındaki sütun",
+      "desc": "Parça, Zora Nehri’nin ortasında suyla çevrili yüksek bir platformun üzerindedir ve çocukken yanındaki ağaçlık alandan bir Cucco ile süzülerek ulaşabilirsiniz. O alana kollarınızda Cucco olmadan sarmaşıklardan tırmanırsınız, ancak yukarıda, soldaki eğrelti otlarının arasında bir sandık ve bir Cucco bulunan bir mağaraya inen delik vardır. **Kollarınızda Cucco ile çiçekten mağaradan çıkın, kenara koşun ve platforma süzülmek için atlayın.**\n\nYetişkinken oraya fasulye bitkisine binerek veya Süzülen Çizmeler ile ulaşırsınız.",
+      "hint": "Yetişkinken ekili fasulye veya Süzülen Çizmeler ile."
+    },
+    "rio-heart-02": {
+      "name": "Şelale yanındaki çıkıntı",
+      "desc": "Zora Nehri’nin sonunda, Zora Bölgesi girişini gizleyen şelalenin yanında, parçayı taşıyan ayrı bir platform vardır.\n\nNehrin başındaki, Fasulye Satıcısı’nın yanındaki Cucco’yu alın ve nehir boyunca yukarı taşıyın. Şelaleye ulaştığınızda en yüksek noktaya tırmanın, **onunla atlayın ve platforma süzülün**.",
+      "hint": "Yetişkinken yalnızca Süzülen Çizmeler ile ulaşabilirsiniz."
+    },
+    "rio-heart-03": {
+      "name": "Kurbağa oyunu",
+      "desc": "Bu parçanın kurbağaları olan Muhteşem Beş Kurbağa Tenor, Zora Nehri’nin yarısında kayaya oyulmuş bir mağaranın göletindeki kütüklerde oturur. Çocukken gidin, onlarla konuşun; okarinada bir şeyler çalmanızı isteyeceklerdir. Her yeni şarkı için size Rupi verirler:\n- Zelda’nın Ninnisi\n- Epona’nın Şarkısı\n- Saria’nın Şarkısı\n- Güneş Şarkısı\n- Zaman Şarkısı\n\nHepsini çaldığınızda kendi oyunlarını önerirler: bir kurbağanın üzerinde bir böcek belirir ve **zıplayıp onu yemesi için hızlıca onun notasını çalarsınız**. Tüm diziyi doğru çalarsanız parça sizin olur; kaçırırsanız tekrar deneyebilirsiniz.",
+      "hint": "Her kurbağanın hangi notayı çaldığını ezberleyin."
+    },
+    "rio-heart-04": {
+      "name": "Yağmurdaki kurbağalar",
+      "desc": "Zora Nehri’nin yarısında, bir mağarada beş kurbağanın bulunduğu bir kütük bulacaksınız. Okarinada **Fırtına Şarkısı**’nı çalmanız gerekir. Çaldıktan sonra kurbağalar sizi bir Kalp Parçası ile ödüllendirecektir."
+    },
+    "rio-gs-01": {
+      "name": "Fasulye Satıcısı yanındaki yumuşak toprakta böcekler",
+      "desc": "Zora Nehri’nin başında, Fasulye Satıcısı’nın yanında bir Altın Skulltula gizleyen yumuşak toprak vardır ve onu ortaya çıkarmak için bir şişe böcek gerekir.\n\n**Böcek şişesini yumuşak toprağın üzerine boşaltın**: Skulltula yerden çıkacaktır. Onu kılıcınızla yenin ve jetonu toplayın."
+    },
+    "rio-gs-02": {
+      "name": "Şelale yanındaki duvar",
+      "desc": "Zora Nehri’nin sonunda, şelalenin yanında bulunan bu Altın Skulltula yalnızca gece ve çocukken ortaya çıkar.\n\nŞelalenin yanındaki çimenli çıkıntıdan kayadan aşağı, suyun kenarındaki kıyıya inin.\n\nSkulltula o kıyıdaki alçak kayanın duvarındadır. Yaklaşın ve kılıcınızla saldırın."
+    },
+    "rio-gs-03": {
+      "name": "Yüksek mağaraların üstü",
+      "desc": "Zora Nehri’nin ortasında, mağaraların bulunduğu platonun üstündeki kaya duvarında yüksekte gece vakti bir Altın Skulltula çıkar ve Kanca ona yalnızca platonun kendisine tırmanırsanız yetişir.\n\nYetişkinken suyun yanındaki kayaların arasındaki sarmaşık duvarından tırmanırsınız. Yukarıda kenara yürüyün ve **onu yenip jetonu geri getirmek için duvarın tepesine Kanca fırlatın**.",
+      "hint": "Aşağıdaki patikadan Uzun Kanca gerekir."
+    },
+    "rio-gs-04": {
+      "name": "Köprünün üstü",
+      "desc": "Zora Nehri’ndeki son köprünün üstünde, Zora Bölgesi şelalesine giden mağarada gece vakti bir Altın Skulltula’nın yerleştiği çok yüksek bir kaya duvarı vardır.\n\n**Köprünün üzerinden ona Kanca ile vurun** ve jetonu toplayın."
+    },
+    "rio-bean-01": {
+      "name": "Fasulye Satıcısı yanındaki yumuşak toprak",
+      "desc": "Zora Nehri’ne girer girmez iki çatlak kaya yolu kapatır; onları bir Bomba ile patlatın.\n\nHemen arkalarında, bir çitin yanında oturan Fasulye Satıcısı vardır ve çocukken ondan birkaç tane almaya değer: ilki 10 Rupi’dir ve sonraki her biri 10 artar. **Envanterinizden kullanarak yanındaki yumuşak toprağa bir tane ekin**.",
+      "hint": "Çocukken ekin ve yetişkinken kullanın."
+    },
+    "dominio-gs-01": {
+      "name": "Donmuş şelale",
+      "desc": "Yetişkinken, Zora Bölgesi donmuş hâldeyken, Altın Skulltula gece vakti çocukken dalış oyununun yapıldığı donmuş şelalenin tepesinde çıkar. Oraya Kral Zora’nın katındaki, yüksek bir galeriye açılan koridordan ulaşırsınız.\n\nKenardan aşağı ve solunuza bakın: duvara yaslı, donmuş bitkilerle kaplı bir sütunun üzerindedir. Jetonu almak için **ona Kanca ile ulaşın ya da bir okla düşürün**."
+    },
+    "fuente-heart-01": {
+      "name": "En uzaktaki buz kütlesi",
+      "desc": "Parça, donmuş Zora Çeşmesi’nde Buz Mağarası yolundan uzaktaki en uzak buz kütlesinin tepesinde durur. Yetişkinken çeşmeye donmuş Kral Zora’nın tahtının arkasındaki geçitten girersiniz.\n\n**Sonuncusuna kadar bloktan bloğa atlayın**: kaygan buz bloklarıdır, bu yüzden her zıplayışı dikkatle ayarlayın. Suya düşerseniz başa yüzün ve tekrar çıkın."
+    },
+    "fuente-heart-02": {
+      "name": "Çeşmenin dibi",
+      "desc": "Bu Kalp Parçası, Zora Çeşmesi’nin dibinde bir yığın Yeşil Rupi arasında bekler. Yetişkinken iki şeye ihtiyacınız vardır: su altında nefes almak için Kral Zora’yı kurtardığınızda verdiği Zora Kıyafeti ve dibe batmak için Demir Çizmeler.\n\nZora Kıyafeti üzerinizdeyken suya girin, **Demir Çizmeler’i giyin ve dibe batın**, parçayı alın, sonra tekrar yüzeye çıkmak için çizmeleri çıkarın."
+    },
+    "fuente-gs-01": {
+      "name": "Batık kemerin üstündeki duvar",
+      "desc": "Zora Bölgesi’nden Zora Çeşmesi’ne girer girmez, yarı suya batmış ve sarmaşıklı kaya duvarına yaslı yıkık taş kemere kadar kıyıyı takip edin. Kemerin tepesine tırmanın: gece vakti o duvarda bir Altın Skulltula belirir ve çocukken ona Bumerang ile ulaşabilirsiniz.",
+      "hint": "Bumerang’ı Jabu-Jabu’nun Karnı içinde alırsınız."
+    },
+    "fuente-gs-02": {
+      "name": "Güneydoğu köşesindeki çam ağacı",
+      "desc": "Zora Çeşmesi’nin güneydoğu köşesinde, uçurumun dibinde çam ağaçlarının olduğu ve Büyük Peri Çeşmesi’ni gizleyen duvarın yanındaki bölgede, çocukken günün her saatinde bir Altın Skulltula gizleyen bir ağaç vardır.\n\nYüzmeye gerek yok: Lord Jabu-Jabu’nun önündeki adak kâsesinden sağa inin ve kıyı boyunca toprak patikayı takip edin. Skulltula’yı düşürmek için **çam ağacına yuvarlanın**, kılıcınızla yenin ve jetonu alın."
+    },
+    "fuente-gs-03": {
+      "name": "Zora işaretli blokların arkasındaki mağara",
+      "desc": "Yetişkinken Zora Çeşmesi’nin en güneydoğu ucuna gidin; burada Zora işaretli iki siyah taş blok bir mağara girişini kapatır. **Onları Gümüş Eldivenler ile kaldırın** ve içeri girin.\n\nİçeride tavandan görünmez Skulltula’lar sarkar; onlardan kaçının veya Gerçeğin Merceği ile görün. Arkada sarmaşıklara tırmanın ve açık havadaki bir çıkıntıya çıkın.\n\nAltın Skulltula yalnızca **gece çıkar**. Çıkıntıdaki bir mağara ağzının üstünde belirir; onu Kanca ile düşürüp jetonu toplayabilirsiniz.",
+      "hint": "İçeride tavandan dört görünmez Skulltula sarkar."
+    },
+    "fuente-fairy-01": {
+      "name": "Büyük Peri: Farore’nin Rüzgârı",
+      "desc": "Lord Jabu-Jabu’nun önündeki adak kâsesinden sağdaki yıkık kıyıyı yürüyerek uçurumun dibindeki ağaçların bulunduğu güneydoğu köşesine kadar takip edin. Orada Büyük Peri Çeşmesi kaya duvarının çatlak bir bölümünün arkasında gizlenir.\n\nYolu açmak için **çatlak duvarın yanına bir Bomba veya Bombchu yerleştirin**. İçeride yerdeki Triforce amblemi üzerinde dururken Zelda’nın Ninnisi’ni çalın. Büyük Peri size Farore’nin Rüzgârı’nı vermeden önce çeşmeye atılacak 100 Rupi bağış ister, bu yüzden yanınızda getirin.",
+      "hint": "100 Rupi bağış ister: yanınızda getirin."
+    },
+    "lago-heart-01": {
+      "name": "Laboratuvarda dalış",
+      "desc": "Kıyıdaki bina olan Göl Kenarı Laboratuvarı’nın içinde derin bir havuz vardır ve Kalp Parçası, dibe dalıp tabanına dokunmanın ödülüdür; bunu yalnızca Balık Tutma Göleti’nin ödülü olan Altın Pul ile başarabilirsiniz.\n\nÇocuk ya da yetişkin olmanız fark etmez: suya atlayın, **havuzun dibine dokunana kadar dalın** ve çıktığınızda bilim insanı size parçayı verecektir.",
+      "hint": "Altın Pul yetişkinken balık tutma ödülüdür."
+    },
+    "lago-heart-02": {
+      "name": "Laboratuvar çatısı",
+      "desc": "Çocukken Hylia Gölü’ndeki Göl Kenarı Laboratuvarı’nın yanındaki yumuşak toprağa bir Sihirli Fasulye ekin ve yetişkinken geri dönün. Yaprağa binin: gölün üzerinde bir tur atıp sizi laboratuvar kulesinin ahşap balkonuna bırakır.\n\nKalp Parçası’nın bulunduğu **tepedeki gözetleme noktasına merdivenden tırmanın**.",
+      "hint": "Çatıdaki kargalara dikkat edin: sizi aşağı düşürebilirler."
+    },
+    "lago-heart-03": {
+      "name": "Çocukken balık tutma",
+      "desc": "Balık Tutma Göleti, Hylia Gölü’ndeki küçük bir adadadır ve sahibi 10 Rupi karşılığında size olta verir. Bir balık yakaladığınızda onu tutun, işiniz bittiğinde sahibiyle konuşup bırakacağınızı söyleyin: en iyi avınızı ölçer ve **50 cm’den büyükse çocukken size Kalp Parçası’nı verir**.\n\n**En büyük balıklar** genellikle **göletin ortasında** bulunur.",
+      "hint": "Her deneme 10 Rupi tutar; ödül 50 cm’den büyük bir balık içindir."
+    },
+    "lago-gs-01": {
+      "name": "Laboratuvar yanındaki yumuşak toprakta böcekler",
+      "desc": "Göl Kenarı Laboratuvarı’nın duvarına yaslı, birkaç varil ve çuvalın yanında yumuşak toprak bulunur. Çocukken, günün her saatinde, **toprağın üzerinde bir şişe Böcek açar açmaz** Altın Skulltula ortaya çıkar: böcekler deliğe girer ve o da yerden tırmanır. Onu yenip jetonu almak için kılıcınız yeterlidir."
+    },
+    "lago-gs-02": {
+      "name": "Laboratuvar duvarı",
+      "desc": "Göl Kenarı Laboratuvarı’nın arkasından bir köprü uzanır. Çocukken ve gece vakti, köprüye adım atar atmaz sağa bakın: binanın yuvarlak kulesinde, bir borunun yanında kılıcınız için fazla yüksekte bu Altın Skulltula vardır.\n\n**Köprünün üzerinden ona Bumerang fırlatın**: onu düşürür ve jetonu size getirir."
+    },
+    "lago-gs-03": {
+      "name": "Batı kıyısındaki mağara",
+      "desc": "Çocukken Hylia Gölü’nün batı kıyısını güneye doğru sonuna kadar takip edin; burada kayadaki bir oyukta birkaç küp, bir varil ve duvarda bir Peri Düşüncesi vardır. Oradan suya girin ve yanındaki kıyıya yüzün: kaya duvarında taş lentolu alçak bir boşluk göreceksiniz.\n\n**O boşluktan sürünerek geçin** ve küçük, karanlık bir mağaraya ulaşacaksınız. Altın Skulltula karşı duvardadır; onu kılıcınızla yenin ve jetonu toplayın.",
+      "hint": "Altın Skulltula’yı bulmak için delikten sürünerek geçin."
+    },
+    "lago-gs-04": {
+      "name": "Laboratuvar havuzunun dibindeki sandık",
+      "desc": "Göl Kenarı Laboratuvarı’ndaki havuzun dibinde içinde bir Altın Skulltula bulunan tahta bir sandık gizlidir. Yetişkinken ona ulaşmak için Demir Çizmeler’i giyin ve suya inin.\n\nAşağı indiğinizde **kırmak için sandığa yuvarlanın**, Skulltula’nın işini bitirin ve jetonu Kanca ile toplayın."
+    },
+    "lago-gs-05": {
+      "name": "Büyük adadaki ağaç",
+      "desc": "Göldeki en büyük adada, Su Serenadı platformunun bulunduğu adada, içi oyuk tepeli devasa bir ağaç vardır. Yetişkinken **kendinizi tepeye çekmek için Uzun Kanca’yı ağacın tepesine nişan alın**; Kanca yetişmez.\n\nAltın Skulltula yalnızca gece vakti tepenin içinde çıkar: gündüzse hemen orada Güneş Şarkısı’nı çalın, ortaya çıkacaktır. Onu kılıcınızla yenin ve jetonu toplayın."
+    },
+    "lago-bean-01": {
+      "name": "Laboratuvar yanındaki yumuşak toprak",
+      "desc": "Çocukken Göl Kenarı Laboratuvarı’nın duvarına yaslı yumuşak toprağa — Böcekli Skulltula’nın olduğu yer — bir Sihirli Fasulye ekin. Yetişkinken geri döndüğünüzde renkli yapraklardan oluşan bir halka biçiminde bir bitki filizlenmiş olacaktır.\n\n**Yaprakların üzerine çıkın, sizi gölün etrafında uçurarak** laboratuvar çatısına götürsünler.",
+      "hint": "Çocukken ekin ve yetişkinken kullanın."
+    },
+    "valle-heart-01": {
+      "name": "Şelalenin arkası",
+      "desc": "Gerudo Vadisi’ndeki büyük şelalenin arkasında, kanyonun dibindeki nehir kıyısında, suyun üstünde kayaya oyulmuş küçük bir oda vardır. Oraya ulaşmak için şelalenin dibindeki ineğin köşesine inin — Cucco ile süzülerek veya nehre atlayıp yüzerek.\n\nOradan kıyıyı şelaleye doğru takip edin, Dedikodu Taşı’nı geçin ve dökülen suyun arkasındaki ıslak kayalardan atlayın. Ardından Kalp Parçası’nın beklediği odaya çıkmak için **kayaya oyulmuş basamaklardan tırmanın**.",
+      "hint": "Akıntı sizi sürüklerse Hylia Gölü’ne çıkarsınız."
+    },
+    "valle-heart-02": {
+      "name": "Kanyon çıkıntısındaki sandık",
+      "desc": "Gerudo Vadisi’nde, köprüyü geçtikten sonra marangozların çadırı tarafında, kaya kemerinin yanındaki koyu kaya yığınlarının yanından kanyonun kenarına gidin. Aşağıda, nehre yarı yolda, üzerinde bir sandık bulunan dar bir çıkıntı vardır.\n\nÇocuksanız sandığa inmek için **Cucco ile süzülün**.\n\nYetişkinseniz **kenardan çıkıntıya atlayın** ve sandığı açın.\n\nGeri dönmek için çıkıntıyı takip edip nehre atlayın: akıntı sizi Hylia Gölü’ne taşır.",
+      "hint": "Sandık uçurumun yüzündedir."
+    },
+    "valle-gs-01": {
+      "name": "Yaya köprüsü yanındaki su oluğu",
+      "desc": "Hyrule Ovası’ndan Gerudo Vadisi’ne girdiğinizde karşınıza ilk olarak bir göletin üzerindeki küçük ahşap yaya köprüsü çıkar. Gece vakti Altın Skulltula kalasların altında, gölete dökülen su oluğunun yanındaki tuğla duvardadır.\n\nYaya köprüsünün bir kenarından suya inin, aşağıdaki taş kıyıya çıkın ve **onu düşürüp jetonu geri getirmek için Bumerang fırlatın**. Ardından yaya köprüsüne geri tırmanın."
+    },
+    "valle-gs-02": {
+      "name": "İneğin yanındaki yumuşak toprakta böcekler",
+      "desc": "Büyük şelalenin dibinde, nehrin üst kısmında bir inek, bir Gerudo ve yumuşak toprak bulunan bir köşe vardır. Çocukken oraya büyük köprünün solundaki uçurum kenarından Cucco ile süzülerek (bir çıkıntıda durup tekrar atlayabilirsiniz) ya da nehre atlayıp yüzerek ulaşabilirsiniz.\n\nOraya vardığınızda **şişedeki Böcekleri yumuşak toprağa bırakın** ve çıkan Altın Skulltula’yı yenerek jetonu toplayın."
+    },
+    "valle-gs-03": {
+      "name": "Çadırın arkası",
+      "desc": "Köprüyü geçince, vadinin Gerudo Kalesi’ne bakan tarafında marangozların çadırı vardır. Yetişkinken karşıya geçmek için kırık köprüden Epona ile atlamak yeterlidir; marangozları kurtardıysanız Uzun Kanca veya onarılmış köprü de iş görür.\n\nGece vakti çadırın etrafından arkasındaki harabelere dolaşın. Altın Skulltula oymalı taş duvarda yarı yükseklikte tırmanır: **onu Kanca ile indirin, jetonu da yanında size getirir**."
+    },
+    "valle-gs-04": {
+      "name": "Çadırın karşısındaki kaya kemeri",
+      "desc": "Marangozların çadırından Gerudo Kalesi’ne giden patikada, dibinde iki koyu kaya yığını bulunan kızılımsı kayadan büyük bir doğal kemer vardır. Gece vakti kemerin iç yüzünde bir Altın Skulltula tırmanır.\n\nKaya yığınlarının arasında durun, onu görene kadar kemerin tepesine bakın ve **düşürmek için Kanca fırlatın**: öldürdüğünüzde Kanca’nın kendisi jetonu size getirir."
+    },
+    "valle-bean-01": {
+      "name": "Gerudo kanyonundaki yumuşak toprak",
+      "desc": "Bu yumuşak toprak, büyük şelalenin dibinde inek ve Gerudo ile aynı yeri paylaşır ve Böcekli Altın Skulltula’nın da toprağıdır. Çocukken büyük köprüden Cucco ile aşağı süzülün veya nehirden yüzerek çıkın ve Sihirli Fasulye’yi ekin.\n\nYetişkinken yaprak iki Kırmızı Rupi’nin yanından geçerek şelalelerden iner ve çıkar; **büyük şelalenin yarısında suyun içinden atlayarak** Kalp Parçası’nın oyuğuna girin.",
+      "hint": "Çocukken ekin ve yetişkinken kullanın."
+    },
+    "fortaleza-heart-01": {
+      "name": "Atlı okçuluk - 1.000 puan",
+      "desc": "Dört marangozu kurtararak aldığınız Gerudo Kartı atlı okçuluk poligonunu açar. Gündüz gidin, çünkü gece sorumlu kadın oynamanıza izin vermez, ve yanınızda Epona’yı getirin. Her deneme 30 Rupi’dir.\n\nEpona parkuru kendi koşar ve hedefler ile küpler için 20 okunuz vardır; her küp veya tam isabet 100 puan değerindedir. **Kalp Parçası’nı kazanmak için 1.000 puana ulaşın**; 1.400 puanla En Büyük Sadak’ı da eve götürürsünüz.",
+      "hint": "Her oyun 30 Rupi tutar; 1.400 puanla En Büyük Sadak."
+    },
+    "fortaleza-gs-01": {
+      "name": "Okçuluk poligonu hedefi",
+      "desc": "Gerudo Kartı ile atlı okçuluk poligonuna girebilirsiniz ve gece vakti parkurun sonundaki bir direğin üzerindeki büyük yuvarlak hedefte bir Altın Skulltula vardır. Epona ile veya yürüyerek parkurun tamamını aşıp uzak uçtaki dairesel alana gidin.\n\nSkulltula’yı öldürüp jetonu geri getirmek için **net bir atış açısı yakaladığınızda ona Kanca fırlatın**; önden göremiyorsanız hedefin etrafından dolaşın."
+    },
+    "fortaleza-gs-02": {
+      "name": "Üst çatı",
+      "desc": "Gece vakti Altın Skulltula, Gerudo Kalesi’nin yan çatılarında, Kalp Parçası sandığından birkaç adım ötede ortaya çıkar: uçurum kayasının yanında yükselen bloğun tuğla duvarındadır.\n\nYetişkinken oraya çıkmak için mutfak koridoru kapısından girin, görülmeden geçin ve arkadaki çatılara açılan yüksek çıkışı kullanın. O duvarın önünde durun ve jetonu toplamak için **ona Kanca fırlatın** ya da kılıcınızla üzerine atlayın."
+    },
+    "desierto-gs-01": {
+      "name": "Anıtın içi",
+      "desc": "Lanetli Çorak Topraklar’daki taş anıta ulaşmak için yetişkinken bayrakları takip ederek kum nehrini geçin. Anıtta sütunların arasındaki boşluktan içeri girin ve aşağıdaki odaya inen merdivenden inin.\n\nAltın Skulltula arka duvarda, sunağın üzerindedir: **sunağa çıkın ve onu kılıcınızla indirin**. Meşaleleri Ateş Okları veya Din’in Ateşi ile yakarsanız içinde İşçi Deku Tohumu bulunan bir sandık belirir."
+    },
+    "coloso-heart-01": {
+      "name": "Tapınak yanındaki taş kemer",
+      "desc": "Ruh Tapınağı girişinin yakınında yalnızca sihirli bitkinin ulaşabildiği bir taş kemer vardır, bu yüzden iş çocukken başlar. Ruh Ağıtı ile Çöl Heykeli’ne gidin ve tapınak girişinin solundaki yumuşak toprağa bir Sihirli Fasulye ekin.\n\nYetişkinken yaprak yolculuğu iki kaya platformunun üzerinden geçer ve kemerin üstünde biter: **üzerine geldiğinizde atlayın ve Kalp Parçası’nı alın**."
+    },
+    "coloso-gs-01": {
+      "name": "Tapınak yanındaki yumuşak toprakta böcekler",
+      "desc": "Çocukken Çöl Heykeli’ne gitmek için Ruh Ağıtı’nı çalın ve varış platformundan Ruh Tapınağı’nın basamaklarına yürüyün: yumuşak toprak girişin hemen solunda, kaya duvarına yaslıdır.\n\nSihirli Fasulye’yi de ektiğiniz o toprakta **bir şişeden Böcekleri bırakın**, Altın Skulltula hemen çıkacaktır: onu kılıcınızla yenin ve jetonu toplayın."
+    },
+    "coloso-gs-02": {
+      "name": "Büyük kayanın tepesi",
+      "desc": "Büyük Peri Çeşmesi’nin yakınında büyük bir kaya yükselir ve krater biçimli bir oyuğa sahip tepesi, Ruh Tapınağı’nın yumuşak toprağındaki Sihirli Fasulye bitkisinin üzerinden geçtiği ikinci platformdur. Yetişkinken yaprağa binin ve o kayaya ulaştığında **tepeye atlayıp oyuğa inin**.\n\nAltın Skulltula orada yalnızca gece çıkar: gündüzse Güneş Şarkısı’nı çalın, ortaya çıkacaktır. Onu kılıcınızla öldürün ve Altın Skulltula Jetonu’nu alın."
+    },
+    "coloso-gs-03": {
+      "name": "Tapınağın yanındaki kaya duvarı",
+      "desc": "Gece vakti bu Çöl Heykeli Altın Skulltula’sı Ruh Tapınağı’nın sağındaki kaya duvarında yüksekte belirir.\n\nSkulltula’yı bulun ve öldürüp Altın Skulltula Jetonu’nu çekmek için **ona Kanca ile vurun**."
+    },
+    "coloso-bean-01": {
+      "name": "Tapınak yanındaki yumuşak toprak",
+      "desc": "Sihirli Fasulye’yi ekmek için buraya çocukken Ruh Ağıtı ile gelmeniz gerekir: yumuşak toprak Ruh Tapınağı girişinin solundadır ve üzerine Böcek bırakmak bir Altın Skulltula da çıkarır.\n\nYetişkinken bitki **sizi iki kaya platformunun üzerinden Kalp Parçası’nın bulunduğu taş kemere taşır** ve ikinci platform yalnızca gece ortaya çıkan diğer Altın Skulltula’yı barındırır.",
+      "hint": "Çocukken ekin, yetişkinken kullanın."
+    },
+    "coloso-fairy-01": {
+      "name": "Büyük Peri: Nayru’nun Sevgisi",
+      "desc": "Vahanın kuzeyinde, Ruh Tapınağı’ndan bakıldığında göletin karşısında, palmiye ağaçlarının arasındaki çatlak bir kaya duvarı Büyük Peri Çeşmesi’ni gizler. Ruh Ağıtı ile gelen çocuk olarak da Lanetli Çorak Topraklar’ı geçen yetişkin olarak da aynı şekilde açabilirsiniz.\n\n**Çatlak kayayı bir Bomba, Bombchu veya Megaton Çekici ile patlatın**, içeri girin, Triforce amblemi üzerinde durun ve Zelda’nın Ninnisi’ni çalın. Büyük Peri çeşme için 300 Rupi bağış isteyecektir: kabul edin, size Nayru’nun Sevgisi’ni verecektir.",
+      "hint": "300 Rupi bağış ister."
+    },
+    "deku-gs-01": {
+      "name": "Pusula odası",
+      "desc": "Deku Ağacı’nın en üst katındaki Pusula odası, bu Altın Skulltula’yı kuytu bir köşede saklar. Platformları yükseltmek için anahtara basın ve Pusula’ya gitmek yerine soldaki yan oyuğa atlayın.\n\n**Arka duvarda, küçük sandığın arkasında**, kolayca ulaşabileceğiniz yerdedir: kılıcınızla öldürün ve Altın Skulltula Jetonu’nu alın."
+    },
+    "deku-gs-02": {
+      "name": "Bodrum sarmaşıkları",
+      "desc": "Ana odanın ortasındaki büyük ağın üzerine atladığınızda ağı delip bodrumdaki suya düşersiniz. Sağdaki yuvarlak havuzda bu Altın Skulltula, ana odaya geri tırmanan sarmaşık duvarında bekler.\n\nOna uzaktan saldırmanız gerekir, bu yüzden sudan **Sapan veya Bumerang ile düşürün**, ardından Altın Skulltula Jetonu için sarmaşıklara tırmanın.",
+      "hint": "Sapan’ı bu zindanın içinde alırsınız."
+    },
+    "deku-gs-03": {
+      "name": "Bodrum parmaklığı",
+      "desc": "Deku Ağacı’nın ilk bodrum katında parmaklıklı bir kapıyla biten bir su kanalı vardır ve bu Altın Skulltula ona tutunur.\n\nSuda kapıya bakan yuvarlak platforma çıkın, **Sapan ile onu düşürün** ve Altın Skulltula Jetonu’nu alın."
+    },
+    "deku-gs-04": {
+      "name": "Arka oda",
+      "desc": "Deku Ağacı’nın ilk bodrum katında, Gohma Larvaları odasından sonra meşaleden bir Deku Sopası yakın ve **arka duvardaki ağı yakın**. Arkasında bir sarmaşık duvarıyla biten bir tünel vardır.\n\nOnu koruyan Büyük Skulltula’ya dikkat edin: arkasını dönmesini bekleyin ve sırtından vurun. Ardından **Altın Skulltula’yı Sapan ile düşürün** ve Altın Skulltula Jetonu için sarmaşıklara tırmanın.",
+      "hint": "İlk ziyaretinizde alabilirsiniz."
+    },
+    "deku-heart-01": {
+      "name": "Kalp Kabı - Gohma",
+      "desc": "Üç Deku Çalısı’nı 2, 3, 1 sırasıyla yendikten sonra ikinci bodrum katındaki Kraliçe Gohma’nın odasına girebilirsiniz ve girer girmez tavana bakın, çünkü patron oradan aşağı iner.\n\n**Gözü kırmızıya döndüğünde Sapan ile vurun** veya sersemletmek için bir Deku Cevizi atın, ardından gözüne kılıcınızla veya bir Deku Sopası ile vurun. Yumurtlamak için tavana tırmanırsa larvalar çıkmadan yumurtaları kırın. Yenildiğinde Kalp Kabı’nı bırakır.",
+      "hint": "Gözüne yapılan bir Sapan atışı onu tavandan da düşürür."
+    },
+    "dodongos-gs-01": {
+      "name": "Yavru Dodongo’ların duvarının arkası",
+      "desc": "Beamos ile ilgilendikten sonra ana salonun sağ tarafındaki çatlak duvarı bir Bomba Çiçeği ile patlatın; başlangıcında sağda başka bir çatlak duvar bulunan Yavru Dodongo koridoruna gireceksiniz.\n\nBir Bomba ile açın ya da **bir Yavru Dodongo’yu çekip tam duvarın dibinde öldürün**, çünkü patlaması duvarı da kırar.\n\nİçeride birkaç Keese ve Altın Skulltula vardır.",
+      "hint": "Korkuluk çıkıntısındaki ile aynı koridoru paylaşır."
+    },
+    "dodongos-gs-02": {
+      "name": "Büyük merdivendeki sarmaşıklar",
+      "desc": "Sol kanatta, Bomba Çiçekleriyle dolu odadaki büyük merdiven, hepsinin zincirleme patlaması için boşta duran Bomba Çiçeği’ni sıradaki boşluğa koymadan inmez; bu yüzden oradan başlayın.\n\nMerdivenlerden çıkın, el merdivenine tırmanın ve çıkıntıyı arkadaki kapıya kadar takip edin. Ona ulaşmadan önce **üzerinde normal bir Skulltula ve altın olanı bulunan tırmanılabilir tel duvar** vardır: ikisini de Sapan ile (yetişkinken Peri Yayı veya Kanca ile) indirin ve Altın Skulltula Jetonu için tırmanın."
+    },
+    "dodongos-gs-03": {
+      "name": "Dodongo’larla çevrili sütun",
+      "desc": "Birinci katta, Bomba Çantası sandığı odasından çıkarken çatlak duvarı bir Bomba ile patlatın ve orta odaya bakan çıkıntıya ilerleyin. Orada dev kafatasının yakınında başka bir çatlak duvar vardır: **bir Bomba ile açın ve Dodongo’larla dolu o mağaraya girin**.\n\nAltın Skulltula odanın ortasında, Dodongo’larla çevrili bir kaya sütununun üzerindedir. Onlardan kaçının veya onları temizleyin ve Altın Skulltula Jetonu’nu almak için Skulltula’yı kılıcınızla indirin.",
+      "hint": "Kılıcınız yeterlidir: ilk ziyaretinizde alabilirsiniz."
+    },
+    "dodongos-gs-04": {
+      "name": "Ağzın ötesindeki Armos odası",
+      "desc": "İkinci kattaki köprüden ana salondaki dev kafatasının her bir gözüne bir Bomba bırakarak ağzını açmasını sağlayın ve içinden girin. Ateş Keese odasını geçin ve blok koridoruna çıkın.\n\nAhşap kirişlere tırmanmak için blokları itin ve arkadaki çitli alana inin. Orada **çatlak duvarı Bombalarla açın** ve tüneli takip edin. Yaklaştığınızda uyanan bir Armos sizi bekler ve Altın Skulltula onun arkasındaki duvardadır."
+    },
+    "dodongos-gs-05": {
+      "name": "Korkuluk çıkıntısı",
+      "desc": "Yetişkinken, Korkuluk Şarkısı’nı öğrenmiş olarak, duvarın arkasındaki Skulltula ile aynı yer olan Yavru Dodongo koridoruna geri dönün. Koridorun başlangıcına yakın durun ve duvardaki yüksek çıkıntıya bakın.\n\nOrada **Pierre’in çıkıntıda belirmesi için Korkuluk Şarkısı’nı çalın**: ona Kanca ile geçin, yukarı çıkın, Altın Skulltula’yı kılıcınızla öldürün ve Altın Skulltula Jetonu’nu alın.",
+      "hint": "Uzun Kanca ile Korkuluk’a ihtiyacınız yoktur."
+    },
+    "dodongos-heart-01": {
+      "name": "Kalp Kabı - Kral Dodongo",
+      "desc": "Kral Dodongo’nun inine girmek için Patron Anahtarı gerekmez: Armos mağarasından sonra blok odasına dönün ve parmaklıklı kapıyı açmak için bir bloğu büyük yer anahtarının üzerine itin. Sonraki odada Bombalar içeren küpleri kırın ve **aşağı inmek için zeminin çatlak bölümünü patlatın**.\n\nNefes almak için ağzını her açtığında içine bir Bomba atın ve sersemlediğinde kılıcınızla saldırın. Kıvrılıp yuvarlandığında kenara çekilin veya kalkanınızla bloklayın ve mavi ışınlanmaya girmeden önce Kalp Kabı’nı alın.",
+      "hint": "Bombanız biterse odadaki Bomba Çiçekleri iş görür."
+    },
+    "jabu-gs-01": {
+      "name": "Su anahtarı odası",
+      "desc": "Ruto ile aynı delikten aşağı inin ve bodrum odalarını takip ederek havuzun ve su anahtarının bulunduğu odaya gidin. Altın Skulltula duvarda, üç küplü bir çıkıntının üzerindeki sarmaşıkların tepesindeki bir oyuktadır.\n\n**Suyun yükselmesi için Ruto’yu anahtarın üzerinde oturur hâlde bırakın**. Sarmaşıklara yüzün, çıkıntıya tırmanın ve Altın Skulltula Jetonu’nu almak için Skulltula’yı kılıcınızla öldürün.",
+      "hint": "Suyun yükselmesi için Ruto anahtarın üzerinde kalmalıdır."
+    },
+    "jabu-gs-02": {
+      "name": "Büyük odanın bodrumu, alttaki",
+      "desc": "Elinizde Bumerang varken Ruto ile tanıştığınız delikli büyük odaya geri dönün. Yeşil dokunaç yenildiğinde sağ arkadaki deliğini kapatan sütun çekilir: **o delikten aşağı inin**, onu taşıyorsanız önce Ruto’yu aşağı atın.\n\nAşağıda denizanaları süzülür ve bitişik iki duvarda iki Altın Skulltula vardır; bu alttakidir. Onlara kilitlenemediğiniz için Bumerang’ı elle nişan alın: onu düşürür ve dönerken Altın Skulltula Jetonu’nu size getirir.",
+      "hint": "Yukarıdaki eşiyle birlikte alırsınız."
+    },
+    "jabu-gs-03": {
+      "name": "Büyük odanın bodrumu, üstteki",
+      "desc": "Delikli büyük odanın altında, yeşil dokunacın kapattığı delikten indiğiniz bodrumda, kuzey ve kuzeybatıdaki bitişik duvarlarda iki Altın Skulltula vardır. İkisi de Bumerang gerektirdiği için ikisini birden almanızı öneririz.\n\nBurada peşinde olduğunuz üsttekidir, bu yüzden ona da kilitlenemediğiniz için **Bumerang’ı elle nişan alın** ve düştüğünde Altın Skulltula Jetonu’nu geri getirmek için tekrar fırlatın."
+    },
+    "jabu-gs-04": {
+      "name": "Patrondan önceki sarmaşıklar",
+      "desc": "Barinade’den önceki odaya zindanın ikinci odasından — içine atladığınızda sizi aşağı düşüren çukurlu oda — kapıyı açan anahtara bir sandık taşıyarak ulaşırsınız.\n\nÖnce elektrikli denizanalarını Bumerang ile temizleyin ve **kristal anahtara doğru tırmanan sarmaşık sütununu** arayın: Altın Skulltula onun üzerindedir. Bumerang ile öldürün ve Altın Skulltula Jetonu’nu almak için tırmanın."
+    },
+    "jabu-heart-01": {
+      "name": "Kalp Kabı - Barinade",
+      "desc": "Sarmaşık odasının arkasındaki Barinade’nin kapısı, bir kristalle korunan bir anahtarla kilitlidir: duvara tırmanın, anahtara kilitlenin ve **arkasından dolanacak şekilde Bumerang’ı fırlatın**.\n\nİçeri girdiğinizde elektrik şoklarından kaçınarak onu tavana bağlayan üç dokunacı kesmek için Bumerang’ı kullanın ve saldığı denizanalarının işini bitirin. Ardından Bumerang ile sersemletip kılıcınızla vurun, ikinci denizanası dalgasıyla aynı şeyi tekrarlayın ve önce Kalp Kabı’nı almadan mavi ışınlanmaya adım atmayın."
+    },
+    "bosque-gs-01": {
+      "name": "Giriş sarmaşıkları",
+      "desc": "Tapınağın ilk odası açık havadadır, iki ağaç ve üzerinize gelen bir çift Wolfos vardır; Altın Skulltula ise yukarıda, Küçük Anahtar sandığının yakınında bekler.\n\nWolfos’ları temizleyin, **sağdaki sarmaşıklardan ağacın tepesine tırmanın** ve daldan Kanca ile öldürün (Peri Yayı veya Bomba da iş görür); Kanca’nın kendisi Altın Skulltula Jetonu’nu size getirir."
+    },
+    "bosque-gs-02": {
+      "name": "Merkez salon",
+      "desc": "Poe Kardeşler ara sahnesinden sonra dört meşale ve asansörün bulunduğu büyük oda olan merkez salona ulaşırsınız. Bu Altın Skulltula karşı kapının yanındaki merdivenlerin sağında bekler.\n\nDuvarda yüksekte görmek için **o merdivenlerden çıkıp sağa dönün**, Kanca ile öldürün ve Altın Skulltula Jetonu’nu geri getirmek için tekrar ateşleyin.",
+      "hint": "Duvarların arkasına dikkatlice bakın."
+    },
+    "bosque-gs-03": {
+      "name": "Vitraylı kapının üstündeki balkon",
+      "desc": "Orman Tapınağı’nda su kanalının çıktığı alandaki vitraylı kapının sahanlığından Korkuluk Şarkısı’nı çalmanız gerekir: Pierre kapının üstündeki küçük balkonda belirir. **Ona Kanca ile geçin**, balkon zeminindeki Altın Skulltula’yı öldürün ve Altın Skulltula Jetonu’nu alın.",
+      "hint": "Pierre yalnızca Korkuluk Şarkısı’nı çalarsanız belirir."
+    },
+    "bosque-gs-04": {
+      "name": "Batı avlusu çıkıntısı",
+      "desc": "Bükülmüş koridoru düzeltip Patron Anahtarı’nı aldıktan sonra o odanın zeminindeki delikten aşağıdaki su odasına inin, merdivenlerinden çıkın ve batı avlusunun yükseklerindeki taş yürüyüş yoluna çıkın.\n\nYürüyüş yolunun sonunda, kapıdan hemen önce, **soldaki yosunlu taş platforma atlayın**. Yukarı bakın: Altın Skulltula duvardadır, Kanca için hazır — Altın Skulltula Jetonu’nu da size getirir. Uzun Kanca ile avlu zemininden ulaşabilirsiniz.",
+      "hint": "Taş duvarın tepesine bakın."
+    },
+    "bosque-gs-05": {
+      "name": "Bodrumdaki dönen oda",
+      "desc": "Dört Poe Kardeş yenildiğinde merkez salondaki asansör sizi bodruma, patron kapısına giden dönen duvarlı bir odaya indirir.\n\nBu Altın Skulltula için duvarları hareket ettirmenize gerek yoktur: **asansörden iner inmez dairesel koridoru takip edin ve küplerin bulunduğu açık oyuğa girin**. Tavandan Büyük bir Skulltula düşer; işini bitirin ve altın olanın beklediği duvarın yukarısına bakın. Onu Kanca ile düşürün, Altın Skulltula Jetonu’nu da size getirir."
+    },
+    "bosque-heart-01": {
+      "name": "Kalp Kabı - Hayalet Ganon",
+      "desc": "Patron Anahtarı bodrumdaki dönen odanın arkasındaki kapıyı açar; merdivenlerden çıkın ve tablolar odasına ulaşacaksınız. Hayalet Ganon atını bir tablonun içine sürer ve birkaç binici çıkar: gerçek olanı nal sesleri çıkarır ve çerçeveye ulaştığında mor bir geçit açar.\n\nGerçek olanı çıktığında **ona bir ok atın veya Kanca ile vurun**; üç ok onu atından düşürür. Ardından enerji toplarını biri isabet edip düşene kadar kılıcınızla veya boş bir Şişe ile ona geri gönderin; vurun ve bitene kadar tekrarlayın."
+    },
+    "fuego-gs-01": {
+      "name": "Zaman Bloğu odası",
+      "desc": "Ana salondaki merdivenlerin tepesinde sağdaki kapı Küçük Anahtar ile açılır ve büyük lav odasına çıkar. Sol tarafında bir duvarın tepesinde bir Zaman Bloğu vardır: tam önündeki platformda durun, **yerdeki oymalı taşın üzerine çıkın ve Zaman Şarkısı’nı çalın**. Blok aşağı inecektir ve üzerinden yukarıdaki kapıya tırmanabilirsiniz.\n\nİçeride size uçan karolardan kalkanınızla korunun ve Like Like’ın işini bitirin: sizi yakalarsa Hylian Kalkanı’nızı çalar (onu yendiğinizde geri alırsınız). Ardından Altın Skulltula’yı duvardan indirin.",
+      "hint": "Büyük lav odasına girerken solunuza dikkat edin."
+    },
+    "fuego-gs-02": {
+      "name": "Kaya labirentindeki duvar",
+      "desc": "Bu Altın Skulltula yuvarlanan kaya labirentinde bir duvar parçasının arkasında gizlenir. Oraya metal ızgaraya tırmanarak ulaşırsınız; oradan yuvarlanan kayalardan kaçınarak dış duvarı takip edin, bir Goron’un hücresine çok yakın bir geçidin sonundaki çatlak kaya bölümüne ulaşacaksınız.\n\nO bölüm açıkça görünür, bu yüzden yoklamanıza gerek yoktur: **yanına bir Bomba veya Bombchu koyun** ve arkasında açılan tünelde Altın Skulltula’yı indirin. Fırsattan yararlanıp yan hücredeki Goron’u da kurtarın."
+    },
+    "fuego-gs-03": {
+      "name": "Korkuluk’un arkasındaki ızgara",
+      "desc": "Sizi kovalayan ateş duvarı odasından çıktığınızda tepedeki kapı sizi bu kez yukarıdan kaya labirentine geri götürür. Kapının tam önündeki platformda durun ve **Pierre’in yüksek platformda belirmesi için Korkuluk Şarkısı’nı çalın**.\n\nOna Kanca ile geçin ve oradan yanındaki, asansör gibi kendi kendine yükselen platformdaki hedefe ateş edin. Kapıdan geçin ve ızgaralara tırmanın: tepeye ulaşır ulaşmaz Altın Skulltula duvarda bekler ve onu Kanca ile indirirsiniz.",
+      "hint": "Korkuluk Şarkısı Hylia Gölü’nde çocukken ve yetişkinken bestelenir."
+    },
+    "fuego-gs-04": {
+      "name": "Tepedeki sekizgen oda",
+      "desc": "Korkuluk ile ulaştığınız, bu bölgenin diğer Altın Skulltula’sının bulunduğu ızgaranın tepesine tırmanın ve tepedeki kapıdan geçin. Ateşle çevrili üç sandıklı bir platformu olan lav dolu büyük bir sekizgen odaya açılır.\n\nBulmak için içeri girerken sağa bakmanız yeterlidir: **duvarda, kapıdan birkaç adım ötede**, lavın yanındadır. Kanca ile öldürün ve jetonu alın.",
+      "hint": "Izgaradakinin hemen yanında."
+    },
+    "fuego-gs-05": {
+      "name": "Giriş salonu heykelinin arkası",
+      "desc": "Bunu en sona, Megaton Çekici’ne ve çekicin ötesindeki Zaman Bloğu odasındaki Goron’dan aldığınız son Küçük Anahtar’a sahip olduğunuz zamana saklayın. O Goron size girişteki üç bloklu taş heykelin arkasında gizli bir kapı olduğunu söyler: giriş salonunun sağ tarafında **heykeli çekiçle parçalayın** ve kapıyı anahtarla açın.\n\nİlk odada bir sonrakini açmak için Meşale Sümüklüböceklerini öldürün. İkincisinde uçan karolara karşı korunun, Like Like’ı yenin ve Altın Skulltula’yı gizleyen kaya yığınını çekiçle kırın.",
+      "hint": "Giriş salonundaki heykeli ve kaya yığınını çekiçle parçalayın."
+    },
+    "fuego-heart-01": {
+      "name": "Kalp Kabı - Volvagia",
+      "desc": "Volvagia platformdaki deliklerden kafasını çıkarır: çıkarır çıkarmaz **ona Megaton Çekici ile vurun ve sersemlemişken kılıcınızla ya da çekicin kendisiyle işini bitirin**. Uçuşa geçtiğinde gölgelerini izleyerek alevlerinden ve düşen kayalardan kaçının.\n\nOnu yendiğinizde Kalp Kabı mavi ışınlanmanın yanında belirir.",
+      "hint": "Ona yalnızca kafasını lavdan çıkardığında zarar verebilirsiniz."
+    },
+    "agua-gs-01": {
+      "name": "Bodrum ızgarasının yanı",
+      "desc": "Tapınağın suyu en alçak seviyedeyken merkez sütunun tabanındaki kapıyı açmak için bir Küçük Anahtar kullanın. İçeride suyu yükseltmek için Triforce sembolünün önünde Zelda’nın Ninnisi’ni çalın, Demir Çizmeler’i giyin ve zemindeki delikten bodrum odasına batın.\n\n**Duvarda yüksekteki kristal anahtara Kanca ile vurun**: birkaç düşman belirir. Onları öldürün, sandık çıkıntısına yüzmek için çizmeleri çıkarın ve duvarda, ızgaranın yanındaki Altın Skulltula’yı Kanca ile çekip indirin."
+    },
+    "agua-gs-02": {
+      "name": "Girdaplı nehir",
+      "desc": "Kara Link dövüşünden sonra Uzun Kanca sandığının arkasındaki merdivenlerden çıkın ve sonraki odada ızgaralı kuyudan aşağı inin. Su basmış tüneli takip ederek girdaplı bir yer altı nehrine çıkın ve sizi içine çektikleri için onlardan uzak durun.\n\nGirdap bölgesinde **Demir Çizmeler’i giyin ve akıntılardan kaçınarak dipten yürüyün**. Altın Skulltula suyun üstünde, kaya duvarında yüksektedir: yukarıya Uzun Kanca ile nişan alın, onu öldürür ve jetonu size getirir.",
+      "hint": "Suyun üstündeki Skulltula’ya dikkat edin."
+    },
+    "agua-gs-03": {
+      "name": "Merkez sütunun içi",
+      "desc": "Zelda’nın Ninnisi ile tapınağın suyunu en alçak veya orta seviyeye indirin ve merkez sütunun tabanındaki kapıdan geçin. İçeride, zemin katta, yarı yükseklikteki bir çıkıntıya ulaşmak için duvardaki hedefe Uzun Kanca atın.\n\nOradan **duvarın yukarısına bakın**: Altın Skulltula oradadır ve aynı Uzun Kanca onu öldürüp jetonu size getirir. Önce sütunun suyunu yükseltmenize gerek yoktur, ancak gerektiğinde tırmanabilirsiniz."
+    },
+    "agua-gs-04": {
+      "name": "Yuvarlanan kayalı şelale",
+      "desc": "Uzun Kanca ile ulaşılan kuzey bodrumda, Tektite odasını ve blok bulmacası odasını geçin; sonrakinde anahtara basın ve diğer kapıya gitmek için gayzerlerin üzerinden atlayın. Arkasında, Patron Anahtarı odasının hemen yanında, şelaleden kayaların yuvarlandığı bir kanal vardır.\n\nBir Shell Blade’in beklediği yan koridorda kayalardan siper alın ve oradan **şelaleye, batıya doğru bakın**: Altın Skulltula o duvardadır. Uzun Kanca yaklaşmadan ona yetişir ve jetonu size getirir."
+    },
+    "agua-gs-05": {
+      "name": "Su altındaki çatlak duvarın arkası",
+      "desc": "Bu Altın Skulltula birinci katın doğu tarafındaki bir odadadır. Merkez sütundaki Triforce önünde Zelda’nın Ninnisi’ni çaldıktan sonra su orta seviyedeyken Demir Çizmeler’i giyin ve su basmış doğu koridorundan su altındaki çatlak duvara inin: **onu Bombalar veya Megaton Çekici ile kırın**.\n\nArkasında düşmanlarla dolu bir oda vardır. Skulltula duvardaki bir mozaik üzerinde, merdivenlerin yanında ve kılıç hizasındadır: bir kılıç darbesiyle indirin ve jetonu alın.",
+      "hint": "Bombalar ve orta seviyede su gerekir."
+    },
+    "agua-heart-01": {
+      "name": "Kalp Kabı - Morpha",
+      "desc": "Patron Anahtarı ile ve su en yüksek seviyedeyken üçüncü kata (3F) çıkın ve kuzey tarafındaki altın sütundaki hedefe Uzun Kanca atın. Merdivenlerden çıkın ve aşağı kayan diken tuzaklarından kaçınarak su dolu rampadan yukarı ilerleyin.\n\nMorpha’yı ortaya çıkarmak için ortadaki platformlara basın ve **dokunaçları sizi yakaladığı için hemen sudan uzaklaşıp odanın dış kenarına geri çekilin**. Çekirdeğini Uzun Kanca ile çekip çıkarın, kılıcınızla vurun ve dövüşten sonra mavi ışınlanmaya girmeden Kalp Kabı’nı alın."
+    },
+    "sombra-gs-01": {
+      "name": "Görünmez tırpan odası",
+      "desc": "Büyük uçurum odasında, Süzülen Çizmeler ile Stalfos platformuna geçip onu yendikten sonra sola dönün ve Gerçeğin Merceği’ni etkinleştirin: bir kapıya giden görünmez platformlar yolu belirir.\n\nDiğer tarafta yalnızca Mercek ile görebileceğiniz tırpanların bulunduğu yuvarlak küp odası vardır. Onlardan kaçının, Ateş Keese’leri yayla vurun ve Like Like’ın işini kılıcınızla bitirin: **odayı temizlemek, duvarda kılıç mesafesinde Altın Skulltula’nın bulunduğu küçük bir odanın kapısını açar**.",
+      "hint": "Açılan oyukta biri görünmez iki sandık da vardır."
+    },
+    "sombra-gs-02": {
+      "name": "Hücre koridoru duvarı",
+      "desc": "Tavandan dikenlerin düştüğü odada Gerçeğin Merceği duvarda gizli bir bloğu ortaya çıkarır: onu şemsiye gibi dikenlerin altına çekin ve üst kısma ulaşmak için üzerine çıkın. **Altın Skulltula hücre koridorunun duvarında yüksektedir** ve yürüyüş yolundan Kanca ona yetişir.",
+      "hint": "Yürüyüş yolundan ulaşmak için bloğun üzerine çıkın."
+    },
+    "sombra-gs-03": {
+      "name": "Pervaneli koridordaki çukur",
+      "desc": "Kafatasına atılan bombanın Küçük Anahtar düşürdüğü dev kafatası küpü odasını geçip sonraki odaya ilerleyin: tavandaki hedefi bulmak için Gerçeğin Merceği’ni kullanın, Kanca ile üst kata çıkın ve oradaki kilitli kapıyı açın.\n\nArkasında pervaneli koridor vardır. Rüzgârın sizi savurmaması için Demir Çizmeler’i giyin ve ızgaralı çukura ilerleyin: **Altın Skulltula çukurun duvarındadır**. Kenardan eğilin ve jetonu da size getiren Kanca ile ona ulaşın.",
+      "hint": "Demir Çizmeler ile rüzgâr sizi savuramaz."
+    },
+    "sombra-gs-04": {
+      "name": "Tekne odasındaki yüksek çıkıntı",
+      "desc": "Tekne odasına girer girmez soldaki bloğu çekin ve zemindeki oluk boyunca ahşap yürüyüş yoluna kadar itin, ardından üzerine çıkın. Altın Skulltula yanındaki ızgaralı bir çıkıntının duvarındadır.\n\n**Yürüyüş yolunda Korkuluk Şarkısı’nı çalıp Pierre’e Uzun Kanca atmanız** gerekir: sizi çıkıntıya, Skulltula’nın yanına bırakır ve onu kılıcınızla indirirsiniz.",
+      "hint": "Oraya çıkmak için Korkuluk Şarkısı’nı bilmeniz gerekir."
+    },
+    "sombra-gs-05": {
+      "name": "Dev kafataslarının içi",
+      "desc": "Tekne battığında kapının üzerindeki ağı bir Ateş Oku ile yakın ve Gerçeğin Merceği ile Floormaster odasını geçerek Sheikah gözlü kapıya ulaşın.\n\nİçeride dev kafatasları vardır. Balkona çıkan merdivene tırmanın ve **kafataslarının içine bomba atın**: ikincisi patladığında Altın Skulltula Jetonu düşer.",
+      "hint": "Kıyıdaki kapı bir ağla kaplıdır: bir Ateş Oku ile yakın."
+    },
+    "sombra-heart-01": {
+      "name": "Kalp Kabı - Bongo Bongo",
+      "desc": "Dövüşte davulun üzerinde zıplamamak için Süzülen Çizmeler’i giyin ve **Bongo Bongo’nun ellerini oklarla veya Kanca ile sersemletin**. Ardından Mercek aktifken gözünü vurun ve kılıcınızla saldırın.\n\nBittiğinde size Kalp Kabı’nı bırakır."
+    },
+    "espiritu-gs-01": {
+      "name": "Keese odasındaki metal çit",
+      "desc": "Çocukken Nabooru ile konuşup giriş salonundaki küçük delikten süzülerek girersiniz.\n\nİleride Keese ve Wallmaster’ın bulunduğu odaya ulaşırsınız. Çitin inip köprü olması için Gümüş Rupileri toplayın: diğer tarafta **Altın Skulltula sağ duvarın tel örgüsündedir**. Bumerang onu öldürür ve jetonu size getirir.",
+      "hint": "Beş Gümüş Rupi ile çit iner ve köprü olur."
+    },
+    "espiritu-gs-02": {
+      "name": "Büyük heykel odasının zemini",
+      "desc": "Büyük heykelin bulunduğu odaya ulaştığınızda yan merdivenlerden alt kata inin ve heykelin arkasına dolaşın.\n\nDoğu tarafında, heykelin yanı ile duvar arasındaki dar geçitte **Altın Skulltula duvarda, zemin hizasındadır**. Onu yenip jetonu almak için tek bir kılıç darbesi yeterlidir."
+    },
+    "espiritu-gs-03": {
+      "name": "Merdiven kapısının üstü",
+      "desc": "Tapınağın çocuk bölümünde, blok odası güneş yüzlü bloğu ışık huzmesinin içine iterek çözülür: bir sonraki merdivenin tepesindeki zincirli kapı için Küçük Anahtar içeren bir sandık belirir. O merdivene açılan kapıdan geçerken Skulltula’nın sesini şimdiden duyabilirsiniz.\n\nArkanıza bakmadan yukarı çıkmayın: arkanızı dönün ve onu **az önce geçtiğiniz kapının üzerinde** göreceksiniz. Çocukken Bumerang, yetişkinken Kanca onu öldürüp jetonu size getirir.",
+      "hint": "Iron Knuckle dövüşünden önce."
+    },
+    "espiritu-gs-04": {
+      "name": "Yuvarlanan kaya odasında Zaman Bloğu’nun arkası",
+      "desc": "Tapınağın yetişkin bölümü giriş salonundaki büyük bloğu Gümüş Eldivenler ile kenara iterek başlar. Ardından gelen yuvarlak odada Beamos’u öldürün (bir Bombchu yeterlidir) ve kapıları açmak için tavandaki kristal anahtara Kanca ile vurun.\n\nSağdaki kapı yuvarlanan kaya odasına çıkar. Duvardaki oyuklarda bulunan iki Zaman Bloğu’na ulaşana kadar kayalardan kaçının: ilki hiçbir şey gizlemez, ancak **ikincisinin yanında Zaman Şarkısı’nı çalın**; kenara çekildiğinde oyuğunun arkasındaki Altın Skulltula’yı ortaya çıkarır. Kılıcınızla öldürün ve jetonu alın.",
+      "hint": "Blok kaybolmaz, yalnızca bir kare kayar."
+    },
+    "espiritu-gs-05": {
+      "name": "Heykel odasının kuzeybatı çıkıntısı",
+      "desc": "Altın Skulltula, büyük tanrıça heykeli odasının yüksek kuzeybatı çıkıntısında, bir korkuluğun belirdiği köşededir.\n\nYetişkinken avucuna tırmanmak için heykelin bileğindeki hedefe Uzun Kanca atın. Oradan **Korkuluk Şarkısı’nı çalın**: korkuluk çıkıntının tepesinde belirir ve ona Uzun Kanca ile geçebilirsiniz. Yukarıda Skulltula onun yanında zemindedir; kılıcınızla öldürün ve jetonu alın.",
+      "hint": "Korkuluk Şarkısı’nı heykelin avucundan çalın."
+    },
+    "espiritu-heart-01": {
+      "name": "Kalp Kabı - Twinrova",
+      "desc": "Twinrova’ya karşı önce Koume’nin ateşini Kotake’ye, Kotake’nin buzunu da Koume’ye yansıtın.\n\nBirleştiklerinde **aynı elementten art arda üç atışı emip Twinrova’ya geri fırlatın**; düştüğünde kılıcınızla vurun. Kalp Kabı platformun ortasında belirir.",
+      "hint": "Patron Anahtarı için Zelda’nın Ninnisi, yay ve Kanca gerekir."
+    },
+    "pozo-gs-01": {
+      "name": "Orta alanın solundaki oda",
+      "desc": "Bodrumda bulunan Gerçeğin Merceği’ne ve bir Küçük Anahtar’a ihtiyacınız vardır. Mercek açıkken kuyunun duvarlarındaki oyuklarda gizli sandıklar belirir ve bunlardan biri anahtar taşır.\n\nOrta alana girişin karşısındaki sahte duvardan girersiniz ve zeminde delik olan X işaretinin etrafından dolaşmanız gerekir. **Soldaki kilitli kapıyı açın**, odanın ortasındaki Deku Baba’yı öldürün ve mumlu bir nişin üstünde duvarda yüksekte Altın Skulltula’yı arayın: Bumerang onu düşürür ve jetonla geri döner.",
+      "hint": "Giriş koridorundaki gizli oyuklarda iki anahtar daha vardır."
+    },
+    "pozo-gs-02": {
+      "name": "Çukurlu odanın yüksek köşesi",
+      "desc": "Girişin karşısındaki sahte duvardan girdiğiniz orta alanın sağındaki kilitli kapı, Keese ve büyük bir çukurun bulunduğu bir odaya çıkar. Gibdo odasındaki tabuttan çıkan gibi bir Küçük Anahtar’a ve Gerçeğin Merceği’ne ihtiyacınız vardır.\n\nKeese’leri öldürün ve **bir meşalenin yanında, yüksek bir köşede Altın Skulltula’yı görmek için Merceği takın**. Onu yakalamak için Bumerang’ı kullanın.",
+      "hint": "Bir anahtar ve Gerçeğin Merceği gerekir."
+    },
+    "pozo-gs-03": {
+      "name": "Like Like odası",
+      "desc": "Kuyunun ortasını çevreleyen dış koridoru kuzeydoğu köşesine kadar takip edin; burada \"Adımına dikkat et!\" uyarısı olan bir tabela bulunan kapı vardır. Dikkate alın, çünkü hemen altında kaçınmazsanız sizi dibe düşüren bir tuzak vardır.\n\nSonraki odada zeminde gizli delikler bulunur, bu yüzden **Gerçeğin Merceği’ni takın ve bastığınız yere dikkat ederek geçin**.\n\nAteş Keese’leri Bumerang ile indirin ve Beamos’u bomba ile patlatın. Diğer taraftaki kapı Like Like odasına çıkar: onu yendiğinizde Altın Skulltula arka duvarda, iki meşale arasında Bumerang menzilindedir ve jetonu da size getirir.",
+      "hint": "Adımına dikkat et!"
+    },
+    "hielo-gs-01": {
+      "name": "Dönen bıçaklı oda",
+      "desc": "Izgarayı açmak için ilk odadaki Freezard’ları öldürün ve dönen buz bıçağının bulunduğu büyük yuvarlak odaya geçin.\n\n**Gizli Gümüş Rupi’nin bulunduğu buz dikitli köşeyi bulun**: Altın Skulltula duvarda yukarıda, buz tabakalarının arasında ve bir dikitin üzerindedir. Kanca ile öldürün.",
+      "hint": "Gümüş Rupiler Mavi Ateş odasını açar."
+    },
+    "hielo-gs-02": {
+      "name": "Pusula odası",
+      "desc": "Harita odasına giden yolu açmak için dönen bıçaklı odadaki Gümüş Rupileri toplayın ve orada bir şişeyi Mavi Ateş ile doldurun. Bıçaklı odaya dönün ve onunla iki kırmızı buz duvarından birini — diken tuzaklı koridora açılanı — eritin.\n\nSonunda dikitlerle dolu Pusula odası vardır. Buz Keese’lerini öldürün ve **arka duvarın yukarısına, kırmızı bir buz bloğunun yanına bakın**: Altın Skulltula oradadır. Almak için Kanca’yı kullanın."
+    },
+    "hielo-gs-03": {
+      "name": "Buz bloğu odası",
+      "desc": "Bir buz bloğunu itmeniz gereken odada Buz Keese’lerini öldürün ve girişe doğru arkanızı dönün: **Altın Skulltula duvarda yüksekte, içeri girdiğiniz kapının solundadır**. Taş sütunlardan fark etmesi daha kolaydır; yerden Kanca ile indirin ve jetonu alın."
+    },
+    "castillo-fairy-02": {
+      "name": "Büyük Peri: Çift Savunma",
+      "desc": "Ganon’un Kalesi’nin dışına yıkık Hyrule Kale Şehri’nden ulaşırsınız ve sağdaki çıkmaz yolu çocukken Döner Saldırı çeşmesinin olduğu yerde biter. Artık altın oymalı siyah bir taş sütun girişi kapatır: **onu kalenin Gölge Sınavı’ndan aldığınız Altın Eldivenler ile kaldırın**.\n\nİçeride Triforce ambleminden Zelda’nın Ninnisi’ni çalın ve bağış olarak istediği 500 Rupi’yi çeşmeye atın. Cesaret Büyük Perisi savunmanızı ikiye katlar: kalpleriniz altın kenarlık kazanır ve yarı hasar alırsınız.",
+      "hint": "500 Rupi bağış ister; girişteki sütun Altın Eldivenler ile kaldırılır."
+    },
+    "kakariko-bottle-01": {
+      "name": "Yedi kayıp Cucco",
+      "desc": "Kümesin yanındaki Cucco Kadını’nın yedi Cucco’su kaçmıştır; çocukken onları geri getirirseniz size Boş Şişe verir: **her Cucco’yu kucaklayıp kümesin içine atın**. Onunla konuşursanız kaç tanesinin eksik olduğunu söyler ve ipuçları verir; kümestekiler evlere girseniz bile yerlerinde kalır.\n\nBiri hemen yanında, biri girişin yakınında, biri Ölüm Dağı kapısının yanında ve biri Skulltula Evi’nin çitinin arkasındadır. Beşincisi yuvarlanarak kırdığınız bir sandıktadır; son ikisi ise İksir Dükkânı’nın arkasındaki, süzülerek ulaştığınız çitli alandadır."
+    },
+    "lonlon-bottle-01": {
+      "name": "Talon’un Süper Cucco’ları",
+      "desc": "Öncelikle Hyrule Kalesi’nde uyuyan Talon’u Garip Yumurta’dan çıkan Cucco ile uyandırmanız gerekir ki Lon Lon Çiftliği’ne geri dönsün. Çiftlikte evine gündüz girin: gece Talon uyur.\n\n10 Rupi karşılığında sizi 30 saniyede **odadaki tüm Cucco’lar arasından üç Süper Cucco’sunu bulmaya** davet eder: Cucco’ları kucaklayın, doğru olanı bulduğunuzda size söyler. Başarırsanız ilk seferde size bir şişe Lon Lon Sütü verir.",
+      "hint": "Bir oyun 10 Rupi tutar."
+    },
+    "lago-bottle-01": {
+      "name": "Ruto’nun mektubu",
+      "desc": "Hylia Gölü’nün dibinde, Zora Bölgesi’nden gelen su altı tünelinin çıkışına yakın bir yerde, Prenses Ruto’dan bir mektup içeren bir şişe vardır. Çocukken o derinliğe yalnızca Zora Bölgesi’ndeki dalış oyununun ödülü olan Gümüş Pul ile inebilirsiniz.\n\nSudan dışarı uzanan taş sütunların yanında **dibe dalın ve şişeyi alın**.",
+      "hint": "Göle Zora Bölgesi’nden dalarak da ulaşabilirsiniz."
+    },
+    "ciudadela-bottle-01": {
+      "name": "Poe Koleksiyoncusu",
+      "desc": "Yetişkinken Hyrule Kale Şehri girişindeki eski nöbetçi kulübesi Poe Koleksiyoncusu’nun dükkânıdır. Her Büyük Poe için size 30 Rupi öder ve 100 puan ekler; beşinciyle 500 puana ulaştığınızda size Boş Şişe verir. 1000’e kadar devam ederseniz 200 Rupi değerinde altın Dev Rupi verir.\n\nBüyük Poe’lar Epona’ya binip lanetli çitlerden birinden atladığınızda Hyrule Ovası’nda belirir: **at sırtında oklarla vurup düşürün ve her ruhu Boş Şişe’ye yakalayın**.",
+      "hint": "Her Büyük Poe için 30 Rupi öder; şişe 500 puanda gelir."
+    },
+    "ciudadela-bottle-02": {
+      "name": "İksir dükkâncısının böceği",
+      "desc": "Hyrule Kale Şehri’nde, Zaman Tapınağı’na çıkan yolun yanındaki binada bulunan İksir Dükkânı’na girin. Dükkâncının elinden bir böcek kaçmıştır: yardım edeceğinizi söyleyin, yakalamanız için size Boş Şişe verecektir.\n\nŞişeyi kuşanın ve **dükkân zemininde koşturan böceği yakalayın**. Teşekkür olarak şişeyi Kırmızı İksir ile doldurur ve şişe sizde kalır."
+    },
+    "dominio-heart-01": {
+      "name": "Meşale sandığı",
+      "desc": "Zora Bölgesi’nin en alt katındaki şelalenin arkasında, çocukken tüm meşalelerini aynı anda yaktığınızda içinde parça bulunan bir sandık belirir: Kral Zora’nın odasındaki meşalelerden birinden bir Deku Sopası yakın.\n\nAşağı inin ve **önce sönmeyen, merdivenlerin dibindekini yakın**, ardından her meşaleyi sopayı yeniden tutuşturmak için kullanarak kısa ömürlü dört meşaleyi yakın. Bunlar Zora Dükkânı’nın önündeki, taş çemberli göletteki ve duvarı takip ederek ulaştığınız şelalenin arkasındaki iki meşaledir.",
+      "hint": "Şelalenin arkasındakiler için Din’in Ateşi yardımcı olur."
+    },
+    "fortaleza-heart-02": {
+      "name": "Çatı sandığı",
+      "desc": "Sandık Gerudo Kalesi’nin en yüksek çatısında, bir boşluğun karşısında kaya duvarına yaslıdır. İç koridorlardan, **hücrenizin yanındaki** bir merdiven sizi çatıların üstündeki bir kaya çıkıntısına çıkarır; sandığı görebildiğiniz kenara kadar takip edin.\n\nOradan ganimete ulaşmak için **Uzun Kanca’yı sandığa nişan alın**.",
+      "hint": "Sandığa ulaşmak için Uzun Kanca’yı kullanın."
+    },
+    "kakariko-heart-04": {
+      "name": "50 Skulltula ödülü",
+      "desc": "50 Altın Skulltula Jetonu ile Skulltula Evi’ne geri dönün ve Kalp Parçası’nı almak için **lanetli zengin adamla konuşun**.",
+      "hint": "50 Altın Skulltula Jetonu gerekir."
+    },
+    "castillo-gs-03": {
+      "name": "Yıkık kemer",
+      "desc": "Yetişkinken Ganon’un Kalesi’nin dışındaki sağ yol — Büyük Peri Çeşmesi’ne giden yol — eskiden Hyrule Kalesi’nin girişi olan yıkık bir taş kemerin altından geçer.\n\n**Kemerden geçin ve arkanızı dönün**: Altın Skulltula kemerin arka yüzünde yüksekte, kılıcınızın erişemeyeceği yerdedir. Onu Kanca ile indirin."
+    },
+    "cementerio-thought-01": {
+      "name": "Kraliyet Ailesi Mezarı’ndaki kırık kaide",
+      "desc": "Mezarlık’ta Triforce üzerinde Zelda’nın Ninnisi’ni çalarak Kraliyet Ailesi Mezarı’na girin ve Güneş Şarkısı’nı öğreten taş anıtın bulunduğu son odaya ilerleyin.\n\nOrada yeşil sıvının üzerinde, anıta kazınmış melodiyi hatırlayamayan ve unutmamak için tekrar duymak isteyen bir perinin düşüncesini taşıyan kırık bir kaide vardır. **İşaretin yanında Güneş Şarkısı’nı çalın.**",
+      "hint": "İşaretin yanında Güneş Şarkısı’nı çalın."
+    },
+    "coloso-thought-01": {
+      "name": "Ruh Tapınağı merdiveni",
+      "desc": "Çöl Heykeli’nde, Gümüş Eldivenler’i aldığınız çıkıntıda, iki meşale ayağının arasında düşünce kenardaki alçak duvardadır. Peri manzaranın nefes kesici olduğunu ama bu kadar kuru havaya dayanamadığını ve sağlam bir sağanak yağmasını dilediğini söyler. Burada Fırtına Şarkısı’nı çalmak büyünüzü ve sağlığınızı yeniler.",
+      "hint": "İşaretin önünde Fırtına Şarkısı’nı çalın."
+    },
+    "hielo-thought-01": {
+      "name": "Pusula odasının yanındaki buz tüneli",
+      "desc": "Buz Mağarası’nda Pusula’yı aldıktan sonra o bölgedeki Mavi Ateş ile bir şişe doldurun ve yanındaki kırmızı buz bloğunu eritin. Arkasındaki donmuş tüneli — diken tuzaklı koridora ve buz bloğu odasına gideni — takip edin: duvarında bu Peri Düşüncesi’ni göreceksiniz. Perinin kanatları buz tutmuştur ve güneşte biraz vakit geçirmek için her şeyini verirdi. **İşaretin yanında Güneş Şarkısı’nı çalın.**",
+      "hint": "İşaretin yanında Güneş Şarkısı’nı çalın."
+    },
+    "lago-thought-01": {
+      "name": "Batı kıyısındaki küplü oyuk",
+      "desc": "Hylia Gölü’nde batı kıyısını güneye doğru neredeyse sonuna kadar takip edin: bu düşünce kaya duvarında küpler, çuvallar ve varillerin bulunduğu bir oyuktadır. Peri saklambaç oynama sırrının diğer perilerin fırlatamadığı veya kıramadığı bir yer olduğunu söyler. **Oyuktaki küpleri kırın**: birinden bir peri çıkar ve birkaç Rupi de vardır.",
+      "hint": "Oyuktaki küpleri kırın: birinin içinde bir peri saklanıyor."
+    },
+    "llanura-thought-01": {
+      "name": "Asma köprü yanındaki harabeler",
+      "desc": "Asma köprüden Hyrule Kale Şehri’nden çıkın ve nehre bakan tümseğe doğru doğuya gidin: yosun kaplı taş duvar harabelerinin arasında ilk Peri Düşüncesi bulunur ve Navi bunu fırsat bilip onların ne olduğunu açıklar. Peri birinin başına ağaçtan bir şey düştüğünde bunun tesadüf olmadığını, dallara bir şeyler saklayanın kendisi olduğunu söyler. İçindekileri dökmek için **ağaç gövdelerine yuvarlanın**; yanındaki çam Mavi Rupi düşürür.",
+      "hint": "Ağaçlara yuvarlanın: bazen dallardan bir şeyler düşer."
+    },
+    "llanura-thought-02": {
+      "name": "Gerudo Vadisi yanındaki sandıklı mağara",
+      "desc": "Hyrule Ovası’nın batısında, Gerudo Vadisi’ne giden kurak kesimde, kuzey kaya yüzünde içinde sandık bulunan sığ bir mağara vardır. Düşüncesini buraya bırakan peri, sivri şapkalı çocuğa hazinenin kendisi için olduğunu ve onu kilitlemediğini söyler. Yetişkinken geç kalmışsınızdır: sandık açık ve boştur. **Çocukken geri dönün ve sandığı açın**; o zaman içinde gerçekten bir Kalp Parçası bulunur.",
+      "hint": "Çocukken geri dönün ve mağaradaki sandığı açın."
+    },
+    "llanura-thought-03": {
+      "name": "Çiftliğin güneyindeki Dedikodu Taşı mağarası",
+      "desc": "Lon Lon Çiftliği’nin güneydoğusunda, küçük bir göletin yanında, bir çalı halkası ortasına Megaton Çekici darbesiyle açılan bir mağarayı örter. İçeride tahta bir sandığın üstünde duvarda asılı bir Skulltula ve bir Dedikodu Taşı vardır; düşünce kaya duvarındadır. Peri burada parlak altın bir böcek bulmuştur, ancak yakalamadan önce duvardaki haşere üzerine atlamıştır. **Çocukken duvardaki Skulltula’nın işini bitirin ve yetişkinken kırmak için altındaki tahta sandığa yuvarlanın**: içinde altın böcek, yani bir Altın Skulltula vardır.",
+      "hint": "Büyük Skulltula’nın altındaki tahta sandığı kırın."
+    },
+    "llanura-thought-04": {
+      "name": "İşçi Deku’nun deliğinin yanındaki ağaç",
+      "desc": "Asma köprüden Hyrule Kale Şehri’nden çıkın ve duvar ile nehir arasındaki çimen şeridi boyunca doğuya gidin: bu düşünce tam duvarın dibindeki bir ağaçtadır ve birkaç adım ötede yalnızca parolayı bilenlere satış yapan bir İşçi Deku’nun bulunduğu bir delik vardır. Peri sonunda parolayı çözdüğünü ve bunun \"Not bad at all...\" ya da \"I'll make the dishbursement.\" olmadığını söyler. Yetişkinken elinde hiçbir şey kalmamıştır, bu yüzden **çocukken gidin ve ona \"Sell somethin', will ya?\" deyin**: size 100 Rupi karşılığında bir Kalp Parçası satacaktır.",
+      "hint": "Yan taraftaki delikteki İşçi Deku’ya \"Sell somethin', will ya?\" deyin."
+    },
+    "llanura-thought-05": {
+      "name": "Çiftlik çiti yanındaki harabeler",
+      "desc": "Hyrule Ovası’nda Lon Lon Çiftliği’nin dışından dolaşarak güneybatı köşesine gidin: ahşap çitin hemen dibinde sarmaşık kaplı bir tuğla duvarın harabeleri vardır ve düşünce duvar yüzünün alt kısmındadır. Peri oradan ovanın hem gece hem gündüz manzarasını çok sevdiğini ve beklemeden birinden diğerine geçmek istediğini söyler. **Güneş Şarkısı’nı çalın**, sağlığınızı ve büyünüzü yenileyecektir.",
+      "hint": "Gündüzden geceye geçmek için Güneş Şarkısı’nı çalın."
+    },
+    "llanura-thought-06": {
+      "name": "Kuzeybatı Hyrule Ovası’ndaki kaya oyuğu",
+      "desc": "Hyrule Ovası’nın en kuzeybatısında, nehir kenarında variller, çuvallar ve bir masanın bulunduğu kayada bir oyuk vardır ve bu düşünce girişindeki duvardadır. Peri Peahat’lerden korktuğunu çünkü dev gibi olduklarını, kök saldıklarını ve ovanın sahibi gibi davrandıklarını, ancak her bitki gibi ateşe dayanamadıklarını söyler. **Peahat’leri Din’in Ateşi ile yakın.**"
+    },
+    "lonlon-thought-01": {
+      "name": "Çiftlik bahçesinin duvarı",
+      "desc": "Lon Lon Çiftliği’nde evin ve ahırın arkasından bahçeye dolaşın: düşünce birkaç sandık, varil ve ahşap bir arabanın arasında sarmaşık kaplı tuğla duvardadır. Peri o çocuğun çaldığı küçük melodinin çok güzel olduğunu ve inekleri çılgına çevirdiğini söyler. Bu Epona’nın Şarkısı’dır, ancak işaretin yanında çalmak bir işe yaramaz: **bir ineğe çalın**, size Lon Lon Sütü verecektir.",
+      "hint": "Bir ineğe Epona’nın Şarkısı’nı çalın."
+    },
+    "pozo-thought-01": {
+      "name": "Gibdo odasındaki tabut",
+      "desc": "Kuyunun Dibi’nde B1’e inin ve meşalelerde yakılmış bir Deku Sopası ile yakarak temizlediğiniz ağ sarılı tabutların bulunduğu Gibdo odasına girin. Bu Peri Düşüncesi ayakta duran tabutlardan birinin yanındadır: peri o adamın \"dönüp durmak\" hakkındaki şarkısını özlediğini ve buralarda birinin onu bilmesini dilediğini söyler. Büyü ve sağlığı yenilemek için **tabutun yanında Fırtına Şarkısı’nı çalın**.",
+      "hint": "Tabutun yanında Fırtına Şarkısı’nı çalın."
+    },
+    "sendero-thought-01": {
+      "name": "Goron Şehri yakınındaki yaprak çemberi",
+      "desc": "Ölüm Dağı Patikası’nı tırmanırken Goron Şehri girişinden birkaç adım ötede, sağda içinde bitki bulunan yerdeki bir deliğin olduğu bir kaya çıkıntısı ve yanındaki duvarda bu düşünce vardır. Peri sakin günlerde yerdeki yaprakların daireler çizerek yavaşça dans ettiğini, ama fırtınalı günlerde son hızla dönüp uçacakmış gibi göründüklerini söyler. Deliğe girmek için **çemberin üzerinde Fırtına Şarkısı’nı çalın**.",
+      "hint": "Yaprak çemberinin üzerinde Fırtına Şarkısı’nı çalın."
+    },
+    "sombra-thought-01": {
+      "name": "Tavan dikenleri odasının duvarı",
+      "desc": "Gölge Tapınağı’nın B3 katında, gizli bloğun sizi tavandan düşen dikenlerden koruduğu oda vardır. Kırmızı Rupi sandığının bulunduğu hücreyi geçince, duvardaki bir deliğin yanında bu Peri Düşüncesi’ni göreceksiniz. Peri rüzgârın sert estiği yerleri çok sevdiğini ve **buranın gerçekten iyi bir rüzgâr esintisine ihtiyacı olduğunu** söyler."
+    },
+    "crater-heart-03": {
+      "name": "Krater’deki İşçi Deku",
+      "desc": "Krater’de çocukken Ölüm Dağı zirve girişinden batıya, haritanın Büyük Peri Çeşmesi’ni işaretlediği yere doğru ilerleyin. Duvardaki bir tırmanma ağının yanında yerden bir İşçi Deku fırlar ve size saldırmaya çalışır.\n\nAtışlarından kaçınarak yaklaşın ve ona vurun. Pes ettiğinde onunla konuşun: **size 100 Rupi karşılığında Kalp Parçası’nı satar**.",
+      "hint": "Çocukken ona vurduktan sonra size 100 Rupi’ye satar."
+    },
+    "cementerio-thought-02": {
+      "name": "Kraliyet Ailesi Mezarı girişindeki harabeler",
+      "desc": "Mezarlık’ta Kraliyet Ailesi Mezarı’nı açan Triforce’lu taşa çıkın: bu düşünce girişteki kırık taşların arasındadır.\n\nPeri bir mezarın dibine nasıl düştüğünü, korkunç bir canavarın üzerine nasıl geldiğini ve gözlerini kamaştıran bir şarkı söylediğinde onu kovalamayı nasıl bıraktığını anlatır, ama şarkının adını hatırlayamaz. **Bu Güneş Şarkısı’dır: ReDead’leri felç etmek için çalın.**",
+      "hint": "Güneş Şarkısı ReDead’leri felç eder."
+    },
+    "llanura-thought-07": {
+      "name": "Hylia Gölü çıkışı yanındaki harabeler",
+      "desc": "Hyrule Ovası’nın güney ucunda, Hylia Gölü’ne inen patikanın yakınında ağaçların arasında bazı taş harabeler vardır: düşünce sütunlardan birinin yüzündedir.\n\nPeri kimsenin bir kelebeğe sopa sallamamasını, hele ki yerinden kıpırdamadan hiç sallamamasını rica eder. **Yerinizden kıpırdamadan bir Deku Sopası ile kelebeğe vurun: bir Periye dönüşür.**",
+      "hint": "Bir Deku Sopası ile kelebeğe vurun: bir Periye dönüşür."
+    },
+    "llanura-thought-08": {
+      "name": "Zora Nehri girişi yanındaki kaya oyuğu",
+      "desc": "Hyrule Ovası’nın doğu kenarında, Zora Nehri girişinin biraz güneyinde, variller, bir masa, bir bank ve kamp ateşi kalıntılarının bulunduğu kayada bir oyuk vardır: düşünce kaya duvarındadır.\n\nPeri Rupileri güzel şekiller hâlinde dizmeyi çok sever. Onları çukurlara, deliklere ve su altına da saklar ve birinin almasını dert etmez. **Çukurlarda, deliklerde ve su altında şekiller hâlinde dizilmiş Rupileri arayın.**",
+      "hint": "Çukurlarda, deliklerde ve su altında şekiller hâlinde dizilmiş Rupileri arayın."
+    },
+    "llanura-thought-09": {
+      "name": "Asma köprünün batısındaki hendek kayaları",
+      "desc": "Asma köprüden Hyrule Kale Şehri’nden çıkın ve hendeğin kıyısı boyunca batıya gidin: suyun döküldüğü duvarın karşısında bazı büyük kayalar vardır ve bu düşünce onların yanındadır.\n\nPeri tüm servetini tahta bir sandığa sakladığından kimsenin asla şüphelenmeyeceğini söyler.",
+      "hint": "Peri tüm servetini tahta bir sandığa sakladığını söyler."
+    },
+    "llanura-thought-10": {
+      "name": "Kakariko yakınındaki sebze tarlası yanındaki araba",
+      "desc": "Kuzeydoğu Hyrule Ovası’nda, Kakariko Köyü’ne çıkan yoldan pek uzak olmayan bir yerde alçak bir taş duvara dayalı ahşap bir araba vardır: düşünce onun kalaslarındadır.\n\nPeri buranın yalnız göründüğünü, sanki yabani otlardan başka bir şey yokmuş gibi durduğunu ama yakından bakarsanız gizlice koşturan küçükleri göreceğinizi söyler. **Sebze tarlasına inin: bitkilerin arasında koşturan Böcekler var.**",
+      "hint": "Yan taraftaki sebze tarlasında bitkilerin arasında koşturan Böcekler var."
+    }
+  }
+}

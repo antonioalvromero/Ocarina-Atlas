@@ -1,0 +1,946 @@
+{
+  "places": {
+    "kokiri": {
+      "intro": "Het Kokiri-woud, het dorp waar het avontuur begint, heeft drie Gouden Skulltula’s en zachte aarde voor een Magische Boon op de kaart. Twee van de Skulltula’s verschijnen als kind: degene achter het Huis van de Betweterige Broers, alleen ’s nachts, en degene in de zachte aarde naast de winkel, op elk moment van de dag met Insecten. Plant op diezelfde plek ook een boon, want als volwassene tilt de plant je naar een richel met Rupees, en keer ’s nachts terug met de Grijphaak voor de derde Skulltula, boven op het Huis van de Tweeling."
+    },
+    "perdido": {
+      "intro": "Bijna alles in de Verdwaalde Bossen verzamel je als kind: twee Hartstukjes met de ocarina, drie Gouden Skulltula’s en twee plekken voor Magische Bonen. Het is het doolhof dat het Kokiri-woud verbindt met de Heilige Open Plek, en de Hartstukjes krijg je via de Skull Kids: Saria’s Lied voor degene met de fluit, links van de ingang, en het geheugenspel bij het doelwit, aan de rechterkant. Neem Insecten mee voor de twee stukjes zachte aarde, één bij de brug naar de Hyrule-vlakte en één op de open plek met de eenzame boom, en plant in beide een boon: als volwassene en ’s nachts tilt de plant op de open plek je naar de richel van de derde Skulltula."
+    },
+    "prado": {
+      "intro": "Een enkele Gouden Skulltula, en alleen als volwassene, is alles wat de Heilige Open Plek herbergt, en de kaart markeert waar hij verschijnt in het doolhof richting de Bostempel. Hij zit op de rechtermuur halverwege het doolhof, nadat je de Moblins hebt ontweken en vóór de trap: haal hem naar beneden met de Grijphaak, dezelfde die je nodig hebt om de tempel binnen te gaan."
+    },
+    "llanura": {
+      "intro": "De kaart van de Hyrule-vlakte markeert twee Hartstukjes en drie Gouden Skulltula’s. Drie daarvan liggen onder de grond, in grotten die je opent met een Bom of de Megatonhamer. In de grot ten oosten van de ophaalbrug van Hyrule-stad, bij de slotgracht, verkoopt een Deku-handelaar je een Hartstukje voor 100 Rupees als je als kind komt en het wachtwoord kent, dat de Feengedachte op de boom ernaast je als volwassene vertelt; het andere ligt in een kist onder een rotsoverhang in het westen, vlak bij de Gerudo-vallei, en die moet je als kind openen. Van de Skulltula’s valt degene in de eenzame den in het oosten naar beneden als je tegen de stam rolt, vereist degene in de grot van de steencirkel bij Lon Lon Ranch de Boemerang of de Grijphaak, en verschijnt de derde als volwassene in een krat in de grot ten zuidoosten van de ranch, mits je als kind daar de Feengedachte hebt gelezen en de gewone Skulltula hebt verslagen."
+    },
+    "lonlon": {
+      "intro": "Als kind kun je alles op Lon Lon Ranch verzamelen: drie Gouden Skulltula’s, een Hartstukje en een Fles, elk gemarkeerd op de kaart. Twee van de Skulltula’s verschijnen alleen ’s nachts en vereisen de Boemerang, bij het raam van het huis en in de stenen toren achteraan; de derde, in de boom bij de ingang, valt op elk moment naar beneden wanneer je tegen de stam rolt. Het Hartstukje ligt achter in de stenen toren, achter enkele kratten, en de Fles is de prijs van Talons Super-Cucco-spel, al moet je hem eerst wakker maken bij Kasteel Hyrule met de Cucco uit het Vreemde Ei."
+    },
+    "ciudadela": {
+      "intro": "Drie Hartstukjes, twee Flessen en een Gouden Skulltula: dat is wat Hyrule-stad herbergt, met een kaart voor kind en een voor volwassene, omdat de stad verandert. Bijna alles is voor jonge Link: twee Hartstukjes zijn ’s nachts te halen, in de Schatkistwinkel en door Richard, de verdwaalde puppy, terug te brengen naar zijn baasje, en het derde is een prijs bij de Bombchu-bowlingbaan, die pas opengaat nadat je Koning Dodongo hebt verslagen. De Skulltula zit verstopt in een krat in het wachthuisje bij de ingang, en de Flessen zijn de nieuwe uit de remake, een geschenk van de winkelier langs de weg naar de Tempel des Tijds, en die van de Poe-verzamelaar, als volwassene, voor vijf Grote Poes."
+    },
+    "castillo": {
+      "intro": "Tussen de twee kaarten van Kasteel Hyrule, het kasteelterrein als kind en de buitenkant van het Kasteel van Ganon als volwassene, liggen drie Gouden Skulltula’s en twee Grote Feeën. Twee Skulltula’s verschijnen als kind: degene in de boom in de heggetuin en degene in de grot die het Lied der Stormen opent bij de boom aan de slotgracht, samen met de Grote Fee van de Draaiaanval achter een rotsblok aan het einde van het doodlopende pad in het oosten. Als volwassene blijven de Skulltula op de verwoeste boog over, die je alleen ziet als je je omdraait terwijl je eronderdoor loopt, en de Grote Fee van de Dubbele Verdediging, verborgen achter een pilaar die je met de Gouden Handschoenen optilt."
+    },
+    "kakariko": {
+      "intro": "Kakariko ligt aan de voet van de Doodsberg, voorbij de brug vanaf de Hyrule-vlakte, en is een van de plekken met de meeste verzamelobjecten op de kaart. Vijf van de zes Gouden Skulltula’s verschijnen als kind en ’s nachts, met het zwaard of de Feeënkatapult, en de zesde, op de rotswand vlak naast het dak van Impa’s Huis, als volwassene, ’s nachts en met de Grijphaak. De Hartstukjes zijn verdeeld over beide leeftijden, de Fles krijg je van de Cucco-vrouw wanneer je haar zeven Cucco’s terugbrengt, en in het Huis van de Skulltula’s wacht nog een Hartstukje zodra je 50 tekens hebt verzameld."
+    },
+    "cementerio": {
+      "intro": "De Begraafplaats van Kakariko heeft een kaart voor elke leeftijd, en samen herbergen ze vier Hartstukjes, twee Gouden Skulltula’s en een Magische Boon. Als kind en ’s nachts graaft Dampé voor 10 Rupees en delft hij af en toe een Hartstukje op, en het graf vlak bij het Graf van de Koninklijke Familie verbergt er nog een in de crypte, die op die leeftijd alleen ’s nachts open is. Als volwassene volgen de race tegen de geest van Dampé, die het Hartstukje bij de tweede keer oplevert (de eerste keer krijg je de Grijphaak), en de richel aan de linkermuur, bereikbaar via de boon die je als kind hebt geplant. De Skulltula’s verschijnen ’s nachts op de muur bij de ingang en, met Insecten, als kind op elk uur, in de zachte aarde naast het Graf van Dampé."
+    },
+    "sendero": {
+      "intro": "Langs het Doodsbergpad, van Kakariko tot aan de Krater, markeert de kaart vier Gouden Skulltula’s, een Hartstukje, een Grote Fee en een Magische Boon. Ruim als kind het rotsblok voor de Dodongo-grot op met een Bom of de Bombloem en benut de zachte aarde ervoor: Insecten voor een Skulltula en een boon die als volwassene als kortere route dient. Het Hartstukje ligt op de richel boven de ingang van de grot, en de Grote Fee van magie en Din’s Vuur zit op de top, achter de gebarsten muur naast Kaepora Gaebora. Van de andere drie Skulltula’s verschijnt degene achter de gebarsten muur bij Kakariko op beide leeftijden, en liggen de twee voor volwassen Link ’s nachts onder rotsblokken die je moet breken, waarvan één alleen met de Megatonhamer."
+    },
+    "goron": {
+      "intro": "Goron-stad, uitgehouwen in de Doodsberg, heeft slechts drie verzamelobjecten op de kaart: twee Gouden Skulltula’s en een Hartstukje, verdeeld over beide leeftijden. Als kind bereik je de Skulltula in het rotsblokdoolhof op de bovenverdieping door een pad vrij te blazen met Bommen, en komt het Hartstukje uit de grote draaiende kruik in het midden: steek de fakkels aan zodat hij gaat draaien en laat vanaf de plank een verdieping hoger een Bom erin vallen. Als volwassene blijft de andere Skulltula over, onder een rotsrichel aan het plafond, waar alleen de Grijphaak bij kan."
+    },
+    "crater": {
+      "intro": "De hitte heerst in de Doodsbergkrater, waar de kaart drie Hartstukjes, twee Gouden Skulltula’s, een Grote Fee en een Magische Boon markeert. Je komt binnen vanaf de bergtop of vanuit Goron-stad; als kind telt de hitte een timer af, en als volwassene heb je met de Goron-tuniek alle tijd. Als kind pak je de Skulltula in het krat bij de ingang vanaf de top, het Hartstukje dat de Deku-handelaar voor 100 Rupees verkoopt en de Skulltula in de zachte aarde bij de Bolero van het Vuur, bereikbaar door dat lied te spelen: plant daar ook de boon. Als volwassene zet die plant je af op de koepelvormige rots met nog een Hartstukje; het derde, dat je ook als kind kunt pakken, ligt in een nis in de muur als je vanaf de ingang langs de netten omlaag klimt, en de Grote Fee die je magie verdubbelt wacht achter rotsblokken die alleen de Megatonhamer kan breken."
+    },
+    "rio": {
+      "intro": "De Bonenverkoper zit bij de ingang van de Zora-rivier, en stroomopwaarts markeert de kaart vier Hartstukjes en vier Gouden Skulltula’s. Blaas als kind de rotsblokken bij de ingang weg met een Bom, koop zoveel mogelijk bonen van hem en plant er één in de zachte aarde naast hem. Alle vier de Hartstukjes zijn voor jonge Link: twee op platforms waar je met een Cucco naartoe zweeft (of met de Boemerang, voor degene bij de waterval) en twee van de kikkers op de boomstronk, één door hun liederen te spelen en hun spel te winnen en één met het Lied der Stormen. Van de Skulltula’s zijn er twee voor jonge Link, degene in de zachte aarde bij de Bonenverkoper met Insecten en ’s nachts degene op de muur bij de waterval, en twee voor volwassen Link ’s nachts, hoog op de wanden en met de Grijphaak."
+    },
+    "dominio": {
+      "intro": "Eén per leeftijd: zo zijn de twee verzamelobjecten in het Zora-rijk verdeeld, een Hartstukje als kind en een Gouden Skulltula als volwassene, elk op zijn plek op de kaart. Voor het Hartstukje steek je alle fakkels op de benedenverdieping aan met een Deku-stok, te beginnen bij die onderaan de trap, waarna de kist achter de waterval verschijnt. Als volwassene, wanneer het rijk is bevroren, verschijnt de Skulltula ’s nachts bovenaan de bevroren waterval en haal je hem naar beneden met de Grijphaak of een pijl."
+    },
+    "fuente": {
+      "intro": "Achter de troon van Koning Zora herbergt de Zora-bron twee Hartstukjes, drie Gouden Skulltula’s en een Grote Fee, met een kaart voor elke leeftijd. Als kind is het de vijver van Jabu-Jabu, en als volwassene een bevroren meer op weg naar de IJsgrot. De Grote Fee, die Farore’s Wind geeft, is op beide leeftijden te openen achter de gebarsten muur in de zuidoosthoek, en twee van de Skulltula’s verschijnen als kind: degene in de den in diezelfde hoek en, ’s nachts en met de Boemerang, degene op de muur van de verzonken boog. Als volwassene wacht één Hartstukje op de verste ijsschots en een ander op de bodem, met de Zora-tuniek en de IJzeren Laarzen, en de derde Skulltula verschijnt ’s nachts aan de andere kant van een grot achter twee blokken met Zora-tekens, die je optilt met de Zilveren Handschoenen."
+    },
+    "lago": {
+      "intro": "Het Hylia-meer is een van de rijkste gebieden op de kaart: vijf Gouden Skulltula’s, drie Hartstukjes, een Fles en een Magische Boon, verdeeld over beide leeftijden. Als kind levert de zachte aarde vlak naast het laboratorium een Skulltula op met Insecten en een boon die je als volwassene naar het dak tilt, waar een van de Hartstukjes ligt; een ander krijg je van de eigenaar van de Visvijver voor een vis van meer dan 50 cm, en het derde van de Meerwetenschapper als je met de Gouden Schub naar de bodem van zijn bassin duikt. De Fles met Ruto’s Brief ligt op de bodem van het meer, bij de tunnel naar het Zora-rijk, en vereist de Zilveren Schub. Van de Skulltula’s zijn er drie voor jonge Link en twee voor volwassen Link: degene in het krat op de bodem van het bassin met de IJzeren Laarzen, en degene in de kruin van de grote boom op het eiland, ’s nachts en met de Lange Grijphaak."
+    },
+    "valle": {
+      "intro": "Om het Gerudo-fort te bereiken moet je de Gerudo-vallei oversteken, en de kaart markeert vier Gouden Skulltula’s, twee Hartstukjes en een Magische Boon. Eén van de Hartstukjes ligt achter de grote waterval, waar je zwemmend bij komt, en het andere, in een kist op een richel in de kloof, bereik je als kind door met de Cucco bij de brug te zweven. Op het platform met de koe, aan de voet van de waterval, geeft de zachte aarde een Skulltula met Insecten en een boon die je als volwassene ook dicht bij het Hartstukje achter de waterval brengt. De andere drie Skulltula’s verschijnen ’s nachts: degene bij de waterstraal naast de loopbrug als kind met de Boemerang, en die op de tent van de timmerlieden en de rotsboog ertegenover als volwassene met de Grijphaak."
+    },
+    "fortaleza": {
+      "intro": "Alles wat het Gerudo-fort herbergt is voor volwassen Link: twee Hartstukjes en twee Gouden Skulltula’s, die de kaart op de schietbaan en de daken plaatst. Het redden van de vier timmerlieden levert de Gerudo-pas op, die het boogschieten te paard opent: haal overdag 1.000 punten op Epona voor een Hartstukje, en kom ’s nachts terug met de Grijphaak voor de Skulltula op het verste doelwit. De hoge uitgang vanuit de keuken leidt naar de daken, waar ’s nachts de andere Skulltula zit en, op het hoogste dak, de kist met het tweede Hartstukje staat, bereikbaar met de Lange Grijphaak vanaf de rotsrichel erboven."
+    },
+    "desierto": {
+      "intro": "De Spookwoestijn herbergt slechts één Gouden Skulltula, als volwassene, in de kamer onder het stenen monument op weg naar de Woestijnkolos. Om de woestijn over te steken passeer je de zandrivier met de Zweeflaarzen of de Lange Grijphaak en volg je de vlaggen; ga bij het monument door de opening tussen de pilaren, klim de ladder af en sla de Skulltula vanaf het altaar met je zwaard naar beneden."
+    },
+    "coloso": {
+      "intro": "Met het Requiem van de Geest bereik je als kind de Woestijnkolos, en de kaart markeert drie Gouden Skulltula’s, een Hartstukje, een Grote Fee en een Magische Boon. Als volwassene kom je er door de Spookwoestijn over te steken. Ga als kind om Insecten te laten vallen in de zachte aarde bij de ingang van de Geestentempel voor een Skulltula en om daar de boon te planten: als volwassene voert de plant je over de top van de grote rots, waar ’s nachts nog een Skulltula zit, naar de stenen boog met het Hartstukje. De derde Skulltula verschijnt ’s nachts hoog op de rotswand rechts van de Geestentempel, met de Grijphaak, en de Grote Fee van Nayru’s Liefde, achter de gebarsten muur ten noorden van de oase, is op beide leeftijden te openen met een Bom of een Bombchu."
+    },
+    "deku": {
+      "intro": "In de Deku-boom is de eerste kerker van het spel, die je als kind binnengaat zodra je het Kokiri-woud verlaat met zwaard en schild. De kaart beslaat alle vijf verdiepingen, van bovenaf tot aan de tweede kelder. De vier Gouden Skulltula’s versla je met het zwaard of de Feeënkatapult die je binnen vindt, en in de remake zijn alle vier al bij dit eerste bezoek te verzamelen: voor degene in de achterkamer van de kelder heb je geen Bommen of Boemerang meer nodig, je brandt gewoon het web weg met een Deku-stok. Koningin Gohma, in de tweede kelder, laat de Hartcontainer vallen: verdoof haar oog met de Feeënkatapult en sla haar met het zwaard."
+    },
+    "dodongos": {
+      "intro": "De Dodongo-grot ligt aan het Doodsbergpad en opent als kind door het rotsblok bij de ingang op te blazen met een Bombloem en de Goron-armband. De kaart toont beide verdiepingen van de grot. Van de vijf Gouden Skulltula’s pak je er vier bij het eerste bezoek als kind; voor degene op de richel van de vogelverschrikker moet je als volwassene terugkeren met de Grijphaak en het Vogelverschrikkerslied, of met de Lange Grijphaak. Koning Dodongo laat de Hartcontainer vallen: een Bom in zijn bek en daarna het zwaard."
+    },
+    "jabu": {
+      "intro": "Je gaat In Jabu-Jabu’s Buik als kind vanuit de Zora-bron, door een vis voor Jabu-Jabu’s bek los te laten, en binnen draait bijna alles om de Boemerang die je al vroeg vindt. De kaart heeft drie verdiepingen, inclusief de kelder. De eerste Gouden Skulltula valt door het zwaard in de kamer met de waterschakelaar; de andere drie met de Boemerang, waarvan twee samen in de kelder van de grote kamer met gaten, handmatig richtend omdat je ze niet kunt vergrendelen. Barinade laat de Hartcontainer vallen, eveneens met worpen van de Boemerang."
+    },
+    "bosque": {
+      "intro": "De Bostempel is de eerste kerker als volwassene: je gaat binnen vanaf de Heilige Open Plek met de Grijphaak, en met diezelfde Grijphaak schakel je de vijf Gouden Skulltula’s uit en trek je de tekens naar je toe. De kaart heeft vijf verdiepingen. Het is handig ze onderweg mee te pakken, want elk zit in een kamer langs de route: de ingang, de centrale hal, de twee binnenplaatsen en de draaiende kamer in de kelder, vlak voor de eindbaas. De Hartcontainer wordt achtergelaten door Phantom Ganon, met de Feeënboog of de Grijphaak paraat."
+    },
+    "fuego": {
+      "intro": "Je bereikt de Vuurtempel als volwassene vanuit de Doodsbergkrater, gekleed in de Goron-tuniek om de hitte te weerstaan. De kaart heeft vijf verdiepingen, van 1F tot 5F. De vijf Gouden Skulltula’s vragen om meer dan alleen het zwaard: het Lied van de Tijd, Bommen, de Grijphaak en, voor twee ervan, het Vogelverschrikkerslied dat je als kind en als volwassene componeert bij het Hylia-meer. Zowel degene achter het standbeeld in de hal als de Hartcontainer van Volvagia wachten op de Megatonhamer, dus bewaar die voor het laatst."
+    },
+    "agua": {
+      "intro": "De Watertempel rust op de bodem van het Hylia-meer en betreed je als volwassene met de IJzeren Laarzen en de Zora-tuniek, waarbij je het waterpeil verandert met Zelda’s Slaapliedje. De kaart telt vier verdiepingen, van B1 tot 3F. Van de vijf Gouden Skulltula’s kun je er twee pakken voordat je Donkere Link verslaat: degene bij het rooster in de kelder en degene achter de gebarsten muur onder water; de andere drie vereisen de Lange Grijphaak die je na dat gevecht krijgt, dus het makkelijkst is om die eerst te halen en daarna een ronde te maken langs de centrale pilaar, de draaikolkrivier en de waterval met de rotsblokken. Morpha laat aan het einde de Hartcontainer vallen."
+    },
+    "sombra": {
+      "intro": "De Schaduwtempel, onder de Begraafplaats van Kakariko, opent als volwassene met de Nocturne van de Schaduw en Din’s Vuur, en binnen zijn de Lens der Waarheid en de Zweeflaarzen vanaf het begin onmisbaar. De kaart heeft vier kelderverdiepingen. De vijf Gouden Skulltula’s verschijnen in volgorde van de route: in de kamer met de onzichtbare zeisen, in die met de spijkers aan het plafond, in de put van de gang met ventilatoren, op de richel in de bootkamer en in de reusachtige schedels; twee pak je met de Grijphaak, degene in de bootkamer vereist de Lange Grijphaak en het Vogelverschrikkerslied, en degene in de schedels Bommen. De Hartcontainer valt van Bongo Bongo, met pijlen of de Grijphaak en de Lens actief."
+    },
+    "espiritu": {
+      "intro": "De Geestentempel, bij de Woestijnkolos, verken je twee keer: eerst als kind door na een gesprek met Nabooru door de kleine opening te kruipen, en later als volwassene door het grote blok in de hal opzij te schuiven met de Zilveren Handschoenen. De kaart heeft vier verdiepingen, van 1F tot 4F. Drie van de vijf Gouden Skulltula’s zijn al in het kindergedeelte te verzamelen, twee met de Boemerang of de Feeënkatapult en één met het zwaard, en de andere twee, in het volwassen gedeelte, vereisen het Lied van de Tijd en de Lange Grijphaak met het Vogelverschrikkerslied. Voor de Hartcontainer van Twinrova heb je het Spiegelschild nodig, dat je in de tempel zelf vindt."
+    },
+    "pozo": {
+      "intro": "Je betreedt de Bodem van de Put als kind, zodra je de put in Kakariko hebt leeggepompt door het Lied der Stormen te spelen in de Windmolen. Binnen markeert de kaart van twee verdiepingen drie Gouden Skulltula’s, en voor alle drie heb je de Boemerang en de Lens der Waarheid nodig, die je in de kelder vindt. Zonder de Lens zie je de schijnmuren, onzichtbare paden en valluiken niet; de drie Skulltula’s wachten achter afgesloten deuren, twee in het centrale gedeelte en één in de kamer met de Like Like."
+    },
+    "hielo": {
+      "intro": "Je betreedt de IJsgrot als volwassene vanuit de bevroren Zora-bron, over de ijsschotsen naar de grot achterin, en hier vind je de IJzeren Laarzen. De kaart markeert drie Gouden Skulltula’s, en alle drie vallen door de Grijphaak. Eén zit in de kamer met het draaiende mes, tussen de stalagmieten; voor de andere twee verzamel je de Zilveren Rupees in die kamer om de kamer met de Kerkerkaart te openen, vul je daar een Fles met Blauw Vuur en smelt je de twee rode ijsmuren in de meskamer: daarachter liggen de Kompaskamer en de kamer met de schuivende ijsblokken."
+    },
+    "gerudo": {
+      "intro": "Het Gerudo-oefenterrein is de proefkerker van het Gerudo-fort, die je als volwassene betreedt met de Gerudo-pas. Er zijn geen Gouden Skulltula’s of Hartstukjes, dus op deze kaart staan geen verzamelobjecten om af te vinken; de beloning zijn de IJspijlen."
+    },
+    "ganon": {
+      "intro": "Het Kasteel van Ganon verrijst als volwassene op de plek waar vroeger Kasteel Hyrule stond, en is de laatste kerker van het spel. Er zijn geen Gouden Skulltula’s of Hartstukjes, dus op deze kaart staan geen verzamelobjecten om af te vinken. Buiten langs het toegangspad bevinden zich wel de Grote Fee van de Dubbele Verdediging en een Gouden Skulltula op een verwoeste boog: die staan op de kaart van Kasteel Hyrule."
+    }
+  },
+  "items": {
+    "kokiri-gs-01": {
+      "name": "Achter het Huis van de Betweterige Broers",
+      "desc": "Het Huis van de Betweterige Broers, op de heuvel tegenover het Huis van de Grote Mido en naast het Bosoefenterrein, verbergt deze Gouden Skulltula aan de achterkant van de stam. Hij komt alleen ’s nachts tevoorschijn, en alleen als kind.\n\nBeklim de heuvel en loop om het huis heen naar de achterkant."
+    },
+    "kokiri-gs-02": {
+      "name": "Insecten in de zachte aarde bij de winkel",
+      "desc": "Vlak achter de Kokiri-winkel ligt een stukje zachte aarde dat als kind een Gouden Skulltula verbergt, en je hebt alleen een fles met insecten nodig om hem tevoorschijn te lokken.\n\nZodra je **de fles met insecten over de aarde leeggooit**, springt de Skulltula uit de grond: versla hem met je zwaard en pak het Gouden Skulltula-teken. Dit werkt op elk moment van de dag."
+    },
+    "kokiri-gs-03": {
+      "name": "Achterkant van het Huis van de Tweeling",
+      "desc": "Voor deze Gouden Skulltula moet je als volwassene ’s nachts terugkeren naar het Kokiri-woud, omdat hij hoog aan de achterkant van het Huis van de Tweeling kleeft, het huis met het tweepuntige dak bij het pad naar de Open Plek van de Grote Deku-boom.\n\nJe zwaard reikt niet zo hoog, maar **de Grijphaak schakelt hem van onderaf uit**, en een tweede schot op het teken trekt het naar je toe."
+    },
+    "kokiri-bean-01": {
+      "name": "Zachte aarde achter de winkel",
+      "desc": "Een van de Magische Bonen die je koopt bij de Bonenverkoper aan de Zora-rivier hoort hier, in de zachte aarde vlak naast de Kokiri-winkel, en je plant hem het best als kind zodat hij klaarstaat wanneer je terugkeert.\n\nAls volwassene **zet het blad van de plant je af op een kleine richel met een ring groene Rupees** rond een rode. Dezelfde plek verbergt ook de Skulltula van de insecten, dus als kind kun je beide in één keer doen.",
+      "hint": "Plant hem als kind en gebruik hem als volwassene."
+    },
+    "perdido-heart-01": {
+      "name": "Saria’s Lied voor de Skull Kid",
+      "desc": "Zodra je vanuit het Kokiri-woud de Verdwaalde Bossen binnengaat, leidt het eerste pad links naar een Skull Kid die fluit speelt op een hoge boomstronk en verdwijnt als je zomaar op hem afloopt.\n\n**Klim dus op de lage boomstronk voor hem** en speel Saria’s Lied op je Ocarina: de Skull Kid wordt je vriend en geeft je een Hartstukje."
+    },
+    "perdido-heart-02": {
+      "name": "Geheugenspel met de Ocarina",
+      "desc": "Het gebied met het doelwit voor de Feeënkatapult, het eerste pad rechts wanneer je vanuit het Kokiri-woud binnenkomt, verbergt een geheugenspel met twee Skull Kids. Loop de trap af naar de boom met het doelwit en **ga er rechts langs om op de kleine boomstronk te klimmen**.\n\nDaarna moet je op je Ocarina herhalen wat zij spelen, in drie rondes van vijf, zes en acht noten. Als je een noot mist, begint de ronde opnieuw met een andere melodie, en de prijzen lopen op: Rupees in de eerste twee rondes en het Hartstukje in de derde."
+    },
+    "perdido-gs-01": {
+      "name": "Insecten in de zachte aarde bij de brug",
+      "desc": "Voorbij de fluitspelende Skull Kid, het eerste pad links vanaf de ingang vanuit het Kokiri-woud, sla je nogmaals linksaf om het gebied met de brug naar de Hyrule-vlakte te bereiken. Je herkent het aan de Roddelsteen en de Deku-handelaar achterin die de grotere Deku-stokkentas verkoopt.\n\nDe zachte aarde ligt direct langs het pad wanneer je aankomt: **giet er een fles met insecten overheen** en, zodra de Gouden Skulltula bovenkomt, maak je hem af met je zwaard en pak je het Gouden Skulltula-teken."
+    },
+    "perdido-gs-02": {
+      "name": "Insecten in de zachte aarde op de open plek met de eenzame boom",
+      "desc": "Om deze plek te bereiken volg je in de Verdwaalde Bossen de route rechts, links, rechts, links en sla je vervolgens, in plaats van naar de Heilige Open Plek te gaan, nog een keer linksaf. Het is de open plek met de eenzame boom, twee Deku-handelaars en een gat in het gras.\n\nEenmaal daar **laat je de insecten los op de zachte aarde rechts, naast een van de handelaars**, en zodra de Gouden Skulltula tevoorschijn komt, versla je hem met je zwaard en pak je het Gouden Skulltula-teken."
+    },
+    "perdido-gs-03": {
+      "name": "Richel bij het Bospodium",
+      "desc": "Om de hoge richel te bereiken waar deze Gouden Skulltula zit, is voorbereiding als kind nodig, want de enige weg omhoog is de plant op de open plek met de eenzame boom. Om daar te komen ga je in de Verdwaalde Bossen rechts, links, rechts, links en links, en plant je de boon in de zachte aarde rechts, naast een Deku-handelaar.\n\nWanneer je als volwassene ’s nachts terugkomt, **vaar je op de plant omhoog naar de richel** en versla je de Skulltula met je zwaard."
+    },
+    "perdido-bean-01": {
+      "name": "Zachte aarde bij de brug",
+      "desc": "Twee keer linksaf vanaf de ingang van de Verdwaalde Bossen brengt je naar het gebied met de brug naar de Hyrule-vlakte, en de zachte aarde daar is een goede plek om als kind een Magische Boon te planten.\n\nWanneer je als volwassene terugkeert, **laat je je door de plant optillen naar de brug** tussen het Kokiri-woud en de Hyrule-vlakte en spring je erop: dat is een handige kortere route tijdens de ruilreeks, wanneer de Vreemde Paddenstoel na drie minuten bederft.",
+      "hint": "Plant hem als kind en gebruik hem als volwassene."
+    },
+    "perdido-bean-02": {
+      "name": "Zachte aarde bij de twee Deku-handelaars",
+      "desc": "Twee Deku-handelaars en een eenzame boom staan op de open plek in de Verdwaalde Bossen die je bereikt door vanaf de ingang rechts, links, rechts, links en links te gaan, en daar ligt een stukje zachte aarde om als kind een Magische Boon te planten. Het ligt rechts, achter een van de handelaars, en insecten lokken er ook een Gouden Skulltula uit.\n\nAls volwassene **vaar je op de plant omhoog naar de hoge richel van de open plek**, waar ’s nachts nog een Gouden Skulltula zit.",
+      "hint": "Plant hem als kind en gebruik hem als volwassene."
+    },
+    "prado-gs-01": {
+      "name": "Rechtermuur voor de trap",
+      "desc": "Het doolhof van de Heilige Open Plek verbergt deze Gouden Skulltula, al verschijnt hij alleen als volwassene. Baan je een weg erdoorheen terwijl je de Moblins ontwijkt en kijk halverwege naar de muur aan de rechterkant.\n\n**Raak de Skulltula met de Grijphaak** en schiet nog een keer om het Gouden Skulltula-teken naar je toe te trekken."
+    },
+    "llanura-heart-01": {
+      "name": "Deku-handelaar bij de slotgracht",
+      "desc": "Verlaat Hyrule-stad over de ophaalbrug en volg de muur naar het oosten langs de rand van de slotgracht. Naast een boom zie je een gat dat je kunt openen met een Bom of de Megatonhamer: spring erin en praat met de Deku-handelaar binnen.\n\nHij verkoopt alleen aan wie het wachtwoord kent. Om dat te leren ga je als volwassen Link naar de boom ernaast en lees je de Feengedachte. Keer daarna terug als kind, praat met de Deku-handelaar en **kies \"Verkoop me eens wat, wil je?\"**: hij biedt je het Hartstukje aan voor 100 Rupees.\n\nKoop het als kind, want als volwassene heeft hij het al verkocht aan de Link uit het verleden.",
+      "hint": "Het kost 100 Rupees."
+    },
+    "llanura-heart-02": {
+      "name": "Paradox van de kist uit het verleden",
+      "desc": "Aan het westelijke uiteinde van de Hyrule-vlakte, vlak bij de ingang van de Gerudo-vallei, wordt de grond roodachtig. Loop de helling af naar een holte onder een rotsoverhang en zoek de kist achterin.\n\nDit moet als kind gebeuren: als volwassene staat de kist al open en is hij leeg, en een Feengedachte legt uit dat hij nooit op slot zat. **Open de kist als kind** en het Hartstukje is van jou.",
+      "hint": "Lees als volwassene de Feengedachte om te ontdekken waarom hij leeg is."
+    },
+    "llanura-gs-01": {
+      "name": "Eenzame den in het oosten",
+      "desc": "In het oosten van de Hyrule-vlakte, tussen de Zora-rivier en het Kokiri-woud, staat een eenzame den op een heuveltje naast een beekje. Daarin zit een Gouden Skulltula verstopt.\n\n**Rol tegen de stam** om hem op de grond te laten vallen, maak hem af met je zwaard en pak het Gouden Skulltula-teken.",
+      "hint": "Hij staat op een heuveltje, naast een beekje."
+    },
+    "llanura-gs-02": {
+      "name": "Grot van de steencirkel bij de ranch",
+      "desc": "In het bosje ten zuidwesten van Lon Lon Ranch, naast de uitgang richting het Hylia-meer, bedekt een cirkel van stenen op de grond een grot. Open hem met **een Bom of een slag met de Megatonhamer op de cirkel** en laat je in het gat zakken.\n\nZodra je binnenkomt valt er een Grote Skulltula van het plafond: versla die met je zwaard. De gouden zit op de muur; bereik hem met de Grijphaak of de Boemerang, die ook meteen het Gouden Skulltula-teken naar je toe brengen."
+    },
+    "lonlon-heart-01": {
+      "name": "Stenen toren achteraan",
+      "desc": "Achter op Lon Lon Ranch, direct achter de paardenwei, staat een stenen toren die als silo dient. In een van de hoeken bedekken enkele kratten een opening: **schuif de kratten opzij en kruip door de opening** tot aan het einde, waar het Hartstukje wacht."
+    },
+    "lonlon-gs-01": {
+      "name": "Boom op weg naar de wei",
+      "desc": "Zodra je Lon Lon Ranch binnengaat, op het zijerf aan de linkerkant, staat een boom waarin een Gouden Skulltula verstopt zit: **rol tegen de stam om hem op de grond te laten vallen**, versla hem en pak het Gouden Skulltula-teken."
+    },
+    "lonlon-gs-02": {
+      "name": "Krat in de grot ten zuiden van de ranch",
+      "desc": "Om deze Gouden Skulltula als volwassene te laten verschijnen, moet jonge Link de Feengedachte lezen in de ondergrondse grot ten zuidoosten van Lon Lon Ranch, bij de vijver, en de gewone Skulltula verslaan.\n\nZodra dat is gelukt, keer je terug als volwassene. Achterin tegen de muur staat een houten krat. **Breek het door ertegenaan te rollen** en er komt een Gouden Skulltula uit: versla hem met je zwaard en pak het Gouden Skulltula-teken. Leuk detail: de Feengedachte is dan veranderd.",
+      "hint": "Dood de Skulltula in het verleden om de gouden in de toekomst te vinden."
+    },
+    "lonlon-gs-03": {
+      "name": "Raam van het huis",
+      "desc": "Als je ’s nachts omhoog kijkt naar het huis van Talon op Lon Lon Ranch, naast de toegangspoort, zie je een Gouden Skulltula bij het bovenraam, te hoog voor je zwaard.\n\n**Gooi de Boemerang er van onderaf tegenaan**: die verslaat hem en brengt het Gouden Skulltula-teken in dezelfde worp mee terug. Overdag is die muur leeg."
+    },
+    "lonlon-gs-04": {
+      "name": "In de stenen toren",
+      "desc": "De stenen toren achter op Lon Lon Ranch, achter de wei, herbergt ’s nachts een Gouden Skulltula binnenin. Ga door de torendeur naar binnen en kijk omhoog: hij zit hoog op de muur, boven de bos hooi die onder het raam hangt.\n\nAlleen de Boemerang kan erbij: **gooi hem vanaf de torenvloer** en hij verslaat de Skulltula en brengt het Gouden Skulltula-teken in één worp terug. De Feeënkatapult doodt hem wel, maar dan blijft het teken boven hangen."
+    },
+    "ciudadela-heart-01": {
+      "name": "Schatkistwinkel",
+      "desc": "De Schatkistwinkel ligt links van het plein van Hyrule-stad wanneer je binnenkomt, in een zijstraat. Hij is alleen ’s nachts open en kost 10 Rupees per spel. De eigenaar geeft je een sleutel: elk van de vijf kamers heeft twee kisten en maar één bevat de sleutel naar de volgende; kies je fout, dan is het spel voorbij.\n\nRust de Lens der Waarheid uit via het tabblad Uitrusting om te zien wat er in elke kist zit. **Doorloop alle vijf kamers en open de grote kist in de prijzenkamer** om het Hartstukje op te eisen.",
+      "hint": "Aanbevolen: Lens der Waarheid."
+    },
+    "ciudadela-heart-02": {
+      "name": "De verdwaalde puppy",
+      "desc": "Richard is het kleine witte hondje dat ’s nachts rondrent in een van de achterafstraatjes van Hyrule-stad, waar een man uit het raam van zijn huis leunt. Praat met Richard zodat hij je volgt.\n\nMet Richard op je hielen loop je naar **de ingang van het plein vanaf de Hyrule-vlakte**. Zijn baasje geeft je het Hartstukje.",
+      "hint": "Ze geeft het stukje alleen de eerste keer; daarna Rupees."
+    },
+    "ciudadela-heart-03": {
+      "name": "Bombchu-bowlingbaan",
+      "desc": "De Bombchu-bowlingbaan ligt aan de westkant van het Marktplein in Hyrule-stad en gaat pas open nadat je Koning Dodongo hebt verslagen.\n\nPraat met de medewerkster: voordat je betaalt vertelt ze welke prijs er te winnen valt, en elk potje kost 10 Rupees. Je moet drie levels halen met 10 Bombchu’s, die je van achter de lijn loslaat zodat ze het doelwit achterin raken, met obstakels zoals een Cucco in de weg.\n\nDe prijs wisselt per potje, dus **blijf spelen tot ze het Hartstukje aankondigt** en win dat spel.",
+      "hint": "10 Rupees per spel; de prijs wordt aangekondigd voordat je betaalt."
+    },
+    "ciudadela-gs-01": {
+      "name": "Wachthuisje",
+      "desc": "Naast de ophaalbrug, bij de ingang van Hyrule-stad, staat het wachthuisje, een gebouw vol kruiken met een Gouden Skulltula verstopt in een houten krat.\n\nLoop naar de achtermuur en **rol tegen het meest rechtse krat**, dat rechts van de soldaat staat wanneer je naar hem kijkt."
+    },
+    "castillo-gs-01": {
+      "name": "Boom in de heggetuin",
+      "desc": "Je kunt het terrein van Kasteel Hyrule alleen als kind verkennen. Loop het pad omhoog richting het kasteel en stap aan de zijkant de tuin met heggen en bloemen binnen. Steek die westwaarts over naar de verste hoek, bij de kasteelmuur, waar een eenzame boom staat.\n\n**Rol tegen de stam** om de Gouden Skulltula naar beneden te laten vallen; versla hem en pak het teken."
+    },
+    "castillo-gs-02": {
+      "name": "Grot van het Lied der Stormen",
+      "desc": "Om de bewaker bij de poort van Kasteel Hyrule te ontwijken klim je langs de klimplanten en laat je je in de slotgracht zakken bij de toegangsbrug. Zwem oostwaarts onder de brug door en klim de stenen trap op: precies daar, bij de buitenmuur, staat een boom met een cirkel van aarde aan de voet.\n\n**Speel het Lied der Stormen op die cirkel** om een gat te openen. De grot heeft gebarsten muren die je met Bommen kunt opblazen: achter een daarvan zit de Gouden Skulltula. De Boemerang doodt hem en brengt je het teken."
+    },
+    "castillo-fairy-01": {
+      "name": "Grote Fee: Draaiaanval",
+      "desc": "Aan het oostelijke uiteinde van het terrein van Kasteel Hyrule, langs de rechtermuur, loopt een doodlopend pad met een rotsblok aan het einde. Om te voorkomen dat de bewaker je tegenhoudt, klim je langs de klimplanten op de muur.\n\nAan het einde van het pad **blaas je het rotsblok op met een Bom en kruip je door de opening** naar de Bron van de Grote Fee. Speel Zelda’s Slaapliedje op het Triforce-embleem en accepteer het offer van 50 Rupees: de Grote Fee versterkt je Draaiaanval met een magische schokgolf.",
+      "hint": "Ze vraagt een offer van 50 Rupees en versterkt de Draaiaanval met een schokgolf."
+    },
+    "kakariko-heart-01": {
+      "name": "Klein dak achter Impa’s Huis",
+      "desc": "Het stukje ligt goed zichtbaar op een klein dak met rode pannen achter Impa’s Huis, tegen de berg aan. Vanaf het blauwe dak van het huis **laat je je zakken op het kleine dak erachter** en pak je het op. Vanaf daar kun je afdalen naar de stal met de koe.\n\nPraat als kind met Kaepora Gaebora op de top van de Doodsberg en de uil zet je af op het dak van Impa. Als volwassene heb je de Grijphaak nodig.",
+      "hint": "Als volwassene met de Grijphaak vanaf het dak van het Huis van de Skulltula’s."
+    },
+    "kakariko-heart-02": {
+      "name": "Windmolen",
+      "desc": "In de Windmolen, achter in het dorp, wacht het stukje bovenin, op een meubelstuk langs de bovenste loopbrug.\n\nAls volwassene kom je er via het Graf van Dampé, op de Begraafplaats. Wanneer zijn race voorbij is, is de uitgangstrap kapot: **schiet de Grijphaak op het doelwit boven de deur** en volg de gang. Je komt boven in de Windmolen uit, naast het draaiende platform; klim op het meubel tegen de muur en pak het stukje.",
+      "hint": "Als volwassene kom je binnen via het Graf van Dampé."
+    },
+    "kakariko-heart-03": {
+      "name": "De man op het dak",
+      "desc": "De man op het dak zit boven op **de Drankjeswinkel, naast de uitkijktoren en tegenover de Windmolen**, en je hoeft hem alleen maar te bereiken en aan te spreken om het Hartstukje te krijgen.\n\nAls volwassene volstaat de Grijphaak: ga op de reling tegenover de Windmolen staan en haak jezelf op het dak.",
+      "hint": "Als volwassene heb je de Grijphaak nodig."
+    },
+    "kakariko-gs-01": {
+      "name": "Huis in aanbouw",
+      "desc": "Terwijl de timmerlieden aan het huis in aanbouw werken, hangt deze Gouden Skulltula als kind ’s nachts op de bakstenen muur van de bouwplaats, boven de grond. **Loop de houten loopplank op naar de steiger** en je hebt hem recht voor je op de muur.\n\nJe zwaard is genoeg om hem te doden, dus je hebt verder niets nodig om het teken te pakken."
+    },
+    "kakariko-gs-02": {
+      "name": "Boom bij de ingang",
+      "desc": "De grote den bij de ingang vanaf de Hyrule-vlakte, in het lagere deel van het dorp, verbergt ’s nachts een Gouden Skulltula die als kind op de grond valt als je **tegen de stam van de den rolt**. Zodra hij beneden is, maak je hem af en pak je het teken."
+    },
+    "kakariko-gs-03": {
+      "name": "Uitkijktoren",
+      "desc": "Halverwege de ladder van de uitkijktoren, midden in het dorp, hangt ’s nachts een Gouden Skulltula die je van onderaf aanvalt: **schiet hem neer met de Feeënkatapult of stuur een Bombchu de ladder op**.\n\nZodra hij dood is, klim je de ladder op: het teken blijft er halverwege hangen en je kunt het pakken zonder helemaal naar boven te klimmen.",
+      "hint": "Schakel hem uit voordat je de toren beklimt richting de man op het dak."
+    },
+    "kakariko-gs-04": {
+      "name": "Huis bij de bergpoort",
+      "desc": "Op weg naar de poort naar de Doodsberg, in het hogere deel van het dorp, zie je een huis vlak ernaast, voorbij de uitkijktoren. Loop als kind en ’s nachts **eromheen via het graspad aan de achterkant** en bekijk de muren tot je de Gouden Skulltula vindt. Hij zit op grondhoogte, dus je kunt hem met je zwaard uitschakelen en het teken pakken zonder extra voorwerpen."
+    },
+    "kakariko-gs-05": {
+      "name": "Huis van de Skulltula’s",
+      "desc": "Het Huis van de Skulltula’s, waar de vervloekte familie woont, is het eerste huis rechts wanneer je vanaf de Hyrule-vlakte binnenkomt, met spinnenwebben boven de deur. Als kind en ’s nachts verschijnt de Gouden Skulltula op **de voorkant van het huis, links van de toegangstrap**, op grondhoogte; overdag kun je zijn web daar al zien.\n\nAls het dag is, speel je het Lied van de Zon om de nacht te laten vallen. Je zwaard rekent in een mum van tijd met hem af, waarna je alleen nog het teken hoeft op te pakken."
+    },
+    "kakariko-gs-06": {
+      "name": "Boven Impa’s Huis",
+      "desc": "Voor deze Gouden Skulltula moet je als volwassene ’s nachts terugkeren; hij zit op de rotswand vlak naast het blauwe dak van Impa’s Huis, het grote huis aan de zuidrand van het dorp. Je hebt de Grijphaak nodig.\n\nLoop aan de zijkant om het huis heen naar de rotswand erachter, waar klimplanten groeien, en **klim daarlangs omhoog naar het blauwe dak**. Vanaf boven zie je de Skulltula op de rots naast het dak: haal hem neer met de Grijphaak, die ook meteen het teken naar je toe brengt."
+    },
+    "cementerio-heart-01": {
+      "name": "Grafdelftocht met Dampé",
+      "desc": "Als kind en ’s nachts biedt Dampé, de grafdelver, zijn \"Bloedstollende Grafdelftocht\" aan op de Begraafplaats. Als je overdag aankomt, speel je daar het Lied van de Zon: de nacht valt en Dampé komt meteen naar buiten. Accepteer en blijf op het centrale plein, want als je te ver wegloopt eindigt de tocht.\n\nGa naast een van de aardehopen staan en **vraag hem te graven: elke poging kost 10 Rupees**. Soms stuit hij op iets hards en vraagt hij 5 Rupees extra om door te graven, waarna willekeurig een steen of het stukje tevoorschijn komt. Blijf proberen tot het verschijnt. De locatie is volledig willekeurig.",
+      "hint": "10 Rupees per hoop; soms vraagt hij 5 extra om door te graven."
+    },
+    "cementerio-heart-02": {
+      "name": "Race tegen Dampé",
+      "desc": "Het Graf van Dampé is de grafsteen met bloemen waar rook uit komt, in het omheinde gedeelte links, een paar treden omhoog. Trek er als volwassene en ’s nachts **aan om het gat te openen en daal af in de catacomben**. Volg beneden zijn geest tot het einde zonder hem uit het oog te verliezen; de eerste race levert de Grijphaak op.\n\nHet Hartstukje komt bij de tweede. Vertrek met de Grijphaak via het doelwit boven de kapotte trap (je komt uit in de Windmolen van Kakariko), keer terug naar de Begraafplaats, daal opnieuw af in het gat dat open blijft, en haal de finish binnen één minuut.",
+      "hint": "De eerste race geeft je de Grijphaak; het stukje krijg je bij de tweede."
+    },
+    "cementerio-heart-03": {
+      "name": "Graf bij het Graf van de Koninklijke Familie",
+      "desc": "Vlak bij het Graf van de Koninklijke Familie, in het bovenste deel van de Begraafplaats: ga met je rug naar het graf staan, met je gezicht richting de uitgang, en van de grafstenen links van je is het **de eerste van links**. Als volwassene gaat het altijd open; als kind alleen ’s nachts (overdag houdt het jongetje dat over de graven waakt je tegen; het Lied van de Zon bespaart je het wachten).\n\nTrek aan de grafsteen en daal af in het gat: de kist met het Hartstukje staat achter in de crypte, zonder vijanden die hem bewaken.",
+      "hint": "Als kind gaat het graf alleen ’s nachts open."
+    },
+    "cementerio-heart-04": {
+      "name": "Richel op de muur",
+      "desc": "Hoog op de linkermuur van de Begraafplaats, boven het Graf van Dampé en de zachte aarde, bevindt zich een richel waar het Hartstukje goed zichtbaar op een stenen pilaar ligt, onbereikbaar van onderaf zonder hulp.\n\nAls je als kind een Magische Boon in die zachte aarde plant, **stap je als volwassene op het blad en laat je je naar de richel tillen**. Eenmaal boven pak je het stukje van de pilaar.",
+      "hint": "Het stukje ligt goed zichtbaar op een pilaar op de muur."
+    },
+    "cementerio-gs-01": {
+      "name": "Muur van de Begraafplaats",
+      "desc": "’s Nachts verschijnt er hoog in het smalle steegje tussen Dampé’s Hut en de stenen muur met het ijzeren hek, bij de ingang van de Begraafplaats, een Gouden Skulltula. Overdag zie je op die plek een gouden web dat aangeeft waar hij verschijnt.\n\n**Versla hem met de Grijphaak of de Boemerang en trek daarmee meteen het teken terug.**"
+    },
+    "cementerio-gs-02": {
+      "name": "Insecten in de zachte aarde",
+      "desc": "Ga als kind met een fles Insecten, op elk moment van de dag, naar het stukje zachte aarde in de linkerhoek achter op de Begraafplaats, bij de muur en naast het Graf van Dampé, en **laat ze erop los zodat er een Gouden Skulltula uitkomt**. Dood hem zodra hij opduikt en pak het teken.",
+      "hint": "Het is dezelfde plek waar je de Magische Boon plant."
+    },
+    "cementerio-bean-01": {
+      "name": "Zachte aarde op de Begraafplaats",
+      "desc": "Onder de hoge richel op de linkermuur van de Begraafplaats, naast het Graf van Dampé, ligt de zachte aarde waar we aanraden **als kind een Magische Boon te planten**. Wanneer je als volwassene terugkomt, tilt het blad je omhoog naar de richel met het Hartstukje.",
+      "hint": "Plant hem als kind en gebruik hem als volwassene."
+    },
+    "sendero-heart-01": {
+      "name": "Richel boven de Dodongo-grot",
+      "desc": "Boven de ingang van de Dodongo-grot ligt de richel met dit Hartstukje, goed zichtbaar in een nis in de rots. Je moet als kind een Magische Boon in de zachte aarde planten.\n\nAls volwassene vaar je mee op de bonenplant en spring je eraf wanneer hij langs de richel komt om het Hartstukje te pakken."
+    },
+    "sendero-gs-01": {
+      "name": "Insecten in de zachte aarde bij de grot",
+      "desc": "De zachte aarde voor deze Gouden Skulltula ligt voor de Dodongo-grot.\n\nZodra de ingang is vrijgemaakt, **giet je de insecten uit de fles op de zachte aarde** en, zodra de Gouden Skulltula tevoorschijn springt, versla je hem met je zwaard en pak je het teken.",
+      "hint": "Je kunt op dezelfde plek een Magische Boon planten."
+    },
+    "sendero-gs-02": {
+      "name": "Gebarsten muur bij Kakariko",
+      "desc": "Wanneer je Kakariko verlaat richting de berg, nog vóór de Dodongo-grot, zit er aan de rechterkant van het pad een muur van gebarsten rotsen die afwijkt van de rest: je kunt de Skulltula erachter horen.\n\n**Open de muur met een Bom of, als volwassene, met de Megatonhamer**, stap de nis binnen en versla de Gouden Skulltula, die op zwaardhoogte op de achterwand zit."
+    },
+    "sendero-gs-03": {
+      "name": "Boven de Dodongo-grot",
+      "desc": "Op de richel met reling vanwaar je als kind de Bombloem op de Dodongo-grot laat vallen, naast de afslag naar Goron-stad, liggen enkele rotsen tegen de muur. Deze Gouden Skulltula verschijnt eronder wanneer je als volwassene ’s nachts terugkeert.\n\n**Breek de rotsen met de Megatonhamer of een Bom**, het enige dat ze kan vernietigen, versla daarna de Skulltula en pak het teken."
+    },
+    "sendero-gs-04": {
+      "name": "Pad met vallende rotsen",
+      "desc": "Voorbij de Dodongo-grot klimt het pad naar het gedeelte waar vulkanische rotsen naar beneden regenen en eindigt bij de klimwand met netten richting de top. Deze Gouden Skulltula verschijnt aan de voet van die wand, als volwassene en ’s nachts.\n\nMet je gezicht naar de wand, rechts bij het omhoogklimmen naast de rotsboog, ligt een stapel rotsen die Bommen niet kunnen breken: **sla erop met de Megatonhamer** en, zodra de rotsen aan gruzelementen liggen, maak je de Skulltula af en pak je het teken."
+    },
+    "sendero-bean-01": {
+      "name": "Zachte aarde bij de Dodongo-grot",
+      "desc": "Voordat je hier een Magische Boon kunt planten, moet je als kind eerst het rotsblok opruimen dat de Dodongo-grot blokkeert, met de Bombloem erboven en de Goron-armband. Plant hem daarna in de zachte aarde voor de ingang.\n\nAls volwassene zweeft de plant langs de richel met het Hartstukje en brengt hij je omhoog naar het stuk met de vallende rotsen: **een kortere route die het rotsblok op het pad overslaat**.",
+      "hint": "Plant hem als kind en gebruik hem als volwassene."
+    },
+    "sendero-fairy-01": {
+      "name": "Grote Fee: magie",
+      "desc": "Helemaal bovenin, op de top van de Doodsberg, wacht Kaepora Gaebora bij de ingang van de Krater. **De muur van gebarsten rotsen links van hem kun je neerhalen met een Bom** of, als volwassene, met de Megatonhamer, en daarachter ligt de bron.\n\nSpeel binnen Zelda’s Slaapliedje op het Triforce-embleem. De Grote Fee vraagt je om een offer van 25 Rupees: accepteer, en ze geeft je de Magiemeter en Din’s Vuur. Als je als kind omhoog klimt, neem dan het Hyliaanse Schild mee voor de vallende rotsen.",
+      "hint": "Ze vraagt een offer van 25 Rupees. Beloning: Magiemeter en Din’s Vuur."
+    },
+    "goron-heart-01": {
+      "name": "Draaiende kruik",
+      "desc": "De grote kruik met gezichten midden op de onderste verdieping van Goron-stad begint pas te draaien wanneer je als kind **de fakkels eromheen aansteekt**. Din’s Vuur werkt, of een brandende Deku-stok, bijvoorbeeld aangestoken in de kamer van Darunia, die opengaat wanneer je Zelda’s Slaapliedje voor zijn deur speelt. Ze blijven branden, ook als je later terugkomt.\n\nGa daarna een verdieping omhoog, loop de houten plank op die boven de kruik uitsteekt en laat een Bom van bovenaf erin vallen, of gooi er een Bombloem in met de Goron-armband. Hij laat het stukje op de grond vallen samen met 10 Rupees.",
+      "hint": "Als hij op een ander gezicht stopt, geeft hij andere prijzen: probeer opnieuw tot het lukt."
+    },
+    "goron-gs-01": {
+      "name": "Rotsblokdoolhof",
+      "desc": "De kamer met het rotsblokdoolhof ligt op de bovenste verdieping van Goron-stad, die met de ingang vanaf het Doodsbergpad, en als kind steek je die over door met Bommen een pad door de blokken te blazen.\n\nHelemaal achterin, naast twee kisten, staat een houten krat met de Gouden Skulltula erin: **rol tegen het krat om het te breken**, versla de Skulltula met je zwaard en pak het teken."
+    },
+    "goron-gs-02": {
+      "name": "Rotsoverhang aan het plafond",
+      "desc": "Loop als volwassene in Goron-stad, één verdieping boven het onderste niveau, tegen de klok in om het platform heen. Kijk omhoog voordat je de tunnel binnengaat: de Gouden Skulltula zit aan de onderkant van de rotsoverhang aan het plafond.\n\n**Haal hem naar beneden met de Grijphaak**, die meteen ook het teken naar je toe trekt."
+    },
+    "crater-heart-01": {
+      "name": "Nis in de kraterwand",
+      "desc": "Wanneer je de Krater binnengaat vanaf de top van de Doodsberg, kijkt de ingangsrichel uit over een grote wand die afdaalt naar het platform van de Bolero van het Vuur. Aan de rand van die richel hangen klimnetten: **klim erlangs omlaag** en iets lager vind je het stukje in een nis in de wand, tussen twee netten in.\n\nAls kind verbrandt de hitte je snel. Als volwassene heb je met de Goron-tuniek alle tijd.",
+      "hint": "Als kind loopt er een hittetimer: wees snel."
+    },
+    "crater-heart-02": {
+      "name": "Koepelrots in de Krater",
+      "desc": "Speel als kind de **Bolero van het Vuur op de ocarina** en plant, eenmaal in de Krater, een boon in de zachte aarde naast het platform.\n\nKeer terug als volwassene met de Goron-tuniek aan, **vaar mee op het blad en spring eraf wanneer het over een van de hoge rotsen zweeft**: het stukje wacht bovenop.",
+      "hint": "Je moet de Bolero van het Vuur hebben geleerd."
+    },
+    "crater-gs-01": {
+      "name": "Krat bij de ingang vanaf de top",
+      "desc": "Als je de Krater als kind binnengaat vanaf de top van de Doodsberg, in plaats van vanuit Goron-stad, zie je een paar stappen van de ingang aan de linkerkant twee houten kratten tegen de rotswand, naast een kruik. De Gouden Skulltula zit in het krat naast de kruik.\n\n**Breek de kratten door ertegenaan te rollen**, versla de Skulltula en pak het teken.",
+      "hint": "Gebruik Nayru’s Liefde als je de hitte niet aankunt."
+    },
+    "crater-gs-02": {
+      "name": "Insecten in de zachte aarde bij het Bolero-platform",
+      "desc": "Deze Gouden Skulltula dwingt je door de tijd te reizen, omdat hij alleen als kind tevoorschijn komt terwijl je de Bolero van het Vuur als volwassene leert. Als kind is het spelen van dat lied de enige manier om bij deze zachte aarde te komen, een paar stappen van het Bolero-platform.\n\nJe verschijnt op het platform: **laat de insecten los in de zachte aarde ernaast**, versla de Skulltula en pak het teken zonder te treuzelen, want de hitte blijft je harten leegtrekken.",
+      "hint": "Als kind trekt de hitte beetje bij beetje je harten leeg: treuzel niet."
+    },
+    "crater-bean-01": {
+      "name": "Zachte aarde in de Krater",
+      "desc": "Naast het platform van de Bolero van het Vuur, in het centrale deel van de Krater, ligt een stukje zachte aarde dat je als kind alleen bereikt door dat lied te spelen. **Plant de Magische Boon en vertrek meteen**, bijvoorbeeld met een ander warplied, omdat de hitte een timer laat aftellen.\n\nWanneer je als volwassene terugkeert, vliegt de plant eerst over de koepelrots met het ene Hartstukje en daarna langs de beklimbare wand met het andere. Hij brengt je ook omhoog naar de ingang bij de top.",
+      "hint": "Plant hem als kind en gebruik hem als volwassene."
+    },
+    "crater-fairy-01": {
+      "name": "Grote Fee: dubbele magie",
+      "desc": "Vanuit de kamer van Darunia in Goron-stad daal je als volwassene af naar het lagere deel van de Krater. Als je net Volvagia hebt verslagen, zet het blauwe licht je af op het centrale platform: steek de kettingbrug naar het westen over en volg die oever. Twee stapels rotsen blokkeren een doorgang in de wand: **sla ze kapot met de Megatonhamer**.\n\nStap in de bron op het embleem en speel Zelda’s Slaapliedje. De Grote Fee der Wijsheid vraagt een offer van 200 Rupees voor de bron: accepteer, en ze verdubbelt je Magiemeter.",
+      "hint": "Ze vraagt een offer van 200 Rupees. Beloning: verdubbelt je Magiemeter."
+    },
+    "rio-heart-01": {
+      "name": "Pilaar midden in de rivier",
+      "desc": "Het stukje ligt op een hoog platform omringd door water, midden in de Zora-rivier, en als kind bereik je het door met een Cucco te zweven vanaf het beboste gedeelte ernaast. Je klimt daar omhoog via klimplanten, zonder Cucco in je armen, maar bovenin, tussen de varens links, leidt een gat naar een grot met een kist en een Cucco. **Verlaat de grot via de bloem met de Cucco in je armen, ren naar de rand en spring om naar het platform te zweven.**\n\nAls volwassene kom je er op de bonenplant of met de Zweeflaarzen.",
+      "hint": "Als volwassene met de geplante boon of de Zweeflaarzen."
+    },
+    "rio-heart-02": {
+      "name": "Richel bij de waterval",
+      "desc": "Aan het einde van de Zora-rivier, naast de waterval die de ingang van het Zora-rijk verbergt, staat een vrijstaand platform met het stukje.\n\nPak de Cucco aan het begin van de rivier, naast de Bonenverkoper, en draag hem stroomopwaarts met je mee. Eenmaal bij de waterval klim je naar het hoogste punt, **spring je met hem en zweef je naar het platform**.",
+      "hint": "Als volwassene kun je het alleen bereiken met de Zweeflaarzen."
+    },
+    "rio-heart-03": {
+      "name": "Kikkerspel",
+      "desc": "De kikkers voor dit stukje, de Vijf Fantastische Kikkertenoren, zitten op boomstronken in de vijver van een grot uitgehouwen in de rots, halverwege de Zora-rivier. Ga als kind, praat met ze en ze vragen je iets op de ocarina te spelen. Ze geven je Rupees voor elk nieuw lied:\n- Zelda’s Slaapliedje\n- Epona’s Lied\n- Saria’s Lied\n- Lied van de Zon\n- Lied van de Tijd\n\nZodra je ze allemaal hebt gespeeld, stellen ze hun spel voor: er verschijnt een insect boven een kikker en **jij speelt snel zijn noot zodat hij omhoog springt om het op te eten**. Speel de hele reeks foutloos en het stukje is van jou; als je mist, kun je opnieuw proberen.",
+      "hint": "Onthoud welke noot bij elke kikker hoort."
+    },
+    "rio-heart-04": {
+      "name": "De kikkers in de regen",
+      "desc": "Halverwege de Zora-rivier vind je een boomstronk met vijf kikkers in een grot. Je moet het **Lied der Stormen** op de ocarina spelen. Nadat je het hebt gespeeld, belonen de kikkers je met een Hartstukje."
+    },
+    "rio-gs-01": {
+      "name": "Insecten in de zachte aarde bij de Bonenverkoper",
+      "desc": "Naast de Bonenverkoper, aan het begin van de Zora-rivier, ligt een stukje zachte aarde dat een Gouden Skulltula verbergt, en je hebt een fles met insecten nodig om hem naar buiten te lokken.\n\n**Gooi de fles met insecten leeg op de zachte aarde**: de Skulltula steekt zijn kop uit de grond. Versla hem met je zwaard en pak het teken."
+    },
+    "rio-gs-02": {
+      "name": "Muur bij de waterval",
+      "desc": "Aan het einde van de Zora-rivier, bij de waterval, komt deze Gouden Skulltula alleen ’s nachts tevoorschijn, als kind.\n\nKlim vanaf de met gras begroeide richel naast de waterval langs de rots omlaag naar de oever beneden, aan het water.\n\nDe Skulltula zit op de wand van de lage rots op die oever. Ga dichtbij staan en val hem aan met je zwaard."
+    },
+    "rio-gs-03": {
+      "name": "Boven de verhoogde grotten",
+      "desc": "Hoog op de rotswand boven het plateau met de grotten, midden langs de Zora-rivier, verschijnt ’s nachts een Gouden Skulltula, en de Grijphaak reikt er alleen bij als je op het plateau zelf klimt.\n\nAls volwassene klim je omhoog langs de klimplanten tussen de rotsen, vlak naast het water. Loop boven naar de rand en **schiet de Grijphaak naar de bovenkant van de wand** om hem te verslaan en het teken terug te halen.",
+      "hint": "Vanaf het pad beneden zou je de Lange Grijphaak nodig hebben."
+    },
+    "rio-gs-04": {
+      "name": "Boven de brug",
+      "desc": "Boven de laatste brug over de Zora-rivier, in de grot die leidt naar de waterval van het Zora-rijk, rijst een zeer hoge rotswand op waarop ’s nachts een Gouden Skulltula neerstrijkt.\n\n**Raak hem met de Grijphaak vanaf de brug zelf** en pak het teken."
+    },
+    "rio-bean-01": {
+      "name": "Zachte aarde bij de Bonenverkoper",
+      "desc": "Direct wanneer je de Zora-rivier binnengaat, blokkeren twee gebarsten rotsblokken de weg; blaas ze op met een Bom.\n\nVlak daarachter, naast een hek, zit de Bonenverkoper, en als kind loont het de moeite om er een paar van hem te kopen: de eerste kost 10 Rupees en elke volgende wordt 10 Rupees duurder. **Plant er één in de zachte aarde naast hem**, door hem uit je inventaris te gebruiken.",
+      "hint": "Plant hem als kind en gebruik hem als volwassene."
+    },
+    "dominio-gs-01": {
+      "name": "Bevroren waterval",
+      "desc": "Als volwassene, wanneer het Zora-rijk is bevroren, verschijnt de Gouden Skulltula ’s nachts bovenaan de bevroren waterval, waar als kind het duikspel was. Je komt er via de gang op de verdieping van Koning Zora, die uitkomt op een hoge galerij.\n\nKijk over de rand naar links: hij zit op een pilaar bedekt met bevroren planten, tegen de muur aan. **Bereik hem met de Grijphaak of schiet hem neer met een pijl** om het teken te pakken."
+    },
+    "fuente-heart-01": {
+      "name": "Verste ijsschots",
+      "desc": "Het stukje ligt boven op de verste ijsschots in de bevroren Zora-bron, weg van het pad naar de IJsgrot. Als volwassene betreed je de bron via de doorgang achter de troon van de bevroren Koning Zora.\n\n**Spring van schots naar schots tot helemaal op de laatste**: het zijn gladde ijsblokken, dus schat elke sprong goed in. Als je in het water valt, zwem je terug naar het begin en klim je opnieuw omhoog."
+    },
+    "fuente-heart-02": {
+      "name": "Bodem van de bron",
+      "desc": "Dit Hartstukje wacht op de bodem van de Zora-bron, tussen een stapel Groene Rupees. Als volwassene heb je twee dingen nodig: de Zora-tuniek, die Koning Zora je geeft wanneer je hem bevrijdt, om onder water te ademen, en de IJzeren Laarzen om te zinken.\n\nGa met de Zora-tuniek aan het water in, **trek de IJzeren Laarzen aan en zink naar de bodem**, pak het stukje en doe de laarzen weer uit om naar boven te drijven."
+    },
+    "fuente-gs-01": {
+      "name": "Muur boven de verzonken boog",
+      "desc": "Zodra je de Zora-bron binnengaat vanuit het Zora-rijk, volg je de oever naar een verwoeste stenen boog, half verzonken in het water tegen de rotswand met klimplanten. Klim boven op de boog: ’s nachts verschijnt er een Gouden Skulltula op die muur, en als kind kun je erbij met de Boemerang.",
+      "hint": "De Boemerang vind je In Jabu-Jabu’s Buik."
+    },
+    "fuente-gs-02": {
+      "name": "Den in de zuidoosthoek",
+      "desc": "In de zuidoosthoek van de Zora-bron, die met de dennen aan de voet van de klif naast de muur die de Bron van de Grote Fee verbergt, staat een boom met als kind op elk uur van de dag een Gouden Skulltula erin.\n\nZwemmen is niet nodig: ga vanaf de offerschaal voor Heer Jabu-Jabu rechtsaf omlaag en volg het zandpad langs de oever. **Rol tegen de den** om de Skulltula naar beneden te laten vallen, versla hem met je zwaard en pak het teken."
+    },
+    "fuente-gs-03": {
+      "name": "Grot achter de blokken met Zora-tekens",
+      "desc": "Ga als volwassene naar het uiterste zuidoosten van de Zora-bron, waar twee zwarte stenen blokken met Zora-tekens de ingang van een grot bedekken. **Til ze op met de Zilveren Handschoenen** en ga naar binnen.\n\nBinnen hangen onzichtbare Skulltula’s aan het plafond; ontwijk ze of bekijk ze met de Lens der Waarheid. Klim achterin langs de klimplanten omhoog naar een buitenrichel.\n\nDe Gouden Skulltula **komt alleen ’s nachts tevoorschijn**. Hij verschijnt boven de ingang van een grot op de richel; haal hem neer met de Grijphaak en pak het teken.",
+      "hint": "Binnen hangen vier onzichtbare Skulltula’s aan het plafond."
+    },
+    "fuente-fairy-01": {
+      "name": "Grote Fee: Farore’s Wind",
+      "desc": "Volg vanaf de offerschaal voor Heer Jabu-Jabu te voet de vervallen oever rechts naar de zuidoosthoek, die met de bomen aan de voet van de klif. Daar verbergt een gebarsten stuk rotswand de Bron van de Grote Fee.\n\n**Plaats een Bom of een Bombchu naast de gebarsten muur** om de doorgang te openen. Speel binnen Zelda’s Slaapliedje terwijl je op het Triforce-embleem op de vloer staat. Voordat ze je Farore’s Wind geeft, vraagt de Grote Fee een offer van 100 Rupees die in de bron worden gegooid, dus neem ze mee.",
+      "hint": "Ze vraagt een offer van 100 Rupees: neem ze mee."
+    },
+    "lago-heart-01": {
+      "name": "Duiken in het laboratorium",
+      "desc": "In het Meer-laboratorium, het gebouw aan de oever, bevindt zich een diep bassin, en het Hartstukje is de beloning voor het omlaag duiken en aanraken van de bodem, wat alleen lukt met de Gouden Schub, de prijs van de Visvijver.\n\nHet maakt niet uit of je als kind of als volwassene gaat: spring het water in, **duik omlaag tot je de bodem van het bassin raakt**, en zodra je eruit klimt geeft de wetenschapper je het stukje.",
+      "hint": "De Gouden Schub is de visprijs als volwassene."
+    },
+    "lago-heart-02": {
+      "name": "Dak van het laboratorium",
+      "desc": "Plant als kind een Magische Boon in de zachte aarde naast het Meer-laboratorium bij het Hylia-meer en keer terug als volwassene. Vaar mee op het blad: het maakt een boog over het meer en zet je af op het houten balkon van de laboratoriumtoren.\n\n**Klim de ladder op naar het uitkijkplatform bovenin**, waar het Hartstukje ligt.",
+      "hint": "Pas op voor de kraaien op het dak: ze kunnen je naar beneden stoten."
+    },
+    "lago-heart-03": {
+      "name": "Vissen als kind",
+      "desc": "De Visvijver ligt op een klein eiland in het Hylia-meer, en de eigenaar leent je de hengel voor 10 Rupees. Wanneer je een vis vangt, houd je hem bij, en als je klaar bent praat je met de eigenaar en zeg je dat je stopt: hij meet je beste vangst en **als die groter is dan 50 cm, geeft hij je als kind het Hartstukje**.\n\nDe **grootste vissen** zitten meestal **midden in de vijver**.",
+      "hint": "Elke poging kost 10 Rupees; de prijs is voor een vis van meer dan 50 cm."
+    },
+    "lago-gs-01": {
+      "name": "Insecten in de zachte aarde bij het laboratorium",
+      "desc": "Tegen de muur van het Meer-laboratorium aan, naast enkele vaten en zakken, ligt een stukje zachte aarde. Als kind komt de Gouden Skulltula op elk moment van de dag tevoorschijn zodra je **een fles Insecten opent boven de aarde**: de insecten kruipen het gat in en hij klimt uit de grond. Je zwaard is genoeg om hem te verslaan en het teken te pakken."
+    },
+    "lago-gs-02": {
+      "name": "Muur van het laboratorium",
+      "desc": "Achter het Meer-laboratorium loopt een brug naar buiten. Kijk als kind ’s nachts, zodra je erop stapt, naar rechts: op de ronde toren van het gebouw, naast een pijp, zit deze Gouden Skulltula, te hoog voor je zwaard.\n\n**Gooi de Boemerang vanaf de brug zelf naar hem toe**: hij haalt hem neer en brengt je het teken."
+    },
+    "lago-gs-03": {
+      "name": "Grot aan de westoever",
+      "desc": "Volg als kind de westoever van het Hylia-meer helemaal naar het zuiden tot het einde, waar een nis in de rots enkele kruiken, een vat en een Feengedachte op de muur bevat. Ga vanaf daar het water in en zwem naar de oever ernaast: in de rotswand zie je een lage opening met een stenen latei.\n\n**Kruip door die opening** en je komt in een kleine, donkere grot. De Gouden Skulltula zit op de wand tegenover je; versla hem met je zwaard en pak het teken.",
+      "hint": "Kruip door het gat om de Gouden Skulltula te vinden."
+    },
+    "lago-gs-04": {
+      "name": "Krat op de bodem van het laboratoriumbassin",
+      "desc": "Het bassin in het Meer-laboratorium verbergt op de bodem een houten krat met een Gouden Skulltula erin. Om er als volwassene bij te komen trek je de IJzeren Laarzen aan en laat je je in het water zakken.\n\nEenmaal beneden **rol je tegen het krat om het te breken**, maak je de Skulltula af en pak je het teken met de Grijphaak."
+    },
+    "lago-gs-05": {
+      "name": "Boom op het grote eiland",
+      "desc": "Op het grootste eiland in het meer, dat met het platform van de Serenade van het Water, staat een enorme boom met een holle kruin. Richt als volwassene **de Lange Grijphaak op de top van de boom om jezelf omhoog te trekken** naar de kruin; de gewone Grijphaak reikt niet ver genoeg.\n\nDe Gouden Skulltula komt daar alleen ’s nachts tevoorschijn, binnen in de kruin: als het dag is, speel je daar het Lied van de Zon en hij verschijnt. Versla hem met je zwaard en pak het teken."
+    },
+    "lago-bean-01": {
+      "name": "Zachte aarde bij het laboratorium",
+      "desc": "Plant als kind een Magische Boon in de zachte aarde tegen de muur van het Meer-laboratorium, dezelfde plek als de Skulltula van de insecten. Wanneer je als volwassene terugkomt, is er een plant gegroeid in de vorm van een ring kleurrijke bladeren.\n\n**Stap op de bladeren en ze vliegen je** rond het meer naar het dak van het laboratorium.",
+      "hint": "Plant hem als kind en gebruik hem als volwassene."
+    },
+    "valle-heart-01": {
+      "name": "Achter de waterval",
+      "desc": "Achter de grote waterval in de Gerudo-vallei, op de rivieroever op de bodem van de kloof, ligt een kleine kamer uitgehouwen in de rots, boven het water. Om er te komen ga je naar de hoek met de koe aan de voet van de waterval, door met de Cucco te zweven of in de rivier te springen en eruit te zwemmen.\n\nVolg vanaf daar de oever richting de waterval, passeer de Roddelsteen en spring over de natte rotsen achter het vallende water. **Beklim daarna de in de rots uitgehouwen treden** naar de kamer, waar het Hartstukje wacht.",
+      "hint": "Als de stroming je meesleurt, kom je uit in het Hylia-meer."
+    },
+    "valle-heart-02": {
+      "name": "Kist op de kloofrichel",
+      "desc": "Loop in de Gerudo-vallei, voorbij de brug aan de kant van de tent van de timmerlieden, naar de rand van de kloof naast de stapels donkere rotsen bij de rotsboog. Beneden, halverwege richting de rivier, ligt een smalle richel met een kist.\n\nAls kind **gebruik je de Cucco om omlaag te zweven** naar de kist.\n\nAls volwassene **laat je je vanaf de rand op de richel vallen** en open je de kist.\n\nOm terug te keren volg je de richel en spring je in de rivier: de stroming voert je naar het Hylia-meer.",
+      "hint": "De kist staat op de rotswand."
+    },
+    "valle-gs-01": {
+      "name": "Waterstraal bij de loopbrug",
+      "desc": "Wanneer je de Gerudo-vallei binnenkomt vanaf de Hyrule-vlakte, stuit je als eerste op een kleine houten loopbrug over een poel. ’s Nachts zit de Gouden Skulltula onder de planken, op de stenen muur naast de waterstraal die in de poel valt.\n\nLaat je aan één kant van de loopbrug in het water zakken, klim beneden op de stenen oever en **gooi de Boemerang naar hem toe** om hem neer te halen en het teken terug te brengen. Klim daarna weer omhoog naar de loopbrug."
+    },
+    "valle-gs-02": {
+      "name": "Insecten in de zachte aarde bij de koe",
+      "desc": "Aan de voet van de grote waterval, aan het bovenste deel van de rivier, ligt een hoek met een koe, een Gerudo en een stukje zachte aarde. Als kind bereik je die door met de Cucco vanaf de rand van de klif links van de grote brug te zweven (je kunt op een richel pauzeren en opnieuw springen), of door in de rivier te springen en eruit te zwemmen.\n\nEenmaal daar **laat je de Insecten uit de fles los op de zachte aarde** en versla je de Gouden Skulltula die tevoorschijn komt om het teken te pakken."
+    },
+    "valle-gs-03": {
+      "name": "Achter de tent",
+      "desc": "Voorbij de brug, aan de kant van de vallei richting het Gerudo-fort, staat de tent van de timmerlieden. Om als volwassene over te steken volstaat het om met Epona over de kapotte brug te springen; de Lange Grijphaak of de herstelde brug, als je de timmerlieden hebt gered, werken ook.\n\nLoop ’s nachts om de tent heen naar de ruïnes erachter. De Gouden Skulltula klimt halverwege op de bewerkte stenen muur: **haal hem neer met de Grijphaak, die meteen ook het teken naar je toe trekt**."
+    },
+    "valle-gs-04": {
+      "name": "Rotsboog tegenover de tent",
+      "desc": "Op het pad van de tent van de timmerlieden naar het Gerudo-fort staat een grote natuurlijke boog van roodachtige rots, met twee stapels donkere stenen aan de voet. ’s Nachts klimt er een Gouden Skulltula op de binnenzijde van de boog.\n\nGa tussen de stapels stenen staan, kijk omhoog naar de bovenkant van de boog tot je hem ziet en **schiet de Grijphaak op hem om hem neer te halen**: zodra je hem doodt, brengt de Grijphaak zelf het teken naar je toe."
+    },
+    "valle-bean-01": {
+      "name": "Zachte aarde in de Gerudo-kloof",
+      "desc": "Deze zachte aarde deelt zijn plek met de koe en de Gerudo aan de voet van de grote waterval, en is ook de plek voor de Gouden Skulltula van de insecten. Zweef als kind met de Cucco omlaag vanaf de grote brug of zwem uit de rivier en plant de Magische Boon.\n\nAls volwassene vliegt het blad langs de watervallen omhoog en omlaag, voorbij twee Rode Rupees, en **spring je halverwege de grote waterval door het water** de nis van het Hartstukje in.",
+      "hint": "Plant hem als kind en gebruik hem als volwassene."
+    },
+    "fortaleza-heart-01": {
+      "name": "Boogschieten te paard - 1.000 punten",
+      "desc": "De Gerudo-pas die je krijgt voor het redden van de vier timmerlieden opent de baan voor boogschieten te paard. Ga overdag, want ’s nachts laat de beheerster je niet spelen, en neem Epona mee. Elke ronde kost 30 Rupees.\n\nEpona rent het parcours zelf af en je hebt 20 pijlen voor de doelwitten en kruiken; elke kruik of roos levert 100 punten op. **Behaal 1.000 punten om het Hartstukje te winnen**; bij 1.400 punten neem je ook de Grootste Pijlkoker mee naar huis.",
+      "hint": "Elk spel kost 30 Rupees; bij 1.400 punten krijg je de Grootste Pijlkoker."
+    },
+    "fortaleza-gs-01": {
+      "name": "Doelwit op de schietbaan",
+      "desc": "Met de Gerudo-pas kun je de baan voor boogschieten te paard op, en ’s nachts zit er een Gouden Skulltula op het grote ronde doelwit op een paal aan het einde van het parcours. Rijd of loop het hele parcours af, op Epona of te voet, tot het cirkelvormige gedeelte aan het einde.\n\n**Schiet de Grijphaak erop zodra je vrij zicht hebt** om de Skulltula te doden en het teken terug te halen; als je hem van voren niet ziet, loop dan om het doelwit heen."
+    },
+    "fortaleza-gs-02": {
+      "name": "Bovenste dak",
+      "desc": "’s Nachts verschijnt de Gouden Skulltula op de zijdaken van het Gerudo-fort, een paar stappen van de kist met het Hartstukje: hij zit op de stenen muur van het blok dat naast de klifwand verrijst.\n\nOm boven te komen ga je als volwassene door de deur naar de keukengang, steek je die ongezien over en neem je de hoge uitgang achterin die op de daken uitkomt. Ga voor die muur staan en **schiet de Grijphaak erop**, of spring er met je zwaard naartoe, om het teken te pakken."
+    },
+    "desierto-gs-01": {
+      "name": "In het monument",
+      "desc": "Om het stenen monument in de Spookwoestijn te bereiken steek je als volwassene de zandrivier over en volg je de vlaggen. Ga bij het monument door de opening tussen de pilaren en klim de ladder af naar de kamer beneden.\n\nDe Gouden Skulltula zit op de achterwand, boven het altaar: **klim op het altaar en sla hem met je zwaard naar beneden**. Als je de fakkels aansteekt met Vuurpijlen of Din’s Vuur, verschijnt er een kist met een Deku-handelaarszaad."
+    },
+    "coloso-heart-01": {
+      "name": "Stenen boog bij de tempel",
+      "desc": "Vlak bij de ingang van de Geestentempel staat een stenen boog waar alleen de magische plant bij komt, dus het werk begint als kind. Reis naar de Woestijnkolos met het Requiem van de Geest en plant een Magische Boon in de zachte aarde links van de tempelingang.\n\nDe tocht op het blad voert als volwassene over twee rotsplatforms en eindigt boven de boog: **spring eraf zodra je erboven zweeft en pak het Hartstukje**."
+    },
+    "coloso-gs-01": {
+      "name": "Insecten in de zachte aarde bij de tempel",
+      "desc": "Speel als kind het Requiem van de Geest om naar de Woestijnkolos te reizen en loop vanaf het aankomstplatform naar de trappen van de Geestentempel: het stukje zachte aarde ligt vlak links van de ingang, tegen de rotswand aan.\n\nOp die plek, waar je ook de Magische Boon plant, **laat je de Insecten uit een fles los** waarna de Gouden Skulltula meteen tevoorschijn komt: versla hem met je zwaard en pak het teken."
+    },
+    "coloso-gs-02": {
+      "name": "Top van de grote rots",
+      "desc": "Vlak bij de Bron van de Grote Fee rijst een grote rots op waarvan de top, met een kratervormige kuil, het tweede platform is waar de Magische Boon uit de zachte aarde bij de Geestentempel overheen zweeft. Vaar als volwassene mee op het blad en, wanneer het die rots bereikt, **spring je op de top en laat je je in de kuil zakken**.\n\nDe Gouden Skulltula komt daar alleen ’s nachts tevoorschijn: als het dag is, speel je het Lied van de Zon en hij verschijnt. Dood hem met je zwaard en pak het Gouden Skulltula-teken."
+    },
+    "coloso-gs-03": {
+      "name": "Rotswand naast de tempel",
+      "desc": "’s Nachts verschijnt deze Gouden Skulltula van de Woestijnkolos hoog op de rotswand rechts van de Geestentempel.\n\nZoek de Skulltula en **raak hem met de Grijphaak** om hem te doden en het Gouden Skulltula-teken naar je toe te trekken."
+    },
+    "coloso-bean-01": {
+      "name": "Zachte aarde bij de tempel",
+      "desc": "Je moet hier als kind met het Requiem van de Geest komen om de Magische Boon te planten: de zachte aarde ligt links van de ingang van de Geestentempel, en Insecten erop loslaten brengt ook een Gouden Skulltula naar buiten.\n\nAls volwassene **voert de plant je over twee rotsplatforms naar de stenen boog** met het Hartstukje, en op het tweede platform zit de andere Gouden Skulltula, die alleen ’s nachts verschijnt.",
+      "hint": "Plant hem als kind, gebruik hem als volwassene."
+    },
+    "coloso-fairy-01": {
+      "name": "Grote Fee: Nayru’s Liefde",
+      "desc": "Ten noorden van de oase, aan de overkant van de vijver gezien vanaf de Geestentempel, verbergt een gebarsten rotswand tussen de palmbomen de Bron van de Grote Fee. Je kunt hem zowel als kind openen, aankomend met het Requiem van de Geest, als als volwassene na het oversteken van de Spookwoestijn.\n\n**Blaas de gebarsten rots op met een Bom, een Bombchu of de Megatonhamer**, ga naar binnen, sta op het Triforce-embleem en speel Zelda’s Slaapliedje. De Grote Fee vraagt een offer van 300 Rupees voor de bron: accepteer, en ze geeft je Nayru’s Liefde.",
+      "hint": "Ze vraagt een offer van 300 Rupees."
+    },
+    "deku-gs-01": {
+      "name": "Kompaskamer",
+      "desc": "De Kompaskamer, op de bovenste verdieping van de Deku-boom, verbergt deze Gouden Skulltula in een afgelegen hoek. Stap op de schakelaar om de platforms omhoog te brengen en spring, in plaats van naar het Kompas te gaan, in de zijdnis aan de linkerkant.\n\n**Op de achterwand, achter de kleine kist**, is hij binnen handbereik: dood hem met je zwaard en pak het Gouden Skulltula-teken."
+    },
+    "deku-gs-02": {
+      "name": "Klimplanten in de kelder",
+      "desc": "Wanneer je op het grote web midden in de hoofdkamer springt, breek je erdoorheen en land je in het water van de kelder. In het ronde bassin rechts wacht deze Gouden Skulltula op de muur met klimplanten die terug omhoog leidt naar de hoofdkamer.\n\nJe moet hem van een afstand aanvallen, dus **schiet hem vanuit het water neer met de Feeënkatapult of de Boemerang**, en klim daarna langs de klimplanten omhoog naar het Gouden Skulltula-teken.",
+      "hint": "De Feeënkatapult vind je in deze kerker zelf."
+    },
+    "deku-gs-03": {
+      "name": "Kelderhek",
+      "desc": "Op de eerste kelderverdieping van de Deku-boom loopt een waterkanaal dat eindigt bij een traliehek, waaraan deze Gouden Skulltula zich vastklampt.\n\nKlim op het ronde platform in het water met je gezicht naar het hek, **schiet hem neer met de Feeënkatapult** en pak het Gouden Skulltula-teken."
+    },
+    "deku-gs-04": {
+      "name": "Achterkamer",
+      "desc": "Steek op de eerste kelderverdieping van de Deku-boom, na de kamer met Gohma-larven, een Deku-stok aan bij de fakkel en **verbrand het web op de achterwand**. Daarachter loopt een tunnel die eindigt bij een muur met klimplanten.\n\nPas op voor de Grote Skulltula die hem bewaakt: wacht tot hij zich omdraait en sla hem op zijn rug. **Schiet daarna de Gouden Skulltula neer met de Feeënkatapult** en klim langs de klimplanten omhoog voor het Gouden Skulltula-teken.",
+      "hint": "Je kunt hem al bij je eerste bezoek pakken."
+    },
+    "deku-heart-01": {
+      "name": "Hartcontainer - Gohma",
+      "desc": "Nadat je de drie Deku-struiken in de volgorde 2, 3, 1 hebt verslagen, kun je de kamer van Koningin Gohma op de tweede kelderverdieping binnengaan; kijk zodra je binnen bent omhoog naar het plafond, want daar laat de eindbaas zich vanaf vallen.\n\n**Wanneer haar oog rood wordt, schiet je erop met de Feeënkatapult** of gooi je een Deku-noot om haar te verdoven, en sla je haar oog met je zwaard of een Deku-stok. Als ze naar het plafond klimt om eieren te leggen, breek ze dan voordat de larven uitkomen. Wanneer ze valt, laat ze de Hartcontainer achter.",
+      "hint": "Een schot met de Feeënkatapult in haar oog haalt haar ook van het plafond."
+    },
+    "dodongos-gs-01": {
+      "name": "Achter de muur van de Baby Dodongo’s",
+      "desc": "Nadat je de Beamos hebt afgehandeld, blaas je de gebarsten muur aan de rechterkant van de centrale hal op met een Bombloem en kom je in de gang met Baby Dodongo’s, met direct aan het begin nog een gebarsten muur rechts.\n\nOpen die met een Bom of **lok een Baby Dodongo ernaartoe en dood hem vlak tegen de muur**, want zijn explosie breekt hem ook open.\n\nBinnen zitten wat Keese en de Gouden Skulltula.",
+      "hint": "Hij deelt een gang met degene op de richel van de vogelverschrikker."
+    },
+    "dodongos-gs-02": {
+      "name": "Klimplanten bij de grote trap",
+      "desc": "De grote trap in de linkervleugel, in de kamer vol Bombloemen, komt pas naar beneden wanneer je de losse Bombloem in de opening in de rij plaatst zodat ze allemaal in een kettingreactie ontploffen, dus begin daarmee.\n\nLoop de trap op, klim de ladder op en volg de richel naar de deur achterin. Vlak daarvoor is **een beklimbare gaaswand met een gewone Skulltula en de gouden**: schakel beide uit met de Feeënkatapult (als volwassene met de Feeënboog of de Grijphaak) en klim omhoog voor het Gouden Skulltula-teken."
+    },
+    "dodongos-gs-03": {
+      "name": "Pilaar omringd door Dodongo’s",
+      "desc": "Wanneer je op de eerste verdieping de kamer met de kist van de Bommentas verlaat, blaas je de gebarsten muur op met een Bom en loop je door naar de richel die uitkijkt op de centrale hal. Daar zit nog een gebarsten muur vlak bij de reusachtige schedel: **open die met een Bom en ga die grot vol Dodongo’s binnen**.\n\nDe Gouden Skulltula zit op een rotspilaar midden in de kamer, omringd door Dodongo’s. Ontwijk ze of schakel ze uit en sla de Skulltula met je zwaard naar beneden om het Gouden Skulltula-teken te pakken.",
+      "hint": "Je zwaard volstaat: je kunt hem bij je eerste bezoek pakken."
+    },
+    "dodongos-gs-04": {
+      "name": "Armos-kamer voorbij de bek",
+      "desc": "Laat vanaf de brug op de tweede verdieping een Bom vallen in elk oog van de reusachtige schedel in de centrale hal zodat zijn bek opengaat, en ga erdoor naar binnen. Passeer de kamer met Vuur-Keese en klim omhoog naar de blokkengang.\n\nDuw de blokken opzij om op de houten balken te klimmen en laat je zakken in het omheinde gedeelte achterin. **Open daar de gebarsten muur met Bommen** en volg de tunnel. Er wacht een Armos die ontwaakt zodra je nadert, en de Gouden Skulltula zit op de muur erachter."
+    },
+    "dodongos-gs-05": {
+      "name": "Richel van de vogelverschrikker",
+      "desc": "Keer als volwassene, nadat je het Vogelverschrikkerslied al hebt geleerd, terug naar de gang met Baby Dodongo’s, dezelfde als de Skulltula achter de muur. Blijf dicht bij het begin van de gang, met je gezicht naar een hoge richel op de muur.\n\n**Speel daar het Vogelverschrikkerslied zodat Pierre op de richel verschijnt**: trek jezelf met de Grijphaak naar hem toe, klim omhoog, dood de Gouden Skulltula met je zwaard en pak het Gouden Skulltula-teken.",
+      "hint": "Met de Lange Grijphaak heb je de vogelverschrikker niet nodig."
+    },
+    "dodongos-heart-01": {
+      "name": "Hartcontainer - Koning Dodongo",
+      "desc": "Je hebt de Baassleutel niet nodig om het hol van Koning Dodongo te betreden: ga na de Armos-grot terug naar de blokkenkamer en duw een blok op de grote vloerschakelaar om de traliedeur te openen. Breek in de volgende kamer de kruiken, die Bommen bevatten, en **blaas het gebarsten stuk vloer op om omlaag te vallen**.\n\nGooi telkens wanneer hij zijn bek opent om in te ademen een Bom naar binnen en sla er zodra hij verdoofd is op los met je zwaard. Als hij zich oprolt en wegrolt, stap je opzij of blokkeer je met je schild, en pak je de Hartcontainer voordat je in het blauwe licht stapt.",
+      "hint": "Als je Bommen op zijn, volstaan de Bombloemen in de kamer."
+    },
+    "jabu-gs-01": {
+      "name": "Kamer met de waterschakelaar",
+      "desc": "Val door hetzelfde gat als Ruto en volg de kelderkamers tot degene met het bassin en de waterschakelaar. De Gouden Skulltula zit op de muur, in een nis bovenaan de klimplanten, boven een richel met drie kruiken.\n\n**Zet Ruto op de schakelaar zodat het water stijgt**. Zwem naar de klimplanten, klim omhoog naar de richel en dood de Skulltula met je zwaard om het Gouden Skulltula-teken te pakken.",
+      "hint": "Ruto moet op de schakelaar blijven zitten zodat het water stijgt."
+    },
+    "jabu-gs-02": {
+      "name": "Kelder van de grote kamer, onderste",
+      "desc": "Ga met de Boemerang op zak terug naar de grote kamer met gaten waar je Ruto ontmoette. Zodra de groene tentakel is verslagen, trekt de pilaar die zijn gat achteraan rechts bedekt zich terug: **laat je door dat gat vallen**, en gooi Ruto eerst omlaag als je haar draagt.\n\nBeneden zweven kwallen rond, en er zitten twee Gouden Skulltula’s op twee aangrenzende muren; dit is de onderste. Omdat je ze niet kunt vergrendelen, richt je de Boemerang handmatig: hij slaat hem neer en brengt op de terugweg het Gouden Skulltula-teken mee.",
+      "hint": "Je pakt hem samen met zijn partner erboven."
+    },
+    "jabu-gs-03": {
+      "name": "Kelder van de grote kamer, bovenste",
+      "desc": "Onder de grote kamer met gaten, in de kelder waarin je valt via het gat dat de groene tentakel bedekte, zitten twee Gouden Skulltula’s op aangrenzende muren, naar het noorden en noordwesten. We raden aan beide tegelijk te pakken, omdat ze allebei de Boemerang vereisen.\n\nDegene die je hier zoekt is de bovenste, dus **richt de Boemerang handmatig op hem**, omdat je deze ook niet kunt vergrendelen, en gooi opnieuw wanneer hij valt om het Gouden Skulltula-teken op te halen."
+    },
+    "jabu-gs-04": {
+      "name": "Klimplanten voor de eindbaas",
+      "desc": "Je bereikt de kamer voor Barinade vanuit de tweede kamer van de kerker, die met de put waardoor je omlaag valt als je erin springt, door een krat naar de schakelaar te dragen die de deur opent.\n\nRuim eerst de elektrische kwallen op met de Boemerang en zoek de **pilaar met klimplanten die omhoog loopt naar de kristalschakelaar**: daarop zit de Gouden Skulltula. Dood hem met de Boemerang en klim omhoog om het Gouden Skulltula-teken te pakken."
+    },
+    "jabu-heart-01": {
+      "name": "Hartcontainer - Barinade",
+      "desc": "De deur van Barinade, achter in de kamer met klimplanten, is afgesloten door een schakelaar beschermd door een kristal: klim de muur op, vergrendel de schakelaar en **gooi de Boemerang zodat hij erachterlangs buigt**.\n\nGebruik binnen de Boemerang om de drie tentakels door te snijden die hem aan het plafond vasthouden, ontwijk de elektrische schokken en maak de kwallen af die hij loslaat. Verdoof hem daarna met de Boemerang en sla met je zwaard, herhaal dit bij de tweede golf kwallen en stap niet in het blauwe licht zonder eerst de Hartcontainer te pakken."
+    },
+    "bosque-gs-01": {
+      "name": "Klimplanten bij de ingang",
+      "desc": "De eerste kamer van de tempel is in de openlucht, met twee bomen en een paar Wolfos die op je afkomen, en de Gouden Skulltula wacht hoog bovenin, vlak bij de kist met de Kleine Sleutel.\n\nSchakel de Wolfos uit, **klim langs de klimplanten rechts naar de top van de boom** en dood hem vanaf de tak met de Grijphaak (de Feeënboog of een Bom werkt ook); de Grijphaak zelf brengt het Gouden Skulltula-teken naar je toe."
+    },
+    "bosque-gs-02": {
+      "name": "Centrale hal",
+      "desc": "Na de scène met de Poe-zussen bereik je de centrale hal, de grote kamer met de vier fakkels en de lift. Deze Gouden Skulltula wacht rechts van de trap bij de deur aan de overkant.\n\n**Loop die trap op en kijk naar rechts** om hem hoog op de muur te zien, dood hem met de Grijphaak en schiet nog een keer om het Gouden Skulltula-teken terug te halen.",
+      "hint": "Kijk goed achter de muren."
+    },
+    "bosque-gs-03": {
+      "name": "Balkon boven de glas-in-looddeur",
+      "desc": "Vanaf het bordes bij de glas-in-looddeur, in het gedeelte waar het waterkanaal uitkomt in de Bostempel, moet je het Vogelverschrikkerslied spelen: Pierre verschijnt op het kleine balkon boven de deur. **Trek jezelf met de Grijphaak naar hem toe**, dood de Gouden Skulltula op de balkonvloer en pak het Gouden Skulltula-teken.",
+      "hint": "Pierre verschijnt alleen als je het Vogelverschrikkerslied speelt."
+    },
+    "bosque-gs-04": {
+      "name": "Richel op de westelijke binnenplaats",
+      "desc": "Zodra je de gedraaide gang hebt rechtgezet en de Baassleutel hebt gepakt, laat je je door het gat in de vloer van die kamer vallen naar de waterkamer beneden, loop je de trap op en kom je uit op de stenen loopbrug hoog boven de westelijke binnenplaats.\n\nLaat je aan het einde van de loopbrug, vlak voor de deur, **zakken op het bemoste stenen platform links**. Kijk omhoog: de Gouden Skulltula zit op de muur, klaar voor de Grijphaak, die meteen het Gouden Skulltula-teken naar je toe brengt. Met de Lange Grijphaak bereik je hem ook vanaf de vloer van de binnenplaats.",
+      "hint": "Kijk naar de bovenkant van de stenen muur."
+    },
+    "bosque-gs-05": {
+      "name": "Draaiende kamer in de kelder",
+      "desc": "Zodra de vier Poe-zussen zijn verslagen, brengt de lift in de centrale hal je naar de kelder, een kamer met draaiende muren die naar de baasdeur leidt.\n\nJe hoeft de muren niet te draaien voor deze Gouden Skulltula: **volg de cirkelvormige gang zodra je uit de lift stapt en ga de open nis met de kruiken binnen**. Er valt een Grote Skulltula van het plafond; maak die af en kijk hoog op de muur, waar de gouden wacht. Haal hem neer met de Grijphaak, die ook het Gouden Skulltula-teken naar je toe brengt."
+    },
+    "bosque-heart-01": {
+      "name": "Hartcontainer - Phantom Ganon",
+      "desc": "De Baassleutel opent de deur achter in de draaiende kamer in de kelder; loop de trap op en je bereikt de schilderijenkamer. Phantom Ganon rijdt te paard een schilderij binnen en meerdere ruiters komen eruit: de echte maakt hoefslagen en opent een paars portaal wanneer hij de lijst bereikt.\n\nWanneer de echte tevoorschijn komt, **schiet je hem met een pijl of raak je hem met de Grijphaak**; drie pijlen werpen hem van zijn paard. Kaats daarna zijn energiebollen terug met je zwaard of een lege Fles tot er één raakt en hij valt; sla hem en herhaal tot hij verslagen is."
+    },
+    "fuego-gs-01": {
+      "name": "Kamer van het Tijdblok",
+      "desc": "Bovenaan de trap in de centrale hal opent de rechterdeur met een Kleine Sleutel en leidt naar de grote lavakamer. Aan de linkerkant daarvan zit een Tijdblok bovenaan een muur: ga op het platform recht ervoor staan, **stap op de gegraveerde steen op de vloer en speel het Lied van de Tijd**. Het blok zakt naar beneden zodat je erop kunt klimmen naar de deur erboven.\n\nBescherm jezelf binnen tegen de vliegende vloertegels en maak de Like Like af: als hij je grijpt, steelt hij je Hyliaanse Schild (je krijgt het terug zodra je hem verslaat). Haal daarna de Gouden Skulltula van de muur.",
+      "hint": "Let links op zodra je de grote lavakamer binnenkomt."
+    },
+    "fuego-gs-02": {
+      "name": "Muur in het rotsblokdoolhof",
+      "desc": "Deze Gouden Skulltula verbergt zich achter een stuk muur in het doolhof met rollende rotsblokken. Je komt er door het metalen rooster op te klimmen; blijf vanaf daar langs de buitenmuur, terwijl je de rollende rotsblokken ontwijkt, tot je aan het einde van een gang een gebarsten stuk rots bereikt, vlak bij de cel van een Goron.\n\nDat stuk is duidelijk zichtbaar, dus je hoeft niet te zoeken: **plaats er een Bom of een Bombchu tegenaan** en haal in de tunnel die erachter opengaat de Gouden Skulltula neer. Maak van de gelegenheid gebruik om de Goron in de cel ernaast te bevrijden."
+    },
+    "fuego-gs-03": {
+      "name": "Rooster achter de vogelverschrikker",
+      "desc": "Wanneer je de kamer met de achtervolgende vuurmuur verlaat, brengt de deur bovenin je terug naar het rotsblokdoolhof, dit keer van bovenaf. Ga op het platform recht voor de deur staan en **speel het Vogelverschrikkerslied zodat Pierre op het hoge platform verschijnt**.\n\nTrek jezelf met de Grijphaak naar hem toe en schiet vanaf daar op het doelwit ernaast, op een platform dat vanzelf als een lift stijgt. Ga door de deur en klim langs de roosters omhoog: zodra je boven bent wacht de Gouden Skulltula op de muur en haal je hem neer met de Grijphaak.",
+      "hint": "Het Vogelverschrikkerslied componeer je als kind en als volwassene bij het Hylia-meer."
+    },
+    "fuego-gs-04": {
+      "name": "Achthoekige kamer bovenin",
+      "desc": "Klim helemaal naar de top van het rooster dat je via de vogelverschrikker bereikt, dat met de andere Gouden Skulltula van dit gedeelte, en ga door de deur bovenin. Die opent naar een grote achthoekige kamer vol lava, met een platform met drie kisten omringd door vuur.\n\nKijk bij het binnenlopen direct naar rechts om hem te vinden: **hij zit op de muur, een paar stappen van de deur**, naast de lava. Dood hem met de Grijphaak en pak het teken.",
+      "hint": "Vlak naast degene op het rooster."
+    },
+    "fuego-gs-05": {
+      "name": "Achter het standbeeld in de hal",
+      "desc": "Bewaar deze voor het laatst, zodra je de Megatonhamer en de laatste Kleine Sleutel hebt, die van de Goron in de kamer met het Tijdblok voorbij de hamer. Die Goron vertelt je dat er een geheime deur zit achter het stenen standbeeld van drie blokken bij de ingang: **sla het standbeeld aan de rechterkant van de hal stuk met de hamer** en open de deur met de sleutel.\n\nDood in de eerste kamer de Vuurrupsen om de volgende te openen. Bescherm jezelf in de tweede tegen de vliegende vloertegels, versla de Like Like en breek met de hamer de stapel rotsen die de Gouden Skulltula verbergt.",
+      "hint": "Sla het standbeeld in de hal en de stapel rotsen stuk met de hamer."
+    },
+    "fuego-heart-01": {
+      "name": "Hartcontainer - Volvagia",
+      "desc": "Volvagia steekt zijn kop uit de gaten in het platform: **sla hem zodra dat gebeurt met de Megatonhamer en maak hem af met je zwaard of de hamer zelf** terwijl hij verdoofd is. Wanneer hij opstijgt, ontwijk je zijn vlammen en de vallende rotsen door op hun schaduwen te letten.\n\nZodra je hem hebt verslagen, verschijnt de Hartcontainer naast het blauwe licht.",
+      "hint": "Je kunt hem alleen raken wanneer hij zijn kop uit de lava steekt."
+    },
+    "agua-gs-01": {
+      "name": "Naast het kelderrooster",
+      "desc": "Gebruik, met het water van de tempel op het laagste peil, een Kleine Sleutel om de deur onderaan de centrale pilaar te openen. Speel binnen Zelda’s Slaapliedje voor het Triforce-symbool om het water te laten stijgen, trek de IJzeren Laarzen aan en zink door het gat in de vloer naar de kelderkamer.\n\n**Raak de kristalschakelaar hoog op de muur met de Grijphaak**: er verschijnen meerdere vijanden. Dood ze, doe de laarzen uit om naar de richel met de kist te drijven en haal de Gouden Skulltula op de muur, naast het rooster, naar beneden met de Grijphaak."
+    },
+    "agua-gs-02": {
+      "name": "Draaikolkrivier",
+      "desc": "Klim na het gevecht met Donkere Link de trap op achter de kist van de Lange Grijphaak en laat je in de volgende kamer zakken door de schacht met het rooster. Volg de ondergelopen tunnel tot je uitkomt bij een ondergrondse rivier met draaikolken, en blijf uit hun buurt omdat ze je naar binnen zuigen.\n\nTrek in het draaikolkgebied **de IJzeren Laarzen aan en loop over de bodem**, terwijl je de stromingen ontwijkt. De Gouden Skulltula zit boven het water, hoog op de rotswand: richt omhoog met de Lange Grijphaak, die hem doodt en het teken naar je toe brengt.",
+      "hint": "Let op de Skulltula boven het water."
+    },
+    "agua-gs-03": {
+      "name": "In de centrale pilaar",
+      "desc": "Verlaag met Zelda’s Slaapliedje het water van de tempel naar het laagste of middelste peil en ga door de deur onderaan de centrale pilaar. Schiet binnen, op de begane grond, de Lange Grijphaak op het doelwit op de muur om een richel halverwege te bereiken.\n\n**Kijk vanaf daar hoog tegen de muur**: daar zit de Gouden Skulltula, en dezelfde Lange Grijphaak doodt hem en brengt je het teken. Je hoeft het water in de pilaar niet eerst te laten stijgen, maar je kunt zo nodig omhoog klimmen."
+    },
+    "agua-gs-04": {
+      "name": "Waterval met rollende rotsblokken",
+      "desc": "Steek in de noordelijke kelder, bereikbaar met de Lange Grijphaak, de Tektite-kamer en de blokkenpuzzelkamer over, en stap in de volgende kamer op de schakelaar om via de geisers naar de andere deur te springen. Daarachter loopt een kanaal waar rotsblokken van een waterval omlaag rollen, vlak naast de kamer van de Baassleutel.\n\nSchuil voor de rotsblokken in de zijgang, waar een Schelpenmes wacht, en **kijk vanaf daar richting de waterval, naar het westen**: de Gouden Skulltula zit op die wand. De Lange Grijphaak bereikt hem zonder dichterbij te komen en brengt je het teken."
+    },
+    "agua-gs-05": {
+      "name": "Achter de gebarsten muur onder water",
+      "desc": "Deze Gouden Skulltula bevindt zich in een kamer aan de oostkant van de eerste verdieping. Trek, met het water op het middelste peil na het spelen van Zelda’s Slaapliedje voor de Triforce in de centrale pilaar, de IJzeren Laarzen aan en loop door de ondergelopen oostelijke gang naar een gebarsten muur onder water: **breek die met Bommen of de Megatonhamer**.\n\nDaarachter ligt een kamer met vijanden. De Skulltula zit op een mozaïek op de muur, naast de trap en op zwaardhoogte: sla hem neer met je zwaard en pak het teken.",
+      "hint": "Je hebt Bommen nodig en het water op het middelste peil."
+    },
+    "agua-heart-01": {
+      "name": "Hartcontainer - Morpha",
+      "desc": "Ga met de Baassleutel en het water op het hoogste peil naar de derde verdieping (3F) en schiet de Lange Grijphaak op het doelwit op de gouden pilaar aan de noordkant. Loop de trap op en beklim de ondergelopen helling, terwijl je de neerglijdende spijkervallen ontwijkt.\n\nStap op de platforms in het midden om Morpha te laten verschijnen en **keer meteen terug naar de buitenrand van de kamer, weg van het water**, omdat zijn tentakels je grijpen. Trek zijn kern eruit met de Lange Grijphaak, sla hem met je zwaard en pak na het gevecht de Hartcontainer voordat je in het blauwe licht stapt."
+    },
+    "sombra-gs-01": {
+      "name": "Kamer met onzichtbare zeisen",
+      "desc": "Nadat je in de grote kloofkamer met de Zweeflaarzen bent overgestoken naar het Stalfos-platform en hem hebt verslagen, draai je naar links en zet je de Lens der Waarheid aan: er verschijnt een pad van onzichtbare platforms naar een deur.\n\nAan de andere kant ligt de ronde kamer met kruiken, met zeisen die je alleen met de Lens ziet. Ontwijk ze, schiet de Vuur-Keese neer met de boog en maak de Like Like af met je zwaard: **het leegmaken van de kamer opent de deur naar een kleine ruimte met de Gouden Skulltula op de muur**, binnen zwaardbereik.",
+      "hint": "De nis die opengaat bevat ook twee kisten, waarvan één onzichtbaar."
+    },
+    "sombra-gs-02": {
+      "name": "Muur van de cellengang",
+      "desc": "In de kamer met vallende spijkers aan het plafond onthult de Lens der Waarheid een blok verborgen in de muur: sleep het onder de spijkers als een paraplu en klim erop om het bovenste deel te bereiken. **De Gouden Skulltula zit hoog op de muur van de cellengang**, en vanaf de loopbrug bereikt de Grijphaak hem.",
+      "hint": "Klim op het blok om hem vanaf de loopbrug te bereiken."
+    },
+    "sombra-gs-03": {
+      "name": "Put in de gang met ventilatoren",
+      "desc": "Ga voorbij de kamer met de reusachtige schedelkruik, waar een bom in de schedel een Kleine Sleutel laat vallen, naar de volgende kamer: gebruik de Lens der Waarheid om het doelwit aan het plafond te vinden, trek jezelf met de Grijphaak omhoog naar het bovenste niveau en open daar de afgesloten deur.\n\nDaarachter ligt de gang met ventilatoren. Trek de IJzeren Laarzen aan zodat de wind je niet wegblaast en loop door naar de put met de roosters: **de Gouden Skulltula zit op de wand van de put**. Leun over de rand en bereik hem met de Grijphaak, die meteen het teken terugbrengt.",
+      "hint": "Met de IJzeren Laarzen kan de wind je niet wegblazen."
+    },
+    "sombra-gs-04": {
+      "name": "Hoge richel in de bootkamer",
+      "desc": "Zodra je de bootkamer binnenkomt, trek je aan het blok links en duw je het langs de groef in de vloer naar de houten loopbrug, waarna je erop klimt. De Gouden Skulltula zit op de muur van een richel met rooster ernaast.\n\nJe moet **het Vogelverschrikkerslied spelen op de loopbrug en de Lange Grijphaak op Pierre schieten**: zo kom je op de richel naast de Skulltula terecht en sla je hem met je zwaard naar beneden.",
+      "hint": "Je moet het Vogelverschrikkerslied kennen om daarboven te komen."
+    },
+    "sombra-gs-05": {
+      "name": "In de reusachtige schedels",
+      "desc": "Wanneer de boot zinkt, brand je het web boven de deur weg met een Vuurpijl en steek je de Floormaster-kamer met de Lens der Waarheid over naar de deur met het Sheikah-oog.\n\nBinnen staan de reusachtige schedels. Klim de ladder op naar het balkon en **gooi bommen in de schedels**: wanneer de tweede uit elkaar spat, valt het Gouden Skulltula-teken eruit.",
+      "hint": "De deur aan de oever is bedekt met een web: verbrand het met een Vuurpijl."
+    },
+    "sombra-heart-01": {
+      "name": "Hartcontainer - Bongo Bongo",
+      "desc": "Trek tijdens het gevecht de Zweeflaarzen aan zodat je niet op de trommel stuitert en **verdoof de handen van Bongo Bongo met pijlen of de Grijphaak**. Schiet daarna met de Lens actief op zijn oog en sla hem met je zwaard.\n\nWanneer het voorbij is, laat hij de Hartcontainer voor je achter."
+    },
+    "espiritu-gs-01": {
+      "name": "Metalen hek in de Keese-kamer",
+      "desc": "Als kind kom je binnen door met Nabooru te praten en door de kleine opening in de toegangshal te kruipen.\n\nVerderop bereik je de kamer met de Keese en de Wallmaster. Verzamel de Zilveren Rupees zodat het hek zakt en een brug vormt: aan de andere kant **zit de Gouden Skulltula op het gaas van de rechtermuur**. De Boemerang doodt hem en brengt je het teken.",
+      "hint": "Met de vijf Zilveren Rupees zakt het hek en wordt het een brug."
+    },
+    "espiritu-gs-02": {
+      "name": "Vloer van de kamer met het grote standbeeld",
+      "desc": "Zodra je de kamer met het grote standbeeld bereikt, loop je de zijtrap af naar de onderste verdieping en loop je achter het standbeeld om.\n\nIn de smalle doorgang tussen de zijkant en de muur, aan de oostkant, **zit de Gouden Skulltula op de muur, op vloerhoogte**. Eén klap met je zwaard volstaat om hem te verslaan en het teken op te pakken."
+    },
+    "espiritu-gs-03": {
+      "name": "Boven de deur bij de trap",
+      "desc": "In het kindergedeelte van de tempel los je de blokkenkamer op door het blok met het zonnegezicht in de lichtstraal te schuiven: er verschijnt een kist met een Kleine Sleutel voor de geketende deur bovenaan de volgende trap. Zodra je door de deur naar die trap gaat, hoor je de Skulltula al.\n\nLoop niet omhoog zonder achterom te kijken: draai je om en je ziet hem **boven de deur waar je net doorheen kwam**. Als kind doodt de Boemerang hem en brengt het teken terug, en als volwassene doet de Grijphaak hetzelfde.",
+      "hint": "Vóór het gevecht met de Iron Knuckle."
+    },
+    "espiritu-gs-04": {
+      "name": "Achter het Tijdblok in de kamer met rollende rotsblokken",
+      "desc": "Het volwassen gedeelte van de tempel begint door het grote blok in de toegangshal opzij te schuiven met de Zilveren Handschoenen. Dood in de ronde kamer daarna de Beamos (één Bombchu is genoeg) en raak de kristalschakelaar aan het plafond met de Grijphaak om de deuren te openen.\n\nDe rechterdeur leidt naar de kamer met rollende rotsblokken. Ontwijk ze tot je de twee Tijdblokken in de muurnissen bereikt: de eerste verbergt niets, maar **speel het Lied van de Tijd naast de tweede** en wanneer het opzij schuift, komt achter in de nis de Gouden Skulltula tevoorschijn. Dood hem met je zwaard en pak het teken.",
+      "hint": "Het blok verschuift maar één plek, het verdwijnt niet."
+    },
+    "espiritu-gs-05": {
+      "name": "Noordwestelijke richel van de standbeeldkamer",
+      "desc": "De Gouden Skulltula zit op de hoge noordwestelijke richel van de kamer met het grote godinnenstandbeeld, in de hoek waar een vogelverschrikker verschijnt.\n\nSchiet als volwassene de Lange Grijphaak op het doelwit op de pols van het standbeeld om op de handpalm te klimmen. **Speel vanaf daar het Vogelverschrikkerslied**: de vogelverschrikker verschijnt boven op de richel en je kunt je met de Lange Grijphaak naar hem toe trekken. Boven zit de Skulltula op de vloer naast hem; dood hem met je zwaard en pak het teken.",
+      "hint": "Speel het Vogelverschrikkerslied vanaf de handpalm van het standbeeld."
+    },
+    "espiritu-heart-01": {
+      "name": "Hartcontainer - Twinrova",
+      "desc": "Kaats tegen Twinrova eerst het vuur van Koume terug naar Kotake en het ijs van Kotake terug naar Koume.\n\nWanneer ze samensmelten, **absorbeer je drie schoten van hetzelfde element achter elkaar en vuur je ze terug op Twinrova**; sla haar met je zwaard zodra ze valt. De Hartcontainer verschijnt midden op het platform.",
+      "hint": "De Baassleutel vereist Zelda’s Slaapliedje, de boog en de Grijphaak."
+    },
+    "pozo-gs-01": {
+      "name": "Linkerkamer vanuit het centrale gedeelte",
+      "desc": "Je hebt de Lens der Waarheid nodig, die je in de kelder vindt, en een Kleine Sleutel. Met de Lens aan verschijnen verborgen kisten in nissen in de muren van de put, en één daarvan bevat een sleutel.\n\nJe betreedt het centrale gedeelte door de schijnmuur tegenover de ingang, en moet om de X op de vloer heen lopen, want dat is een gat. **Open de afgesloten deur links**, dood de Deku Baba midden in de kamer en zoek de Gouden Skulltula hoog op de muur, boven een nis met kaarsen: de Boemerang slaat hem neer en komt terug met het teken.",
+      "hint": "Er liggen nog twee sleutels in verborgen nissen in de toegangsgang."
+    },
+    "pozo-gs-02": {
+      "name": "Hoge hoek van de putkamer",
+      "desc": "De afgesloten deur rechts van het centrale gedeelte, dat je binnengaat door de schijnmuur tegenover de ingang, leidt naar een kamer met Keese en een grote put. Je hebt een Kleine Sleutel nodig, zoals die uit de doodskist in de Gibdo-kamer, en de Lens der Waarheid.\n\nDood de Keese en **zet de Lens aan om de Gouden Skulltula in een hoge hoek, naast een fakkel, te zien**. Gebruik de Boemerang om hem te pakken.",
+      "hint": "Je hebt een sleutel en de Lens der Waarheid nodig."
+    },
+    "pozo-gs-03": {
+      "name": "Kamer met de Like Like",
+      "desc": "Volg de buitenste gang die rond het midden van de put loopt tot de noordoosthoek, waar een deur staat met een bord dat waarschuwt: \"Pas op waar je loopt!\" Neem dat serieus, want vlak eronder zit een val waardoor je naar de bodem valt als je hem niet ontwijkt.\n\nDe volgende kamer heeft verborgen gaten in de vloer, dus **zet de Lens der Waarheid aan en steek voorzichtig over**.\n\nSchakel de Vuur-Keese uit met de Boemerang en blaas de Beamos op met een bom. De deur aan de overkant leidt naar de kamer met de Like Like: zodra je die verslaat, zit de Gouden Skulltula op de achterwand, tussen twee fakkels, binnen bereik van de Boemerang, die je ook het teken brengt.",
+      "hint": "Pas op waar je loopt!"
+    },
+    "hielo-gs-01": {
+      "name": "Kamer met het draaiende mes",
+      "desc": "Dood de Freezards in de eerste kamer om het rooster te openen en loop door naar de grote ronde kamer met het draaiende ijsmes.\n\n**Zoek de hoek met de ijsstalagmieten, waar de verborgen Zilveren Rupee ligt**: de Gouden Skulltula zit hoog op de muur, tussen de ijsplaten en boven een stalagmiet. Dood hem met de Grijphaak.",
+      "hint": "De Zilveren Rupees openen de kamer met Blauw Vuur."
+    },
+    "hielo-gs-02": {
+      "name": "Kompaskamer",
+      "desc": "Verzamel de Zilveren Rupees in de kamer met het draaiende mes om de weg naar de kaartkamer te openen en vul daar een fles met Blauw Vuur. Ga terug naar de meskamer en smelt er een van de twee rode ijsmuren mee, degene die naar een gang met spijkervallen leidt.\n\nAan het einde ligt de Kompaskamer, vol stalagmieten. Dood de IJs-Keese en **kijk hoog op de achterwand, naast een blok rood ijs**: daar zit de Gouden Skulltula. Gebruik de Grijphaak om hem te pakken."
+    },
+    "hielo-gs-03": {
+      "name": "Kamer met het ijsblok",
+      "desc": "Dood in de kamer waar je een ijsblok moet duwen de IJs-Keese en draai je om naar de ingang: **de Gouden Skulltula zit hoog op de muur, links van de deur wanneer je binnenkomt**. Hij is makkelijker te zien vanaf de stenen pilaren; haal hem vanaf de vloer neer met de Grijphaak en pak het teken."
+    },
+    "castillo-fairy-02": {
+      "name": "Grote Fee: Dubbele Verdediging",
+      "desc": "Je bereikt de buitenkant van het Kasteel van Ganon vanuit het verwoeste Hyrule-stad, en het doodlopende pad rechts eindigt waar als kind de bron van de Draaiaanval lag. Nu blokkeert een zwarte stenen pilaar met gouden gravures de ingang: **til hem op met de Gouden Handschoenen**, die je krijgt uit de Schaduwproef van het kasteel.\n\nSpeel binnen Zelda’s Slaapliedje op het Triforce-embleem en gooi de 500 Rupees die ze als offer vraagt in de bron. De Grote Fee van Moed verdubbelt je verdediging: je harten krijgen een gouden rand en je loopt half zoveel schade op.",
+      "hint": "Ze vraagt een offer van 500 Rupees; de pilaar bij de ingang til je op met de Gouden Handschoenen."
+    },
+    "kakariko-bottle-01": {
+      "name": "De zeven verdwaalde Cucco’s",
+      "desc": "De Cucco-vrouw bij het hok heeft er zeven laten ontsnappen; als je ze als kind terugbrengt, geeft ze je een Lege Fles: **pak elke Cucco op en gooi hem in het hok**. Als je met haar praat, vertelt ze hoeveel er nog missen en geeft ze hints; degene in het hok blijven zitten, zelfs als je huizen binnengaat.\n\nEén loopt vlak naast haar, een ander bij de ingang, een derde bij de poort naar de Doodsberg en een vierde achter het hek van het Huis van de Skulltula’s. De vijfde zit in een krat dat je breekt door ertegenaan te rollen; de laatste twee zitten in het omheinde gedeelte achter de Drankjeswinkel, dat je zwevend bereikt."
+    },
+    "lonlon-bottle-01": {
+      "name": "Talons Super-Cucco’s",
+      "desc": "Allereerst moet je Talon, die bij Kasteel Hyrule ligt te slapen, wakker maken met de Cucco die uit het Vreemde Ei komt, zodat hij terugkeert naar Lon Lon Ranch. Ga op de ranch overdag zijn huis binnen: ’s nachts slaapt Talon.\n\nVoor 10 Rupees daagt hij je uit om binnen 30 seconden **zijn drie Super-Cucco’s tussen alle Cucco’s in de kamer te vinden**: pak Cucco’s op en hij zegt het als je de juiste hebt. Als het lukt, geeft hij je de eerste keer een fles Lon Lon-melk.",
+      "hint": "Een potje kost 10 Rupees."
+    },
+    "lago-bottle-01": {
+      "name": "Ruto’s brief",
+      "desc": "Op de bodem van het Hylia-meer, vlak bij de uitgang van de onderwatertunnel vanuit het Zora-rijk, ligt een fles met een brief van Prinses Ruto. Als kind kom je alleen zo diep met de Zilveren Schub, de prijs van het duikspel in het Zora-rijk.\n\n**Duik naast de stenen pilaren die uit het water steken naar de bodem en pak de fles**.",
+      "hint": "Je kunt het meer ook bereiken door vanuit het Zora-rijk te duiken."
+    },
+    "ciudadela-bottle-01": {
+      "name": "De Poe-verzamelaar",
+      "desc": "Als volwassene is het oude wachthuisje bij de ingang van Hyrule-stad de winkel van de Poe-verzamelaar. Voor elke Grote Poe betaalt hij 30 Rupees en telt hij 100 punten op, en zodra je 500 punten bereikt, bij de vijfde, geeft hij je een Lege Fles. Ga je door tot 1.000 punten, dan geeft hij je een Enorme Rupee, de gouden, ter waarde van 200 Rupees.\n\nGrote Poes verschijnen op de Hyrule-vlakte wanneer je op Epona rijdt en over een van de spookachtige hekken springt: **schiet ze vanaf je paard neer met pijlen en vang elke ziel in een Lege Fles**.",
+      "hint": "Hij betaalt 30 Rupees per Grote Poe; de fles krijg je bij 500 punten."
+    },
+    "ciudadela-bottle-02": {
+      "name": "Het insect van de drankjesverkoper",
+      "desc": "Ga in Hyrule-stad de Drankjeswinkel binnen, in het gebouw naast het pad omhoog naar de Tempel des Tijds. Er is een insect ontsnapt bij de winkelier: zeg dat je wilt helpen en hij geeft je een Lege Fles om het te vangen.\n\nRust de fles uit en **vang het insect terwijl het over de winkelvloer rent**. Als dank vult hij de fles met een Rood Drankje, en mag je de fles houden."
+    },
+    "dominio-heart-01": {
+      "name": "Fakkelkist",
+      "desc": "Achter de waterval op de onderste verdieping van het Zora-rijk verschijnt een kist met het stukje wanneer je als kind alle fakkels tegelijk aansteekt: steek een Deku-stok aan bij een van de fakkels in de zaal van Koning Zora.\n\nLoop omlaag en **steek eerst de fakkel onderaan de trap aan**, die niet uitgaat, en daarna de vier kort brandende fakkels, waarbij je elke fakkel gebruikt om je stok opnieuw aan te steken. Dat zijn degene voor de Zora-winkel, degene bij de vijver met de steencirkel en de twee achter de waterval, die je bereikt door langs de muur te lopen.",
+      "hint": "Din’s Vuur helpt bij de fakkels achter de waterval."
+    },
+    "fortaleza-heart-02": {
+      "name": "Kist op het dak",
+      "desc": "De kist staat op het hoogste dak van het Gerudo-fort, tegen de rotswand aan, aan de overkant van een kloof. Vanuit de binnengangen brengt een ladder **naast je cel** je naar een rotsrichel boven de daken; volg die tot de rand vanwaar je de kist ziet staan.\n\n**Richt vanaf daar de Lange Grijphaak op de kist** om de buit te bereiken.",
+      "hint": "Gebruik de Lange Grijphaak om de kist te bereiken."
+    },
+    "kakariko-heart-04": {
+      "name": "Beloning voor 50 Skulltula’s",
+      "desc": "Ga met 50 Gouden Skulltula-tekens terug naar het Huis van de Skulltula’s en **praat met de vervloekte rijke man** om het Hartstukje te krijgen.",
+      "hint": "Je hebt 50 Gouden Skulltula-tekens nodig."
+    },
+    "castillo-gs-03": {
+      "name": "Verwoeste boog",
+      "desc": "Als volwassene loopt het rechterpad buiten het Kasteel van Ganon, dat naar de Bron van de Grote Fee leidt, onder een verwoeste stenen boog door die vroeger de ingang van Kasteel Hyrule was.\n\n**Loop onder de boog door en draai je om**: de Gouden Skulltula zit hoog op de achterkant, buiten bereik van je zwaard. Haal hem neer met de Grijphaak."
+    },
+    "cementerio-thought-01": {
+      "name": "Gebroken sokkel in het Graf van de Koninklijke Familie",
+      "desc": "Ga op de Begraafplaats het Graf van de Koninklijke Familie binnen door Zelda’s Slaapliedje op de Triforce te spelen en loop door naar de laatste kamer, die met het stenen monument dat het Lied van de Zon leert.\n\nDaar, boven de groene vloeistof, staat een gebroken sokkel met de gedachte van een fee die zich de melodie op het monument niet meer herinnert en haar nog eens wil horen zodat ze haar niet vergeet. **Speel het Lied van de Zon naast het teken.**",
+      "hint": "Speel het Lied van de Zon naast het teken."
+    },
+    "coloso-thought-01": {
+      "name": "Trap van de Geestentempel",
+      "desc": "Bij de Woestijnkolos, op de richel waar je de Zilveren Handschoenen krijgt tussen de twee fakkelhouders, staat de gedachte op het lage muurtje aan de rand. De fee zegt dat het uitzicht adembenemend is, maar dat ze niet tegen zulke droge lucht kan en wenst dat er een flinke regenbui valt. Het Lied der Stormen hier spelen herstelt je magie en je gezondheid.",
+      "hint": "Speel het Lied der Stormen voor het teken."
+    },
+    "hielo-thought-01": {
+      "name": "IJstunnel naast de Kompaskamer",
+      "desc": "Zodra je in de IJsgrot het Kompas hebt, vul je een fles met het Blauw Vuur in dat gedeelte en smelt je het blok rood ijs ernaast. Volg de bevroren tunnel erachter, die leidt naar de gang met spijkervallen en de ijsblokkamer: je ziet deze Feengedachte op de wand. De vleugels van de fee zijn bevroren en ze zou alles geven voor een momentje in de zon. **Speel het Lied van de Zon naast het teken.**",
+      "hint": "Speel het Lied van de Zon naast het teken."
+    },
+    "lago-thought-01": {
+      "name": "Kruikennis aan de westoever",
+      "desc": "Volg bij het Hylia-meer de westoever bijna helemaal naar het zuiden: deze gedachte bevindt zich in een nis in de rotswand, met kruiken, zakken en vaten. De fee zegt dat haar geheim bij verstoppertje een plek is die de andere feeën niet kunnen gooien of breken. **Breek de kruiken in de nis**: uit een ervan komt een fee, en er liggen ook wat Rupees.",
+      "hint": "Breek de kruiken in de nis: in één ervan verstopt zich een fee."
+    },
+    "llanura-thought-01": {
+      "name": "Ruïnes bij de ophaalbrug",
+      "desc": "Verlaat Hyrule-stad over de ophaalbrug en ga oostwaarts naar het heuveltje met uitzicht op de rivier: tussen de ruïnes van een bemoste stenen muur staat de eerste Feengedachte, en Navi grijpt de kans aan om uit te leggen wat ze zijn. De fee zegt dat wanneer er iets uit een boom op iemand valt, dat geen toeval is: zij verstopt dingen in de takken. **Rol tegen boomstammen** om los te schudden wat erin zit; de den ernaast laat een Blauwe Rupee vallen.",
+      "hint": "Rol tegen de bomen: soms valt er iets uit de takken."
+    },
+    "llanura-thought-02": {
+      "name": "Kistengrot bij de Gerudo-vallei",
+      "desc": "In het westen van de Hyrule-vlakte, in het droge gedeelte richting de Gerudo-vallei, zit een ondiepe grot in de noordelijke rotswand met een kist erin. De fee die haar gedachte hier achterliet vertelt het jongetje met de puntmuts dat de schat voor hem is en dat ze hem niet op slot heeft gedaan. Als volwassene ben je te laat: de kist staat open en is leeg. **Kom als kind terug en open de kist**, waarin dan wél een Hartstukje ligt.",
+      "hint": "Kom als kind terug en open de kist in de grot."
+    },
+    "llanura-thought-03": {
+      "name": "Grot met Roddelsteen ten zuiden van de ranch",
+      "desc": "Ten zuidoosten van Lon Lon Ranch, naast een kleine vijver, bedekt een ring van struiken een grot die opengaat met een slag van de Megatonhamer in het midden. Binnen hangt een Skulltula aan de muur boven een houten krat, samen met een Roddelsteen, en de gedachte staat op de rotswand. De fee vond hier een glanzend gouden insect, maar het ongedierte op de muur sprong op haar af voordat ze het kon vangen. **Maak als kind de Skulltula op de muur af en rol als volwassene tegen het houten krat eronder om het te breken**: binnenin zit het gouden insect, een Gouden Skulltula.",
+      "hint": "Breek het houten krat onder de Grote Skulltula."
+    },
+    "llanura-thought-04": {
+      "name": "Boom bij het gat van de Deku-handelaar",
+      "desc": "Verlaat Hyrule-stad over de ophaalbrug en loop oostwaarts over de grasstrook tussen de muur en de rivier: deze gedachte staat op een boom vlak tegen de muur en een paar stappen verderop zit een gat met een Deku-handelaar die alleen verkoopt aan wie het wachtwoord kent. De fee zegt dat ze er eindelijk achter is gekomen, en dat het niet \"Helemaal niet slecht...\" of \"Ik zal de uitbetaling doen.\" was. Als volwassene heeft hij niets meer over, dus **ga als kind en zeg tegen hem \"Verkoop me eens wat, wil je?\"**: hij verkoopt je een Hartstukje voor 100 Rupees.",
+      "hint": "Zeg \"Verkoop me eens wat, wil je?\" tegen de Deku-handelaar in het gat ernaast."
+    },
+    "llanura-thought-05": {
+      "name": "Ruïnes bij het hek van de ranch",
+      "desc": "Loop op de Hyrule-vlakte buitenom Lon Lon Ranch naar de zuidwesthoek: vlak tegen het houten hek staan de ruïnes van een met klimop begroeide bakstenen muur, en de gedachte staat onderaan op de voorzijde van de muur. De fee zegt dat ze dol is op het uitzicht over de vlakte vanaf daar, zowel ’s nachts als overdag, en dat ze graag van het een naar het ander zou wisselen zonder te hoeven wachten. **Speel het Lied van de Zon** en ze herstelt je gezondheid en magie.",
+      "hint": "Speel het Lied van de Zon om tussen dag en nacht te wisselen."
+    },
+    "llanura-thought-06": {
+      "name": "Rotsnis in het noordwesten van de Hyrule-vlakte",
+      "desc": "Helemaal in het noordwesten van de Hyrule-vlakte, bij de rivier, bevindt zich een rotsnis met vaten, zakken en een tafel, en deze gedachte staat op de wand bij de ingang. De fee zegt dat Peahats haar bang maken omdat ze enorm zijn, wortel schieten en doen alsof de vlakte van hen is, maar dat ze, net als elke plant, niet tegen vuur kunnen. **Verbrand de Peahats met Din’s Vuur**."
+    },
+    "lonlon-thought-01": {
+      "name": "Muur van de ranchtuin",
+      "desc": "Loop op Lon Lon Ranch achter het huis en de stal om naar de tuin: de gedachte staat op de met klimop begroeide bakstenen muur, tussen enkele kratten, vaten en een houten kar. De fee zegt dat het deuntje dat dat jongetje speelt erg mooi is en de koeien helemaal gek maakt. Het is Epona’s Lied, maar het naast het teken spelen doet niets: **speel het voor een koe** en ze geeft je Lon Lon-melk.",
+      "hint": "Speel Epona’s Lied voor een koe."
+    },
+    "pozo-thought-01": {
+      "name": "Doodskist in de Gibdo-kamer",
+      "desc": "Ga in de Bodem van de Put omlaag naar B1 en betreed de Gibdo-kamer, die met de in spinnenwebben gewikkelde doodskisten, die je vrijmaakt door ze weg te branden met een bij de fakkels aangestoken Deku-stok. Deze Feengedachte staat op de zijkant van een van de staande doodskisten: de fee mist het lied van die man over \"steeds maar rond en rond\" en wenst dat iemand hier in de buurt het kende. **Speel het Lied der Stormen naast de doodskist** om magie en gezondheid te herstellen.",
+      "hint": "Speel het Lied der Stormen naast de doodskist."
+    },
+    "sendero-thought-01": {
+      "name": "Bladercirkel bij Goron-stad",
+      "desc": "Wanneer je het Doodsbergpad beklimt, op een paar stappen van de ingang van Goron-stad, ligt rechts een rotsrichel met een gat in de grond met een plant erin, en op de wand ernaast deze gedachte. De fee zegt dat de bladeren op de grond op rustige dagen langzaam in rondjes dansen, maar op stormachtige dagen op volle snelheid draaien alsof ze weg willen vliegen. **Speel het Lied der Stormen op de cirkel** om in het gat te komen.",
+      "hint": "Speel het Lied der Stormen op de bladercirkel."
+    },
+    "sombra-thought-01": {
+      "name": "Muur van de kamer met plafondspijkers",
+      "desc": "Op B3 van de Schaduwtempel ligt de kamer waar het verborgen blok je beschermt tegen de spijkers die van het plafond vallen. Voorbij de cel met de kist met de Rode Rupee, naast een gat in de muur, zie je deze Feengedachte. De fee zegt dat ze gek is op plekken waar het hard waait en **dat deze plek wel een flinke windvlaag kan gebruiken**."
+    },
+    "crater-heart-03": {
+      "name": "Deku-handelaar in de Krater",
+      "desc": "Loop in de Krater als kind westwaarts vanaf de ingang bij de top van de Doodsberg, richting de plek waar de kaart de Bron van de Grote Fee markeert. Naast een klimnet op de wand springt er een Deku-handelaar uit de grond die je probeert aan te vallen.\n\nKom dichterbij terwijl je zijn schoten ontwijkt en sla hem. Zodra hij zich overgeeft, praat je met hem: **hij verkoopt je het Hartstukje voor 100 Rupees**.",
+      "hint": "Als kind verkoopt hij het je voor 100 Rupees nadat je hem hebt geraakt."
+    },
+    "cementerio-thought-02": {
+      "name": "Ruïnes bij de ingang van het Graf van de Koninklijke Familie",
+      "desc": "Loop op de Begraafplaats naar de steen met de Triforce die het Graf van de Koninklijke Familie opent: deze gedachte staat tussen de gebroken stenen bij de ingang.\n\nDe fee vertelt hoe ze op de bodem van een graf belandde, hoe een afschuwelijk monster op haar afkwam en hoe het stopte met haar achtervolgen toen ze een lied zong dat het verblindde, maar ze weet niet meer hoe het heette. **Het is het Lied van de Zon: speel het om de ReDeads te verlammen.**",
+      "hint": "Het Lied van de Zon verlamt ReDeads."
+    },
+    "llanura-thought-07": {
+      "name": "Ruïnes bij de uitgang naar het Hylia-meer",
+      "desc": "Aan het zuidelijke uiteinde van de Hyrule-vlakte, vlak bij het pad omlaag naar het Hylia-meer, staan enkele stenen ruïnes tussen de bomen: de gedachte staat op de voorzijde van een van de pilaren.\n\nDe fee smeekt dat niemand ooit met een stok naar een vlinder zwaait, en al helemaal niet zonder te bewegen. **Raak een vlinder met een Deku-stok zonder van je plek te bewegen: hij verandert in een Fee.**",
+      "hint": "Raak een vlinder met een Deku-stok: hij verandert in een Fee."
+    },
+    "llanura-thought-08": {
+      "name": "Rotsnis bij de ingang van de Zora-rivier",
+      "desc": "Aan de oostrand van de Hyrule-vlakte, iets ten zuiden van de ingang van de Zora-rivier, bevindt zich een rotsnis met vaten, een tafel, een bankje en de resten van een kampvuur: de gedachte staat op de rotswand.\n\nDe fee legt graag Rupees in mooie patronen. Ze verstopt ze in kuilen en gaten, en ook onder water, en vindt het niet erg als iemand ze meeneemt. **Zoek naar Rupees die in patronen liggen in kuilen, gaten en onder water.**",
+      "hint": "Zoek naar Rupees die in patronen liggen in kuilen, gaten en onder water."
+    },
+    "llanura-thought-09": {
+      "name": "Rotsen bij de slotgracht ten westen van de ophaalbrug",
+      "desc": "Verlaat Hyrule-stad over de ophaalbrug en loop westwaarts langs de oever van de slotgracht: tegenover de muur waar het water uit stroomt liggen enkele grote rotsen, en deze gedachte staat ernaast.\n\nDe fee zegt dat niemand ooit zal vermoeden dat ze haar hele fortuin in een houten krat heeft verstopt.",
+      "hint": "De fee zegt dat ze haar hele fortuin in een houten krat heeft verstopt."
+    },
+    "llanura-thought-10": {
+      "name": "Kar bij de moestuin vlak bij Kakariko",
+      "desc": "In het noordoosten van de Hyrule-vlakte, niet ver van het pad omhoog naar Kakariko, staat een houten kar tegen een laag stenen muurtje: de gedachte staat op de planken.\n\nDe fee zegt dat de plek er eenzaam uitziet, alsof er alleen maar onkruid groeit, maar dat je als je goed kijkt kleintjes stiekem ziet rondscharrelen. **Ga naar de moestuin: tussen de planten scharrelen Insecten rond.**",
+      "hint": "Tussen de planten in de moestuin ernaast scharrelen Insecten rond."
+    }
+  }
+}

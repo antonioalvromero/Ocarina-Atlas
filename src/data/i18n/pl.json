@@ -1,0 +1,946 @@
+{
+  "places": {
+    "kokiri": {
+      "intro": "Las Kokiri, wioska, w której zaczyna się przygoda, kryje na swojej mapie trzy Złote Skulltule oraz miękką ziemię na Magiczną Fasolkę. Dwie Skulltule pojawiają się jako dziecko: jedna za Domem Braci Wszystkowiedzących, tylko w nocy, a druga w miękkiej ziemi przy sklepie, o dowolnej porze i przy użyciu Robaków. Posadź w tym samym miejscu także fasolkę, bo jako dorosły wyniesie cię ona na półkę z Rupiami, a po trzecią Skulltulę wróć w nocy z Chwytakiem na dach Domu Bliźniaczek."
+    },
+    "perdido": {
+      "intro": "Niemal wszystko w Zaginionych Lasach zdobywa się jako dziecko: dwa Kawałki Serca za pomocą Okaryny, trzy Złote Skulltule i dwa miejsca na Magiczne Fasolki. To labirynt łączący Las Kokiri ze Świętą Leśną Polaną, a Kawałki Serca zależą od Skull Kidów: Pieśń Sarii dla tego z fletem, na lewo od wejścia, oraz gra pamięciowa przy tarczy, na prawo. Zabierz Robaki do obu miejsc z miękką ziemią — przy moście na Równinę Hyrule i na polanie z samotnym drzewem — i posadź w każdym fasolkę: jako dorosły w nocy ta na polanie wyniesie cię na półkę z trzecią Skulltulą."
+    },
+    "prado": {
+      "intro": "Jedna Złota Skulltula, dostępna jako dorosły, to wszystko, co kryje Święta Leśna Polana, a mapa wskazuje, gdzie pojawia się w labiryncie prowadzącym do Świątyni Lasu. Zobaczysz ją na prawej ścianie w połowie labiryntu, po ominięciu Moblinów i przed schodami: strąć ją Chwytakiem, tym samym, którego potrzebujesz, by wejść do świątyni."
+    },
+    "llanura": {
+      "intro": "Mapa Równiny Hyrule wskazuje dwa Kawałki Serca i trzy Złote Skulltule. Trzy z tych znajdziek kryją się pod ziemią, w grotach otwieranych Bombą lub Młotem Megatonowym. W grocie na wschód od mostu zwodzonego Miasta Zamkowego Hyrule, przy fosie, Handlarz Deku sprzeda ci Kawałek Serca za 100 Rupii, jeśli przyjdziesz jako dziecko i znasz hasło, które zdradza Myśl Wróżki na drzewie obok, gdy jesteś dorosły; drugi znajduje się w skrzyni pod skalnym nawisem na zachodzie, niedaleko Doliny Gerudo, i musisz ją otworzyć jako dziecko. Spośród Skulltul ta na samotnej sośnie na wschodzie spada po wturlaniu się w pień, ta w grocie pod kamiennym kręgiem przy Ranczu Lon Lon wymaga Bumerangu lub Chwytaka, a trzecia pojawia się jako dorosły w skrzynce w grocie na południowy wschód od rancza, jeśli jako dziecko przeczytałeś tam Myśl Wróżki i pokonałeś zwykłą Skulltulę."
+    },
+    "lonlon": {
+      "intro": "Jako dziecko możesz zdobyć wszystko na Ranczu Lon Lon: trzy Złote Skulltule, Kawałek Serca i Butelkę, każdą oznaczoną na mapie. Dwie Skulltule pojawiają się tylko w nocy i wymagają Bumerangu — w oknie domu oraz wewnątrz kamiennej wieży z tyłu; trzecia, w drzewie przy wejściu, spada o dowolnej porze po wturlaniu się w pień. Kawałek Serca jest z tyłu kamiennej wieży, za kilkoma skrzynkami, a Butelka to nagroda za grę Talona z Super Cucco, choć najpierw musisz obudzić go na Zamku Hyrule za pomocą Cucco z Dziwnego Jajka."
+    },
+    "ciudadela": {
+      "intro": "Trzy Kawałki Serca, dwie Butelki i jedna Złota Skulltula: tyle kryje Miasto Zamkowe Hyrule, z osobną mapą dla dziecka i dorosłego, ponieważ miasto się zmienia. Prawie wszystko należy do małego Linka: dwa Kawałki zdobywa się w nocy — w Sklepie ze Skrzyniami Skarbów oraz za odprowadzenie zagubionego szczeniaka Richarda do właścicielki, a trzeci jest nagrodą w Kręgielni Bombchu, która otwiera się dopiero po pokonaniu Króla Dodongo. Skulltula chowa się w skrzynce w wartowni przy wejściu, a Butelki to nowa butelka z remake'u — prezent od sklepikarza przy drodze do Świątyni Czasu — oraz nagroda od Kolekcjonera Poe jako dorosły za pięć Wielkich Poe."
+    },
+    "castillo": {
+      "intro": "Na dwóch mapach Zamku Hyrule — jego terenach jako dziecko i okolicach Zamku Ganona jako dorosły — znajdują się trzy Złote Skulltule i dwie Wielkie Wróżki. Dwie Skulltule pojawiają się jako dziecko: jedna na drzewie w ogrodzie z żywopłotami i druga w grocie otwieranej Pieśnią Burz przy drzewie nad fosą, wraz z Wielką Wróżką Ataku Obrotowego za głazem na końcu ślepej ścieżki na wschodzie. Jako dorosły zostają Skulltula na zrujnowanym łuku, którą widać dopiero po odwróceniu się w trakcie przechodzenia, oraz Wielka Wróżka Podwójnej Obrony za filarem, który podnoszą Złote Rękawice."
+    },
+    "kakariko": {
+      "intro": "Wioska Kakariko leży u stóp Góry Śmierci, za mostem z Równiny Hyrule, i jest jednym z miejsc z największą liczbą znajdziek na mapie. Pięć z jej sześciu Złotych Skulltul pojawia się jako dziecko w nocy i wystarczy miecz lub Proca Wróżek, a szósta — na skalnej ścianie tuż obok dachu Domu Impy — jako dorosły, w nocy i z Chwytakiem. Kawałki Serca dzielą się między oba etapy życia, Butelkę daje Kobieta od Cucco, gdy przyprowadzisz jej siedem kur Cucco, a w Domu Skulltuli czeka kolejny Kawałek Serca za zebranie 50 żetonów."
+    },
+    "cementerio": {
+      "intro": "Cmentarz Kakariko ma mapę dla każdego wieku, a łącznie kryje cztery Kawałki Serca, dwie Złote Skulltule i Magiczną Fasolkę. Jako dziecko w nocy Dampé kopie za 10 Rupii i co jakiś czas wykopuje Kawałek Serca, a grób obok Grobowca Rodziny Królewskiej skrywa kolejny w swojej krypcie, która w tym wieku otwiera się tylko w nocy. Jako dorosły dochodzi wyścig z duchem Dampé, który daje Kawałek Serca za drugim razem (pierwszy daje Chwytak), oraz półka na lewej ścianie, osiągalna dzięki fasolce posadzonej jako dziecko. Skulltule pojawiają się w nocy na ścianie przy wejściu oraz — z Robakami, jako dziecko o dowolnej porze — w miękkiej ziemi obok Grobu Dampé."
+    },
+    "sendero": {
+      "intro": "Wzdłuż Szlaku Góry Śmierci, od Kakariko do Krateru, mapa wskazuje cztery Złote Skulltule, Kawałek Serca, Wielką Wróżkę i Magiczną Fasolkę. Jako dziecko wysadź głaz przed Jaskinią Dodongo Bombą lub Kwiatem-Bombą i wykorzystaj miękką ziemię przed wejściem: Robaki wyciągną Skulltulę, a fasolka posłuży jako skrót dla dorosłego Linka. Kawałek Serca leży na półce nad wejściem do jaskini, a Wielka Wróżka magii i Ognia Din czeka na szczycie, za pękniętą ścianą obok Kaepory Gaebory. Z pozostałych trzech Skulltul ta za pękniętą ścianą przy Kakariko pojawia się w każdym wieku, a dwie dla dorosłego Linka w nocy kryją się pod głazami, które trzeba rozbić — jeden z nich tylko Młotem Megatonowym."
+    },
+    "goron": {
+      "intro": "Miasto Goronów, wykute w Górze Śmierci, ma na mapie tylko trzy znajdźki: dwie Złote Skulltule i Kawałek Serca, podzielone między oba etapy życia. Jako dziecko do Skulltuli w labiryncie głazów na górnym piętrze dotrzesz, wysadzając przejście Bombami, a Kawałek Serca wypada z wielkiej obracającej się wazy pośrodku: zapal pochodnie wokół niej, by zaczęła się kręcić, i wrzuć do środka Bombę z deski piętro wyżej. Jako dorosły zostaje druga Skulltula, pod skalnym występem przy suficie, do której sięga tylko Chwytak."
+    },
+    "crater": {
+      "intro": "W Kraterze Góry Śmierci panuje żar, a mapa wskazuje tam trzy Kawałki Serca, dwie Złote Skulltule, Wielką Wróżkę i Magiczną Fasolkę. Wchodzi się tu ze szczytu góry lub z Miasta Goronów; jako dziecko upał uruchamia odliczanie, a jako dorosły z Tuniką Gorona nie musisz się spieszyć. Jako dziecko zdobędziesz Skulltulę w skrzynce przy wejściu ze szczytu, Kawałek Serca sprzedawany przez Handlarza Deku za 100 Rupii oraz Skulltulę w miękkiej ziemi przy miejscu teleportacji Bolero Ognia, dokąd trafisz po zagraniu tej pieśni — posadź tam też fasolkę. Jako dorosły roślina zaniesie cię na kopulastą skałę z kolejnym Kawałkiem; trzeci, dostępny też jako dziecko, kryje się we wnęce w ścianie podczas schodzenia po siatkach od wejścia, a Wielka Wróżka podwajająca magię czeka za głazami, które rozbije tylko Młot Megatonowy."
+    },
+    "rio": {
+      "intro": "Sprzedawca Fasolek siedzi przy wejściu do Rzeki Zora, a w górę rzeki mapa wskazuje cztery Kawałki Serca i cztery Złote Skulltule. Jako dziecko usuń Bombą głazy przy wejściu, kup od niego jak najwięcej fasolek i posadź jedną w miękkiej ziemi obok. Wszystkie cztery Kawałki Serca są dla małego Linka: dwa na platformach, na które dolecisz z Cucco (lub sięgniesz Bumerangiem po ten przy wodospadzie), i dwa od żab na pniu — jeden za zagranie im melodii i wygranie gry, a drugi za Pieśń Burz. Ze Skulltul dwie są dla dziecka: w miękkiej ziemi przy Sprzedawcy Fasolek z Robakami oraz w nocy na ścianie przy wodospadzie, a dwie dla dorosłego w nocy, wysoko na ścianach i z użyciem Chwytaka."
+    },
+    "dominio": {
+      "intro": "Po jednej na każdy wiek: tak dzielą się dwie znajdźki w Domenie Zora — Kawałek Serca jako dziecko i Złota Skulltula jako dorosły, każda w swoim miejscu na mapie. Aby zdobyć Kawałek Serca, zapal Kijem Deku wszystkie pochodnie na dolnym poziomie, zaczynając od tej u stóp schodów, a za wodospadem pojawi się skrzynia. Jako dorosły, gdy domena jest skuta lodem, Skulltula pojawia się w nocy na szczycie zamarzniętego wodospadu i strącisz ją Chwytakiem lub strzałą."
+    },
+    "fuente": {
+      "intro": "Za tronem Króla Zory Źródło Zora kryje dwa Kawałki Serca, trzy Złote Skulltule i Wielką Wróżkę, z osobną mapą dla każdego wieku. Jako dziecko to staw Jabu-Jabu, a jako dorosły zamarznięte jezioro po drodze do Lodowej Jaskini. Wielka Wróżka z Wiatrem Farore otwiera się w każdym wieku za pękniętą ścianą w południowo-wschodnim rogu, a dwie Skulltule pojawiają się jako dziecko: na sośnie w tym samym rogu oraz w nocy z Bumerangiem na ścianie zatopionego łuku. Jako dorosły jeden Kawałek czeka na najdalszej krze lodowej, a drugi na dnie — wymaga Tuniki Zora i Żelaznych Butów; trzecia Skulltula pojawia się w nocy po drugiej stronie jaskini zasłoniętej dwoma blokami ze znakami Zora, które podnoszą Srebrne Rękawice."
+    },
+    "lago": {
+      "intro": "Jezioro Hylia to jedna z najbardziej obfitych stref na mapie: pięć Złotych Skulltul, trzy Kawałki Serca, Butelka i Magiczna Fasolka na przestrzeni obu etapów życia. Jako dziecko miękka ziemia tuż obok laboratorium daje Skulltulę po użyciu Robaków oraz fasolkę, która jako dorosły wynosi cię na dach, gdzie leży jeden z Kawałków Serca; drugi dostaniesz od właściciela Stawu Rybnego za rybę powyżej 50 cm, a trzeci od Naukowca znad Jeziora, jeśli zanurkujesz na dno jego basenu ze Złotą Łuską. Butelka z Listem Ruto leży na dnie jeziora, przy tunelu do Domeny Zora, i wymaga Srebrnej Łuski. Spośród Skulltul trzy są dla dziecka i dwie dla dorosłego: w skrzynce na dnie basenu z Żelaznymi Butami oraz w koronie wielkiego drzewa na wyspie, w nocy i z Dalekosiężnym Chwytakiem."
+    },
+    "valle": {
+      "intro": "Aby dotrzeć do Fortecy Gerudo, musisz przejść przez Dolinę Gerudo, a jej mapa wskazuje cztery Złote Skulltule, dwa Kawałki Serca i Magiczną Fasolkę. Jeden Kawałek kryje się za wielkim wodospadem, do którego dopłyniesz wpław, a do drugiego, w skrzyni na półce w kanionie, dotrzesz jako dziecko, szybując z Cucco stojącym przy moście. Na platformie z krową, u stóp wodospadu, miękka ziemia daje Skulltulę przy użyciu Robaków oraz fasolkę, która jako dorosły również zbliża cię do Kawałka za wodospadem. Pozostałe trzy Skulltule pojawiają się w nocy: przy strumieniu wody obok kładki jako dziecko z Bumerangiem oraz na namiocie cieśli i skalnym łuku naprzeciwko niego jako dorosły z Chwytakiem."
+    },
+    "fortaleza": {
+      "intro": "Wszystko, co kryje Forteca Gerudo, jest dla dorosłego Linka: dwa Kawałki Serca i dwie Złote Skulltule, które mapa umieszcza na strzelnicy łuczniczej i dachach. Uratowanie czterech cieśli daje ci Przepustkę Gerudo, otwierającą strzelnicę konną: za dnia zdobądź 1000 punktów na Eponie, aby wygrać Kawałek Serca, a w nocy wróć z Chwytakiem po Skulltulę na najdalszej tarczy. Górne wyjście z kuchni prowadzi na dachy, gdzie w nocy siedzi druga Skulltula, a na najwyższym dachu stoi skrzynia z drugim Kawałkiem Serca, do którego dotrzesz Dalekosiężnym Chwytakiem ze skalnej półki powyżej."
+    },
+    "desierto": {
+      "intro": "Nawiedzone Pustkowie kryje tylko jedną Złotą Skulltulę, dostępną jako dorosły, w komnacie pod kamiennym monumentem w drodze do Kolosa Pustyni. Aby je przejść, pokonaj rzekę piasku w Latających Butach lub Dalekosiężnym Chwytakiem i podążaj za flagami; przy monumencie wejdź przez szczelinę między kolumnami, zejdź po drabinie i strąć Skulltulę mieczem z ołtarza."
+    },
+    "coloso": {
+      "intro": "Z Requiem Ducha dotrzesz do Kolosa Pustyni jako dziecko, a jego mapa wskazuje trzy Złote Skulltule, Kawałek Serca, Wielką Wróżkę i Magiczną Fasolkę. Jako dorosły trafisz tu przez Nawiedzone Pustkowie. Przyjdź jako dziecko, aby wypuścić Robaki na miękką ziemię przy wejściu do Świątyni Ducha po Skulltulę oraz posadzić tam fasolkę: jako dorosły roślina przeniesie cię ponad szczytem wielkiej skały, gdzie w nocy siedzi druga Skulltula, prosto na kamienny łuk z Kawałkiem Serca. Trzecia Skulltula pojawia się w nocy wysoko na skalnej ścianie na prawo od Świątyni Ducha, do zdjęcia Chwytakiem, a Wielka Wróżka Miłości Nayru, za pękniętą ścianą na północ od oazy, otwiera się w obu wiekach Bombą lub Bombchu."
+    },
+    "deku": {
+      "intro": "Wnętrze Drzewa Deku to pierwszy loch w grze, do którego wchodzisz jako dziecko tuż po wyjściu z Lasu Kokiri z mieczem i tarczą. Mapa obejmuje jego pięć poziomów, od samej góry po drugie podziemie. Wszystkie cztery Złote Skulltule padają od miecza lub Procy Wróżek znalezionej w środku, a w remake'u możesz zebrać wszystkie cztery już przy pierwszej wizycie: ta w tylnej komnacie podziemi nie wymaga już Bomb ani Bumerangu — wystarczy spalić pajęczynę Kijem Deku. Królowa Gohma w drugim podziemiu zostawia Pojemnik Serca: ogłusz jej oko Procą i uderz mieczem."
+    },
+    "dodongos": {
+      "intro": "Jaskinia Dodongo leży przy Szlaku Góry Śmierci i otwiera się jako dziecko po wysadzeniu głazu u wejścia Kwiatem-Bombą dzięki Bransolecie Gorona. Jej mapa obejmuje dwa piętra jaskini. Z pięciu Złotych Skulltul cztery zdobędziesz już przy pierwszej wizycie jako dziecko; po tę na półce stracha na wróble musisz wrócić jako dorosły z Chwytakiem i Pieśnią Stracha na Wróble albo z Dalekosiężnym Chwytakiem. Król Dodongo zostawia Pojemnik Serca: Bomba do paszczy, a potem miecz."
+    },
+    "jabu": {
+      "intro": "Do Brzucha Jabu-Jabu wchodzisz jako dziecko ze Źródła Zora, kładąc rybę przed pyskiem Jabu-Jabu, a w środku niemal wszystko kręci się wokół Bumerangu zdobywanego na początku. Mapa obejmuje trzy piętra wraz z podziemiem. Pierwsza Złota Skulltula pada od miecza w komnacie z przełącznikiem wody; pozostałe trzy od Bumerangu, z czego dwie razem w podziemiu dużej sali z dziurami, celując ręcznie, ponieważ nie da się ich namierzyć. Barinade zostawia Pojemnik Serca, również pokonywany rzutami Bumerangu."
+    },
+    "bosque": {
+      "intro": "Świątynia Lasu to pierwszy loch dorosłego Linka: wchodzisz tu ze Świętej Leśnej Polany z Chwytakiem, a ten sam Chwytak strąca pięć Złotych Skulltul i przyciąga ich żetony. Mapa obejmuje pięć pięter. Najlepiej zbierać je po drodze, bo każda pojawia się w sali na trasie: przy wejściu, w holu, na obu dziedzińcach i w obrotowej sali w podziemiu, tuż przed bossem. Pojemnik Serca zostawia Widmowy Ganon, przy użyciu Łuku Wróżek lub Chwytaka."
+    },
+    "fuego": {
+      "intro": "Do Świątyni Ognia docierasz jako dorosły z Krateru Góry Śmierci, w Tunice Gorona chroniącej przed żarem. Jej mapa ma pięć pięter, od 1F do 5F. Pięć Złotych Skulltul wymaga więcej niż samego miecza: Pieśni Czasu, Bomb, Chwytaka oraz — przy dwóch z nich — Pieśni Stracha na Wróble skomponowanej jako dziecko i dorosły nad Jeziorem Hylia. Zarówno ta za posągiem w holu, jak i Pojemnik Serca po Volvagii czekają na Młot Megatonowy, więc zostaw je na koniec."
+    },
+    "agua": {
+      "intro": "Świątynia Wody leży na dnie Jeziora Hylia i wchodzi się do niej jako dorosły z Żelaznymi Butami i Tuniką Zora, zmieniając poziom wody Kołysanką Zeldy. Mapa obejmuje cztery piętra, od B1 do 3F. Z pięciu Złotych Skulltul dwie można zebrać przed pokonaniem Mrocznego Linka: tę przy kracie w podziemiu oraz tę za pękniętą podwodną ścianą; pozostałe trzy wymagają Dalekosiężnego Chwytaka zdobywanego w tej walce, więc najprościej zdobyć go najpierw, a potem oczyścić centralny filar, rzekę z wirami i wodospad z głazami. Morpha zostawia Pojemnik Serca na końcu."
+    },
+    "sombra": {
+      "intro": "Świątynia Cienia pod Cmentarzem Kakariko otwiera się jako dorosły za pomocą Nokturnu Cienia i Ognia Din, a w środku od samego początku niezbędne są Soczewka Prawdy i Latające Buty. Mapa obejmuje cztery poziomy podziemi. Pięć Złotych Skulltul pojawia się zgodnie z kolejnością trasy: w sali z niewidzialnymi kosami, w sali z kolcami na suficie, w dole w korytarzu z wentylatorami, na półce w sali z łodzią oraz wewnątrz wielkich czaszek; dwie padają od Chwytaka, ta w sali z łodzią wymaga Dalekosiężnego Chwytaka i Pieśni Stracha na Wróble, a ta w czaszkach — Bomb. Pojemnik Serca zostawia Bongo Bongo, pokonywany strzałami lub Chwytakiem przy włączonej Soczewce."
+    },
+    "espiritu": {
+      "intro": "Świątynię Ducha przy Kolosie Pustyni zwiedza się dwukrotnie: najpierw jako dziecko, przeciskając się przez mały otwór po rozmowie z Nabooru, a następnie jako dorosły, odsuwając wielki blok w holu Srebrnymi Rękawicami. Mapa obejmuje cztery piętra, od 1F do 4F. Trzy z pięciu Złotych Skulltul można zebrać już w części dla dziecka — dwie Bumerangiem lub Procą Wróżek i jedną mieczem — a pozostałe dwie w części dla dorosłego wymagają Pieśni Czasu oraz Dalekosiężnego Chwytaka z Pieśnią Stracha na Wróble. Do Pojemnika Serca po Twinrovie potrzebna jest Lustrzana Tarcza, którą zdobędziesz w samej świątyni."
+    },
+    "pozo": {
+      "intro": "Na Dno Studni wchodzisz jako dziecko, gdy osuszysz studnię w Wiosce Kakariko, grając Pieśń Burz w Młynie. W środku dwupiętrowa mapa wskazuje trzy Złote Skulltule, a wszystkie wymagają Bumerangu oraz Soczewki Prawdy zdobywanej w podziemiu. Bez Soczewki nie zobaczysz fałszywych ścian, niewidzialnych przejść ani zapadni; trzy Skulltule czekają za zamkniętymi drzwiami — dwie w centralnej części i jedna w sali z Like Like."
+    },
+    "hielo": {
+      "intro": "Do Lodowej Jaskini wchodzisz jako dorosły z zamarzniętego Źródła Zora, przeskakując po krach lodowych do jaskini z tyłu, i to tutaj zdobywasz Żelazne Buty. Mapa wskazuje trzy Złote Skulltule i wszystkie trzy padają od Chwytaka. Jedna kryje się w sali z wirującym ostrzem, między stalagmitami; po pozostałe dwie zbierz Srebrne Rupie w tej sali, aby otworzyć salę z Mapą Lochu, napełnij tam Butelkę Niebieskim Ogniem i stop nim dwie ściany z czerwonego lodu w sali z ostrzem: za nimi znajdują się sala z Kompasem i sala z przesuwanym blokiem lodu."
+    },
+    "gerudo": {
+      "intro": "Poligon Gerudo to loch prób w Fortece Gerudo, do którego wchodzisz jako dorosły z Przepustką Gerudo. Nie zawiera żadnych Złotych Skulltul ani Kawałków Serca, więc na tej mapie nie ma znajdziek do odhaczenia; nagrodą za jego ukończenie są Lodowe Strzały."
+    },
+    "ganon": {
+      "intro": "Zamek Ganona wznosi się jako dorosły tam, gdzie niegdyś stał Zamek Hyrule, i jest finałowym lochem gry. Nie zawiera żadnych Złotych Skulltul ani Kawałków Serca, więc na tej mapie nie ma znajdziek do odhaczenia. Na zewnątrz, przy ścieżce wejściowej, czekają natomiast Wielka Wróżka Podwójnej Obrony oraz Złota Skulltula na zrujnowanym łuku: znajdziesz je na mapie Zamku Hyrule."
+    }
+  },
+  "items": {
+    "kokiri-gs-01": {
+      "name": "Za Domem Braci Wszystkowiedzących",
+      "desc": "Dom Braci Wszystkowiedzących, na wzgórzu naprzeciwko Domu Wielkiego Mido i obok Leśnego Centrum Treningowego, skrywa tę Złotą Skulltulę z tyłu swojego pnia. Pojawia się tylko w nocy i tylko jako dziecko.\n\nWejdź na wzgórze i obejdź dom od tyłu."
+    },
+    "kokiri-gs-02": {
+      "name": "Robaki w miękkiej ziemi przy sklepie",
+      "desc": "Tuż za Sklepem Kokiri znajduje się kawałek miękkiej ziemi, który skrywa Złotą Skulltulę dla dziecka, a do jej wywabienia wystarczy butelka z robakami.\n\nGdy tylko **opróżnisz butelkę z robakami na ziemię**, Skulltula wyskoczy spod ziemi: pokonaj ją mieczem i zabierz Żeton Złotej Skulltuli. Działa o każdej porze dnia."
+    },
+    "kokiri-gs-03": {
+      "name": "Tył Domu Bliźniaczek",
+      "desc": "Ta Złota Skulltula wymaga powrotu do Lasu Kokiri jako dorosły, w nocy, ponieważ trzyma się wysoko z tyłu Domu Bliźniaczek — tego z dwuspadowym dachem w pobliżu ścieżki na Polanę Wielkiego Drzewa Deku.\n\nTwój miecz tam nie sięgnie, ale **Chwytak zdejmie ją z dołu**, a drugi strzał w żeton przyciągnie go do ciebie."
+    },
+    "kokiri-bean-01": {
+      "name": "Miękka ziemia za sklepem",
+      "desc": "Jedną z Magicznych Fasolek kupionych od Sprzedawcy Fasolek nad Rzeką Zora sadzi się właśnie tutaj, w miękkiej ziemi tuż obok Sklepu Kokiri, i najlepiej posadzić ją jako dziecko, aby była gotowa po powrocie.\n\nJako dorosły liść rośliny **wysadzi cię na małej półce z kręgiem zielonych Rupii** wokół jednej czerwonej. To samo miejsce kryje też Skulltulę od robaków, więc jako dziecko załatwisz obie rzeczy za jednym razem.",
+      "hint": "Posadź ją jako dziecko i użyj jako dorosły."
+    },
+    "perdido-heart-01": {
+      "name": "Pieśń Sarii dla Skull Kida",
+      "desc": "Zaraz po wejściu do Zaginionych Lasów z Lasu Kokiri pierwsza ścieżka w lewo prowadzi do Skull Kida grającego na flecie na wysokim pniu, który znika, jeśli po prostu do niego podejdziesz.\n\nDlatego **wejdź na niski pień przed nim** i zagraj Pieśń Sarii na Okarynie: Skull Kid zaprzyjaźni się z tobą i podaruje ci Kawałek Serca."
+    },
+    "perdido-heart-02": {
+      "name": "Gra pamięciowa na Okarynie",
+      "desc": "Strefa z tarczą do Procy, czyli pierwsza ścieżka w prawo po wejściu z Lasu Kokiri, kryje grę pamięciową z dwoma Skull Kidami. Zejdź po schodach naprzód do drzewa z tarczą i **przejdź po jego prawej stronie, by wejść na mały pień**.\n\nNastępnie musisz powtarzać na Okarynie to, co zagrają, w trzech rundach po pięć, sześć i osiem nut. Jeśli pomylisz nutę, runda zaczyna się od nowa z inną melodią, a nagrody rosną: Rupie w pierwszych dwóch rundach i Kawałek Serca w trzeciej."
+    },
+    "perdido-gs-01": {
+      "name": "Robaki w miękkiej ziemi przy moście",
+      "desc": "Za Skull Kidem grającym na flecie — pierwszą ścieżką w lewo od wejścia z Lasu Kokiri — skręć ponownie w lewo, a trafisz na polanę z mostem na Równinę Hyrule. Poznasz ją po Kamieniu Plotek i Handlarzu Deku z tyłu, który sprzedaje większą torbę na Kije Deku.\n\nMiękka ziemia leży tuż przy ścieżce po wejściu: **wylej na nią butelkę z robakami**, a gdy Złota Skulltula wyjdzie na powierzchnię, wykończ ją mieczem i zabierz Żeton Złotej Skulltuli."
+    },
+    "perdido-gs-02": {
+      "name": "Robaki w miękkiej ziemi na polanie z samotnym drzewem",
+      "desc": "Aby dotrzeć do tego miejsca, idź w Zaginionych Lasach w prawo, w lewo, w prawo, w lewo, a potem — zamiast kierować się na Świętą Leśną Polanę — skręć jeszcze raz w lewo. To polana z samotnym drzewem, dwoma Handlarzami Deku i dziurą w trawie.\n\nNa miejscu **wypuść robaki na miękką ziemię po prawej, obok jednego z Handlarzy Deku**, a gdy Złota Skulltula wyjdzie, pokonaj ją mieczem i zabierz Żeton Złotej Skulltuli."
+    },
+    "perdido-gs-03": {
+      "name": "Półka przy Leśnej Scenie",
+      "desc": "Dotarcie na wysoką półkę, na której siedzi ta Złota Skulltula, wymaga przygotowań jako dziecko, bo jedyną drogą w górę jest roślina na polanie z samotnym drzewem. Aby tam dojść, skręć w Zaginionych Lasach w prawo, w lewo, w prawo, w lewo i w lewo, a potem posadź fasolkę w miękkiej ziemi po prawej, obok Handlarza Deku.\n\nGdy wrócisz jako dorosły w nocy, **wleć na roślinie na półkę** i pokonaj Skulltulę mieczem."
+    },
+    "perdido-bean-01": {
+      "name": "Miękka ziemia przy moście",
+      "desc": "Dwukrotny skręt w lewo od wejścia do Zaginionych Lasów prowadzi do strefy z mostem na Równinę Hyrule, a tamtejsza miękka ziemia to dobre miejsce na posadzenie Magicznej Fasolki jako dziecko.\n\nGdy wrócisz jako dorosły, **pozwól roślinie unieść się aż do mostu** między Lasem Kokiri a Równiną Hyrule i wskocz na niego: to wygodny skrót podczas łańcucha wymian, gdy Dziwny Grzyb psuje się po trzech minutach.",
+      "hint": "Posadź ją jako dziecko i użyj jako dorosły."
+    },
+    "perdido-bean-02": {
+      "name": "Miękka ziemia przy dwóch Handlarzach Deku",
+      "desc": "Dwaj Handlarze Deku i samotne drzewo stoją na polanie w Zaginionych Lasach, do której docierasz, skręcając od wejścia w prawo, w lewo, w prawo, w lewo i w lewo — tam też znajduje się miękka ziemia na Magiczną Fasolkę dla dziecka. Leży po prawej, za jednym z Handlarzy, a robaki wywabią z niej Złotą Skulltulę.\n\nJako dorosły **wleć na roślinie na wysoką półkę nad polaną**, gdzie w nocy czeka kolejna Złota Skulltula.",
+      "hint": "Posadź ją jako dziecko i użyj jako dorosły."
+    },
+    "prado-gs-01": {
+      "name": "Prawa ściana przed schodami",
+      "desc": "Labirynt na Świętej Leśnej Polanie skrywa tę Złotą Skulltulę, choć pojawia się ona tylko jako dorosły. Przedrzyj się przez niego, omijając Moblinów, a gdy dotrzesz do połowy, spójrz na ścianę po prawej.\n\n**Traf Skulltulę Chwytakiem**, a potem wystrzel go ponownie, aby przyciągnąć Żeton Złotej Skulltuli."
+    },
+    "llanura-heart-01": {
+      "name": "Handlarz Deku przy fosie",
+      "desc": "Wyjdź z Miasta Zamkowego Hyrule przez most zwodzony i idź wzdłuż muru na wschód, brzegiem fosy. Obok drzewa zobaczysz dziurę, którą można otworzyć Bombą lub Młotem Megatonowym: zeskocz do środka i porozmawiaj z Handlarzem Deku.\n\nSprzedaje tylko tym, którzy znają hasło. Aby je poznać, podejdź do drzewa obok jako dorosły Link i przeczytaj Myśl Wróżki. Następnie wróć jako dziecko, porozmawiaj z Handlarzem Deku i **wybierz „Sell somethin', will ya?”**: zaoferuje ci Kawałek Serca za 100 Rupii.\n\nKup go jako dziecko, bo jako dorosły sprzedał go już Linkowi z przeszłości.",
+      "hint": "Kosztuje 100 Rupii."
+    },
+    "llanura-heart-02": {
+      "name": "Paradoks skrzyni z przeszłości",
+      "desc": "Na zachodnim krańcu Równiny Hyrule, blisko wejścia do Doliny Gerudo, ziemia nabiera czerwonawą barwę. Zejdź po zboczu do zagłębienia pod skalnym nawisem i poszukaj skrzyni z tyłu.\n\nMusisz to zrobić jako dziecko: jako dorosły skrzynia jest już otwarta i pusta, a Myśl Wróżki wyjaśnia, że nigdy nie była zamknięta na klucz. **Otwórz skrzynię jako dziecko**, a Kawałek Serca będzie twój.",
+      "hint": "Przeczytaj Myśl Wróżki jako dorosły, aby dowiedzieć się, dlaczego jest pusta."
+    },
+    "llanura-gs-01": {
+      "name": "Samotna sosna na wschodzie",
+      "desc": "Na wschodzie Równiny Hyrule, między Rzeką Zora a Lasem Kokiri, na szczycie pagórka obok strumienia stoi samotna sosna. Kryje się w niej Złota Skulltula.\n\n**Wturlaj się w pień**, aby strącić ją na ziemię, wykończ ją mieczem i zabierz Żeton Złotej Skulltuli.",
+      "hint": "Stoi na szczycie pagórka, obok strumienia."
+    },
+    "llanura-gs-02": {
+      "name": "Grota pod kamiennym kręgiem przy ranczu",
+      "desc": "W zagajniku na południowy zachód od Rancza Lon Lon, obok wyjścia w stronę Jeziora Hylia, krąg kamieni na ziemi zakrywa grotę. Otwórz ją **Bombą lub uderzeniem Młota Megatonowego w krąg** i zeskocz do dziury.\n\nZaraz po wejściu z sufitu spadnie Wielka Skulltula: pokonaj ją mieczem. Złota siedzi na ścianie; sięgniesz jej Chwytakiem lub Bumerangiem, które od razu przyciągną Żeton Złotej Skulltuli."
+    },
+    "lonlon-heart-01": {
+      "name": "Kamienna wieża z tyłu",
+      "desc": "Z tyłu Rancza Lon Lon, tuż za zagrodą dla koni, stoi kamienna wieża służąca jako silos. W jednym z jej narożników kilka skrzynek zasłania otwór: **odsuń skrzynki i przeczołgaj się przez otwór** aż do końca, gdzie czeka Kawałek Serca."
+    },
+    "lonlon-gs-01": {
+      "name": "Drzewo przy drodze do zagrody",
+      "desc": "Zaraz po wejściu na Ranczo Lon Lon, na bocznym podwórzu po lewej, rośnie drzewo ze schowaną Złotą Skulltulą: **wturlaj się w pień, aby strącić ją na ziemię**, pokonaj ją i zabierz Żeton Złotej Skulltuli."
+    },
+    "lonlon-gs-02": {
+      "name": "Skrzynka w grocie na południe od rancza",
+      "desc": "Aby ta Złota Skulltula pojawiła się jako dorosły, mały Link musi przeczytać Myśl Wróżki w podziemnej grocie na południowy wschód od Rancza Lon Lon, obok stawu, oraz pokonać zwykłą Skulltulę.\n\nGdy już to zrobisz, wróć jako dorosły. Z tyłu, pod ścianą, stoi drewniana skrzynka. **Rozbij ją, turlając się w nią**, a wyskoczy Złota Skulltula: pokonaj ją mieczem i zabierz Żeton Złotej Skulltuli. Jako ciekawostka — treść Myśli Wróżki ulegnie zmianie.",
+      "hint": "Zabij Skulltulę w przeszłości, aby znaleźć złotą w przyszłości."
+    },
+    "lonlon-gs-03": {
+      "name": "Okno domu",
+      "desc": "Jeśli w nocy spojrzysz w górę na dom Talona na Ranczu Lon Lon, tuż obok łuku wejściowego, zobaczysz Złotą Skulltulę w oknie na piętrze — za wysoko dla miecza.\n\n**Rzuć w nią Bumerangiem z dołu**: pokona ją i przyniesie Żeton Złotej Skulltuli w tym samym rzucie. Za dnia ta ściana jest pusta."
+    },
+    "lonlon-gs-04": {
+      "name": "Wnętrze kamiennej wieży",
+      "desc": "Kamienna wieża z tyłu Rancza Lon Lon, za zagrodą, kryje w nocy Złotą Skulltulę. Wejdź przez drzwi wieży i spójrz w górę: siedzi wysoko na ścianie, nad wiązką siana wiszącą pod oknem.\n\nTylko Bumerang tam sięgnie: **rzuć go z podłogi wieży**, a pokona Skulltulę i przyniesie Żeton Złotej Skulltuli w tym samym rzucie. Proca ją zabije, ale żeton zostanie w górze."
+    },
+    "ciudadela-heart-01": {
+      "name": "Sklep ze Skrzyniami Skarbów",
+      "desc": "Sklep ze Skrzyniami Skarbów znajduje się po lewej stronie placu Miasta Zamkowego Hyrule zaraz po wejściu, w bocznej uliczce. Otwiera się tylko w nocy, a gra kosztuje 10 Rupii. Właściciel daje ci klucz: w każdej z pięciu sal stoją dwie skrzynie i tylko jedna kryje klucz do następnej; zły wybór kończy grę.\n\nZałóż Soczewkę Prawdy z zakładki Ekwipunek, aby zobaczyć zawartość każdej skrzyni. **Przejdź wszystkie pięć sal i otwórz dużą skrzynię w pokoju z nagrodą**, aby zdobyć Kawałek Serca.",
+      "hint": "Zalecane: Soczewka Prawdy."
+    },
+    "ciudadela-heart-02": {
+      "name": "Zagubiony szczeniak",
+      "desc": "Richard to mały biały piesek, który biega w nocy po jednej z tylnych alejek Miasta Zamkowego Hyrule, gdzie z okna domu wychyla się pewien mężczyzna. Porozmawiaj z Richardem, aby poszedł za tobą.\n\nZ Richardem u boku udaj się do **wejścia na plac od strony Równiny Hyrule**. Jego właścicielka podaruje ci Kawałek Serca.",
+      "hint": "Kawałek Serca daje tylko za pierwszym razem; później Rupie."
+    },
+    "ciudadela-heart-03": {
+      "name": "Kręgielnia Bombchu",
+      "desc": "Kręgielnia Bombchu znajduje się po zachodniej stronie placu targowego w Mieście Zamkowym Hyrule i otwiera się dopiero po pokonaniu Króla Dodongo.\n\nPorozmawiaj z obsługującą: zanim zapłacisz, powie ci, jaka nagroda jest do wygrania, a każda rozgrywka kosztuje 10 Rupii. Musisz przejść trzy poziomy za pomocą 10 Bombchu, wypuszczając je zza linii tak, by trafiły w tarczę z tyłu, omijając przeszkody takie jak Cucco.\n\nNagroda zmienia się co grę, więc **graj dotąd, aż zapowie Kawałek Serca**, i wygraj tę rundę.",
+      "hint": "10 Rupii za grę; nagroda jest zapowiadana przed zapłatą."
+    },
+    "ciudadela-gs-01": {
+      "name": "Wartownia",
+      "desc": "Obok mostu zwodzonego, przy wejściu do Miasta Zamkowego Hyrule, znajduje się wartownia — budynek pełen dzbanów ze Złotą Skulltulą ukrytą w drewnianej skrzynce.\n\nPodejdź do tylnej ściany i **wturlaj się w skrzynkę najbardziej po prawej**, tę na prawo od żołnierza, gdy stoisz przodem do niego."
+    },
+    "castillo-gs-01": {
+      "name": "Drzewo w ogrodzie z żywopłotami",
+      "desc": "Tereny Zamku Hyrule możesz zwiedzać tylko jako dziecko. Idź ścieżką w stronę zamku i skręć z boku w ogród z żywopłotami i kwiatami przed sobą. Przejdź przez niego na zachód do dalszego rogu, przy murze zamku, gdzie rośnie samotne drzewo.\n\n**Wturlaj się w pień**, aby strącić Złotą Skulltulę; pokonaj ją i zabierz żeton."
+    },
+    "castillo-gs-02": {
+      "name": "Grota Pieśni Burz",
+      "desc": "Aby ominąć strażnika przy bramie Zamku Hyrule, wejdź po pnączach i zeskocz do fosy przy moście wejściowym. Przepłyń na wschód pod mostem i wyjdź po kamiennych schodkach: tuż przy zewnętrznym murze rośnie drzewo z kręgiem ziemi u podstawy.\n\n**Zagraj Pieśń Burz na tym kręgu**, aby otworzyć dziurę. Grota ma popękane ściany, które wysadzisz Bombami: za jedną z nich kryje się Złota Skulltula. Bumerang ją zabije i przyniesie ci żeton."
+    },
+    "castillo-fairy-01": {
+      "name": "Wielka Wróżka: Atak Obrotowy",
+      "desc": "Na wschodnim krańcu terenów Zamku Hyrule, trzymając się prawego muru, biegnie ślepa ścieżka zakończona głazem. Aby strażnik cię nie zatrzymał, wejdź po pnączach na mur.\n\nNa końcu ścieżki **wysadź głaz Bombą i przeczołgaj się przez otwór** do Fontanny Wielkiej Wróżki. Zagraj Kołysankę Zeldy na symbolu Triforce i złóż ofiarę 50 Rupii: Wielka Wróżka wzmocni twój Atak Obrotowy magiczną falą uderzeniową.",
+      "hint": "Prosi o ofiarę 50 Rupii i wzmacnia Atak Obrotowy falą uderzeniową."
+    },
+    "kakariko-heart-01": {
+      "name": "Mały dach za Domem Impy",
+      "desc": "Kawałek leży na widoku na małym dachu z czerwonej dachówki za Domem Impy, przy samym zboczu góry. Z niebieskiego dachu domu **zeskocz na mały dach za nim** i podnieś go. Stamtąd możesz zejść do obory z krową.\n\nJako dziecko porozmawiaj z Kaeporą Gaeborą na szczycie Góry Śmierci, a sowa zrzuci cię na dach Impy. Jako dorosły potrzebujesz Chwytaka.",
+      "hint": "Jako dorosły użyj Chwytaka z dachu Domu Skulltuli."
+    },
+    "kakariko-heart-02": {
+      "name": "Młyn",
+      "desc": "Wewnątrz Młyna, z tyłu wioski, Kawałek czeka na górze, na meblu przy górnym pomoście.\n\nJako dorosły dotrzesz tam przez Grób Dampé na Cmentarzu. Po zakończeniu wyścigu schody wyjściowe są zniszczone: **wystrzel Chwytak w tarczę nad drzwiami** i idź korytarzem. Wyjdziesz na górze Młyna, obok obrotowej platformy; wejdź na mebel przy ścianie i zabierz Kawałek.",
+      "hint": "Jako dorosły wejdziesz tam przez Grób Dampé."
+    },
+    "kakariko-heart-03": {
+      "name": "Mężczyzna na dachu",
+      "desc": "Mężczyzna na dachu siedzi na **Sklepie z Miksturami, obok wieży strażniczej i naprzeciwko Młyna** — wystarczy do niego dotrzeć i porozmawiać, aby otrzymać Kawałek Serca.\n\nJako dorosły wystarczy Chwytak: stań na barierce naprzeciwko Młyna i przyciągnij się do dachu.",
+      "hint": "Jako dorosły potrzebujesz Chwytaka."
+    },
+    "kakariko-gs-01": {
+      "name": "Dom w budowie",
+      "desc": "Gdy cieśle budują dom w trakcie budowy, jako dziecko w nocy Złota Skulltula wisi na ceglanej ścianie placu budowy, nad ziemią. **Wejdź po rampie z desek na rusztowanie**, a będziesz miał ją tuż przed sobą na ścianie.\n\nWystarczy sam miecz, więc nie potrzebujesz żadnych innych przedmiotów, by zdobyć żeton."
+    },
+    "kakariko-gs-02": {
+      "name": "Drzewo przy wejściu",
+      "desc": "Wielka sosna blisko wejścia od strony Równiny Hyrule, w dolnej części wioski, kryje w nocy Złotą Skulltulę, która spada na ziemię, gdy jako dziecko **wturlasz się w pień sosny**. Gdy spadnie, wykończ ją i zabierz żeton."
+    },
+    "kakariko-gs-03": {
+      "name": "Wieża strażnicza",
+      "desc": "W połowie drabiny wieży strażniczej, w centrum wioski, w nocy wisi Złota Skulltula, którą atakuje się z dołu: **zestrzel ją Procą Wróżek lub wyślij w górę drabiny Bombchu**.\n\nGdy zginie, wejdź po drabinie: żeton zostaje na niej w połowie wysokości i możesz go zabrać bez wchodzenia na sam szczyt.",
+      "hint": "Pozbądź się jej, zanim wejdziesz na wieżę w stronę mężczyzny na dachu."
+    },
+    "kakariko-gs-04": {
+      "name": "Dom przy bramie w góry",
+      "desc": "W drodze pod górę do bramy na Górę Śmierci, w górnej części wioski, miniesz dom stojący tuż obok niej, za wieżą strażniczą. Jako dziecko w nocy **obejdź go trawiastą ścieżką z tyłu** i sprawdź jego ściany, aż znajdziesz Złotą Skulltulę. Jest na poziomie gruntu, więc zdejmiesz ją mieczem i zabierzesz żeton bez żadnych przedmiotów."
+    },
+    "kakariko-gs-05": {
+      "name": "Dom Skulltuli",
+      "desc": "Dom Skulltuli, siedziba przeklętej rodziny, to pierwszy dom po prawej po wejściu z Równiny Hyrule, z pajęczynami nad drzwiami. Jako dziecko w nocy Złota Skulltula pojawia się na **froncie domu, na lewo od schodków wejściowych**, na poziomie gruntu; za dnia widać już tam jej pajęczynę.\n\nJeśli jest dzień, zagraj Pieśń Słońca, aby sprowadzić noc. Miecz rozprawi się z nią w mgnieniu oka, a potem zostanie tylko podnieść żeton."
+    },
+    "kakariko-gs-06": {
+      "name": "Nad Domem Impy",
+      "desc": "Po tę Złotą Skulltulę musisz wrócić jako dorosły w nocy — siedzi na skalnej ścianie tuż obok niebieskiego dachu Domu Impy, dużego budynku na południowym krańcu wioski. Potrzebujesz Chwytaka.\n\nObejdź dom bokiem do skalnej ściany z tyłu, porośniętej pnączami, i **wespij się po nich na niebieski dach**. Z góry zobaczysz Skulltulę na skale obok dachu: zdejmij ją Chwytakiem, który od razu przyciągnie żeton."
+    },
+    "cementerio-heart-01": {
+      "name": "Wycieczka kopania grobów z Dampé",
+      "desc": "Jako dziecko w nocy grabarz Dampé oferuje na Cmentarzu swoją „Emocjonującą wycieczkę kopania grobów”. Jeśli przyjdziesz za dnia, zagraj tam Pieśń Słońca: zapadnie noc i Dampé natychmiast się pojawi. Zgódź się i zostań na centralnym placu, bo jeśli odejdziesz za daleko, wycieczka się skończy.\n\nStań obok jednego z kopców ziemi i **poproś go, by kopał: każda próba kosztuje 10 Rupii**. Czasem natrafi na coś twardego i poprosi o 5 więcej, żeby kopać dalej — losowo może wykopać kamień albo Kawałek Serca. Próbuj, aż się pojawi. Miejsce jest całkowicie losowe.",
+      "hint": "10 Rupii za kopiec; czasem prosi o 5 więcej, żeby kopać dalej."
+    },
+    "cementerio-heart-02": {
+      "name": "Wyścig z Dampé",
+      "desc": "Grób Dampé to nagrobek z kwiatami, z którego unosi się dym, w ogrodzonej części po lewej, kilka stopni wyżej. Jako dorosły w nocy **pociągnij go, aby otworzyć dziurę, i zejdź do katakumb**. Na dole biegnij za jego duchem do końca, nie tracąc go z oczu; pierwszy wyścig daje Chwytak.\n\nKawałek Serca dostaniesz w drugim. Wyjdź Chwytakiem przez tarczę nad zniszczonymi schodami (wyjdziesz w Młynie w Kakariko), wróć na Cmentarz, znów zejdź do otwartej już dziury i dotrzyj do mety w minutę lub szybciej.",
+      "hint": "Pierwszy wyścig daje Chwytak; Kawałek Serca wpada w drugim."
+    },
+    "cementerio-heart-03": {
+      "name": "Grób przy Grobowcu Rodziny Królewskiej",
+      "desc": "W pobliżu Grobowca Rodziny Królewskiej, w górnej części Cmentarza: stań plecami do grobowca, twarzą do wyjścia, a wśród nagrobków po lewej to **pierwszy od lewej**. Jako dorosły otwiera się zawsze; jako dziecko tylko w nocy (za dnia pilnujący grobów chłopiec cię powstrzyma; Pieśń Słońca oszczędzi czekania).\n\nPociągnij nagrobek i zejdź do dziury: skrzynia z Kawałkiem Serca stoi na końcu krypty i nie pilnują jej żadni wrogowie.",
+      "hint": "Jako dziecko grób otwiera się tylko w nocy."
+    },
+    "cementerio-heart-04": {
+      "name": "Półka na ścianie",
+      "desc": "Wysoko na lewej ścianie Cmentarza, nad Grobem Dampé i miękką ziemią, znajduje się półka z Kawałkiem Serca leżącym na widoku na kamiennym filarze — z dołu nie dosięgniesz bez pomocy.\n\nJeśli jako dziecko posadzisz w tej miękkiej ziemi Magiczną Fasolkę, po powrocie jako dorosły **wejdź na liść i pozwól mu unieść się na półkę**. Na górze zabierz Kawałek z filaru.",
+      "hint": "Kawałek leży na widoku na filarze na ścianie."
+    },
+    "cementerio-gs-01": {
+      "name": "Mur Cmentarza",
+      "desc": "W nocy, w wąskiej alejce między Chatą Dampé a kamiennym murem z żelaznym ogrodzeniem, przy wejściu na Cmentarz, wysoko pojawia się Złota Skulltula. Za dnia widać w tym miejscu złotą pajęczynę wskazującą, gdzie wyjdzie.\n\n**Pokonaj ją Chwytakiem lub Bumerangiem i przyciągnij nimi żeton.**"
+    },
+    "cementerio-gs-02": {
+      "name": "Robaki w miękkiej ziemi",
+      "desc": "Mając butelkę z Robakami i będąc dzieckiem, o dowolnej porze dnia podejdź do miękkiej ziemi w lewym rogu Cmentarza, z tyłu, przy ścianie i obok Grobu Dampé, i **wypuść je tam, aby wyszła Złota Skulltula**. Zabij ją, gdy tylko się pojawi, i zbierz żeton.",
+      "hint": "To to samo miejsce, gdzie sadzisz Magiczną Fasolkę."
+    },
+    "cementerio-bean-01": {
+      "name": "Miękka ziemia na Cmentarzu",
+      "desc": "Pod wysoką półką na lewej ścianie Cmentarza, obok Grobu Dampé, znajduje się miękka ziemia, w której zalecamy **posadzić Magiczną Fasolkę jako dziecko**. Gdy wrócisz jako dorosły, liść uniesie cię na półkę z Kawałkiem Serca.",
+      "hint": "Posadź ją jako dziecko i użyj jako dorosły."
+    },
+    "sendero-heart-01": {
+      "name": "Półka nad Jaskinią Dodongo",
+      "desc": "Nad wejściem do Jaskini Dodongo znajduje się półka z tym Kawałkiem Serca, widoczna we wnęce w skale. Musisz jako dziecko posadzić Magiczną Fasolkę w miękkiej ziemi.\n\nJako dorosły wsiądź na roślinę i zeskocz, gdy będzie mijać półkę, aby zabrać Kawałek Serca."
+    },
+    "sendero-gs-01": {
+      "name": "Robaki w miękkiej ziemi przy jaskini",
+      "desc": "Miękka ziemia z tą Złotą Skulltulą znajduje się przed Jaskinią Dodongo.\n\nGdy wejście jest już odsłonięte, **wypuść robaki z butelki na miękką ziemię**, a gdy tylko Złota Skulltula wyskoczy, pokonaj ją mieczem i zabierz żeton.",
+      "hint": "W tym samym miejscu możesz posadzić Magiczną Fasolkę."
+    },
+    "sendero-gs-02": {
+      "name": "Pęknięta ściana blisko Kakariko",
+      "desc": "Wychodząc z Wioski Kakariko w stronę góry, zanim dotrzesz do Jaskini Dodongo, po prawej stronie szlaku zobaczysz ścianę z popękanych skał, która różni się od reszty: słychać za nią Skulltulę.\n\n**Otwórz ścianę Bombą albo — jako dorosły — Młotem Megatonowym**, wejdź do wnęki i pokonaj Złotą Skulltulę, która siedzi na tylnej ścianie na wysokości miecza."
+    },
+    "sendero-gs-03": {
+      "name": "Nad Jaskinią Dodongo",
+      "desc": "Na półce z barierką, z której jako dziecko zrzucasz Kwiat-Bombę na Jaskinię Dodongo, obok skrętu do Miasta Goronów, pod ścianą leży kilka kamieni. Ta Złota Skulltula pojawia się pod nimi, gdy wrócisz jako dorosły, w nocy.\n\n**Rozbij kamienie Młotem Megatonowym lub Bombą** — to jedyne rzeczy, które potrafią je zniszczyć — a potem pokonaj Skulltulę i zabierz żeton."
+    },
+    "sendero-gs-04": {
+      "name": "Ścieżka spadających skał",
+      "desc": "Za Jaskinią Dodongo szlak pnie się ku odcinkowi, gdzie spadają wulkaniczne głazy, i kończy się ścianą z siatką prowadzącą na szczyt. Ta Złota Skulltula pojawia się u stóp tej ściany, jako dorosły i w nocy.\n\nStojąc przodem do ściany, po prawej po wejściu na górę, obok skalnego łuku, leży stos kamieni, których Bomby nie ruszą: **uderz w nie Młotem Megatonowym**, a gdy rozpadną się na kawałki, wykończ Skulltulę i zabierz żeton."
+    },
+    "sendero-bean-01": {
+      "name": "Miękka ziemia przy Jaskini Dodongo",
+      "desc": "Zanim posadzisz tu Magiczną Fasolkę, jako dziecko musisz usunąć głaz blokujący Jaskinię Dodongo, używając Kwiatu-Bomby z góry i Bransolety Gorona. Następnie posadź ją w miękkiej ziemi przed wejściem.\n\nJako dorosły roślina przelatuje nad półką z Kawałkiem Serca i wnosi cię aż na odcinek ze spadającymi skałami: **to skrót omijający głaz blokujący szlak**.",
+      "hint": "Posadź ją jako dziecko i użyj jako dorosły."
+    },
+    "sendero-fairy-01": {
+      "name": "Wielka Wróżka: magia",
+      "desc": "Na samym szczycie Góry Śmierci, w pobliżu wejścia do Krateru, czeka przycupnięty Kaepora Gaebora. **Ścianę z popękanych skał po jego lewej można wysadzić Bombą** albo — jako dorosły — rozbić Młotem Megatonowym, a za nią kryje się fontanna.\n\nW środku zagraj Kołysankę Zeldy na symbolu Triforce. Wielka Wróżka poprosi o ofiarę 25 Rupii: zgódź się, a otrzymasz Pasek Magii i Ogień Din. Jeśli wspinasz się jako dziecko, weź Tarczę Hylia na odcinek ze spadającymi skałami.",
+      "hint": "Prosi o ofiarę 25 Rupii. Nagroda: Pasek Magii i Ogień Din."
+    },
+    "goron-heart-01": {
+      "name": "Obracająca się waza",
+      "desc": "Wielka waza z twarzami pośrodku najniższego piętra Miasta Goronów zaczyna się kręcić dopiero wtedy, gdy jako dziecko **zapalisz pochodnie wokół niej**. Zadziała Ogień Din lub zapalony Kij Deku, odpalony na przykład w komnacie Darunii, otwieranej Kołysanką Zeldy przed drzwiami. Pochodnie pozostają zapalone nawet przy późniejszym powrocie.\n\nNastępnie wejdź piętro wyżej, wyjdź na drewnianą deskę wystającą nad wazą i wrzuć do środka Bombę albo rzuć Kwiat-Bombę za pomocą Bransolety Gorona. Wyrzuci na podłogę Kawałek Serca razem z 10 Rupiami.",
+      "hint": "Jeśli zatrzyma się na innej twarzy, daje inne nagrody: próbuj, aż się uda."
+    },
+    "goron-gs-01": {
+      "name": "Labirynt głazów",
+      "desc": "Sala z labiryntem głazów znajduje się na najwyższym piętrze Miasta Goronów, tym z wejściem ze Szlaku Góry Śmierci, i jako dziecko przechodzisz ją, wysadzając sobie drogę między blokami Bombami.\n\nNa samym końcu, obok dwóch skrzyń, stoi drewniana skrzynka ze Złotą Skulltulą w środku: **wturlaj się w skrzynkę, aby ją rozbić**, pokonaj Skulltulę mieczem i zabierz żeton."
+    },
+    "goron-gs-02": {
+      "name": "Skalny występ przy suficie",
+      "desc": "Jako dorosły w Mieście Goronów, piętro nad najniższym poziomem, obejdź platformę przeciwnie do ruchu wskazówek zegara. Zanim wejdziesz do tunelu, spójrz w górę: Złota Skulltula siedzi od spodu skalnego występu przy suficie.\n\n**Strąć ją Chwytakiem**, który przy okazji przyciągnie ci żeton."
+    },
+    "crater-heart-01": {
+      "name": "Wnęka w ścianie Krateru",
+      "desc": "Wchodząc do Krateru ze szczytu Góry Śmierci, stoisz na półce nad wielką ścianą opadającą ku platformie Bolero Ognia. Z jej krawędzi zwisają siatki do wspinaczki: **zejdź po nich**, a nieco niżej znajdziesz Kawałek we wnęce w ścianie, między dwiema siatkami.\n\nJako dziecko żar szybko cię spali. Jako dorosły w Tunice Gorona nie musisz się spieszyć.",
+      "hint": "Jako dziecko biegnie licznik upału: pospiesz się."
+    },
+    "crater-heart-02": {
+      "name": "Kopulasta skała w Kraterze",
+      "desc": "Jako dziecko **zagraj Bolero Ognia na okarynie**, a po przybyciu do Krateru posadź fasolkę w miękkiej ziemi obok platformy.\n\nWróć jako dorosły w Tunice Gorona, **wsiądź na liść i zeskocz, gdy przeleci nad jedną z wysokich skał**: na szczycie czeka Kawałek.",
+      "hint": "Musisz znać Bolero Ognia."
+    },
+    "crater-gs-01": {
+      "name": "Skrzynka przy wejściu ze szczytu",
+      "desc": "Jeśli wejdziesz do Krateru jako dziecko ze szczytu Góry Śmierci, a nie z Miasta Goronów, kilka kroków od wejścia po lewej zobaczysz dwie drewniane skrzynki przy skalnej ścianie, obok dzbana. Złota Skulltula jest w tej przy dzbanie.\n\n**Rozbij skrzynki, turlając się w nie**, pokonaj Skulltulę i zabierz żeton.",
+      "hint": "Użyj Miłości Nayru, jeśli nie wytrzymujesz upału."
+    },
+    "crater-gs-02": {
+      "name": "Robaki w miękkiej ziemi przy platformie Bolero",
+      "desc": "Ta Złota Skulltula wymaga podróży w czasie, bo pojawia się tylko jako dziecko, a Bolero Ognia uczy się jako dorosły. Jako dziecko zagranie tej pieśni to jedyny sposób, by dotrzeć do miękkiej ziemi kilka kroków od platformy Bolero.\n\nPojawisz się na platformie: **wypuść robaki na miękką ziemię obok niej**, pokonaj Skulltulę i zabierz żeton bez zwłoki, bo żar cały czas zabiera ci serca.",
+      "hint": "Jako dziecko żar stopniowo zabiera serca: nie zwlekaj."
+    },
+    "crater-bean-01": {
+      "name": "Miękka ziemia w Kraterze",
+      "desc": "Obok platformy Bolero Ognia, w centralnej części Krateru, znajduje się miękka ziemia, do której jako dziecko dotrzesz tylko, grając tę pieśń. **Posadź Magiczną Fasolkę i od razu stamtąd uciekaj**, na przykład inną pieśnią teleportacji, bo upał uruchamia odliczanie.\n\nGdy wrócisz jako dorosły, roślina przelatuje nad kopulastą skałą z jednym Kawałkiem Serca, a potem obok ściany wspinaczkowej z drugim. Wnosi cię też w okolice wejścia ze szczytu.",
+      "hint": "Posadź ją jako dziecko i użyj jako dorosły."
+    },
+    "crater-fairy-01": {
+      "name": "Wielka Wróżka: podwójna magia",
+      "desc": "Z komnaty Darunii w Mieście Goronów jako dorosły zejdziesz do dolnej części Krateru. Jeśli właśnie pokonałeś Volvagię, niebieski portal przeniesie cię na centralną platformę: przejdź przez wiszący most na zachód i idź dalej wzdłuż tego brzegu. Dwa stosy kamieni blokują przejście w ścianie: **rozbij je Młotem Megatonowym**.\n\nW fontannie stań na symbolu i zagraj Kołysankę Zeldy. Wielka Wróżka Mądrości poprosi o ofiarę 200 Rupii do fontanny: zgódź się, a podwoi twój Pasek Magii.",
+      "hint": "Prosi o ofiarę 200 Rupii. Nagroda: podwaja Pasek Magii."
+    },
+    "rio-heart-01": {
+      "name": "Filar pośrodku rzeki",
+      "desc": "Kawałek leży na wysokiej platformie otoczonej wodą, pośrodku Rzeki Zora, a jako dziecko dotrzesz na nią, szybując z Cucco z zalesionego obszaru obok. Wspinasz się tam po pnączach bez Cucco w rękach, ale na górze, wśród paproci po lewej, dziura prowadzi do groty ze skrzynią i Cucco. **Wyjdź z groty przez kwiat z Cucco w rękach, podbiegnij do krawędzi i skocz, by poszybować na platformę.**\n\nJako dorosły dotrzesz tam na roślinie z fasolki albo w Latających Butach.",
+      "hint": "Jako dorosły — na posadzonej fasolce lub w Latających Butach."
+    },
+    "rio-heart-02": {
+      "name": "Półka przy wodospadzie",
+      "desc": "Na końcu Rzeki Zora, obok wodospadu skrywającego wejście do Domeny Zora, stoi wolnostojąca platforma z Kawałkiem.\n\nChwyć Cucco na początku rzeki, obok Sprzedawcy Fasolek, i zanieś je w górę rzeki. Przy wodospadzie wejdź na najwyższy punkt, **skocz z nim i poszybuj na platformę**.",
+      "hint": "Jako dorosły dotrzesz tam tylko w Latających Butach."
+    },
+    "rio-heart-03": {
+      "name": "Gra żab",
+      "desc": "Żaby od tego Kawałka — Wspaniały Kwintet Żabich Tenorów — siedzą na pniach w stawie w grocie wykutej w skale, w połowie Rzeki Zora. Przyjdź jako dziecko, porozmawiaj z nimi, a poproszą, byś zagrał im coś na okarynie. Za każdą nową pieśń dają Rupie:\n- Kołysanka Zeldy\n- Pieśń Epony\n- Pieśń Sarii\n- Pieśń Słońca\n- Pieśń Czasu\n\nGdy zagrasz im wszystkie, zaproponują grę: nad żabą pojawia się owad, a ty **szybko grasz jej nutę, by podskoczyła i go zjadła**. Zagraj bezbłędnie całą sekwencję, a Kawałek jest twój; jeśli się pomylisz, możesz spróbować ponownie.",
+      "hint": "Zapamiętaj, jaką nutę gra każda żaba."
+    },
+    "rio-heart-04": {
+      "name": "Żaby w deszczu",
+      "desc": "W połowie Rzeki Zora znajdziesz w jaskini pień z pięcioma żabami. Musisz zagrać **Pieśń Burz** na okarynie. Gdy ją zagrasz, żaby nagrodzą cię Kawałkiem Serca."
+    },
+    "rio-gs-01": {
+      "name": "Robaki w miękkiej ziemi przy Sprzedawcy Fasolek",
+      "desc": "Obok Sprzedawcy Fasolek, na początku Rzeki Zora, znajduje się miękka ziemia skrywająca Złotą Skulltulę, do której wywabienia potrzebujesz butelki z robakami.\n\n**Opróżnij butelkę z robakami na miękką ziemię**: Skulltula wyskoczy spod ziemi. Pokonaj ją mieczem i zabierz żeton."
+    },
+    "rio-gs-02": {
+      "name": "Ściana przy wodospadzie",
+      "desc": "Na końcu Rzeki Zora, przy wodospadzie, ta Złota Skulltula pojawia się tylko w nocy, jako dziecko.\n\nZ trawiastej półki obok wodospadu zejdź po skale na brzeg poniżej, nad samą wodę.\n\nSkulltula siedzi na ścianie niskiej skały na tym brzegu. Podejdź bliżej i zaatakuj mieczem."
+    },
+    "rio-gs-03": {
+      "name": "Nad wyższymi grotami",
+      "desc": "Wysoko na skalnej ścianie nad płaskowyżem z grotami, w środku Rzeki Zora, w nocy pojawia się Złota Skulltula, a Chwytak sięgnie jej tylko wtedy, gdy wejdziesz na sam płaskowyż.\n\nJako dorosły wespij się po ścianie z pnączami między skałami, obok wody. Na górze podejdź do krawędzi i **wystrzel Chwytak w górną część ściany**, aby ją pokonać i przyciągnąć żeton.",
+      "hint": "Ze ścieżki na dole potrzebowałbyś Dalekosiężnego Chwytaka."
+    },
+    "rio-gs-04": {
+      "name": "Nad mostem",
+      "desc": "Nad ostatnim mostem na Rzece Zora, w jaskini prowadzącej do wodospadu Domeny Zora, wznosi się bardzo wysoka skalna ściana, na której w nocy osiada Złota Skulltula.\n\n**Traf ją Chwytakiem z samego mostu** i zabierz żeton."
+    },
+    "rio-bean-01": {
+      "name": "Miękka ziemia przy Sprzedawcy Fasolek",
+      "desc": "Zaraz po wejściu na Rzekę Zora drogę blokują dwa pęknięte głazy; wysadź je Bombą.\n\nTuż za nimi, przy płocie, siedzi Sprzedawca Fasolek i jako dziecko warto kupić od niego kilka sztuk: pierwsza kosztuje 10 Rupii, a każda kolejna jest o 10 droższa. **Posadź jedną w miękkiej ziemi obok niego**, wybierając ją z ekwipunku.",
+      "hint": "Posadź ją jako dziecko i użyj jako dorosły."
+    },
+    "dominio-gs-01": {
+      "name": "Zamarznięty wodospad",
+      "desc": "Jako dorosły, gdy Domena Zora jest skuta lodem, Złota Skulltula pojawia się w nocy na szczycie zamarzniętego wodospadu, gdzie jako dziecko odbywała się gra w nurkowanie. Dotrzesz tam korytarzem na poziomie Króla Zory, wychodzącym na wysoką galerię.\n\nWyjrzyj za krawędź i w lewo: siedzi na kolumnie pokrytej zamarzniętymi roślinami, przy samej ścianie. **Sięgnij jej Chwytakiem lub strąć strzałą**, aby zdobyć żeton."
+    },
+    "fuente-heart-01": {
+      "name": "Najdalsza kra lodowa",
+      "desc": "Kawałek leży na wierzchu najdalszej kry lodowej w zamarzniętym Źródle Zora, z dala od drogi do Lodowej Jaskini. Jako dorosły wchodzisz do źródła przejściem za tronem zamrożonego Króla Zory.\n\n**Przeskakuj z bloku na blok aż na ostatni**: to śliskie bryły lodu, więc dokładnie wymierz każdy skok. Jeśli wpadniesz do wody, przepłyń na początek i wejdź jeszcze raz."
+    },
+    "fuente-heart-02": {
+      "name": "Dno źródła",
+      "desc": "Ten Kawałek Serca czeka na dnie Źródła Zora, wśród sterty Zielonych Rupii. Jako dorosły potrzebujesz dwóch rzeczy: Tuniki Zora, którą Król Zora daje ci po uwolnieniu go, by oddychać pod wodą, oraz Żelaznych Butów, by opadać na dno.\n\nW Tunice Zora wejdź do wody, **załóż Żelazne Buty i opadnij na dno**, zabierz Kawałek, a potem zdejmij buty, by wypłynąć na powierzchnię."
+    },
+    "fuente-gs-01": {
+      "name": "Ściana nad zatopionym łukiem",
+      "desc": "Zaraz po wejściu do Źródła Zora z Domeny Zora idź brzegiem do zrujnowanego kamiennego łuku, na wpół zatopionego w wodzie i opartego o skalną ścianę z pnączami. Wejdź na szczyt łuku: w nocy na tej ścianie pojawia się Złota Skulltula, a jako dziecko sięgniesz jej Bumerangiem.",
+      "hint": "Bumerang zdobywasz w Brzuchu Jabu-Jabu."
+    },
+    "fuente-gs-02": {
+      "name": "Sosna w południowo-wschodnim rogu",
+      "desc": "W południowo-wschodnim rogu Źródła Zora, tym z sosnami u stóp urwiska, obok ściany skrywającej Fontannę Wielkiej Wróżki, rośnie drzewo kryjące Złotą Skulltulę dla dziecka, o dowolnej porze dnia.\n\nNie trzeba pływać: od misy ofiarnej przed Lordem Jabu-Jabu zejdź w prawo i idź ziemną ścieżką wzdłuż brzegu. **Wturlaj się w sosnę**, aby strącić Skulltulę, pokonaj ją mieczem i zabierz żeton."
+    },
+    "fuente-gs-03": {
+      "name": "Jaskinia za blokami ze znakami Zora",
+      "desc": "Jako dorosły udaj się na sam południowo-wschodni kraniec Źródła Zora, gdzie dwa czarne kamienne bloki ze znakami Zora zasłaniają wejście do jaskini. **Podnieś je Srebrnymi Rękawicami** i wejdź do środka.\n\nWewnątrz z sufitu zwisają niewidzialne Skulltule; omijaj je lub wypatrz Soczewką Prawdy. Z tyłu wespij się po pnączach i wyjdź na zewnętrzną półkę.\n\nZłota Skulltula **pojawia się tylko w nocy**. Wychodzi nad wejściem do jaskini na półce — strącisz ją Chwytakiem i zabierzesz żeton.",
+      "hint": "W środku z sufitu zwisają cztery niewidzialne Skulltule."
+    },
+    "fuente-fairy-01": {
+      "name": "Wielka Wróżka: Wiatr Farore",
+      "desc": "Od misy ofiarnej przed Lordem Jabu-Jabu idź pieszo zniszczonym brzegiem w prawo aż do południowo-wschodniego rogu, tego z drzewami u stóp klifu. Tam za popękanym fragmentem skalnej ściany kryje się Fontanna Wielkiej Wróżki.\n\n**Postaw Bombę lub Bombchu przy pękniętej ścianie**, aby otworzyć przejście. W środku zagraj Kołysankę Zeldy, stojąc na symbolu Triforce na podłodze. Zanim da ci Wiatr Farore, Wielka Wróżka poprosi o ofiarę 100 Rupii wrzucanych do fontanny, więc miej je przy sobie.",
+      "hint": "Prosi o ofiarę 100 Rupii: miej je przy sobie."
+    },
+    "lago-heart-01": {
+      "name": "Nurkowanie w laboratorium",
+      "desc": "Wewnątrz Laboratorium nad Jeziorem, budynku na brzegu, znajduje się głęboki basen, a Kawałek Serca jest nagrodą za zanurkowanie i dotknięcie jego dna — co uda się tylko ze Złotą Łuską, nagrodą ze Stawu Rybnego.\n\nNie ma znaczenia, czy przyjdziesz jako dziecko, czy jako dorosły: wskocz do wody, **zanurkuj aż do dna basenu**, a gdy wyjdziesz, naukowiec podaruje ci Kawałek.",
+      "hint": "Złota Łuska to nagroda za łowienie ryb jako dorosły."
+    },
+    "lago-heart-02": {
+      "name": "Dach laboratorium",
+      "desc": "Jako dziecko posadź Magiczną Fasolkę w miękkiej ziemi obok Laboratorium nad Jeziorem Hylia i wróć jako dorosły. Wsiądź na liść: zatoczy pętlę nad jeziorem i wysadzi cię na drewnianym balkonie wieży laboratorium.\n\n**Wejdź po drabinie na punkt widokowy na szczycie**, gdzie leży Kawałek Serca.",
+      "hint": "Uważaj na wrony na dachu: mogą cię strącić."
+    },
+    "lago-heart-03": {
+      "name": "Łowienie ryb jako dziecko",
+      "desc": "Staw Rybny leży na małej wyspie na Jeziorze Hylia, a jego właściciel wypożycza wędkę za 10 Rupii. Gdy złowisz rybę, zachowaj ją, a kiedy skończysz, porozmawiaj z właścicielem i powiedz, że kończysz: zmierzy twój najlepszy okaz i **jeśli przekroczy 50 cm, jako dziecko otrzymasz Kawałek Serca**.\n\n**Największe ryby** zwykle pływają **na środku stawu**.",
+      "hint": "Każda próba kosztuje 10 Rupii; nagroda jest za rybę powyżej 50 cm."
+    },
+    "lago-gs-01": {
+      "name": "Robaki w miękkiej ziemi przy laboratorium",
+      "desc": "Przy samej ścianie Laboratorium nad Jeziorem, obok beczek i worków, znajduje się miękka ziemia. Jako dziecko o dowolnej porze dnia Złota Skulltula wyskoczy, gdy tylko **otworzysz butelkę z Robakami nad tą ziemią**: robaki wpełzną do dziury, a ona wyjdzie na powierzchnię. Miecz wystarczy, by ją pokonać i zabrać żeton."
+    },
+    "lago-gs-02": {
+      "name": "Ściana laboratorium",
+      "desc": "Z tyłu Laboratorium nad Jeziorem wychodzi mostek. Jako dziecko w nocy, zaraz po wejściu na niego, spójrz w prawo: na okrągłej wieży budynku, obok rury, siedzi ta Złota Skulltula — za wysoko dla miecza.\n\n**Z samego mostku rzuć w nią Bumerangiem**: strąci ją i przyniesie ci żeton."
+    },
+    "lago-gs-03": {
+      "name": "Jaskinia na zachodnim brzegu",
+      "desc": "Jako dziecko idź zachodnim brzegiem Jeziora Hylia na południe aż do samego końca, gdzie we wnęce w skale stoją dzbany, beczka oraz Myśl Wróżki na ścianie. Stamtąd wejdź do wody i dopłyń do sąsiedniego brzegu: w skalnej ścianie zobaczysz niski otwór z kamiennym nadprożem.\n\n**Przeczołgaj się przez ten otwór**, a trafisz do małej, ciemnej jaskini. Złota Skulltula siedzi na przeciwległej ścianie; pokonaj ją mieczem i zabierz żeton.",
+      "hint": "Przeczołgaj się przez otwór, aby znaleźć Złotą Skulltulę."
+    },
+    "lago-gs-04": {
+      "name": "Skrzynka na dnie basenu w laboratorium",
+      "desc": "Basen w Laboratorium nad Jeziorem skrywa na dnie drewnianą skrzynkę ze Złotą Skulltulą w środku. Aby do niej dotrzeć jako dorosły, załóż Żelazne Buty i wskocz do wody.\n\nNa dnie **wturlaj się w skrzynkę, aby ją rozbić**, wykończ Skulltulę i zabierz żeton Chwytakiem."
+    },
+    "lago-gs-05": {
+      "name": "Drzewo na wielkiej wyspie",
+      "desc": "Na największej wyspie na jeziorze, tej z platformą Serenady Wody, rośnie potężne drzewo z pustą koroną. Jako dorosły **wyceluj Dalekosiężnym Chwytakiem w szczyt drzewa, aby wciągnąć się** do korony; zwykły Chwytak nie sięgnie.\n\nZłota Skulltula pojawia się w koronie tylko w nocy: jeśli jest dzień, zagraj tam Pieśń Słońca, a się ukaże. Pokonaj ją mieczem i zabierz żeton."
+    },
+    "lago-bean-01": {
+      "name": "Miękka ziemia przy laboratorium",
+      "desc": "Jako dziecko posadź Magiczną Fasolkę w miękkiej ziemi przy ścianie Laboratorium nad Jeziorem — tej samej co przy Skulltuli od Robaków. Gdy wrócisz jako dorosły, wyrośnie tam roślina przypominająca pierścień kolorowych liści.\n\n**Wejdź na liście, a zabiorą cię w lot** wokół jeziora na dach laboratorium.",
+      "hint": "Posadź ją jako dziecko i użyj jako dorosły."
+    },
+    "valle-heart-01": {
+      "name": "Za wodospadem",
+      "desc": "Za wielkim wodospadem w Dolinie Gerudo, na brzegu rzeki na dnie kanionu, znajduje się niewielka komnata wykuta w skale nad wodą. Aby się tam dostać, zejdź na zakątek z krową u stóp wodospadu, szybując z Cucco albo skacząc do rzeki i wypływając na brzeg.\n\nStamtąd idź brzegiem w stronę wodospadu, miń Kamień Plotek i przeskocz po mokrych skałach za spadającą wodę. Następnie **wejdź po schodkach wykutych w skale** do komnaty, gdzie czeka Kawałek Serca.",
+      "hint": "Jeśli porwie cię nurt, wylądujesz w Jeziorze Hylia."
+    },
+    "valle-heart-02": {
+      "name": "Skrzynia na półce w kanionie",
+      "desc": "W Dolinie Gerudo, za mostem, po stronie namiotu cieśli, podejdź do krawędzi kanionu obok stosów ciemnych skał przy skalnym łuku. Poniżej, w połowie drogi do rzeki, znajduje się wąska półka ze skrzynią.\n\nJeśli jesteś dzieckiem, **użyj Cucco, aby poszybować** w dół do skrzyni.\n\nJeśli jesteś dorosły, **zeskocz z krawędzi na półkę** i otwórz skrzynię.\n\nAby wrócić, idź wzdłuż półki i skocz do rzeki: nurt zaniesie cię do Jeziora Hylia.",
+      "hint": "Skrzynia stoi na ścianie klifu."
+    },
+    "valle-gs-01": {
+      "name": "Strumień wody przy kładce",
+      "desc": "Gdy wchodzisz do Doliny Gerudo z Równiny Hyrule, pierwszą rzeczą, na którą trafiasz, jest mała drewniana kładka nad sadzawką. W nocy Złota Skulltula siedzi pod deskami, na ceglanej ścianie obok strumienia wody wpadającego do sadzawki.\n\nZeskocz do wody z jednej strony kładki, wyjdź na kamienny brzeg poniżej i **rzuć w nią Bumerangiem**, aby ją strącić i przyciągnąć żeton. Potem wróć na górę na kładkę."
+    },
+    "valle-gs-02": {
+      "name": "Robaki w miękkiej ziemi przy krowie",
+      "desc": "U stóp wielkiego wodospadu, w górnym biegu rzeki, znajduje się zakątek z krową, Gerudo i miękką ziemią. Jako dziecko dotrzesz tam, szybując z Cucco z krawędzi klifu na lewo od wielkiego mostu (możesz zatrzymać się na półce i skoczyć jeszcze raz) albo skacząc do rzeki i wypływając na brzeg.\n\nNa miejscu **wypuść Robaki z butelki na miękką ziemię** i pokonaj Złotą Skulltulę, która wyjdzie, aby zdobyć żeton."
+    },
+    "valle-gs-03": {
+      "name": "Za namiotem",
+      "desc": "Za mostem, po stronie doliny zwróconej ku Fortece Gerudo, stoi namiot cieśli. Aby przeprawić się jako dorosły, wystarczy przeskoczyć zniszczony most na Eponie; zadziała też Dalekosiężny Chwytak albo naprawiony most, jeśli uratowałeś cieśli.\n\nW nocy obejdź namiot do ruin za nim. Złota Skulltula wspina się w połowie wysokości rzeźbionej kamiennej ściany: **strąć ją Chwytakiem, który przy okazji przyciągnie ci żeton**."
+    },
+    "valle-gs-04": {
+      "name": "Skalny łuk naprzeciwko namiotu",
+      "desc": "Na ścieżce od namiotu cieśli do Fortecy Gerudo wznosi się wielki naturalny łuk z czerwonawej skały, z dwoma stosami ciemnych kamieni u podstawy. W nocy po wewnętrznej stronie łuku wspina się Złota Skulltula.\n\nStań między stosami kamieni, spójrz w górę na szczyt łuku, aż ją wypatrzysz, i **strzel w nią Chwytakiem, aby ją strącić**: gdy ją zabijesz, sam Chwytak przyciągnie żeton."
+    },
+    "valle-bean-01": {
+      "name": "Miękka ziemia w kanionie Gerudo",
+      "desc": "Ta miękka ziemia dzieli miejsce z krową i Gerudo u stóp wielkiego wodospadu, a także służy do wywabienia Złotej Skulltuli Robakami. Jako dziecko poszybuj w dół z Cucco z wielkiego mostu lub wyjdź z rzeki i posadź Magiczną Fasolkę.\n\nJako dorosły liść leci w dół i w górę wodospadów, mijając dwie Czerwone Rupie, a **w połowie wielkiego wodospadu skocz przez wodę** do wnęki z Kawałkiem Serca.",
+      "hint": "Posadź ją jako dziecko i użyj jako dorosły."
+    },
+    "fortaleza-heart-01": {
+      "name": "Łucznictwo konne – 1000 punktów",
+      "desc": "Przepustka Gerudo zdobyta za uratowanie czterech cieśli otwiera strzelnicę konną. Przyjdź za dnia, bo w nocy prowadząca nie pozwoli ci zagrać, i zabierz Eponę. Każda runda kosztuje 30 Rupii.\n\nEpona biegnie trasą sama, a ty masz 20 strzał na tarcze i dzbany; każdy dzban lub środek tarczy daje 100 punktów. **Zdobądź 1000 punktów, aby wygrać Kawałek Serca**; za 1400 otrzymasz również Największy Kołczan.",
+      "hint": "Każda gra kosztuje 30 Rupii; za 1400 punktów otrzymasz Największy Kołczan."
+    },
+    "fortaleza-gs-01": {
+      "name": "Tarcza na strzelnicy",
+      "desc": "Z Przepustką Gerudo możesz wejść na strzelnicę konną, a w nocy na dużej okrągłej tarczy na słupie na końcu toru siedzi Złota Skulltula. Przejedź lub przejdź cały tor, na Eponie albo pieszo, aż do okrągłego placu na samym końcu.\n\n**Wystrzel w nią Chwytak, gdy będziesz mieć czysty strzał**, aby zabić Skulltulę i przyciągnąć żeton; jeśli nie widać jej od przodu, obejdź tarczę."
+    },
+    "fortaleza-gs-02": {
+      "name": "Górny dach",
+      "desc": "W nocy Złota Skulltula pojawia się na bocznych dachach Fortecy Gerudo, kilka kroków od skrzyni z Kawałkiem Serca: siedzi na ceglanej ścianie budynku wznoszącego się przy skalnym klifie.\n\nAby się tam dostać jako dorosły, wejdź drzwiami do korytarza kuchennego, przejdź go niezauważony i skorzystaj z wysokiego wyjścia z tyłu prowadzącego na dachy. Stań przed tą ścianą i **wystrzel w nią Chwytak** albo doskocz z mieczem, aby zebrać żeton."
+    },
+    "desierto-gs-01": {
+      "name": "Wewnątrz monumentu",
+      "desc": "Aby dotrzeć do kamiennego monumentu na Nawiedzonym Pustkowiu, przekrocz rzekę piasku jako dorosły, kierując się za flagami. Przy monumencie wejdź przez szczelinę między kolumnami i zejdź po drabinie do komnaty poniżej.\n\nZłota Skulltula siedzi na tylnej ścianie nad ołtarzem: **wejdź na ołtarz i strąć ją mieczem**. Jeśli zapalisz pochodnie Ognistymi Strzałami lub Ogniem Din, pojawi się skrzynia z Nasionem Handlarza Deku."
+    },
+    "coloso-heart-01": {
+      "name": "Kamienny łuk przy świątyni",
+      "desc": "Niedaleko wejścia do Świątyni Ducha stoi kamienny łuk, do którego dotrzesz tylko magiczną rośliną, więc przygotowania zaczynają się jako dziecko. Przenieś się do Kolosa Pustyni za pomocą Requiem Ducha i posadź Magiczną Fasolkę w miękkiej ziemi na lewo od wejścia do świątyni.\n\nLot na liściu jako dorosły prowadzi nad dwiema skalnymi platformami i kończy się nad łukiem: **gdy znajdziesz się nad nim, zeskocz i zabierz Kawałek Serca**."
+    },
+    "coloso-gs-01": {
+      "name": "Robaki w miękkiej ziemi przy świątyni",
+      "desc": "Jako dziecko zagraj Requiem Ducha, aby przenieść się do Kolosa Pustyni, i przejdź z platformy teleportacji pod schody Świątyni Ducha: miękka ziemia znajduje się tuż na lewo od wejścia, przy skalnej ścianie.\n\nW tym miejscu, gdzie sadzisz też Magiczną Fasolkę, **wypuść Robaki z butelki**, a Złota Skulltula natychmiast wyjdzie: pokonaj ją mieczem i zabierz żeton."
+    },
+    "coloso-gs-02": {
+      "name": "Szczyt wielkiej skały",
+      "desc": "W pobliżu Fontanny Wielkiej Wróżki wznosi się wielka skała, a jej szczyt z wgłębieniem w kształcie krateru to druga platforma, nad którą przelatuje roślina z Magicznej Fasolki spod Świątyni Ducha. Jako dorosły wsiądź na liść, a gdy dotrze do tej skały, **wskocz na szczyt i zeskocz do zagłębienia**.\n\nZłota Skulltula pojawia się tam tylko w nocy: jeśli jest dzień, zagraj Pieśń Słońca, a się ukaże. Zabij ją mieczem i zabierz Żeton Złotej Skulltuli."
+    },
+    "coloso-gs-03": {
+      "name": "Skalna ściana obok świątyni",
+      "desc": "W nocy ta Złota Skulltula w Kolosie Pustyni pojawia się wysoko na skalnej ścianie na prawo od Świątyni Ducha.\n\nWypatrz Skulltulę i **traf ją Chwytakiem**, aby ją zabić i przyciągnąć Żeton Złotej Skulltuli."
+    },
+    "coloso-bean-01": {
+      "name": "Miękka ziemia przy świątyni",
+      "desc": "Musisz przybyć tu jako dziecko z Requiem Ducha, aby posadzić Magiczną Fasolkę: miękka ziemia leży na lewo od wejścia do Świątyni Ducha, a wypuszczenie na nią Robaków wywabi także Złotą Skulltulę.\n\nJako dorosły roślina **przeniesie cię nad dwiema skalnymi platformami aż do kamiennego łuku** z Kawałkiem Serca, a na drugiej platformie kryje się kolejna Złota Skulltula, pojawiająca się tylko w nocy.",
+      "hint": "Posadź ją jako dziecko, użyj jako dorosły."
+    },
+    "coloso-fairy-01": {
+      "name": "Wielka Wróżka: Miłość Nayru",
+      "desc": "Na północ od oazy, po drugiej stronie stawu patrząc od Świątyni Ducha, pęknięta skalna ściana między palmami skrywa Fontannę Wielkiej Wróżki. Otworzysz ją tak samo jako dziecko po przybyciu przez Requiem Ducha, jak i jako dorosły po przejściu Nawiedzonego Pustkowia.\n\n**Wysadź pękniętą skałę Bombą, Bombchu lub Młotem Megatonowym**, wejdź do środka, stań na symbolu Triforce i zagraj Kołysankę Zeldy. Wielka Wróżka poprosi o ofiarę 300 Rupii do fontanny: zgódź się, a otrzymasz Miłość Nayru.",
+      "hint": "Prosi o ofiarę 300 Rupii."
+    },
+    "deku-gs-01": {
+      "name": "Sala z Kompasem",
+      "desc": "Sala z Kompasem na najwyższym piętrze Drzewa Deku skrywa tę Złotą Skulltulę w ustronnym zakątku. Stań na przełączniku, aby podnieść platformy, i zamiast iść po Kompas, skocz do bocznej wnęki po lewej.\n\n**Na tylnej ścianie, za małą skrzynią**, jest w zasięgu ręki: zabij ją mieczem i zabierz Żeton Złotej Skulltuli."
+    },
+    "deku-gs-02": {
+      "name": "Pnącza w podziemiu",
+      "desc": "Gdy zeskoczysz na wielką pajęczynę pośrodku głównej sali, przebijesz ją i wpadniesz do wody w podziemiu. W okrągłym basenie po prawej ta Złota Skulltula czeka na ścianie z pnączami prowadzącej z powrotem do głównej sali.\n\nMusisz zaatakować z dystansu, więc **strąć ją z wody Procą Wróżek lub Bumerangiem**, a potem wespij się po pnączach po Żeton Złotej Skulltuli.",
+      "hint": "Procę Wróżek zdobywasz w tym właśnie lochu."
+    },
+    "deku-gs-03": {
+      "name": "Krata w podziemiu",
+      "desc": "Na pierwszym poziomie podziemi Drzewa Deku biegnie kanał wodny zakończony zakratowaną bramą, na której trzyma się ta Złota Skulltula.\n\nWejdź na okrągłą platformę w wodzie, przodem do kraty, **strąć ją Procą Wróżek** i zabierz Żeton Złotej Skulltuli."
+    },
+    "deku-gs-04": {
+      "name": "Tylna sala",
+      "desc": "Na pierwszym poziomie podziemi Drzewa Deku, za salą z Larwami Gohmy, zapal Kij Deku od pochodni i **spal pajęczynę na tylnej ścianie**. Za nią ciągnie się tunel zakończony ścianą z pnączami.\n\nUważaj na pilnującą go Wielką Skulltulę: poczekaj, aż się odwróci, i uderz ją w grzbiet. Następnie **strąć Złotą Skulltulę Procą Wróżek** i wespij się po pnączach po Żeton Złotej Skulltuli.",
+      "hint": "Możesz ją zdobyć już przy pierwszej wizycie."
+    },
+    "deku-heart-01": {
+      "name": "Pojemnik Serca – Gohma",
+      "desc": "Po pokonaniu trzech Krzaków Deku w kolejności 2, 3, 1 możesz wejść do komnaty Królowej Gohmy w drugim podziemiu; zaraz po wejściu spójrz na sufit, bo stamtąd zeskoczy boss.\n\n**Gdy jej oko zrobi się czerwone, strzel w nie Procą Wróżek** lub rzuć Orzechem Deku, aby ją ogłuszyć, a potem uderzaj w oko mieczem lub Kijem Deku. Jeśli wejdzie na sufit, by złożyć jaja, zniszcz je, zanim wyklują się larwy. Po pokonaniu zostawi Pojemnik Serca.",
+      "hint": "Strzał z Procy Wróżek w oko strąca ją także z sufitu."
+    },
+    "dodongos-gs-01": {
+      "name": "Za ścianą Młodych Dodongo",
+      "desc": "Po rozprawieniu się z Beamosem wysadź Kwiatem-Bombą pękniętą ścianę po prawej stronie głównej sali, a wejdziesz do korytarza Młodych Dodongo, z kolejną pękniętą ścianą po prawej zaraz na początku.\n\nOtwórz ją Bombą albo **zwab Młodego Dodongo i zabij go tuż przy ścianie**, bo jego wybuch również ją rozbija.\n\nW środku czekają Keese oraz Złota Skulltula.",
+      "hint": "Dzieli korytarz ze Skulltulą na półce Stracha na Wróble."
+    },
+    "dodongos-gs-02": {
+      "name": "Pnącza przy wielkich schodach",
+      "desc": "Wielkie schody w lewym skrzydle, w sali pełnej Kwiatów-Bomb, nie opadną, dopóki nie umieścisz luźnego Kwiatu-Bomby w luce w szeregu, aby wszystkie wybuchły łańcuchowo — zacznij więc od tego.\n\nWejdź po schodach, wespij się po drabinie i idź półką ku drzwiom z tyłu. Zanim do nich dotrzesz, miniesz **ścianę z siatką do wspinaczki, na której siedzą zwykła Skulltula i złota**: zdejmij obie Procą Wróżek (jako dorosły Łukiem Wróżek lub Chwytakiem) i wespij się po Żeton Złotej Skulltuli."
+    },
+    "dodongos-gs-03": {
+      "name": "Filar otoczony Dodongo",
+      "desc": "Na pierwszym piętrze, wychodząc z sali ze skrzynią z Torbą na Bomby, wysadź pękniętą ścianę Bombą i idź dalej na półkę nad centralną salą. Blisko wielkiej czaszki jest tam kolejna pęknięta ściana: **otwórz ją Bombą i wejdź do jaskini pełnej Dodongo**.\n\nZłota Skulltula siedzi na kamiennym filarze pośrodku sali, otoczona przez Dodongo. Omiń je lub pokonaj i strąć Skulltulę mieczem, aby zdobyć Żeton Złotej Skulltuli.",
+      "hint": "Wystarczy miecz: możesz ją zdobyć już przy pierwszej wizycie."
+    },
+    "dodongos-gs-04": {
+      "name": "Sala z Armosem za paszczą",
+      "desc": "Z mostu na drugim piętrze wrzuć po Bombie w oba oczy wielkiej czaszki w głównej sali, aby otworzyła paszczę, i wejdź przez nią do środka. Miń salę z Ognistymi Keese i przejdź do korytarza z blokami.\n\nPrzesuń bloki, aby wejść na drewniane belki i zeskoczyć na ogrodzony obszar z tyłu. Tam **otwórz pękniętą ścianę Bombami** i idź tunelem. Czeka tam Armos budzący się po zbliżeniu, a Złota Skulltula siedzi na ścianie za nim."
+    },
+    "dodongos-gs-05": {
+      "name": "Półka Stracha na Wróble",
+      "desc": "Jako dorosły, znając już Pieśń Stracha na Wróble, wróć do korytarza Młodych Dodongo — tego samego, w którym jest Skulltula za ścianą. Zostań blisko początku korytarza, przodem do wysokiej półki na ścianie.\n\nTam **zagraj Pieśń Stracha na Wróble, aby na półce pojawił się Pierre**: przyciągnij się do niego Chwytakiem, wejdź na górę, zabij Złotą Skulltulę mieczem i zabierz Żeton Złotej Skulltuli.",
+      "hint": "Z Dalekosiężnym Chwytakiem nie potrzebujesz Stracha na Wróble."
+    },
+    "dodongos-heart-01": {
+      "name": "Pojemnik Serca – Król Dodongo",
+      "desc": "Do legowiska Króla Dodongo nie potrzebujesz Klucza Bossa: po jaskini z Armosem wróć do sali z blokami i przesuń jeden na duży przełącznik podłogowy, aby otworzyć zakratowane drzwi. W następnej sali rozbij dzbany z Bombami i **wysadź popękany fragment podłogi, aby zeskoczyć w dół**.\n\nZa każdym razem, gdy otwiera paszczę, by wciągnąć powietrze, wrzuć do środka Bombę, a gdy zostanie ogłuszony, okładaj go mieczem. Gdy zwinie się w kulę i zacznie się toczyć, odsuń się lub zasłoń tarczą, a po walce zabierz Pojemnik Serca przed wejściem w niebieski portal.",
+      "hint": "Jeśli skończą ci się Bomby, wystarczą Kwiaty-Bomby w sali."
+    },
+    "jabu-gs-01": {
+      "name": "Sala z przełącznikiem wody",
+      "desc": "Zeskocz w tę samą dziurę co Ruto i przejdź przez sale w podziemiu do komnaty z basenem i przełącznikiem wody. Złota Skulltula siedzi na ścianie we wnęce na szczycie pnączy, nad półką z trzema dzbanami.\n\n**Posadź Ruto na przełączniku, aby poziom wody się podniósł**. Dopłyń do pnączy, wespij się na półkę i zabij Skulltulę mieczem, aby zdobyć Żeton Złotej Skulltuli.",
+      "hint": "Ruto musi zostać na przełączniku, aby woda się podniosła."
+    },
+    "jabu-gs-02": {
+      "name": "Podziemie dużej sali, dolna",
+      "desc": "Z Bumerangiem w ręku wróć do dużej sali z dziurami, gdzie spotkałeś Ruto. Po pokonaniu zielonej macki filar zasłaniający jej dziurę, z tyłu po prawej, ustąpi: **zeskocz w tę dziurę**, zrzucając najpierw Ruto, jeśli ją niesiesz.\n\nNa dole dryfują meduzy, a na dwóch sąsiednich ścianach siedzą dwie Złote Skulltule; ta jest niżej. Ponieważ nie da się ich namierzyć, wyceluj Bumerang ręcznie: strąci ją i w drodze powrotnej przyniesie Żeton Złotej Skulltuli.",
+      "hint": "Zdobędziesz ją razem z drugą powyżej."
+    },
+    "jabu-gs-03": {
+      "name": "Podziemie dużej sali, górna",
+      "desc": "Pod dużą salą z dziurami, w podziemiu, do którego wpadasz przez otwór odsłonięty po zielonej macce, na sąsiednich ścianach na północy i północnym zachodzie siedzą dwie Złote Skulltule. Zalecamy zdobyć obie naraz, bo obie wymagają Bumerangu.\n\nTym razem celujesz w górną, więc **wyceluj w nią Bumerang ręcznie**, gdyż jej też nie można namierzyć, a gdy spadnie, rzuć ponownie, aby przyciągnąć Żeton Złotej Skulltuli."
+    },
+    "jabu-gs-04": {
+      "name": "Pnącza przed bossem",
+      "desc": "Do sali przed Barinade dotrzesz z drugiej komnaty lochu — tej z dołem, do którego wpadasz po skoku — przenosząc skrzynkę na przełącznik otwierający drzwi.\n\nNajpierw oczyść elektryczne meduzy Bumerangiem i poszukaj **kolumny z pnączami wspinającej się ku kryształowemu przełącznikowi**: siedzi na niej Złota Skulltula. Zabij ją Bumerangiem i wespij się po Żeton Złotej Skulltuli."
+    },
+    "jabu-heart-01": {
+      "name": "Pojemnik Serca – Barinade",
+      "desc": "Drzwi do Barinade z tyłu sali z pnączami są zamknięte przełącznikiem osłoniętym kryształem: wespij się na ścianę, namierz przełącznik i **rzuć Bumerang tak, aby zakręcił za nim**.\n\nW środku użyj Bumerangu, aby odciąć trzy macki mocujące bossa do sufitu, unikając wyładowań elektrycznych, i wykończ wypuszczone meduzy. Następnie ogłusz go Bumerangiem i uderzaj mieczem, powtórz z drugą falą meduz i nie wchodź w niebieski portal bez zabrania Pojemnika Serca."
+    },
+    "bosque-gs-01": {
+      "name": "Pnącza przy wejściu",
+      "desc": "Pierwsza sala świątyni znajduje się pod gołym niebem, z dwoma drzewami i parą atakujących Wolfosów, a Złota Skulltula czeka wysoko, blisko skrzyni z Małym Kluczem.\n\nPokonaj Wolfosy, **wespij się po pnączach po prawej na czubek drzewa**, a z gałęzi zabij ją Chwytakiem (zadziała też Łuk Wróżek lub Bomba); sam Chwytak przyciągnie ci Żeton Złotej Skulltuli."
+    },
+    "bosque-gs-02": {
+      "name": "Centralny hol",
+      "desc": "Po scence z Siostrami Poe trafiasz do centralnego holu, wielkiej sali z czterema pochodniami i windą. Ta Złota Skulltula czeka na prawo od schodów przy przeciwległych drzwiach.\n\n**Wejdź po tych schodach i spójrz w prawo**, aby dostrzec ją wysoko na ścianie, zabij ją Chwytakiem i wystrzel go ponownie, by przyciągnąć Żeton Złotej Skulltuli.",
+      "hint": "Spójrz uważnie za ściany."
+    },
+    "bosque-gs-03": {
+      "name": "Balkon nad witrażowymi drzwiami",
+      "desc": "Z podestu przy witrażowych drzwiach, w miejscu, gdzie wypływa kanał wodny w Świątyni Lasu, musisz zagrać Pieśń Stracha na Wróble: na małym balkonie nad drzwiami pojawi się Pierre. **Przyciągnij się do niego Chwytakiem**, zabij Złotą Skulltulę na podłodze balkonu i zabierz Żeton Złotej Skulltuli.",
+      "hint": "Pierre pojawia się tylko po zagraniu Pieśni Stracha na Wróble."
+    },
+    "bosque-gs-04": {
+      "name": "Półka na zachodnim dziedzińcu",
+      "desc": "Gdy wyprostujesz skręcony korytarz i zabierzesz Klucz Bossa, zeskocz przez dziurę w podłodze tej sali do komnaty z wodą poniżej, wejdź po jej schodach i wyjdź na kamienny pomost wysoko nad zachodnim dziedzińcem.\n\nNa końcu pomostu, tuż przed drzwiami, **zeskocz na omszałą kamienną platformę po lewej**. Spójrz w górę: Złota Skulltula siedzi na ścianie, gotowa na Chwytak, który od razu przyciągnie Żeton Złotej Skulltuli. Dalekosiężnym Chwytakiem sięgniesz jej z poziomu dziedzińca.",
+      "hint": "Spójrz na szczyt kamiennej ściany."
+    },
+    "bosque-gs-05": {
+      "name": "Obrotowa sala w podziemiu",
+      "desc": "Po pokonaniu czterech Sióstr Poe winda w centralnym holu zwozi cię do podziemia — sali o obracających się ścianach prowadzącej do drzwi bossa.\n\nNie musisz przesuwać ścian dla tej Złotej Skulltuli: **idź okrężnym korytarzem zaraz po wyjściu z windy i wejdź do otwartej wnęki z dzbanami**. Z sufitu spadnie Wielka Skulltula; wykończ ją i spójrz wysoko na ścianę, gdzie czeka złota. Strąć ją Chwytakiem, który od razu przyciągnie Żeton Złotej Skulltuli."
+    },
+    "bosque-heart-01": {
+      "name": "Pojemnik Serca – Widmowy Ganon",
+      "desc": "Klucz Bossa otwiera drzwi z tyłu obrotowej sali w podziemiu; wejdź po schodach, a dotrzesz do sali obrazów. Widmowy Ganon wjeżdża konno w obraz, po czym wypada kilku jeźdźców: prawdziwy wydaje odgłosy kopyt i otwiera fioletowy portal, gdy dociera do ramy.\n\nGdy pojawi się prawdziwy, **strzel do niego strzałą lub traf go Chwytakiem**; trzy strzały strącą go z konia. Potem odbijaj jego kule energii mieczem lub pustą Butelką, aż jedna go trafi i upadnie; zadawaj ciosy i powtarzaj, aż go pokonasz."
+    },
+    "fuego-gs-01": {
+      "name": "Sala z Blokiem Czasu",
+      "desc": "Na szczycie schodów w głównym holu drzwi po prawej otwierają się Małym Kluczem i prowadzą do wielkiej sali z lawą. Po jej lewej stronie, u szczytu ściany, stoi Blok Czasu: stań na platformie tuż przed nim, **wejdź na rzeźbioną płytę na podłodze i zagraj Pieśń Czasu**. Blok zjedzie w dół i będziesz mógł się po nim wspiąć do drzwi powyżej.\n\nW środku osłaniaj się przed latającymi płytkami i wykończ Like Like: jeśli cię złapie, ukradnie Tarczę Hylia (odzyskasz ją po jego pokonaniu). Potem strąć Złotą Skulltulę ze ściany.",
+      "hint": "Wchodząc do wielkiej sali z lawą, wypatruj po lewej stronie."
+    },
+    "fuego-gs-02": {
+      "name": "Ściana w labiryncie głazów",
+      "desc": "Ta Złota Skulltula kryje się za fragmentem ściany w labiryncie toczących się głazów. Dotrzesz tam, wspinając się po metalowej kracie; stamtąd trzymaj się zewnętrznej ściany, unikając toczących się głazów, aż dojdziesz do popękanego fragmentu skały na końcu korytarza, bardzo blisko celi Gorona.\n\nTen fragment jest dobrze widoczny, nie trzeba więc szukać po omacku: **podłóż pod niego Bombę lub Bombchu**, a w tunelu, który się otworzy, strąć Złotą Skulltulę. Przy okazji uwolnij Gorona z sąsiedniej celi."
+    },
+    "fuego-gs-03": {
+      "name": "Krata za Strachem na Wróble",
+      "desc": "Gdy wyjdziesz z sali ze ścigającą cię ścianą ognia, górne drzwi zaprowadzą cię z powrotem do labiryntu głazów, tym razem od góry. Stań na platformie tuż przed drzwiami i **zagraj Pieśń Stracha na Wróble, aby na wysokiej platformie pojawił się Pierre**.\n\nPrzyciągnij się do niego Chwytakiem, a stamtąd strzel w tarczę obok, na platformie unoszącej się samoczynnie jak winda. Przejdź przez drzwi i wespij się po kratach: zaraz po dotarciu na górę na ścianie czeka Złota Skulltula — strąć ją Chwytakiem.",
+      "hint": "Pieśń Stracha na Wróble komponujesz jako dziecko i dorosły nad Jeziorem Hylia."
+    },
+    "fuego-gs-04": {
+      "name": "Ośmiokątna sala na szczycie",
+      "desc": "Wespij się na szczyt kraty, na którą docierasz dzięki strachowi na wróble — tej z drugą Złotą Skulltulą z tej części — i przejdź przez górne drzwi. Prowadzą do wielkiej ośmiokątnej sali pełnej lawy, z platformą z trzema skrzyniami otoczoną ogniem.\n\nWystarczy spojrzeć w prawo zaraz po wejściu, by ją znaleźć: **siedzi na ścianie, kilka kroków od drzwi**, obok lawy. Zabij ją Chwytakiem i zabierz żeton.",
+      "hint": "Obok tej na kracie."
+    },
+    "fuego-gs-05": {
+      "name": "Za posągiem w sali wejściowej",
+      "desc": "Zostaw ją na koniec, gdy zdobędziesz Młot Megatonowy oraz ostatni Mały Klucz — od Gorona w sali z Blokiem Czasu za młotem. Ten Goron zdradza, że za trzyblokowym kamiennym posągiem przy wejściu kryją się tajne drzwi: po prawej stronie holu wejściowego **rozbij posąg młotem** i otwórz drzwi kluczem.\n\nW pierwszej sali zabij Ogniste Ślimaki, aby otworzyć kolejną. W drugiej osłaniaj się przed latającymi płytkami, pokonaj Like Like i rozbij młotem stos kamieni skrywający Złotą Skulltulę.",
+      "hint": "Rozbij młotem posąg w holu wejściowym oraz stos kamieni."
+    },
+    "fuego-heart-01": {
+      "name": "Pojemnik Serca – Volvagia",
+      "desc": "Volvagia wysuwa głowę z otworów w platformie: gdy tylko to zrobi, **uderz ją Młotem Megatonowym i popraw mieczem lub samym młotem**, gdy jest ogłuszona. Kiedy wzbija się w powietrze, unikaj płomieni i spadających skał, obserwując ich cienie.\n\nPo pokonaniu bossa Pojemnik Serca pojawi się obok niebieskiego portalu.",
+      "hint": "Możesz ją zranić tylko wtedy, gdy wysuwa głowę z lawy."
+    },
+    "agua-gs-01": {
+      "name": "Obok kraty w podziemiu",
+      "desc": "Przy najniższym poziomie wody w świątyni otwórz Małym Kluczem drzwi u podstawy centralnego filaru. W środku zagraj Kołysankę Zeldy przed symbolem Triforce, aby podnieść wodę, załóż Żelazne Buty i opadnij przez otwór w podłodze do sali w podziemiu.\n\n**Uderz Chwytakiem w kryształowy przełącznik wysoko na ścianie**: pojawi się kilku przeciwników. Zabij ich, zdejmij buty, by wypłynąć na półkę ze skrzynią, i ściągnij Chwytakiem Złotą Skulltulę ze ściany obok kraty."
+    },
+    "agua-gs-02": {
+      "name": "Rzeka z wirami",
+      "desc": "Po walce z Mrocznym Linkiem wejdź po schodach za skrzynią z Dalekosiężnym Chwytakiem, a w następnej sali zeskocz w zakratowany szyb. Idź zalanym tunelem, aż wypłyniesz do podziemnej rzeki z wirami — trzymaj się od nich z daleka, bo wciągają.\n\nW strefie wirów **załóż Żelazne Buty i idź po dnie**, omijając prądy. Złota Skulltula siedzi nad wodą, wysoko na skalnej ścianie: wyceluj w górę Dalekosiężnym Chwytakiem, który ją zabije i przyciągnie żeton.",
+      "hint": "Wypatruj Skulltuli nad wodą."
+    },
+    "agua-gs-03": {
+      "name": "Wewnątrz centralnego filaru",
+      "desc": "Za pomocą Kołysanki Zeldy obniż wodę w świątyni do najniższego lub średniego poziomu i przejdź drzwiami u podstawy centralnego filaru. W środku, na parterze, przyciągnij się Dalekosiężnym Chwytakiem do tarczy na ścianie, aby dostać się na półkę w połowie wysokości.\n\nStamtąd **spójrz wysoko na ścianę**: tam siedzi Złota Skulltula, a ten sam Dalekosiężny Chwytak zabije ją i przyciągnie żeton. Nie musisz najpierw podnosić wody w filarze, ale w razie potrzeby możesz się wspiąć."
+    },
+    "agua-gs-04": {
+      "name": "Wodospad toczących się głazów",
+      "desc": "W północnym podziemiu, dokąd docierasz Dalekosiężnym Chwytakiem, przejdź przez salę z Tektite'ami i salę z zagadką z blokiem, a w kolejnej stań na przełączniku i przeskocz po gejzerach do drugich drzwi. Za nimi biegnie kanał, którym z wodospadu staczają się głazy, tuż obok sali z Kluczem Bossa.\n\nSchowaj się przed głazami w bocznym korytarzu, gdzie czeka Shell Blade, i stamtąd **spójrz w stronę wodospadu na zachód**: Złota Skulltula siedzi na tej ścianie. Dalekosiężny Chwytak dosięgnie jej bez podchodzenia i przyciągnie żeton."
+    },
+    "agua-gs-05": {
+      "name": "Za pękniętą ścianą pod wodą",
+      "desc": "Ta Złota Skulltula znajduje się w sali po wschodniej stronie pierwszego piętra. Przy średnim poziomie wody, po zagraniu Kołysanki Zeldy przed Triforce w centralnym filarze, załóż Żelazne Buty i idź zalanym wschodnim korytarzem do pękniętej ściany pod wodą: **rozbij ją Bombami lub Młotem Megatonowym**.\n\nZa nią kryje się sala z przeciwnikami. Skulltula siedzi na mozaice na ścianie, obok schodów i na wysokości miecza: strąć ją ciosem miecza i podnieś żeton.",
+      "hint": "Potrzebujesz Bomb i średniego poziomu wody."
+    },
+    "agua-heart-01": {
+      "name": "Pojemnik Serca – Morpha",
+      "desc": "Mając Klucz Bossa i najwyższy poziom wody, wejdź na trzecie piętro (3F) i przyciągnij się Dalekosiężnym Chwytakiem do tarczy na złotej kolumnie po północnej stronie. Wejdź po schodach i rusz w górę zalanej wodą rampy, unikając zsuwających się pułapek z kolcami.\n\nWejdź na platformy na środku, aby pojawiła się Morpha, i **natychmiast wycofaj się na zewnętrzną krawędź sali, z dala od wody**, bo jej macki cię chwytają. Wyciągnij jej jądro Dalekosiężnym Chwytakiem, uderzaj je mieczem, a po walce podnieś Pojemnik Serca przed wejściem w niebieski portal."
+    },
+    "sombra-gs-01": {
+      "name": "Sala niewidzialnych kos",
+      "desc": "W wielkiej sali z przepaścią, po przejściu w Latających Butach na platformę ze Stalfosem i pokonaniu go, skręć w lewo i włącz Soczewkę Prawdy: pojawi się ścieżka z niewidzialnych platform prowadząca do drzwi.\n\nPo drugiej stronie leży okrągła sala z dzbanami i kosami widocznymi tylko przez Soczewkę. Omijaj je, zestrzel Ogniste Keese łukiem i wykończ Like Like mieczem: **oczyszczenie sali otworzy drzwi do małego pokoju ze Złotą Skulltulą na ścianie**, w zasięgu miecza.",
+      "hint": "Wnęka, która się otwiera, kryje też dwie skrzynie — jedną z nich niewidzialną."
+    },
+    "sombra-gs-02": {
+      "name": "Ściana korytarza z celami",
+      "desc": "W sali z kolcami opadającymi z sufitu Soczewka Prawdy ujawnia blok ukryty w ścianie: przeciągnij go pod kolce jak parasol i wejdź na niego, aby dostać się na górę. **Złota Skulltula siedzi wysoko na ścianie korytarza z celami**, a z pomostu sięgnie jej Chwytak.",
+      "hint": "Wejdź na blok, aby sięgnąć jej z pomostu."
+    },
+    "sombra-gs-03": {
+      "name": "Dół w korytarzu z wentylatorami",
+      "desc": "Za salą z wielką wazą w kształcie czaszki, gdzie wrzucenie bomby do czaszki daje Mały Klucz, przejdź do następnej komnaty: użyj Soczewki Prawdy, aby wypatrzyć tarczę na suficie, wciągnij się Chwytakiem na górny poziom i otwórz tam zamknięte drzwi.\n\nZa nimi biegnie korytarz z wentylatorami. Załóż Żelazne Buty, żeby wiatr cię nie zdmuchnął, i podejdź do dołu z kratami: **Złota Skulltula siedzi na ścianie dołu**. Wychyl się nad krawędź i sięgnij jej Chwytakiem, który od razu przyciągnie żeton.",
+      "hint": "W Żelaznych Butach wiatr cię nie zdmuchnie."
+    },
+    "sombra-gs-04": {
+      "name": "Wysoka półka w sali z łodzią",
+      "desc": "Zaraz po wejściu do sali z łodzią wyciągnij blok po lewej i przepchnij go wzdłuż rowka w podłodze do drewnianego pomostu, po czym wejdź na górę. Złota Skulltula siedzi na ścianie zakratowanej półki obok.\n\nMusisz **zagrać Pieśń Stracha na Wróble na pomoście i przyciągnąć się Dalekosiężnym Chwytakiem do Pierre'a**: wysadzi cię na półce tuż obok Skulltuli, a ty strącisz ją mieczem.",
+      "hint": "Aby się tam dostać, musisz znać Pieśń Stracha na Wróble."
+    },
+    "sombra-gs-05": {
+      "name": "Wewnątrz wielkich czaszek",
+      "desc": "Gdy łódź zatonie, spal pajęczynę na drzwiach Ognistą Strzałą i przejdź przez salę z Floormasterem z Soczewką Prawdy aż do drzwi z okiem Sheikah.\n\nW środku stoją wielkie czaszki. Wejdź po drabinie na balkon i **wrzucaj bomby do czaszek**: gdy druga pęknie, wypadnie Żeton Złotej Skulltuli.",
+      "hint": "Drzwi na brzegu zasłania pajęczyna: spal ją Ognistą Strzałą."
+    },
+    "sombra-heart-01": {
+      "name": "Pojemnik Serca – Bongo Bongo",
+      "desc": "Podczas walki załóż Latające Buty, żeby nie podskakiwać na bębnie, i **ogłusz dłonie Bongo Bongo strzałami lub Chwytakiem**. Następnie z włączoną Soczewką strzel w jego oko i uderzaj je mieczem.\n\nPo zakończeniu walki zostawi ci Pojemnik Serca."
+    },
+    "espiritu-gs-01": {
+      "name": "Metalowe ogrodzenie w sali z Keese",
+      "desc": "Jako dziecko wchodzisz do środka, rozmawiając z Nabooru i przeciskając się przez mały otwór w holu wejściowym.\n\nDalej trafisz do sali z Keese i Wallmasterem. Zbierz Srebrne Rupie, aby ogrodzenie opadło i zamieniło się w most: po drugiej stronie **Złota Skulltula siedzi na drucianej siatce na prawej ścianie**. Bumerang ją zabije i przyniesie ci żeton.",
+      "hint": "Po zebraniu pięciu Srebrnych Rupii ogrodzenie opada i staje się mostem."
+    },
+    "espiritu-gs-02": {
+      "name": "Podłoga w sali wielkiego posągu",
+      "desc": "Gdy dotrzesz do sali z wielkim posągiem, zejdź bocznymi schodami na dolny poziom i obejdź posąg od tyłu.\n\nW wąskim przejściu między jego bokiem a ścianą, po wschodniej stronie, **Złota Skulltula siedzi na ścianie na poziomie podłogi**. Wystarczy jeden cios mieczem, aby ją pokonać i podnieść żeton."
+    },
+    "espiritu-gs-03": {
+      "name": "Nad drzwiami klatki schodowej",
+      "desc": "W części świątyni dla dziecka salę z blokami rozwiązujesz, przesuwając blok z symbolem słońca w promień światła: pojawi się skrzynia z Małym Kluczem do zakratowanych drzwi na szczycie następnych schodów. Przechodząc przez drzwi na tę klatkę schodową, już słyszysz Skulltulę.\n\nNie wchodź na górę, nie oglądając się za siebie: odwróć się, a zobaczysz ją **nad drzwiami, przez które właśnie przeszedłeś**. Jako dziecko zabije ją i przyniesie żeton Bumerang, a jako dorosły to samo zrobi Chwytak.",
+      "hint": "Przed walką z Iron Knuckle."
+    },
+    "espiritu-gs-04": {
+      "name": "Za Blokiem Czasu w sali toczących się głazów",
+      "desc": "Część świątyni dla dorosłego zaczyna się od odsunięcia wielkiego bloku w holu wejściowym Srebrnymi Rękawicami. W kolejnej, okrągłej sali zabij Beamosa (wystarczy jeden Bombchu) i uderz Chwytakiem w kryształowy przełącznik na suficie, aby otworzyć drzwi.\n\nDrzwi po prawej prowadzą do sali toczących się głazów. Unikaj ich, aż dotrzesz do dwóch Bloków Czasu we wnękach w ścianie: pierwszy nic nie kryje, ale **zagraj Pieśń Czasu obok drugiego**, a gdy się przesunie, odsłoni Złotą Skulltulę w głębi wnęki. Zabij ją mieczem i podnieś żeton.",
+      "hint": "Blok przesuwa się tylko o jedno pole, nie znika."
+    },
+    "espiritu-gs-05": {
+      "name": "Północno-zachodnia półka w sali posągu",
+      "desc": "Złota Skulltula znajduje się na wysokiej północno-zachodniej półce w sali wielkiego posągu bogini, w rogu, gdzie pojawia się strach na wróble.\n\nJako dorosły przyciągnij się Dalekosiężnym Chwytakiem do tarczy na nadgarstku posągu, aby wejść na jego dłoń. Stamtąd **zagraj Pieśń Stracha na Wróble**: strach na wróble pojawi się na szczycie półki i możesz się do niego przyciągnąć Dalekosiężnym Chwytakiem. Na górze Skulltula siedzi na podłodze obok niego; zabij ją mieczem i podnieś żeton.",
+      "hint": "Zagraj Pieśń Stracha na Wróble z dłoni posągu."
+    },
+    "espiritu-heart-01": {
+      "name": "Pojemnik Serca – Twinrova",
+      "desc": "Walcząc z Twinrovą, najpierw odbijaj ogień Koume w stronę Kotake, a lód Kotake w stronę Koume.\n\nGdy się połączą, **pochłoń trzy strzały tego samego żywiołu pod rząd i wystrzel je w Twinrovę**; gdy upadnie, uderzaj ją mieczem. Pojemnik Serca pojawi się na środku platformy.",
+      "hint": "Klucz Bossa wymaga Kołysanki Zeldy, łuku i Chwytaka."
+    },
+    "pozo-gs-01": {
+      "name": "Lewa sala przy centralnej części",
+      "desc": "Potrzebujesz Soczewki Prawdy znalezionej w podziemiu oraz Małego Klucza. Z włączoną Soczewką we wnękach w ścianach studni ujawniają się ukryte skrzynie, a w jednej z nich leży klucz.\n\nDo centralnej części wchodzisz przez fałszywą ścianę naprzeciwko wejścia i musisz ominąć znak X na podłodze, który jest dziurą. **Otwórz zamknięte drzwi po lewej**, zabij Deku Babę pośrodku sali i wypatruj Złotej Skulltuli wysoko na ścianie, nad wnęką ze świecami: Bumerang ją strąci i wróci z żetonem.",
+      "hint": "W ukrytych wnękach w korytarzu wejściowym znajdują się jeszcze dwa klucze."
+    },
+    "pozo-gs-02": {
+      "name": "Wysoki narożnik sali z dołem",
+      "desc": "Zamknięte drzwi po prawej stronie centralnej części, do której wchodzisz przez fałszywą ścianę naprzeciwko wejścia, prowadzą do sali z Keese i wielkim dołem. Potrzebujesz Małego Klucza — na przykład z trumny w sali z Gibdo — oraz Soczewki Prawdy.\n\nZabij Keese i **załóż Soczewkę, aby zobaczyć Złotą Skulltulę w wysokim rogu, obok pochodni**. Użyj Bumerangu, aby ją złapać.",
+      "hint": "Potrzebujesz klucza i Soczewki Prawdy."
+    },
+    "pozo-gs-03": {
+      "name": "Sala z Like Like",
+      "desc": "Idź zewnętrznym korytarzem okrążającym środek studni aż do północno-wschodniego rogu, gdzie stoją drzwi z tabliczką ostrzegawczą: „Patrz pod nogi!”. Posłuchaj ostrzeżenia, bo tuż pod spodem kryje się pułapka zrzucająca na samo dno, jeśli jej nie ominiesz.\n\nNastępna sala ma ukryte dziury w podłodze, więc **załóż Soczewkę Prawdy i przejdź, uważając, gdzie stawiasz kroki**.\n\nZdejmij Ogniste Keese Bumerangiem i wysadź Beamosa bombą. Drzwi po drugiej stronie prowadzą do sali z Like Like: gdy go pokonasz, Złota Skulltula siedzi na tylnej ścianie między dwiema pochodniami, w zasięgu Bumerangu, który przy okazji przyniesie ci żeton.",
+      "hint": "Patrz pod nogi!"
+    },
+    "hielo-gs-01": {
+      "name": "Sala z wirującym ostrzem",
+      "desc": "Zabij Freezardy w pierwszej sali, aby otworzyć kratę, i przejdź do wielkiej okrągłej sali z wirującym lodowym ostrzem.\n\n**Znajdź róg z lodowymi stalagmitami, ten z ukrytą Srebrną Rupią**: Złota Skulltula siedzi wysoko na ścianie, między taflami lodu, nad stalagmitem. Zabij ją Chwytakiem.",
+      "hint": "Srebrne Rupie otwierają salę z Niebieskim Ogniem."
+    },
+    "hielo-gs-02": {
+      "name": "Sala z Kompasem",
+      "desc": "Zbierz Srebrne Rupie w sali z wirującym ostrzem, aby otworzyć drogę do sali z mapą, i napełnij tam butelkę Niebieskim Ogniem. Wróć do sali z ostrzem i stop nim jedną z dwóch ścian z czerwonego lodu — tę prowadzącą do korytarza z pułapkami z kolcami.\n\nNa końcu znajduje się sala z Kompasem pełna stalagmitów. Zabij Lodowe Keese i **spójrz wysoko na tylną ścianę, obok bloku czerwonego lodu**: tam siedzi Złota Skulltula. Zdejmij ją Chwytakiem."
+    },
+    "hielo-gs-03": {
+      "name": "Sala z blokiem lodu",
+      "desc": "W sali, w której musisz przesuwać blok lodu, zabij Lodowe Keese i odwróć się w stronę wejścia: **Złota Skulltula siedzi wysoko na ścianie, na lewo od drzwi, którymi wszedłeś**. Łatwiej ją wypatrzyć z kamiennych filarów; strąć ją z podłogi Chwytakiem i zabierz żeton."
+    },
+    "castillo-fairy-02": {
+      "name": "Wielka Wróżka: Podwójna Obrona",
+      "desc": "Na zewnątrz Zamku Ganona docierasz ze zrujnowanego Miasta Zamkowego Hyrule, a ślepa ścieżka po prawej kończy się tam, gdzie w dzieciństwie była fontanna Ataku Obrotowego. Teraz wejście blokuje czarny kamienny filar ze złotymi rycinami: **podnieś go Złotymi Rękawicami**, które zdobywasz w Próbie Cienia w zamku.\n\nW środku zagraj Kołysankę Zeldy na symbolu Triforce i wrzuć do fontanny 500 Rupii, o które prosi w ofierze. Wielka Wróżka Odwagi podwoi twoją obronę: serca otrzymają złotą obwódkę, a obrażenia zmniejszą się o połowę.",
+      "hint": "Prosi o ofiarę 500 Rupii; filar u wejścia usuwasz Złotymi Rękawicami."
+    },
+    "kakariko-bottle-01": {
+      "name": "Siedem zaginionych Cucco",
+      "desc": "Kobieta od Cucco przy zagrodzie wypuściła siedem swoich kur; jeśli przyprowadzisz je jako dziecko, podaruje ci Pustą Butelkę: **podnieś każdego Cucco i wrzuć do zagrody**. Jeśli z nią porozmawiasz, powie ci, ilu brakuje, i da wskazówki; te już wrzucone zostają w zagrodzie nawet po wejściu do domów.\n\nJeden jest tuż obok niej, drugi przy wejściu, trzeci przy bramie na Górę Śmierci, a czwarty za płotem Domu Skulltuli. Piąty siedzi w skrzynce, którą rozbijesz turlaniem; dwa ostatnie są w ogrodzonej strefie za Sklepem z Miksturami, dokąd dolecisz szybując."
+    },
+    "lonlon-bottle-01": {
+      "name": "Super Cucco Talona",
+      "desc": "Najpierw musisz obudzić Talona, śpiącego na Zamku Hyrule, za pomocą Cucco wyklutego z Dziwnego Jajka, aby wrócił na Ranczo Lon Lon. Na ranczu wejdź do jego domu za dnia: w nocy Talon śpi.\n\nZa 10 Rupii rzuca ci wyzwanie, by w 30 sekund **znaleźć jego trzy Super Cucco wśród wszystkich kur w pokoju**: podnoś Cucco, a powie ci, kiedy trafisz właściwego. Jeśli ci się uda, za pierwszym razem dostaniesz butelkę Mleka Lon Lon.",
+      "hint": "Jedna gra kosztuje 10 Rupii."
+    },
+    "lago-bottle-01": {
+      "name": "List Ruto",
+      "desc": "Na dnie Jeziora Hylia, w pobliżu wyjścia z podwodnego tunelu prowadzącego z Domeny Zora, leży butelka z listem od Księżniczki Ruto. Jako dziecko zanurkujesz tak głęboko tylko ze Srebrną Łuską, nagrodą z gry w nurkowanie w Domenie Zora.\n\nObok kamiennych filarów wystających z wody **zanurkuj na dno i zabierz butelkę**.",
+      "hint": "Nad jezioro możesz też dotrzeć, nurkując z Domeny Zora."
+    },
+    "ciudadela-bottle-01": {
+      "name": "Kolekcjoner Poe",
+      "desc": "Jako dorosły dawna wartownia przy wejściu do Miasta Zamkowego Hyrule staje się sklepem Kolekcjonera Poe. Za każdego Wielkiego Poe płaci 30 Rupii i dolicza 100 punktów, a po osiągnięciu 500 punktów — przy piątym — daje Pustą Butelkę. Jeśli dobijesz do 1000, podaruje ci Ogromną Rupię, złotą, wartą 200 Rupii.\n\nWielkie Poe pojawiają się na Równinie Hyrule, gdy jedziesz na Eponie i przeskakujesz przez jeden z nawiedzonych płotków: **zestrzel je strzałami z siodła i złap każdą duszę do Pustej Butelki**.",
+      "hint": "Płaci 30 Rupii za każdego Wielkiego Poe; butelkę dostajesz za 500 punktów."
+    },
+    "ciudadela-bottle-02": {
+      "name": "Robak sklepikarza z miksturami",
+      "desc": "W Mieście Zamkowym Hyrule wejdź do Sklepu z Miksturami, w budynku obok drogi prowadzącej do Świątyni Czasu. Sklepikarzowi uciekł robak: powiedz, że pomożesz, a da ci Pustą Butelkę, by go złapać.\n\nWyposaż butelkę i **złap robaka, gdy będzie biegał po podłodze sklepu**. W podzięce napełni ją Czerwoną Miksturą, a butelka zostanie u ciebie na stałe."
+    },
+    "dominio-heart-01": {
+      "name": "Skrzynia pochodni",
+      "desc": "Za wodospadem na najniższym poziomie Domeny Zora pojawia się skrzynia z Kawałkiem, gdy jako dziecko zapalisz wszystkie pochodnie naraz: odpal Kij Deku od jednej z pochodni w komnacie Króla Zory.\n\nZejdź na dół i **najpierw zapal tę u stóp schodów**, która nie gaśnie, a potem cztery krótkotrwałe, odpalając kij na nowo od każdej pochodni. To pochodnia przed Sklepem Zora, ta przy stawie z kręgiem kamieni oraz dwie za wodospadem, do których dotrzesz, trzymając się ściany.",
+      "hint": "Ogień Din ułatwia zapalenie tych za wodospadem."
+    },
+    "fortaleza-heart-02": {
+      "name": "Skrzynia na dachu",
+      "desc": "Skrzynia stoi na najwyższym dachu Fortecy Gerudo, przy samej skalnej ścianie, po drugiej stronie przepaści. Z wewnętrznych korytarzy drabina **obok twojej celi** wyprowadza na skalną półkę nad dachami; idź nią aż do krawędzi, z której widać skrzynię.\n\nStamtąd **wyceluj Dalekosiężnym Chwytakiem w skrzynię**, aby sięgnąć po łup.",
+      "hint": "Użyj Dalekosiężnego Chwytaka, aby dotrzeć do skrzyni."
+    },
+    "kakariko-heart-04": {
+      "name": "Nagroda za 50 Skulltul",
+      "desc": "Mając 50 Żetonów Złotej Skulltuli, wróć do Domu Skulltuli i **porozmawiaj z przeklętym bogaczem**, aby otrzymać Kawałek Serca.",
+      "hint": "Potrzebujesz 50 Żetonów Złotej Skulltuli."
+    },
+    "castillo-gs-03": {
+      "name": "Zrujnowany łuk",
+      "desc": "Jako dorosły prawa ścieżka na zewnątrz Zamku Ganona, prowadząca do Fontanny Wielkiej Wróżki, przebiega pod zrujnowanym kamiennym łukiem, który dawniej stanowił wejście do Zamku Hyrule.\n\n**Przejdź pod łukiem i odwróć się**: Złota Skulltula siedzi wysoko na jego tylnej stronie, poza zasięgiem miecza. Zdejmij ją Chwytakiem."
+    },
+    "cementerio-thought-01": {
+      "name": "Rozbity postument w Grobowcu Rodziny Królewskiej",
+      "desc": "Na Cmentarzu wejdź do Grobowca Rodziny Królewskiej, grając Kołysankę Zeldy na symbolu Triforce, i przejdź do ostatniej sali — tej z kamiennym monumentem uczącym Pieśni Słońca.\n\nTam, nad zieloną cieczą, stoi rozbity postument z myślą wróżki, która nie potrafi przypomnieć sobie melodii wyrytej na monumencie i chce ją usłyszeć jeszcze raz, żeby jej nie zapomnieć. **Zagraj Pieśń Słońca obok znaku.**",
+      "hint": "Zagraj Pieśń Słońca obok znaku."
+    },
+    "coloso-thought-01": {
+      "name": "Schody Świątyni Ducha",
+      "desc": "W Kolosie Pustyni, na półce, gdzie zdobywasz Srebrne Rękawice, między dwoma podstawami na pochodnie, myśl znajduje się na niskim murku przy krawędzi. Wróżka mówi, że widok zapiera dech w piersiach, ale nie znosi tak suchego powietrza i marzy o porządnej ulewie. Zagranie tu Pieśni Burz odnawia magię i zdrowie.",
+      "hint": "Zagraj Pieśń Burz przed znakiem."
+    },
+    "hielo-thought-01": {
+      "name": "Lodowy tunel obok sali z Kompasem",
+      "desc": "W Lodowej Jaskini, gdy masz już Kompas, napełnij butelkę Niebieskim Ogniem z tej okolicy i stop sąsiedni blok czerwonego lodu. Idź zamarzniętym tunelem za nim, prowadzącym do korytarza z pułapkami z kolcami i sali z blokiem lodu: na ścianie zobaczysz tę Myśl Wróżki. Wróżce zamarzły skrzydła i oddałaby wszystko, żeby chwilę powygrzewać się na słońcu. **Zagraj Pieśń Słońca obok znaku.**",
+      "hint": "Zagraj Pieśń Słońca obok znaku."
+    },
+    "lago-thought-01": {
+      "name": "Wnęka z dzbanami na zachodnim brzegu",
+      "desc": "Nad Jeziorem Hylia idź zachodnim brzegiem na południe niemal do samego końca: ta myśl znajduje się we wnęce w skalnej ścianie z dzbanami, workami i beczkami. Wróżka zdradza, że jej sekretem w zabawie w chowanego jest kryjówka, której inne wróżki nie potrafią rzucić ani rozbić. **Rozbij dzbany we wnęce**: z jednego wyleci wróżka, a do tego wypadnie kilka Rupii.",
+      "hint": "Rozbij dzbany we wnęce: w jednym chowa się wróżka."
+    },
+    "llanura-thought-01": {
+      "name": "Ruiny przy moście zwodzonym",
+      "desc": "Wyjdź z Miasta Zamkowego Hyrule przez most zwodzony i kieruj się na wschód na pagórek nad rzeką: wśród ruin omszałego kamiennego muru znajduje się pierwsza Myśl Wróżki, a Navi korzysta z okazji, by wyjaśnić, czym one są. Wróżka mówi, że gdy coś spada na kogoś z drzewa, to nie przypadek — to ona chowa różne rzeczy w gałęziach. **Turlaj się w pnie drzew**, aby strząsnąć to, co ukrywają; z sosny obok spada Niebieska Rupia.",
+      "hint": "Turlaj się w drzewa: czasem coś spada z gałęzi."
+    },
+    "llanura-thought-02": {
+      "name": "Jaskinia ze skrzynią przy Dolinie Gerudo",
+      "desc": "Na zachodzie Równiny Hyrule, na suchym odcinku prowadzącym do Doliny Gerudo, w północnej ścianie skalnej kryje się płytka jaskinia ze skrzynią w środku. Wróżka, która zostawiła tu swoją myśl, mówi chłopakowi w spiczastej czapce, że skarb jest dla niego i że nie zamknęła go na klucz. Jako dorosły przychodzisz za późno: skrzynia jest otwarta i pusta. **Wróć jako dziecko i otwórz skrzynię**, w której wtedy faktycznie znajduje się Kawałek Serca.",
+      "hint": "Wróć jako dziecko i otwórz skrzynię w jaskini."
+    },
+    "llanura-thought-03": {
+      "name": "Grota z Kamieniem Plotek na południe od rancza",
+      "desc": "Na południowy wschód od Rancza Lon Lon, obok małego stawu, krąg krzaków zakrywa grotę otwieraną uderzeniem Młota Megatonowego w środek. W środku na ścianie nad drewnianą skrzynką wisi Skulltula, stoi tam też Kamień Plotek, a myśl widnieje na skalnej ścianie. Wróżka znalazła tu lśniącego złotego robaka, ale szkodnik na ścianie rzucił się na nią, zanim zdążyła go złapać. **Wykończ Skulltulę na ścianie jako dziecko, a jako dorosły wturlaj się w drewnianą skrzynkę pod nią, by ją rozbić**: w środku jest złoty robak, czyli Złota Skulltula.",
+      "hint": "Rozbij drewnianą skrzynkę pod Wielką Skulltulą."
+    },
+    "llanura-thought-04": {
+      "name": "Drzewo przy dziurze Handlarza Deku",
+      "desc": "Wyjdź z Miasta Zamkowego Hyrule przez most zwodzony i idź na wschód pasem trawy między murem a rzeką: ta myśl znajduje się na drzewie tuż przy murze, a kilka kroków dalej jest dziura z Handlarzem Deku, który sprzedaje tylko tym, którzy znają hasło. Wróżka mówi, że w końcu je odgadła i że nie brzmiało ono „Not bad at all...” ani „I'll make the dishbursement.”. Jako dorosły nic już u niego nie zostało, więc **przyjdź jako dziecko i powiedz mu „Sell somethin', will ya?”**: sprzeda ci Kawałek Serca za 100 Rupii.",
+      "hint": "Powiedz „Sell somethin', will ya?” Handlarzowi Deku w dziurze obok."
+    },
+    "llanura-thought-05": {
+      "name": "Ruiny przy płocie rancza",
+      "desc": "Na Równinie Hyrule obejdź Ranczo Lon Lon od zewnątrz do jego południowo-zachodniego rogu: tuż przy drewnianym płocie stoją ruiny ceglanego muru porośniętego bluszczem, a myśl znajduje się u dołu na licu ściany. Wróżka mówi, że uwielbia widok na równinę z tego miejsca zarówno nocą, jak i za dnia, i chciałaby przełączać między nimi bez czekania. **Zagraj Pieśń Słońca**, a odnowi twoje zdrowie i magię.",
+      "hint": "Zagraj Pieśń Słońca, aby zmienić dzień w noc."
+    },
+    "llanura-thought-06": {
+      "name": "Skalny zakątek na północnym zachodzie Równiny Hyrule",
+      "desc": "Na dalekim północnym zachodzie Równiny Hyrule, nad rzeką, znajduje się zakątek w skale z beczkami, workami i stołem, a ta myśl widnieje na ścianie przy wejściu. Wróżka mówi, że boi się Peahatów, bo są ogromne, zapuszczają korzenie i zachowują się jak właściciele równiny, ale jak każda roślina nie znoszą ognia. **Spal Peahaty Ogniem Din**."
+    },
+    "lonlon-thought-01": {
+      "name": "Mur ogrodu na ranczu",
+      "desc": "Na Ranczu Lon Lon obejdź dom i stajnię od tyłu do ogrodu: myśl znajduje się na ceglanym murze porośniętym bluszczem, wśród skrzynek, beczek i drewnianego wozu. Wróżka mówi, że melodia, którą gra tamten chłopak, jest bardzo ładna i krowy za nią szaleją. Chodzi o Pieśń Epony, ale zagranie jej obok znaku nic nie daje: **zagraj ją krowie**, a da ci Mleko Lon Lon.",
+      "hint": "Zagraj Pieśń Epony krowie."
+    },
+    "pozo-thought-01": {
+      "name": "Trumna w sali z Gibdo",
+      "desc": "Na Dnie Studni zejdź na B1 i wejdź do sali z Gibdo, tej z trumnami owiniętymi pajęczyną, którą oczyszczasz, paląc je Kijem Deku odpalonym od pochodni. Ta Myśl Wróżki widnieje z boku jednej ze stojących trumien: wróżka tęskni za piosenką tego człowieka o kręceniu się „w kółko i w kółko” i chciałaby, żeby ktoś w okolicy ją znał. **Zagraj Pieśń Burz obok trumny**, aby odnowić magię i zdrowie.",
+      "hint": "Zagraj Pieśń Burz obok trumny."
+    },
+    "sendero-thought-01": {
+      "name": "Krąg liści blisko Miasta Goronów",
+      "desc": "Wspinając się Szlakiem Góry Śmierci, kilka kroków od wejścia do Miasta Goronów, po prawej stronie znajduje się skalna półka z dziurą w ziemi, w której rośnie roślina, a na ścianie obok — ta myśl. Wróżka mówi, że w spokojne dni liście na ziemi powoli tańczą w kółko, ale w burzowe wirują z pełną prędkością, jakby zaraz miały odlecieć. **Zagraj Pieśń Burz na kręgu**, aby dostać się do dziury.",
+      "hint": "Zagraj Pieśń Burz na kręgu liści."
+    },
+    "sombra-thought-01": {
+      "name": "Ściana sali z kolcami na suficie",
+      "desc": "Na poziomie B3 Świątyni Cienia znajduje się sala, w której ukryty blok chroni cię przed kolcami spadającymi z sufitu. Za celą ze skrzynią z Czerwoną Rupią, obok otworu w ścianie, zobaczysz tę Myśl Wróżki. Wróżka mówi, że uwielbia miejsca, gdzie mocno wieje wiatr, i **że temu miejscu naprawdę przydałby się porządny podmuch wiatru**."
+    },
+    "crater-heart-03": {
+      "name": "Handlarz Deku w Kraterze",
+      "desc": "W Kraterze jako dziecko idź na zachód od wejścia ze szczytu Góry Śmierci, w stronę miejsca, gdzie mapa wskazuje Fontannę Wielkiej Wróżki. Obok siatki wspinaczkowej na ścianie spod ziemi wyskakuje Handlarz Deku i próbuje cię zaatakować.\n\nZbliż się, unikając jego pocisków, i uderz go. Gdy się podda, porozmawiaj z nim: **sprzeda ci Kawałek Serca za 100 Rupii**.",
+      "hint": "Jako dziecko sprzeda ci go za 100 Rupii, gdy go uderzysz."
+    },
+    "cementerio-thought-02": {
+      "name": "Ruiny przy wejściu do Grobowca Rodziny Królewskiej",
+      "desc": "Na Cmentarzu podejdź do płyty z symbolem Triforce otwierającej Grobowiec Rodziny Królewskiej: ta myśl znajduje się wśród rozbitych kamieni przy wejściu.\n\nWróżka opowiada, jak trafiła na dno grobu, jak rzucił się na nią przerażający potwór i jak przestał ją gonić, gdy zaśpiewała pieśń, która go oślepiła, ale nie pamięta jej nazwy. **To Pieśń Słońca: zagraj ją, aby sparaliżować ReDeady.**",
+      "hint": "Pieśń Słońca paraliżuje ReDeady."
+    },
+    "llanura-thought-07": {
+      "name": "Ruiny przy wyjściu nad Jezioro Hylia",
+      "desc": "Na południowym krańcu Równiny Hyrule, blisko ścieżki w dół nad Jezioro Hylia, wśród drzew stoją kamienne ruiny: myśl znajduje się na ścianie jednego z filarów.\n\nWróżka błaga, żeby nikt nigdy nie machał kijem w stronę motyla, a tym bardziej stojąc w miejscu. **Uderz motyla Kijem Deku, nie ruszając się z miejsca: zamieni się we Wróżkę.**",
+      "hint": "Uderz motyla Kijem Deku: zamieni się we Wróżkę."
+    },
+    "llanura-thought-08": {
+      "name": "Skalny zakątek przy wejściu nad Rzekę Zora",
+      "desc": "Na wschodnim skraju Równiny Hyrule, nieco na południe od wejścia nad Rzekę Zora, znajduje się zakątek w skale z beczkami, stołem, ławką i pozostałościami ogniska: myśl widnieje na skalnej ścianie.\n\nWróżka uwielbia układać Rupie w ładne wzory. Chowa je w dołach i dziurach, a także pod wodą, i nie ma nic przeciwko, jeśli ktoś je zabierze. **Szukaj Rupii ułożonych we wzory w dołach, dziurach i pod wodą.**",
+      "hint": "Szukaj Rupii ułożonych we wzory w dołach, dziurach i pod wodą."
+    },
+    "llanura-thought-09": {
+      "name": "Skały przy fosie na zachód od mostu zwodzonego",
+      "desc": "Wyjdź z Miasta Zamkowego Hyrule przez most zwodzony i idź na zachód wzdłuż brzegu fosy: naprzeciwko muru, z którego wypływa woda, leżą duże skały, a obok nich znajduje się ta myśl.\n\nWróżka mówi, że nikt nigdy nie będzie podejrzewał, że schowała cały swój majątek w drewnianej skrzynce.",
+      "hint": "Wróżka mówi, że schowała cały swój majątek w drewnianej skrzynce."
+    },
+    "llanura-thought-10": {
+      "name": "Wóz przy grządce warzywnej blisko Kakariko",
+      "desc": "Na północnym wschodzie Równiny Hyrule, niedaleko drogi w górę do Wioski Kakariko, przy niskim kamiennym murku stoi drewniany wóz: myśl znajduje się na jego deskach.\n\nWróżka mówi, że miejsce wygląda na opuszczone, jakby rosły tu same chwasty, ale jeśli dobrze się przyjrzysz, zobaczysz maluchy przemykające po kryjomu. **Zejdź na grządkę warzywną: wśród roślin biegają Robaki.**",
+      "hint": "Wśród roślin na sąsiedniej grządce warzywnej biegają Robaki."
+    }
+  }
+}

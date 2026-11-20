@@ -178,8 +178,29 @@ function handleFullscreenChange(): void {
   }
 }
 
+const OPEN_OVERLAY_SELECTOR = '[data-overlay-open="true"], [role="dialog"][aria-modal="true"]'
+
+export function hasOpenOverlay(
+  doc?: { querySelector?: (selector: string) => unknown } | null,
+): boolean {
+  const target =
+    doc !== undefined
+      ? doc
+      : typeof document !== 'undefined'
+        ? (document as unknown as { querySelector?: (selector: string) => unknown })
+        : null
+  if (!target || typeof target.querySelector !== 'function') return false
+  try {
+    return Boolean(target.querySelector(OPEN_OVERLAY_SELECTOR))
+  } catch {
+    return false
+  }
+}
+
 function handleKeyDown(event: KeyboardEvent): void {
-  if (event.key === 'Escape' && snapshot.isMapOnly && !snapshot.isNativeFullscreen) {
+  if (event.key !== 'Escape' || event.defaultPrevented) return
+  if (snapshot.isMapOnly && !snapshot.isNativeFullscreen) {
+    if (hasOpenOverlay()) return
     void exitFullscreen()
   }
 }

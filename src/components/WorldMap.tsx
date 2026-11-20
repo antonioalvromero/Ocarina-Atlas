@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { BarChart3, Check, Compass, Info, Maximize2, Minimize2, X } from 'lucide-react'
+import { BarChart3, Check, Compass, Info, Maximize2, Minimize2, Search, X } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { pinPosition } from '../lib/coords'
 import { dataset, formatFloorLabel } from '../lib/data'
@@ -20,6 +20,7 @@ import { LanguageSelector } from './LanguageSelector'
 import { LichiiStatusPanel } from './LichiiStatusPanel'
 import { MapViewport, type MapViewportHandle } from './MapViewport'
 import { LivePlayerPin } from './PlayerPin'
+import { QuickSearchModal, type QuickSearchTarget } from './QuickSearchModal'
 
 const totals = new Map<string, number>()
 for (const item of dataset.items) totals.set(item.place, (totals.get(item.place) ?? 0) + 1)
@@ -131,6 +132,7 @@ export function WorldMap() {
   const tracker = useLichiiTracker({ trackPosition: false })
   const [statsOpen, setStatsOpen] = useState(false)
   const [creditsOpen, setCreditsOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
   const [isCoarsePointer, setIsCoarsePointer] = useState(false)
   const [isCompactViewport, setIsCompactViewport] = useState(false)
@@ -254,7 +256,37 @@ export function WorldMap() {
 
   const closeStats = useCallback(() => setStatsOpen(false), [])
   const closeCredits = useCallback(() => setCreditsOpen(false), [])
+  const openSearch = useCallback(() => setSearchOpen(true), [])
+  const closeSearch = useCallback(() => setSearchOpen(false), [])
   const dismissSelectedPlace = useCallback(() => setSelectedPlaceId(null), [])
+  const handleSelectItem = useCallback(
+    (itemId: string) => {
+      const item = dataset.items.find((candidate) => candidate.id === itemId)
+      if (!item) return
+      const place = dataset.places.find((candidate) => candidate.id === item.place)
+      if (!place) return
+      void navigate({
+        to: '/$zone',
+        params: { zone: place.slug },
+        search: { pin: item.id },
+      })
+    },
+    [navigate],
+  )
+  const handleSearchNavigate = useCallback(
+    (target: QuickSearchTarget) => {
+      if (target.kind === 'place') {
+        void navigate({ to: '/$zone', params: { zone: target.slug } })
+      } else {
+        void navigate({
+          to: '/$zone',
+          params: { zone: target.placeSlug },
+          search: { pin: target.itemId },
+        })
+      }
+    },
+    [navigate],
+  )
 
   const playerSublabel = useMemo(
     () =>
@@ -412,6 +444,18 @@ export function WorldMap() {
             <div className="flex items-center justify-between gap-3">
               <h1 className="font-serif text-xl text-parchment-50 max-lg:landscape:text-lg">{t('app.title')}</h1>
               <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={openSearch}
+                  aria-label={t('search.open') || 'Search'}
+                  title={t('search.open') || 'Search'}
+                  className="pointer-events-auto inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-ink-600 bg-ink-800/90 px-2.5 py-1 text-xs font-medium text-parchment-50 transition-colors hover:border-parchment-400 hover:bg-ink-700"
+                >
+                  <Search size={13} className="text-[#e8c04a]" aria-hidden />
+                  <kbd className="rounded border border-ink-600 bg-ink-950/80 px-1 py-px font-sans text-[10px] text-parchment-400 max-sm:hidden">
+                    Ctrl+K
+                  </kbd>
+                </button>
                 <LanguageSelector />
                 <button
                   type="button"
@@ -482,6 +526,13 @@ export function WorldMap() {
           <CreditsModal open={creditsOpen} onClose={closeCredits} />
         </>
       )}
+      <QuickSearchModal
+        open={searchOpen}
+        onOpen={openSearch}
+        onClose={closeSearch}
+        onNavigate={handleSearchNavigate}
+        doneIds={doneIds}
+      />
       <LichiiStatusPanel
         state={tracker.state}
         followPlayer={tracker.followPlayer}
@@ -491,6 +542,7 @@ export function WorldMap() {
         toasts={tracker.toasts}
         onDismissToast={tracker.dismissToast}
         onJumpToPlayer={jumpToPlayer}
+        onSelectItem={handleSelectItem}
         error={tracker.error}
         onRetry={tracker.refresh}
         isFullscreen={isFullscreen}

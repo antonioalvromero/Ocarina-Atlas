@@ -1,10 +1,13 @@
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { expandOwnedRequirements } from '../lib/prerequisites'
 import type { GlobalProgressSummary } from '../lib/progress-stats'
+import { activeProfileSlot, read, write } from '../lib/storage'
+import { translate } from '../lib/i18n'
 import type { Dataset } from '../lib/types'
 import { filterPlacesForDrawer, GlobalStatsDrawer, getCategoryDrawerItems } from './GlobalStatsDrawer'
+import { SpoilerFreeToggle, SpoilerShieldBadgesAndHint } from './Panels'
 
 const MOCK_DATASET: Dataset = {
   map: { image: '/hyrule.png', width: 1000, height: 1000 },
@@ -152,6 +155,76 @@ describe('GlobalStatsDrawer official pins toggle', () => {
     expect(html).toContain('Hide completed')
     expect(html.indexOf('Show official pins')).toBeLessThan(html.indexOf('Only reachable'))
   })
+
+  it('renders the Spoiler shield toggle button alongside Show official pins without redundant preset buttons', () => {
+    const html = renderToString(
+      createElement(GlobalStatsDrawer, {
+        open: true,
+        onClose: () => {},
+        summary: emptySummary,
+      }),
+    )
+    expect(html).not.toContain('Discovery mode')
+    expect(html).not.toContain('100% Atlas mode')
+    expect(html).toContain('Spoiler shield (hints first)')
+    expect(html).toContain('Show official pins')
+  })
+
+  it('renders SpoilerFreeToggle and SpoilerShieldBadgesAndHint with hints, prerequisites, and hidden walkthrough notice', () => {
+    const toggleHtml = renderToString(createElement(SpoilerFreeToggle, { on: true }))
+    expect(toggleHtml).toContain('Spoiler shield (hints first)')
+    expect(toggleHtml).toContain('role="switch"')
+    expect(toggleHtml).toContain('aria-checked="true"')
+
+    const shieldHtml = renderToString(
+      createElement(SpoilerShieldBadgesAndHint, {
+        item: {
+          id: 'espiritu-gs-01',
+          n: 1,
+          cat: 'gs',
+          place: 'spirit-temple',
+          at: { map: 'S1', x: 0.2, y: 0.3 },
+          name: 'Basement Skulltula',
+          desc: 'Secret solution walkthrough paragraph that must stay hidden.',
+          hint: 'Listen near the rusty grate.',
+          age: 'adult',
+          night: true,
+          requires: ['longshot'],
+          images: ['/secret-solution.webp'],
+        },
+        ownedExpanded: expandOwnedRequirements(['longshot']),
+        onRevealSolution: () => {},
+      }),
+    )
+    expect(shieldHtml).toContain('Gold Skulltulas')
+    expect(shieldHtml).toContain('Adult')
+    expect(shieldHtml).toContain('Night only')
+    expect(shieldHtml).toContain('Listen near the rusty grate.')
+    expect(shieldHtml).toContain('Longshot')
+    expect(shieldHtml).toContain('Full walkthrough and screenshots are hidden to avoid spoilers.')
+    expect(shieldHtml).toContain('Reveal full solution')
+    expect(shieldHtml).not.toContain('Secret solution walkthrough paragraph that must stay hidden.')
+    expect(shieldHtml).not.toContain('/secret-solution.webp')
+  })
+
+  it('renders dialog overlay marker and complete ARIA tabs semantics', () => {
+    const html = renderToString(
+      createElement(GlobalStatsDrawer, {
+        open: true,
+        onClose: () => {},
+        summary: emptySummary,
+      }),
+    )
+    expect(html).toContain('role="dialog"')
+    expect(html).toContain('aria-modal="true"')
+    expect(html).toContain('data-overlay-open="true"')
+    expect(html).toContain('role="tablist"')
+    expect(html).toContain('id="global-stats-tab-all"')
+    expect(html).toContain('aria-controls="global-stats-locations-panel"')
+    expect(html).toContain('id="global-stats-locations-panel"')
+    expect(html).toContain('role="tabpanel"')
+    expect(html).toContain('aria-labelledby="global-stats-tab-all"')
+  })
 })
 
 describe('filterPlacesForDrawer', () => {
@@ -199,5 +272,72 @@ describe('filterPlacesForDrawer', () => {
       'empty-zone',
     ])
     expect(filterPlacesForDrawer(places, 'zones', true).map((p) => p.id)).toEqual(['empty-zone'])
+  })
+})
+
+describe('GlobalStatsDrawer Backup & Profiles section', () => {
+  const emptySummary: GlobalProgressSummary = {
+    totalDone: 0,
+    totalItems: 0,
+    percentage: 0,
+    completedPlaces: 0,
+    totalPlaces: 0,
+    categories: [],
+    places: [],
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('renders Backup & Profiles controls with active profile badge, Export JSON, and Import JSON', () => {
+    const html = renderToString(
+      createElement(GlobalStatsDrawer, {
+        open: true,
+        onClose: () => {},
+        summary: emptySummary,
+      }),
+    )
+
+    expect(html).toContain('Backup &amp; Profiles')
+    expect(html).toContain('Save profile: default')
+    expect(html).toContain('Export JSON')
+    expect(html).toContain('Import JSON')
+    expect(html).toContain('accept="application/json,.json"')
+  })
+
+  it('displays the stored active save profile in the badge', () => {
+    const entries = new Map<string, string>()
+    vi.stubGlobal('window', {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      localStorage: {
+        get length() {
+          return entries.size
+        },
+        key: (index: number) => Array.from(entries.keys())[index] ?? null,
+        getItem: (key: string) => entries.get(key) ?? null,
+        setItem: (key: string, value: string) => {
+          entries.set(key, value)
+        },
+      },
+    })
+
+    write(activeProfileSlot, 'slot_02')
+    expect(read(activeProfileSlot)).toBe('slot_02')
+    expect(translate('en', 'backup.activeProfile', { profile: read(activeProfileSlot) })).toBe(
+      'Save profile: slot_02',
+    )
+
+    // Server-side renderToString uses getServerSnapshot (slot.empty === 'default') for hydration safety
+    const html = renderToString(
+      createElement(GlobalStatsDrawer, {
+        open: true,
+        onClose: () => {},
+        summary: emptySummary,
+      }),
+    )
+
+    expect(html).toContain('Save profile: default')
   })
 })

@@ -21,9 +21,12 @@ import {
   getLichiiPort,
   getLichiiTelemetryState,
   getMinGuestHeapPtr,
+  handleLichiiStreamRequest,
   handleSaveSlotApiRequest,
   GHOST_SHOP_COUPON_BOTTLE_ITEM_ID,
   GHOST_SHOP_COUPON_NUM_HASH,
+  isLoopbackRequest,
+  isUncSavePath,
   isValidSub36Buffer,
   KNOWN_BEAN_BOOL_HASH_MAP,
   KNOWN_BOTTLE_BOOL_HASH_MAP,
@@ -35,6 +38,7 @@ import {
   KNOWN_SKULLTULA_HASH_MAP,
   KNOWN_THOUGHT_BOOL_HASH_MAP,
   LichiiRpcClient,
+  MAX_SSE_CLIENTS,
   parseGdmBoolEntryBuffer,
   parseGdmContainerHeader,
   parseGdmIntEntryBuffer,
@@ -46,7 +50,9 @@ import {
   parseSaveBufHeartPieceBoolRange,
   parseSaveSlot,
   projectToPlaceMap,
+  redactTelemetryStateForRemote,
   resolveSaveSlotSelection,
+  sanitizeTelemetryStateForRequest,
   setCustomSaveOverride,
   setSelectedSaveSlot,
   resolveEffectiveScene,
@@ -886,11 +892,19 @@ describe('Lichii environment config helpers', () => {
       fs.utimesSync(capPath, mtimeSec, mtimeSec)
     }
 
-    const invokeSaveSlotEndpoint = async (method: string, bodyText?: string) => {
+    const invokeSaveSlotEndpoint = async (
+      method: string,
+      bodyText?: string,
+      options?: { remoteAddress?: string | undefined; headers?: http.IncomingHttpHeaders },
+    ) => {
       const stream = new PassThrough()
       const reqStream = stream as unknown as http.IncomingMessage
       reqStream.method = method
-      reqStream.headers = {}
+      reqStream.headers =
+        options?.headers ?? (method === 'POST' ? { 'content-type': 'application/json' } : {})
+      ;(reqStream as unknown as { socket: { remoteAddress?: string } }).socket = {
+        remoteAddress: options && 'remoteAddress' in options ? options.remoteAddress : '127.0.0.1',
+      }
       const chunks: Buffer[] = []
       let statusCode = 200
       const headers: Record<string, string | string[]> = {}
@@ -968,6 +982,60 @@ describe('Lichii environment config helpers', () => {
       const badJsonRes = await invokeSaveSlotEndpoint('POST', '{not-json')
       expect(badJsonRes.handled).toBe(true)
       expect(badJsonRes.statusCode).toBe(400)
+
+      // Non-loopback client returns 403
+      const lanRes = await invokeSaveSlotEndpoint('POST', JSON.stringify({ slot: 'slot_00' }), {
+        remoteAddress: '192.168.1.42',
+      })
+      expect(lanRes.statusCode).toBe(403)
+
+      // Missing remoteAddress returns 403
+      const noAddrRes = await invokeSaveSlotEndpoint('POST', JSON.stringify({ slot: 'slot_00' }), {
+        remoteAddress: undefined,
+      })
+      expect(noAddrRes.statusCode).toBe(403)
+
+      // IPv6 loopback (::1) and IPv4-mapped loopback (::ffff:127.0.0.1) are allowed
+      const ipv6Res = await invokeSaveSlotEndpoint('POST', JSON.stringify({ slot: 'slot_00' }), {
+        remoteAddress: '::1',
+      })
+      expect(ipv6Res.statusCode).toBe(200)
+      const mappedRes = await invokeSaveSlotEndpoint('POST', JSON.stringify({ slot: 'slot_01' }), {
+        remoteAddress: '::ffff:127.0.0.1',
+      })
+      expect(mappedRes.statusCode).toBe(200)
+
+      // Missing / wrong Content-Type returns 415
+      const missingCtRes = await invokeSaveSlotEndpoint('POST', JSON.stringify({ slot: 'slot_00' }), {
+        headers: {},
+      })
+      expect(missingCtRes.statusCode).toBe(415)
+
+      // Cross-site Origin or Sec-Fetch-Site returns 403
+      const crossOriginRes = await invokeSaveSlotEndpoint('POST', JSON.stringify({ slot: 'slot_00' }), {
+        headers: {
+          'content-type': 'application/json',
+          host: '127.0.0.1:3000',
+          origin: 'https://evil.example',
+        },
+      })
+      expect(crossOriginRes.statusCode).toBe(403)
+
+      const crossFetchRes = await invokeSaveSlotEndpoint('POST', JSON.stringify({ slot: 'slot_00' }), {
+        headers: {
+          'content-type': 'application/json',
+          'sec-fetch-site': 'cross-site',
+        },
+      })
+      expect(crossFetchRes.statusCode).toBe(403)
+
+      // Windows UNC paths are rejected in both POST /api/saves/slot (400) and setCustomSaveOverride()
+      for (const uncPath of ['\\\\evil-host\\share\\saves', '//evil-host/share/saves', '\\\\?\\UNC\\host\\share']) {
+        expect(isUncSavePath(uncPath)).toBe(true)
+        expect(() => setCustomSaveOverride(uncPath, null)).toThrow(TypeError)
+        const uncRes = await invokeSaveSlotEndpoint('POST', JSON.stringify({ saveDir: uncPath }))
+        expect(uncRes.statusCode).toBe(400)
+      }
     } finally {
       closeLichiiRpc()
       if (prevLichiiPort === undefined) {
@@ -977,6 +1045,86 @@ describe('Lichii environment config helpers', () => {
       }
       setCustomSaveOverride(null, null)
       fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('redacts activeSaveDir for non-loopback requests and preserves full path for loopback', () => {
+    const winState = {
+      connected: false,
+      emulatorRunning: false,
+      scene: null,
+      placeId: null,
+      placeSlug: null,
+      placeName: null,
+      mapId: null,
+      age: null,
+      position: null,
+      mapFraction: null,
+      worldMapFraction: null,
+      skulltulaCount: null,
+      collectedSkulltulaIds: [],
+      authoritativeSkulltulas: false,
+      lastCollectedSkulltulaId: null,
+      lastPickedItem: null,
+      source: 'save' as const,
+      updatedAt: 1,
+      activeSaveDir: 'C:\\Users\\alice\\AppData\\Roaming\\lichii\\save\\profile01',
+    }
+
+    const loopbackReq = { socket: { remoteAddress: '127.0.0.1' } } as http.IncomingMessage
+    const remoteReq = { socket: { remoteAddress: '192.168.1.99' } } as http.IncomingMessage
+
+    expect(isLoopbackRequest(loopbackReq)).toBe(true)
+    expect(isLoopbackRequest(remoteReq)).toBe(false)
+
+    expect(sanitizeTelemetryStateForRequest(winState, loopbackReq).activeSaveDir).toBe(
+      'C:\\Users\\alice\\AppData\\Roaming\\lichii\\save\\profile01',
+    )
+    expect(sanitizeTelemetryStateForRequest(winState, remoteReq).activeSaveDir).toBe('profile01')
+
+    const posixState = { ...winState, activeSaveDir: '/home/alice/.local/share/longshot/' }
+    expect(redactTelemetryStateForRemote(posixState).activeSaveDir).toBe('longshot')
+  })
+
+  it('caps SSE stream clients at MAX_SSE_CLIENTS and returns 503 when full', () => {
+    const openClients: Array<{ req: PassThrough; res: PassThrough; statusCode: number }> = []
+
+    const openStream = (remoteAddress = '127.0.0.1') => {
+      const req = new PassThrough()
+      ;(req as unknown as { socket: { remoteAddress: string } }).socket = { remoteAddress }
+      const res = new PassThrough()
+      let statusCode = 0
+      const mockRes = Object.assign(res, {
+        writeHead(code: number) {
+          statusCode = code
+          return mockRes
+        },
+        flushHeaders() {},
+      })
+      handleLichiiStreamRequest(req as unknown as http.IncomingMessage, mockRes as unknown as http.ServerResponse)
+      return { req, res, statusCode }
+    }
+
+    try {
+      for (let i = 0; i < MAX_SSE_CLIENTS; i++) {
+        const client = openStream('127.0.0.1')
+        expect(client.statusCode).toBe(200)
+        openClients.push(client)
+      }
+
+      // Exceeding MAX_SSE_CLIENTS returns 503.
+      const rejected = openStream('192.168.1.55')
+      expect(rejected.statusCode).toBe(503)
+
+      // Closing one active client frees a slot.
+      openClients.pop()?.req.emit('close')
+      const replacement = openStream('127.0.0.1')
+      expect(replacement.statusCode).toBe(200)
+      openClients.push(replacement)
+    } finally {
+      for (const client of openClients) {
+        client.req.emit('close')
+      }
     }
   })
 

@@ -10,6 +10,7 @@ import {
   getLichiiTelemetryState,
   handleLichiiStreamRequest,
   handleSaveSlotApiRequest,
+  sanitizeTelemetryStateForRequest,
   setStaticAssetRoots,
 } from '../src/lib/lichii-server'
 import {
@@ -106,11 +107,12 @@ function offlineFallbackState(): LichiiTelemetryState {
 
 async function handleTelemetryApi(
   method: string,
+  req: http.IncomingMessage,
   res: http.ServerResponse,
 ): Promise<void> {
   let payload: LichiiTelemetryState
   try {
-    payload = await getLichiiTelemetryState()
+    payload = sanitizeTelemetryStateForRequest(await getLichiiTelemetryState(), req)
   } catch {
     payload = offlineFallbackState()
   }
@@ -337,6 +339,7 @@ async function main(): Promise<void> {
 
   let boundPort = port
   const server = http.createServer(async (req, res) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff')
     const method = (req.method || 'GET').toUpperCase()
     const rawUrl = req.url || '/'
     if (rawUrl.startsWith('//')) {
@@ -370,7 +373,7 @@ async function main(): Promise<void> {
     }
 
     if (requestUrl.pathname === '/api/lichii/state' && (method === 'GET' || method === 'HEAD')) {
-      await handleTelemetryApi(method, res)
+      await handleTelemetryApi(method, req, res)
       return
     }
 
@@ -411,12 +414,12 @@ async function main(): Promise<void> {
       await sendWebResponse(webRes, method, res)
     } catch (err) {
       if (!abortController.signal.aborted && !res.destroyed) {
+        console.error('SSR request failed:', err)
         if (!res.headersSent) {
           res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' })
         }
         if (!res.writableEnded) {
-          const message = err instanceof Error ? err.message : 'Internal Server Error'
-          res.end(message)
+          res.end('Internal Server Error')
         }
       }
     } finally {

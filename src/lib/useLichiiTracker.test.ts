@@ -1,13 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { LichiiTelemetryState } from './lichii-types'
 import {
+  activeProfileSlot,
+  addPin,
   officialDoneSlot,
   officialRevealedSlot,
+  officialVisibleSlot,
   ownedPrereqsSlot,
+  pinsSlot,
   prereqAutoSyncSlot,
   read,
   resetSyncForTests,
   write,
+  zoomSlot,
 } from './storage'
 import {
   TRACKED_BEAN_IDS,
@@ -41,6 +46,7 @@ function fakeWindow() {
       key: (index: number) => Array.from(entries.keys())[index] ?? null,
       getItem: (key: string) => entries.get(key) ?? null,
       setItem: (key: string, value: string) => void entries.set(key, value),
+      removeItem: (key: string) => void entries.delete(key),
     },
   }
 }
@@ -484,5 +490,54 @@ describe('applyTelemetryState prerequisite auto-sync', () => {
       next: ['ocarina'],
       changed: false,
     })
+  })
+
+  it('isolates custom pins, manual reveals, and telemetry collectibles when activeSaveSlot switches between slot_00 and slot_01', () => {
+    write(officialVisibleSlot, true)
+    write(zoomSlot, 2.2)
+
+    applyTelemetryState(
+      makeTelemetry({
+        activeSaveSlot: 'slot_00',
+        authoritativeSkulltulas: true,
+        collectedSkulltulaIds: ['deku-gs-01'],
+        ownedRequirements: ['bombs'],
+      }),
+    )
+    expect(read(activeProfileSlot)).toBe('slot_00')
+    addPin('kokiri', 'principal', 'Slot 0 Note', { x: 0.3, y: 0.4 }, 'other')
+    write(officialRevealedSlot, [...read(officialRevealedSlot), 'manual-reveal-0'])
+
+    applyTelemetryState(
+      makeTelemetry({
+        activeSaveSlot: 'slot_01',
+        authoritativeSkulltulas: true,
+        collectedSkulltulaIds: ['espiritu-gs-01'],
+        ownedRequirements: ['bow'],
+      }),
+    )
+    expect(read(activeProfileSlot)).toBe('slot_01')
+    expect(read(officialDoneSlot)).toEqual(['espiritu-gs-01'])
+    expect(read(officialRevealedSlot)).toEqual(['espiritu-gs-01'])
+    expect(read(ownedPrereqsSlot)).toEqual(['bow'])
+    expect(read(pinsSlot('kokiri', 'principal'))).toEqual([])
+    expect(read(officialVisibleSlot)).toBe(true)
+    expect(read(zoomSlot)).toBe(2.2)
+
+    addPin('kokiri', 'principal', 'Slot 1 Note', { x: 0.6, y: 0.7 }, 'other')
+
+    applyTelemetryState(
+      makeTelemetry({
+        activeSaveSlot: 'slot_00',
+        authoritativeSkulltulas: true,
+        collectedSkulltulaIds: ['deku-gs-01'],
+        ownedRequirements: ['bombs'],
+      }),
+    )
+    expect(read(activeProfileSlot)).toBe('slot_00')
+    expect(read(officialDoneSlot)).toEqual(['deku-gs-01'])
+    expect(read(officialRevealedSlot)).toEqual(['deku-gs-01', 'manual-reveal-0'])
+    expect(read(ownedPrereqsSlot)).toEqual(['bombs'])
+    expect(read(pinsSlot('kokiri', 'principal')).map((p) => p.name)).toEqual(['Slot 0 Note'])
   })
 })

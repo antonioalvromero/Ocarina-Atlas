@@ -1,5 +1,5 @@
 import { Check, RefreshCw, Trash2, Wrench, X } from 'lucide-react'
-import { useEffect, useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useI18n, type TranslationKey } from '../lib/i18n'
 import {
   ALL_PREREQUISITE_KEYS,
@@ -8,6 +8,7 @@ import {
 } from '../lib/prerequisites'
 import { ownedPrereqsSlot, toggleInList, useStored, write } from '../lib/storage'
 import { useLichiiTracker } from '../lib/useLichiiTracker'
+import { useModalFocusTrap } from '../lib/useModalFocusTrap'
 
 const GROUP_ORDER: readonly RequirementGroupKey[] = ['tools', 'gear', 'songs', 'situational']
 
@@ -20,17 +21,9 @@ function GearChecklistDialog({ onClose }: { onClose: () => void }) {
   const { t, tRequirement } = useI18n()
   const ownedPrereqs = useStored(ownedPrereqsSlot)
   const tracker = useLichiiTracker({ trackPosition: false })
+  const dialogRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        event.stopPropagation()
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  useModalFocusTrap(true, dialogRef, onClose)
 
   const ownedSet = useMemo(() => new Set(ownedPrereqs), [ownedPrereqs])
   const ownedCount = useMemo(
@@ -47,9 +40,12 @@ function GearChecklistDialog({ onClose }: { onClose: () => void }) {
       role="presentation"
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="gear-checklist-title"
+        data-overlay-open="true"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
         className="flex max-h-[min(88dvh,720px)] w-full max-w-xl flex-col overflow-hidden rounded-xl border border-[#e8c04a]/40 bg-ink-900 text-parchment-200 shadow-2xl"
       >

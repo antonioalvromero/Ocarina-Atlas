@@ -1,7 +1,7 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { getLocale } from '../lib/i18n'
 import appCss from '../styles.css?url'
-import { analyticsScripts } from '../lib/analytics'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -22,13 +22,13 @@ export const Route = createRootRoute({
       { rel: 'apple-touch-icon', href: '/icons/apple-touch-icon.png' },
       { rel: 'manifest', href: '/manifest.webmanifest' },
     ],
-    scripts: analyticsScripts,
   }),
   component: RootDocument,
 })
 
 function RootDocument() {
   useEffect(() => {
+    document.documentElement.lang = getLocale()
     if (import.meta.env.PROD && 'serviceWorker' in navigator) {
       void navigator.serviceWorker.register('/sw.js').catch(() => {})
     }

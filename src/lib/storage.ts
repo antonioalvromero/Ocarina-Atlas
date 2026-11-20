@@ -5,19 +5,55 @@ import type { AgeFilter, Fraction } from './types'
 
 const PREFIX = 'oot-map:v1:'
 const SYNC_DEBOUNCE_MS = 150
+const MAX_BACKUP_BYTES = 2 * 1024 * 1024
 const SYNCABLE_EXACT_KEYS = new Set([
   'official-visible',
   'official-done',
   'official-revealed',
   'hidden-categories',
   'hide-done',
+  'spoiler-free',
   'item-count-visible',
   'age-filter',
   'age',
   'prereq-filter-enabled',
   'owned-prereqs',
   'prereq-auto-sync',
+  'nearest-finder',
 ])
+
+const PLAYTHROUGH_EXACT_KEYS = new Set([
+  'official-done',
+  'official-revealed',
+  'owned-prereqs',
+])
+
+const ARRAY_SYNCABLE_KEYS = new Set([
+  'official-done',
+  'official-revealed',
+  'hidden-categories',
+  'item-count-visible',
+  'owned-prereqs',
+])
+
+const BOOLEAN_SYNCABLE_KEYS = new Set([
+  'official-visible',
+  'hide-done',
+  'spoiler-free',
+  'prereq-filter-enabled',
+  'prereq-auto-sync',
+  'nearest-finder',
+])
+
+const STRING_SYNCABLE_KEYS = new Set(['age-filter', 'age'])
+
+export type ProgressBackup = {
+  format: 'ocarina-atlas-backup'
+  version: 1
+  exportedAt: string
+  activeProfile: string
+  entries: Record<string, string>
+}
 
 export type SyncStatePayload = {
   version: number
@@ -91,6 +127,24 @@ export const hideDoneSlot: Slot<boolean> = {
   parse: (raw) => raw === true,
 }
 
+export const spoilerFreeSlot: Slot<boolean> = {
+  key: 'spoiler-free',
+  empty: false,
+  parse: (raw) => raw === true,
+}
+
+export type ExplorationPresetMode = 'discovery' | 'full'
+
+export function applyExplorationPreset(mode: ExplorationPresetMode): void {
+  if (mode === 'discovery') {
+    write(officialVisibleSlot, false)
+    write(spoilerFreeSlot, true)
+  } else {
+    write(officialVisibleSlot, true)
+    write(spoilerFreeSlot, false)
+  }
+}
+
 export const officialDoneSlot: Slot<string[]> = {
   key: 'official-done',
   empty: NO_STRINGS,
@@ -141,6 +195,12 @@ export const prereqAutoSyncSlot: Slot<boolean> = {
   parse: (raw) => (typeof raw === 'boolean' ? raw : true),
 }
 
+export const nearestFinderSlot: Slot<boolean> = {
+  key: 'nearest-finder',
+  empty: false,
+  parse: (raw) => raw === true,
+}
+
 export function pinsSlot(placeId: string, mapId: string): Slot<CustomPin[]> {
   return { key: `pins:${placeId}:${mapId}`, empty: NO_PINS, parse: parsePins }
 }
@@ -161,6 +221,47 @@ export const zoomSlot: Slot<number> = {
 /** Zoom and position of one map, so each map reopens where it was left. */
 export function viewSlot(viewId: string): Slot<View> {
   return { key: `view:${viewId}`, empty: INITIAL_VIEW, parse: parseView }
+}
+
+type ProfileSnapshot = Record<string, string>
+type ProfilesStore = Record<string, ProfileSnapshot>
+const EMPTY_PROFILES: ProfilesStore = {}
+
+function isPlaythroughKey(key: string): boolean {
+  const raw = key.startsWith(PREFIX) ? key.slice(PREFIX.length) : key
+  return PLAYTHROUGH_EXACT_KEYS.has(raw) || raw.startsWith('pins:')
+}
+
+export function normalizeProfileId(slotId: string | null | undefined): string {
+  if (typeof slotId !== 'string') return 'default'
+  const trimmed = slotId.trim()
+  return trimmed.length > 0 ? trimmed : 'default'
+}
+
+export const activeProfileSlot: Slot<string> = {
+  key: 'active-profile',
+  empty: 'default',
+  parse: (raw) => (typeof raw === 'string' && raw.trim().length > 0 ? normalizeProfileId(raw) : 'default'),
+}
+
+const profilesSlot: Slot<ProfilesStore> = {
+  key: 'profiles',
+  empty: EMPTY_PROFILES,
+  parse: (raw) => {
+    if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return EMPTY_PROFILES
+    const result: ProfilesStore = {}
+    for (const [profileId, entries] of Object.entries(raw)) {
+      if (typeof entries !== 'object' || entries === null || Array.isArray(entries)) continue
+      const cleanEntries: ProfileSnapshot = {}
+      for (const [k, v] of Object.entries(entries)) {
+        if (typeof v === 'string' && isPlaythroughKey(k)) {
+          cleanEntries[toFullKey(k)] = v
+        }
+      }
+      result[profileId] = cleanEntries
+    }
+    return result
+  },
 }
 
 function backend(): Storage | null {
@@ -316,6 +417,216 @@ export function initRemoteSync(): Promise<void> {
   })()
 
   return syncInitPromise
+}
+
+function utf8ByteLength(text: string): number {
+  if (typeof TextEncoder === 'function') {
+    return new TextEncoder().encode(text).length
+  }
+  return text.length
+}
+
+function validateBackupEntryValue(shortKey: string, serialized: string): void {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(serialized)
+  } catch {
+    throw new Error(`Invalid JSON value for backup entry "${shortKey}".`)
+  }
+  if (shortKey.startsWith('pins:') || ARRAY_SYNCABLE_KEYS.has(shortKey)) {
+    if (!Array.isArray(parsed)) {
+      throw new Error(`Expected JSON array for backup entry "${shortKey}".`)
+    }
+    return
+  }
+  if (BOOLEAN_SYNCABLE_KEYS.has(shortKey)) {
+    if (typeof parsed !== 'boolean') {
+      throw new Error(`Expected JSON boolean for backup entry "${shortKey}".`)
+    }
+    return
+  }
+  if (STRING_SYNCABLE_KEYS.has(shortKey)) {
+    if (typeof parsed !== 'string') {
+      throw new Error(`Expected JSON string for backup entry "${shortKey}".`)
+    }
+  }
+}
+
+export function exportProgressBackup(): ProgressBackup {
+  const entries = collectLocalSyncEntries()
+  return {
+    format: 'ocarina-atlas-backup',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    activeProfile: read(activeProfileSlot),
+    entries,
+  }
+}
+
+export function parseAndValidateProgressBackup(raw: unknown): ProgressBackup {
+  let parsed: unknown = raw
+  if (typeof raw === 'string') {
+    if (raw.length > MAX_BACKUP_BYTES || utf8ByteLength(raw) > MAX_BACKUP_BYTES) {
+      throw new Error('Backup payload exceeds maximum size of 2 MB.')
+    }
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      throw new Error('Invalid JSON in backup payload.')
+    }
+  }
+
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    throw new Error('Backup payload must be a JSON object.')
+  }
+
+  const candidate = parsed as Record<string, unknown>
+  if (candidate.format !== 'ocarina-atlas-backup') {
+    throw new Error('Unsupported backup format.')
+  }
+  if (candidate.version !== 1) {
+    throw new Error('Unsupported backup version.')
+  }
+  if (typeof candidate.exportedAt !== 'string' || candidate.exportedAt.trim().length === 0) {
+    throw new Error('Backup payload is missing a valid exportedAt timestamp.')
+  }
+  if (typeof candidate.activeProfile !== 'string' || candidate.activeProfile.trim().length === 0) {
+    throw new Error('Backup payload is missing a valid activeProfile.')
+  }
+  if (typeof candidate.entries !== 'object' || candidate.entries === null || Array.isArray(candidate.entries)) {
+    throw new Error('Backup payload entries must be an object.')
+  }
+
+  if (typeof raw !== 'string') {
+    const serialized = JSON.stringify(parsed)
+    if (serialized.length > MAX_BACKUP_BYTES || utf8ByteLength(serialized) > MAX_BACKUP_BYTES) {
+      throw new Error('Backup payload exceeds maximum size of 2 MB.')
+    }
+  }
+
+  const normalizedEntries: Record<string, string> = {}
+  for (const [rawKey, value] of Object.entries(candidate.entries as Record<string, unknown>)) {
+    if (typeof value !== 'string') {
+      throw new Error(`Backup entry "${rawKey}" must be a string.`)
+    }
+    if (!isSyncableKey(rawKey)) {
+      throw new Error(`Backup entry "${rawKey}" is not a valid syncable key.`)
+    }
+    const fullKey = toFullKey(rawKey)
+    const shortKey = fullKey.slice(PREFIX.length)
+    validateBackupEntryValue(shortKey, value)
+    normalizedEntries[fullKey] = value
+  }
+
+  return {
+    format: 'ocarina-atlas-backup',
+    version: 1,
+    exportedAt: candidate.exportedAt,
+    activeProfile: normalizeProfileId(candidate.activeProfile),
+    entries: normalizedEntries,
+  }
+}
+
+export function switchSaveProfile(nextSlotId: string | null | undefined): string {
+  const targetProfile = normalizeProfileId(nextSlotId)
+  const storage = backend()
+  if (!storage) return targetProfile
+
+  const currentProfile = read(activeProfileSlot)
+  if (currentProfile === targetProfile) return targetProfile
+
+  const currentSnapshot: ProfileSnapshot = {}
+  const existingPlaythroughKeys = new Set<string>(
+    Array.from(PLAYTHROUGH_EXACT_KEYS, (k) => PREFIX + k),
+  )
+  if (typeof storage.length === 'number' && typeof storage.key === 'function') {
+    for (let i = 0; i < storage.length; i++) {
+      const key = storage.key(i)
+      if (!key || !key.startsWith(PREFIX) || !isPlaythroughKey(key)) continue
+      existingPlaythroughKeys.add(key)
+    }
+  } else {
+    for (const shortKey of snapshots.keys()) {
+      if (isPlaythroughKey(shortKey)) existingPlaythroughKeys.add(PREFIX + shortKey)
+    }
+  }
+
+  for (const fullKey of existingPlaythroughKeys) {
+    const val = storage.getItem(fullKey)
+    if (typeof val === 'string') currentSnapshot[fullKey] = val
+  }
+
+  const allProfiles = { ...read(profilesSlot), [currentProfile]: currentSnapshot }
+  const nextSnapshot = allProfiles[targetProfile] ?? {}
+  try {
+    storage.setItem(PREFIX + profilesSlot.key, JSON.stringify(allProfiles))
+    snapshots.delete(profilesSlot.key)
+  } catch {
+    return currentProfile
+  }
+
+  for (const fullKey of existingPlaythroughKeys) {
+    if (fullKey in nextSnapshot) continue
+    const shortKey = fullKey.slice(PREFIX.length)
+    snapshots.delete(shortKey)
+    try {
+      if (typeof storage.removeItem === 'function') {
+        storage.removeItem(fullKey)
+      } else {
+        storage.setItem(fullKey, '[]')
+      }
+    } catch {
+      // Ignore storage errors when clearing old profile keys.
+    }
+  }
+
+  for (const [fullKey, serialized] of Object.entries(nextSnapshot)) {
+    const shortKey = fullKey.slice(PREFIX.length)
+    snapshots.delete(shortKey)
+    try {
+      storage.setItem(fullKey, serialized)
+    } catch {
+      // Ignore storage quota errors.
+    }
+  }
+
+  try {
+    storage.setItem(PREFIX + activeProfileSlot.key, JSON.stringify(targetProfile))
+    snapshots.delete(activeProfileSlot.key)
+  } catch {
+    // Ignore storage quota errors.
+  }
+
+  notify()
+  return targetProfile
+}
+
+export function importProgressBackup(raw: unknown): { importedKeys: number; activeProfile: string } {
+  const backup = parseAndValidateProgressBackup(raw)
+  const storage = backend()
+  if (!storage) {
+    return { importedKeys: 0, activeProfile: backup.activeProfile }
+  }
+
+  switchSaveProfile(backup.activeProfile)
+
+  const entryList = Object.entries(backup.entries)
+  for (const [fullKey, value] of entryList) {
+    const shortKey = fullKey.slice(PREFIX.length)
+    snapshots.delete(shortKey)
+    try {
+      storage.setItem(fullKey, value)
+    } catch {
+      // Ignore storage quota errors on import.
+    }
+    scheduleSyncPut(fullKey, value)
+  }
+
+  notify()
+  return {
+    importedKeys: entryList.length,
+    activeProfile: backup.activeProfile,
+  }
 }
 
 export function resetSyncForTests(): void {

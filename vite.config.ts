@@ -59,6 +59,14 @@ function clientChunkSplittingPlugin(): Plugin {
                   if (normalized.endsWith('/src/data/oot.json')) {
                     return 'oot-data'
                   }
+                  const localeMatch = normalized.match(/\/src\/lib\/i18n\/locales\/([^/]+)\.ts$/)
+                  if (localeMatch) {
+                    return `i18n-${localeMatch[1]}`
+                  }
+                  const guideMatch = normalized.match(/\/src\/data\/i18n\/([^/]+)\.json$/)
+                  if (guideMatch) {
+                    return `i18n-guides-${guideMatch[1]}`
+                  }
                 },
               },
             },

@@ -1,0 +1,946 @@
+{
+  "places": {
+    "kokiri": {
+      "intro": "La Foresta dei Kokiri, il villaggio in cui ha inizio l'avventura, ospita sulla mappa tre Skulltula d'Oro e un terreno soffice per un Fagiolo Magico. Due delle Skulltula compaiono da bambino: quella dietro la Casa dei Fratelli Sapientoni, solo di notte, e quella nel terreno soffice accanto al negozio, a qualsiasi ora e usando gli Insetti. Pianta anche un fagiolo in quel punto, perché da adulto ti solleverà fino a una sporgenza con delle Rupie, e torna di notte con il Rampino per prendere la terza Skulltula, in cima alla Casa delle Gemelle."
+    },
+    "perdido": {
+      "intro": "Quasi tutto nei Boschi Perduti si raccoglie da bambino: due Frammenti di Cuore con l'ocarina, tre Skulltula d'Oro e due terreni per i Fagioli Magici. È il labirinto che collega la Foresta dei Kokiri alla Radura Sacra, e i Frammenti dipendono dagli Skull Kid: il Canto di Saria per quello con il flauto, a sinistra dell'ingresso, e il gioco di memoria accanto al bersaglio, sulla destra. Porta degli Insetti per i due terreni soffici, quello vicino al ponte verso la Piana di Hyrule e quello nella radura dell'albero solitario, e pianta un fagiolo in ciascuno: da adulto e di notte, quello della radura ti solleva fino alla sporgenza della terza Skulltula."
+    },
+    "prado": {
+      "intro": "Una sola Skulltula d'Oro, da adulto, è tutto ciò che custodisce la Radura Sacra, e la mappa indica dove compare nel labirinto che conduce al Tempio della Foresta. Appare sulla parete di destra a metà del labirinto, dopo aver schivato i Moblin e prima della scalinata: abbattila con il Rampino, lo stesso che ti serve per entrare nel tempio."
+    },
+    "llanura": {
+      "intro": "La mappa della Piana di Hyrule segna due Frammenti di Cuore e tre Skulltula d'Oro. Tre di questi collezionabili si trovano sottoterra, in grotte che si aprono con una Bomba o con il Martello Megaton. In quella a est del ponte levatoio del Borgo di Hyrule, vicino al fossato, un Cespuglio Mercante ti vende un Frammento per 100 Rupie se vai da bambino e conosci la parola d'ordine, che ti rivela da adulto il Pensiero di Fata sull'albero lì accanto; l'altro è in un forziere sotto una sporgenza rocciosa a ovest, vicino alla Valle Gerudo, e va aperto da bambino. Quanto alle Skulltula, quella sul pino solitario a est cade rotolando contro il tronco, quella nella grotta del cerchio di pietre, vicino alla Fattoria Lon Lon, richiede il Boomerang o il Rampino, e la terza appare da adulto dentro una cassa nella grotta a sud-est della fattoria, se da bambino vi hai letto il Pensiero di Fata e sconfitto la Skulltula normale."
+    },
+    "lonlon": {
+      "intro": "Da bambino puoi raccogliere tutto alla Fattoria Lon Lon: tre Skulltula d'Oro, un Frammento di Cuore e un'Ampolla, ciascuno segnalato sulla mappa. Due delle Skulltula compaiono solo di notte e richiedono il Boomerang, nella finestra della casa e dentro la torre di pietra in fondo; la terza, sull'albero all'ingresso, cade a qualsiasi ora rotolando contro il tronco. Il Frammento di Cuore si trova in fondo alla torre di pietra, dietro alcune casse, e l'Ampolla è il premio del gioco dei Super Coccò di Talon, ma prima devi svegliarlo al Castello di Hyrule con il Coccò dell'Uovo Strano."
+    },
+    "ciudadela": {
+      "intro": "Tre Frammenti di Cuore, due Ampolle e una Skulltula d'Oro: ecco cosa custodisce il Borgo di Hyrule, con una mappa da bambino e una da adulto, poiché il borgo cambia. Quasi tutto è per Link bambino: due dei Frammenti si ottengono di notte, al Negozio dei Forzieri e riportando Richard, il cagnolino smarrito, alla sua padrona, mentre il terzo è il premio del Bowling Bombchu, che apre solo dopo aver sconfitto Re Dodongo. La Skulltula si nasconde dentro una cassa nella guardiola all'ingresso, e le Ampolle sono quella nuova del remake, regalata dal negoziante lungo il sentiero verso il Tempio del Tempo, e quella del Mercante di Spettri, da adulto, in cambio di cinque Grandi Spettri."
+    },
+    "castillo": {
+      "intro": "Tra le due mappe del Castello di Hyrule, il suo parco da bambino e l'esterno del Castello di Ganon da adulto, si trovano tre Skulltula d'Oro e due Fate Radiose. Due delle Skulltula compaiono da bambino: quella sull'albero nel giardino di siepi e quella nella grotta aperta dal Canto della Tempesta vicino all'albero presso il fossato, insieme alla Fata Radiosa dell'Attacco Rotante, dietro un masso in fondo al vicolo cieco a est. Da adulto restano la Skulltula sull'arco in rovina, visibile solo se ti volti mentre lo attraversi, e la Fata Radiosa della Doppia Difesa, nascosta da un pilastro che si solleva con i Guanti d'Oro."
+    },
+    "kakariko": {
+      "intro": "Il Villaggio Calbarico sorge ai piedi del Monte Morte, superato il ponte dalla Piana di Hyrule, ed è uno dei luoghi più ricchi di collezionabili della mappa. Cinque delle sue sei Skulltula d'Oro compaiono da bambino e di notte, con la spada o la Fionda delle Fate, e la sesta, sulla parete rocciosa proprio accanto al tetto della Casa di Impa, da adulto, di notte e con il Rampino. I Frammenti di Cuore sono divisi tra le due età, l'Ampolla te la dona la Signora dei Coccò quando le riporti i suoi sette Coccò, e nella Casa delle Skulltula ti attende un altro Frammento una volta raccolti 50 simboli."
+    },
+    "cementerio": {
+      "intro": "Il Cimitero di Calbarico dispone di una mappa per ogni età e tra le due custodisce quattro Frammenti di Cuore, due Skulltula d'Oro e un Fagiolo Magico. Da bambino e di notte, Igor scava per 10 Rupie e di tanto in tanto dissotterra un Frammento, mentre la tomba vicino alla Tomba della Famiglia Reale ne nasconde un altro nella sua cripta, che a quell'età si apre solo di notte. Da adulto arrivano la gara contro lo spirito di Igor, che assegna il Frammento al secondo tentativo (il primo dà il Rampino), e la sporgenza sulla parete sinistra, raggiungibile con il fagiolo piantato da bambino. Le Skulltula appaiono di notte sul muro all'ingresso e, con gli Insetti, da bambino e a qualsiasi ora, nel terreno soffice accanto alla Tomba di Igor."
+    },
+    "sendero": {
+      "intro": "Lungo il Sentiero del Monte Morte, da Calbarico fino al Cratere, la mappa segna quattro Skulltula d'Oro, un Frammento di Cuore, una Fata Radiosa e un Fagiolo Magico. Da bambino, elimina il masso davanti alla Caverna dei Dodongo con una Bomba o il Fiore Bomba e sfrutta il terreno soffice che si libera lì davanti: Insetti per una Skulltula e un fagiolo che funge da scorciatoia da adulto. Il Frammento di Cuore si trova sulla sporgenza sopra l'ingresso della caverna, e la Fata Radiosa della magia e del Fuoco di Din è sulla vetta, dietro la parete crepata accanto a Kaepora Gaebora. Delle altre tre Skulltula, quella nella parete crepata vicino a Calbarico compare a entrambe le età, mentre le due per Link adulto di notte si trovano sotto massi da distruggere, uno dei quali solo con il Martello Megaton."
+    },
+    "goron": {
+      "intro": "La Città dei Goron, scavata nel Monte Morte, ospita sulla mappa solo tre collezionabili: due Skulltula d'Oro e un Frammento di Cuore, suddivisi tra le due età. Da bambino, la Skulltula nel labirinto di massi al piano superiore si raggiunge aprendosi un varco con le Bombe, mentre il Frammento esce dal grande vaso rotante al centro: accendi le sue torce per farlo girare e lascia cadere una Bomba al suo interno dalla passerella del piano di sopra. Da adulto resta l'altra Skulltula, sotto una sporgenza rocciosa sul soffitto, raggiungibile solo con il Rampino."
+    },
+    "crater": {
+      "intro": "Il calore domina il Cratere del Monte Morte, dove la mappa segna tre Frammenti di Cuore, due Skulltula d'Oro, una Fata Radiosa e un Fagiolo Magico. Si entra dalla vetta della montagna o dalla Città dei Goron: da bambino il calore impone un conto alla rovescia, mentre da adulto, con la Tunica Goron, non c'è fretta. Da bambino prendi la Skulltula nella cassa all'ingresso della vetta, il Frammento venduto dal Cespuglio Mercante per 100 Rupie e la Skulltula nel terreno soffice del Bolero del Fuoco, raggiungibile suonando quella melodia: pianta lì anche il fagiolo. Da adulto, quella pianta ti porta sulla roccia a cupola con un altro Frammento; il terzo, raccoglibile anche da bambino, è in una nicchia nella parete scendendo lungo le reti dall'ingresso, e la Fata Radiosa che raddoppia la magia attende dietro alcuni massi che solo il Martello Megaton può infrangere."
+    },
+    "rio": {
+      "intro": "Il Venditore di Fagioli si trova all'ingresso del Fiume Zora, e risalendo la corrente la mappa segna quattro Frammenti di Cuore e quattro Skulltula d'Oro. Da bambino, supera i massi all'ingresso con una Bomba, compra da lui tutti i fagioli che puoi e piantane uno nel terreno soffice lì accanto. Tutti e quattro i Frammenti sono per Link bambino: due su piattaforme raggiungibili planando con un Coccò (o con il Boomerang, nel caso di quello presso la cascata) e due dalle rane sul ceppo, uno suonando loro le melodie e vincendo il loro gioco e un altro con il Canto della Tempesta. Delle Skulltula, due sono per Link bambino, quella nel terreno soffice del Venditore di Fagioli, con gli Insetti, e, di notte, quella sulla parete vicino alla cascata, mentre due sono per Link adulto di notte, molto in alto sulle pareti e con il Rampino."
+    },
+    "dominio": {
+      "intro": "Uno per età: così si dividono i due collezionabili del Villaggio degli Zora, un Frammento di Cuore da bambino e una Skulltula d'Oro da adulto, ciascuno nel proprio punto della mappa. Per il Frammento, accendi tutte le torce del piano inferiore con un Bastone Deku, iniziando da quella ai piedi delle scale, e il suo forziere apparirà dietro la cascata. Da adulto, con il villaggio ghiacciato, la Skulltula compare di notte in cima alla cascata gelata e la puoi abbattere con il Rampino o con una freccia."
+    },
+    "fuente": {
+      "intro": "Dietro il trono di Re Zora, la Fonte degli Zora custodisce due Frammenti di Cuore, tre Skulltula d'Oro e una Fata Radiosa, con una mappa per ogni età. Da bambino è lo stagno di Jabu-Jabu, e da adulto un lago ghiacciato sulla via per la Caverna di Ghiaccio. La Fata Radiosa, quella del Vento di Farore, si apre a entrambe le età, dietro la parete crepata nell'angolo sud-est, e due delle Skulltula compaiono da bambino: quella sul pino nello stesso angolo e, di notte con il Boomerang, quella sulla parete dell'arco sommerso. Da adulto, un Frammento attende sul lastrone di ghiaccio più lontano e un altro sul fondale, con la Tunica Zora e gli Stivali di Ferro, mentre la terza Skulltula compare di notte sul lato opposto di una caverna chiusa da due blocchi con simboli Zora, che si sollevano con i Guanti d'Argento."
+    },
+    "lago": {
+      "intro": "Il Lago Hylia è una delle aree più ricche della mappa: cinque Skulltula d'Oro, tre Frammenti di Cuore, un'Ampolla e un Fagiolo Magico, suddivisi tra le due età. Da bambino, il terreno soffice proprio accanto al laboratorio offre una Skulltula con gli Insetti e un fagiolo che da adulto ti solleva sul tetto, dove si trova uno dei Frammenti; un altro te lo consegna il gestore del Laghetto di Pesca per un pesce oltre i 50 cm, e il terzo lo Scienziato del Lago, se ti immergi fino al fondo della sua vasca con la Scaglia d'Oro. L'Ampolla con la Lettera di Ruto giace sul fondo del lago, vicino al tunnel per il Villaggio degli Zora, e richiede la Scaglia d'Argento. Delle Skulltula, tre sono per Link bambino e due per Link adulto: quella nella cassa sul fondo della vasca, con gli Stivali di Ferro, e quella sulla chioma del grande albero dell'isola, di notte e con il Super Rampino."
+    },
+    "valle": {
+      "intro": "Per raggiungere la Fortezza Gerudo devi attraversare la Valle Gerudo, e la sua mappa segna quattro Skulltula d'Oro, due Frammenti di Cuore e un Fagiolo Magico. Uno dei Frammenti si trova dietro la grande cascata, raggiungibile a nuoto, e l'altro, in un forziere su una sporgenza del canyon, si raggiunge da bambino planando con il Coccò vicino al ponte. Sulla piattaforma della mucca, ai piedi della cascata, il terreno soffice offre una Skulltula con gli Insetti e un fagiolo che da adulto ti avvicina anche al Frammento della cascata. Le altre tre Skulltula appaiono di notte: quella presso il getto d'acqua vicino alla passerella, da bambino con il Boomerang, e quelle sulla tenda dei carpentieri e sull'arco roccioso di fronte, da adulto e con il Rampino."
+    },
+    "fortaleza": {
+      "intro": "Tutto ciò che custodisce la Fortezza Gerudo è per Link adulto: due Frammenti di Cuore e due Skulltula d'Oro, collocati sulla mappa tra il campo di tiro con l'arco e i tetti. Salvare i quattro carpentieri ti fa ottenere la Tessera Gerudo, che apre il tiro con l'arco a cavallo: di giorno, totalizza 1.000 punti su Epona per vincere un Frammento, e torna di notte con il Rampino per la Skulltula sul bersaglio lontano. L'uscita alta della cucina porta sui tetti, dove di notte si trova l'altra Skulltula e, sul tetto più alto, il forziere con il secondo Frammento, raggiungibile con il Super Rampino dalla sporgenza rocciosa sovrastante."
+    },
+    "desierto": {
+      "intro": "Il Deserto Fantasma custodisce una sola Skulltula d'Oro, da adulto, nella camera sotto il monumento di pietra sulla strada per il Colosso del Deserto. Per attraversarlo, supera il fiume di sabbia con i Calzari Alati o il Super Rampino e segui le bandierine; arrivato al monumento, entra dal varco tra le colonne, scendi la scala a pioli e abbatti la Skulltula con la spada dall'altare."
+    },
+    "coloso": {
+      "intro": "Con il Requiem dello Spirito puoi raggiungere il Colosso del Deserto da bambino, e la sua mappa segna tre Skulltula d'Oro, un Frammento di Cuore, una Fata Radiosa e un Fagiolo Magico. Da adulto ci arrivi attraversando il Deserto Fantasma. Vai da bambino per liberare gli Insetti nel terreno soffice all'ingresso del Tempio dello Spirito, ottenendo una Skulltula, e per piantarvi il fagiolo: da adulto, la sua pianta ti trasporta sopra la cima della grande roccia, dove di notte siede un'altra Skulltula, fino all'arco di pietra con il Frammento di Cuore. La terza Skulltula compare di notte in alto sulla parete rocciosa a destra del Tempio dello Spirito, con il Rampino, e la Fata Radiosa dell'Amore di Nayru, dietro la parete crepata a nord dell'oasi, si apre a entrambe le età con una Bomba o un Bombchu."
+    },
+    "deku": {
+      "intro": "Dentro l'Albero Deku è il primo dungeon del gioco, accessibile da bambino appena esci dalla Foresta dei Kokiri con spada e scudo. La mappa copre i suoi cinque piani, dalla cima fino al secondo sotterraneo. Le sue quattro Skulltula d'Oro cadono con la spada o con la Fionda delle Fate che trovi all'interno, e nel remake si possono raccogliere tutte e quattro già alla prima visita: quella nella stanza sul retro del sotterraneo non richiede più Bombe né Boomerang, basta bruciare la ragnatela con un Bastone Deku. Regina Gohma, nel secondo sotterraneo, lascia cadere il Portacuori: stordisci il suo occhio con la Fionda delle Fate e colpiscilo con la spada."
+    },
+    "dodongos": {
+      "intro": "La Caverna dei Dodongo si trova sul Sentiero del Monte Morte e si apre da bambino facendo saltare il masso all'ingresso con un Fiore Bomba e il Bracciale Goron. La sua mappa mostra i due piani della caverna. Delle sue cinque Skulltula d'Oro, quattro si prendono alla prima visita, da bambino; per quella sulla sporgenza dello spaventapasseri occorre tornare da adulto con il Rampino e il Canto dello Spaventapasseri, oppure con il Super Rampino. Re Dodongo lascia cadere il Portacuori: una Bomba in bocca e poi di spada."
+    },
+    "jabu": {
+      "intro": "Entri Dentro la pancia di Jabu-Jabu da bambino dalla Fonte degli Zora, lasciando un pesce davanti alla bocca di Jabu-Jabu, e all'interno quasi tutto ruota attorno al Boomerang che ottieni presto. La mappa comprende i suoi tre piani, sotterraneo incluso. La prima Skulltula d'Oro cade con la spada nella stanza dell'interruttore dell'acqua; le altre tre con il Boomerang, due delle quali insieme nel sotterraneo della grande sala con i buchi, mirando manualmente perché non sono agganciabili. Barinade lascia cadere il Portacuori, sempre a colpi di Boomerang."
+    },
+    "bosque": {
+      "intro": "Il Tempio della Foresta è il primo dungeon da adulto: vi si entra dalla Radura Sacra con il Rampino, e lo stesso Rampino abbatte le sue cinque Skulltula d'Oro e attira i simboli verso di te. La mappa copre i suoi cinque piani. Conviene raccoglierle man mano che avanzi, perché ciascuna si trova in una stanza lungo il percorso: l'ingresso, l'atrio, i due cortili e la stanza rotante nel sotterraneo, proprio prima del boss. Il Portacuori è lasciato da Ganon Spettro, con l'Arco delle Fate o il Rampino a portata di mano."
+    },
+    "fuego": {
+      "intro": "Raggiungi il Tempio del Fuoco da adulto dal Cratere del Monte Morte, indossando la Tunica Goron per resistere al calore. La sua mappa comprende cinque piani, da 1F a 5F. Le sue cinque Skulltula d'Oro richiedono più della semplice spada: il Canto del Tempo, le Bombe, il Rampino e, per due di esse, il Canto dello Spaventapasseri che componi da bambino e da adulto al Lago Hylia. Quella dietro la statua nell'atrio e il Portacuori di Volvagia attendono entrambi il Martello Megaton, quindi lasciali per ultimi."
+    },
+    "agua": {
+      "intro": "Il Tempio dell'Acqua giace sul fondo del Lago Hylia e vi si entra da adulto con gli Stivali di Ferro e la Tunica Zora, variando il livello dell'acqua con la Ninna Nanna di Zelda. La sua mappa copre i quattro piani, da B1 a 3F. Delle sue cinque Skulltula d'Oro, due si possono raccogliere prima di sconfiggere Link Oscuro, quella vicino alla grata nel sotterraneo e quella dietro la parete sommersa crepata; le altre tre richiedono il Super Rampino ottenuto da quello scontro, quindi la via più semplice è prenderlo prima e poi fare un giro del pilastro centrale, del fiume con i mulinelli e della cascata con i massi. Morpha lascia cadere il Portacuori alla fine."
+    },
+    "sombra": {
+      "intro": "Il Tempio dell'Ombra, sotto il Cimitero di Calbarico, si apre da adulto con il Notturno dell'Ombra e il Fuoco di Din, e all'interno la Lente della Verità e i Calzari Alati sono indispensabili fin dall'inizio. La mappa mostra i suoi quattro piani sotterranei. Le sue cinque Skulltula d'Oro si incontrano lungo il percorso, nella sala delle falci invisibili, in quella con gli spuntoni sul soffitto, nella fossa del corridoio dei ventilatori, sulla sporgenza nella sala della barca e dentro i teschi giganti; due cadono con il Rampino, quella nella sala della barca richiede il Super Rampino e il Canto dello Spaventapasseri, e quella nei teschi le Bombe. Il Portacuori è lasciato da Bongo Bongo, con frecce o Rampino e la Lente attiva."
+    },
+    "espiritu": {
+      "intro": "Il Tempio dello Spirito, al Colosso del Deserto, si esplora due volte: prima da bambino, infilandosi nel piccolo passaggio dopo aver parlato con Nabooru, e poi da adulto, spostando il grande blocco nell'atrio con i Guanti d'Argento. La sua mappa copre quattro piani, da 1F a 4F. Tre delle sue cinque Skulltula d'Oro si possono già raccogliere nella sezione da bambino, due con il Boomerang o la Fionda delle Fate e una con la spada, mentre le altre due, nella sezione da adulto, richiedono il Canto del Tempo e il Super Rampino con il Canto dello Spaventapasseri. Per il Portacuori di Twinrova serve lo Scudo Specchio, che ottieni nel tempio stesso."
+    },
+    "pozo": {
+      "intro": "Entri nel Fondo del Pozzo da bambino, dopo aver prosciugato il pozzo del Villaggio Calbarico suonando il Canto della Tempesta nel Mulino a Vento. All'interno, la sua mappa a due piani segna tre Skulltula d'Oro, e tutte richiedono il Boomerang e la Lente della Verità, che si ottiene nel sotterraneo. Senza la Lente non puoi vedere le pareti finte, i sentieri invisibili né le botole; le tre Skulltula attendono dietro porte chiuse a chiave, due nell'area centrale e una nella stanza del Like Like."
+    },
+    "hielo": {
+      "intro": "Entri nella Caverna di Ghiaccio da adulto dalla Fonte degli Zora ghiacciata, seguendo i lastroni di ghiaccio fino alla grotta in fondo, ed è il luogo in cui ottieni gli Stivali di Ferro. La sua mappa segna tre Skulltula d'Oro, e tutte e tre cadono con il Rampino. Una è nella sala della lama rotante, tra le stalagmiti; per le altre due, raccogli le Rupie d'Argento in quella sala per aprire la stanza della Mappa del Dungeon, riempi un'Ampolla di Fuoco Blu lì dentro e usalo per sciogliere le due pareti di ghiaccio rosso nella sala della lama: dietro di esse si trovano la stanza della Bussola e la sala del blocco di ghiaccio scorrevole."
+    },
+    "gerudo": {
+      "intro": "La Palestra Gerudo è il dungeon di prova della Fortezza Gerudo, accessibile da adulto con la Tessera Gerudo. Non ospita Skulltula d'Oro né Frammenti di Cuore, quindi su questa mappa non ci sono collezionabili da spuntare; la sua ricompensa sono le Frecce di Ghiaccio."
+    },
+    "ganon": {
+      "intro": "Il Castello di Ganon sorge da adulto dove un tempo si ergeva il Castello di Hyrule, ed è il dungeon finale del gioco. Non ospita Skulltula d'Oro né Frammenti di Cuore, quindi su questa mappa non ci sono collezionabili da spuntare. Ciò che si trova all'esterno, lungo il sentiero d'ingresso, sono la Fata Radiosa della Doppia Difesa e una Skulltula d'Oro su un arco in rovina: li trovi sulla mappa del Castello di Hyrule."
+    }
+  },
+  "items": {
+    "kokiri-gs-01": {
+      "name": "Dietro la Casa dei Fratelli Sapientoni",
+      "desc": "La Casa dei Fratelli Sapientoni, sulla collina di fronte alla Casa del Grande Mido e accanto al Centro d'Addestramento della Foresta, nasconde questa Skulltula d'Oro sul retro del suo tronco. Esce solo di notte e solo da bambino.\n\nSali sulla collina e aggira la casa fino al retro."
+    },
+    "kokiri-gs-02": {
+      "name": "Insetti nel terreno soffice accanto al negozio",
+      "desc": "Proprio dietro il Negozio dei Kokiri si trova un terreno soffice che nasconde una Skulltula d'Oro da bambino, e per farla uscire basta un'ampolla di insetti.\n\nAppena **svuoti l'ampolla di insetti sul terreno**, la Skulltula sbuca fuori: sconfiggila con la spada e raccogli il simbolo della Skulltula d'Oro. Funziona a qualsiasi ora del giorno."
+    },
+    "kokiri-gs-03": {
+      "name": "Retro della Casa delle Gemelle",
+      "desc": "Questa Skulltula d'Oro richiede di tornare nella Foresta dei Kokiri da adulto, di notte, perché si arrampica in alto sul retro della Casa delle Gemelle, quella con il tetto a doppia punta vicino al sentiero verso la Radura del Grande Albero Deku.\n\nLa spada non arriva così in alto, ma **il Rampino la elimina dal basso**, e un secondo colpo sul simbolo lo porta verso di te."
+    },
+    "kokiri-bean-01": {
+      "name": "Terreno soffice dietro il negozio",
+      "desc": "Uno dei Fagioli Magici che compri dal Venditore di Fagioli al Fiume Zora va piantato qui, nel terreno soffice proprio accanto al Negozio dei Kokiri, ed è meglio piantarlo da bambino così sarà pronto al tuo ritorno.\n\nDa adulto, la foglia della pianta **ti deposita su una piccola sporgenza con un cerchio di Rupie verdi** attorno a una rossa. Lo stesso terreno ospita anche la Skulltula degli insetti, quindi da bambino puoi fare entrambe le cose in una volta sola.",
+      "hint": "Piantalo da bambino e usalo da adulto."
+    },
+    "perdido-heart-01": {
+      "name": "Canto di Saria per lo Skull Kid",
+      "desc": "Appena entri nei Boschi Perduti dalla Foresta dei Kokiri, il primo sentiero a sinistra conduce a uno Skull Kid che suona il flauto su un alto ceppo e che svanisce se ti avvicini semplicemente camminando.\n\nPerciò **sali sul ceppo basso davanti a lui** e suona il Canto di Saria con la tua Ocarina: lo Skull Kid diventerà tuo amico e ti regalerà un Frammento di Cuore."
+    },
+    "perdido-heart-02": {
+      "name": "Gioco di memoria con l'Ocarina",
+      "desc": "L'area del bersaglio per la Fionda delle Fate, il primo sentiero a destra entrando dalla Foresta dei Kokiri, nasconde un gioco di memoria con due Skull Kid. Scendi le scale davanti a te fino all'albero del bersaglio e **passa alla sua destra per salire sul piccolo ceppo**.\n\nDovrai poi ripetere con l'Ocarina ciò che suonano, in tre round da cinque, sei e otto note. Se sbagli una nota, il round ricomincia con una melodia diversa e i premi aumentano: Rupie nei primi due e il Frammento di Cuore nel terzo."
+    },
+    "perdido-gs-01": {
+      "name": "Insetti nel terreno soffice vicino al ponte",
+      "desc": "Superato lo Skull Kid con il flauto, il primo sentiero a sinistra entrando dalla Foresta dei Kokiri, gira di nuovo a sinistra e raggiungerai l'area con il ponte verso la Piana di Hyrule. La riconoscerai dalla Pietra del Pettegolezzo e dal Cespuglio Mercante sul fondo che vende la borsa più grande per i Bastoni Deku.\n\nIl terreno soffice è proprio lungo il sentiero appena arrivi: **versaci sopra un'ampolla di insetti** e, quando la Skulltula d'Oro emerge, finiscila con la spada e raccogli il simbolo."
+    },
+    "perdido-gs-02": {
+      "name": "Insetti nel terreno soffice della radura dell'albero solitario",
+      "desc": "Per raggiungere questo punto, segui il percorso dei Boschi Perduti a destra, sinistra, destra, sinistra e poi, invece di andare verso la Radura Sacra, gira ancora una volta a sinistra. È la radura con l'albero solitario, due Cespugli Mercanti e una buca nell'erba.\n\nUna volta lì, **libera gli insetti sul terreno soffice a destra, accanto a uno dei Cespugli**, e quando la Skulltula d'Oro esce, sconfiggila con la spada e raccogli il simbolo."
+    },
+    "perdido-gs-03": {
+      "name": "Sporgenza presso il Palco della Foresta",
+      "desc": "Raggiungere l'alta sporgenza su cui si trova questa Skulltula d'Oro richiede una preparazione da bambino, perché l'unico modo per salire è la pianta nella radura dell'albero solitario. Per arrivare alla radura, gira a destra, sinistra, destra, sinistra e sinistra nei Boschi Perduti, poi pianta il fagiolo nel terreno soffice a destra, accanto a un Cespuglio Mercante.\n\nQuando torni da adulto di notte, **sali sulla pianta fino alla sporgenza** e sconfiggi la Skulltula con la spada."
+    },
+    "perdido-bean-01": {
+      "name": "Terreno soffice vicino al ponte",
+      "desc": "Girando due volte a sinistra dall'ingresso dei Boschi Perduti si arriva all'area con il ponte verso la Piana di Hyrule, e il suo terreno soffice è un ottimo punto in cui piantare un Fagiolo Magico da bambino.\n\nQuando torni da adulto, **lascia che la pianta ti porti fino al ponte** tra la Foresta dei Kokiri e la Piana di Hyrule e saltaci sopra: è una comoda scorciatoia durante la catena di scambi, quando il Fungo Strano scade dopo tre minuti.",
+      "hint": "Piantalo da bambino e usalo da adulto."
+    },
+    "perdido-bean-02": {
+      "name": "Terreno soffice vicino ai due Cespugli",
+      "desc": "Due Cespugli Mercanti e un albero solitario si trovano nella radura dei Boschi Perduti raggiungibile girando a destra, sinistra, destra, sinistra e sinistra dall'ingresso, e lì c'è un terreno soffice in cui piantare un Fagiolo Magico da bambino. È sulla destra, dietro uno dei Cespugli, e con gli insetti ne uscirà una Skulltula d'Oro.\n\nDa adulto, **sali sulla pianta fino all'alta sporgenza della radura**, dove di notte si trova un'altra Skulltula d'Oro.",
+      "hint": "Piantalo da bambino e usalo da adulto."
+    },
+    "prado-gs-01": {
+      "name": "Parete destra prima delle scale",
+      "desc": "Il labirinto della Radura Sacra nasconde questa Skulltula d'Oro, ma compare solo da adulto. Fatti strada schivando i Moblin e, arrivato a metà percorso, guarda la parete sulla destra.\n\n**Colpisci la Skulltula con il Rampino** e scaglialo di nuovo per attirare il simbolo della Skulltula d'Oro."
+    },
+    "llanura-heart-01": {
+      "name": "Cespuglio Mercante vicino al fossato",
+      "desc": "Esci dal Borgo di Hyrule attraversando il ponte levatoio e segui le mura verso est lungo il bordo del fossato. Accanto a un albero vedrai una buca che puoi aprire con una Bomba o con il Martello Megaton: calati dentro e parla con il Cespuglio Mercante all'interno.\n\nVende solo a chi conosce la parola d'ordine. Per scoprirla, vai all'albero lì accanto da Link adulto e leggi il Pensiero di Fata. Poi torna da bambino, parla con il Cespuglio Mercante e **scegli «Vendimi qualcosa, dai!»**: ti offrirà il Frammento di Cuore per 100 Rupie.\n\nCompralo da bambino, perché da adulto l'avrà già venduto al Link del passato.",
+      "hint": "Costa 100 Rupie."
+    },
+    "llanura-heart-02": {
+      "name": "Paradosso del forziere dal passato",
+      "desc": "All'estremità occidentale della Piana di Hyrule, vicino all'ingresso della Valle Gerudo, il terreno diventa rossastro. Scendi lungo il pendio in un avvallamento sotto una sporgenza rocciosa e cerca il forziere sul fondo.\n\nDevi farlo da bambino: da adulto il forziere è già aperto e vuoto, e un Pensiero di Fata spiega che non è mai stato chiuso a chiave. **Apri il forziere da bambino** e il Frammento di Cuore sarà tuo.",
+      "hint": "Leggi il Pensiero di Fata da adulto per scoprire perché è vuoto."
+    },
+    "llanura-gs-01": {
+      "name": "Pino solitario a est",
+      "desc": "A est della Piana di Hyrule, tra il Fiume Zora e la Foresta dei Kokiri, un pino solitario si erge in cima a una collinetta accanto a un ruscello. Vi si nasconde una Skulltula d'Oro.\n\n**Rotola contro il tronco** per farla cadere a terra, finiscila con la spada e raccogli il simbolo della Skulltula d'Oro.",
+      "hint": "È in cima a una collinetta, accanto a un ruscello."
+    },
+    "llanura-gs-02": {
+      "name": "Grotta del cerchio di pietre vicino alla fattoria",
+      "desc": "Nel boschetto a sud-ovest della Fattoria Lon Lon, vicino all'uscita verso il Lago Hylia, un cerchio di pietre sul terreno nasconde una grotta. Aprila con **una Bomba o un colpo di Martello Megaton sul cerchio** e calati nella buca.\n\nAppena entri, una Grande Skulltula scende dal soffitto: sconfiggila con la spada. Quella d'oro è sulla parete; colpiscila con il Rampino o il Boomerang, che ti porteranno anche il simbolo."
+    },
+    "lonlon-heart-01": {
+      "name": "Torre di pietra sul retro",
+      "desc": "Sul retro della Fattoria Lon Lon, proprio dietro il recinto dei cavalli, si trova una torre di pietra che funge da silo. In uno dei suoi angoli alcune casse coprono un'apertura: **sposta le casse e striscia attraverso il passaggio** fino in fondo, dove ti aspetta il Frammento di Cuore."
+    },
+    "lonlon-gs-01": {
+      "name": "Albero lungo la via per il recinto",
+      "desc": "Appena entri nella Fattoria Lon Lon, nel cortile laterale a sinistra, c'è un albero in cui si nasconde una Skulltula d'Oro: **rotola contro il tronco per farla cadere a terra**, sconfiggila e raccogli il simbolo."
+    },
+    "lonlon-gs-02": {
+      "name": "Cassa nella grotta a sud della fattoria",
+      "desc": "Perché questa Skulltula d'Oro compaia da adulto, Link bambino deve leggere il Pensiero di Fata nella grotta sotterranea a sud-est della Fattoria Lon Lon, vicino allo stagno, e sconfiggere la Skulltula normale.\n\nFatto questo, torna da adulto. Sul fondo, contro la parete, c'è una cassa di legno. **Rompila rotolandoci contro** e ne uscirà una Skulltula d'Oro: sconfiggila con la spada e raccogli il simbolo. Come curiosità, anche il Pensiero di Fata sarà cambiato.",
+      "hint": "Elimina la Skulltula nel passato per trovare quella d'oro nel futuro."
+    },
+    "lonlon-gs-03": {
+      "name": "Finestra della casa",
+      "desc": "Se guardi in alto verso la casa di Talon di notte, alla Fattoria Lon Lon accanto all'arco d'ingresso, vedrai una Skulltula d'Oro nella finestra al piano superiore, troppo in alto per la spada.\n\n**Lanciale il Boomerang dal basso**: la sconfigge e ti riporta il simbolo della Skulltula d'Oro con lo stesso lancio. Di giorno quella parete è vuota."
+    },
+    "lonlon-gs-04": {
+      "name": "Dentro la torre di pietra",
+      "desc": "La torre di pietra sul retro della Fattoria Lon Lon, dietro il recinto, ospita di notte una Skulltula d'Oro al suo interno. Entra dalla porta della torre e guarda in alto: è sulla parete, sopra il mucchio di fieno appeso sotto la finestra.\n\nSolo il Boomerang può raggiungerla: **lancialo dal pavimento della torre** per sconfiggere la Skulltula e riportarti il simbolo con lo stesso lancio. La Fionda delle Fate la uccide, ma il simbolo resta lassù."
+    },
+    "ciudadela-heart-01": {
+      "name": "Negozio dei Forzieri",
+      "desc": "Il Negozio dei Forzieri si trova a sinistra della piazza del Borgo di Hyrule entrando, in un vicolo laterale. Apre solo di notte e costa 10 Rupie a partita. Il proprietario ti consegna una chiave: ciascuna delle cinque stanze ha due forzieri e solo uno contiene la chiave per la successiva; se sbagli, la partita termina.\n\nEquipaggia la Lente della Verità dalla scheda Equipaggiamento per vedere cosa c'è dentro ogni forziere. **Supera tutte e cinque le stanze e apri il grande forziere nella sala dei premi** per ottenere il Frammento di Cuore.",
+      "hint": "Consigliata: Lente della Verità."
+    },
+    "ciudadela-heart-02": {
+      "name": "Il cagnolino smarrito",
+      "desc": "Richard è il piccolo cane bianco che gira di notte in uno dei vicoli sul retro del Borgo di Hyrule, dove un uomo è affacciato alla finestra di casa sua. Parla con Richard affinché ti segua.\n\nCon Richard alle calcagna, vai verso **l'ingresso della piazza provenendo dalla Piana di Hyrule**. La sua padrona ti regalerà il Frammento di Cuore.",
+      "hint": "Dà il frammento solo la prima volta; in seguito solo Rupie."
+    },
+    "ciudadela-heart-03": {
+      "name": "Bowling Bombchu",
+      "desc": "Il Bowling Bombchu si trova sul lato ovest della piazza del mercato nel Borgo di Hyrule e apre solo dopo che hai sconfitto Re Dodongo.\n\nParla con l'addetta: prima di pagare ti dirà qual è il premio in palio, e ogni partita costa 10 Rupie. Devi superare tre livelli con 10 Bombchu, rilasciandoli da dietro la linea affinché raggiungano il bersaglio sul fondo, evitando ostacoli come un Coccò.\n\nIl premio cambia da una partita all'altra, quindi **continua a giocare finché non annuncia il Frammento di Cuore** e vinci quella partita.",
+      "hint": "10 Rupie a partita; il premio viene annunciato prima di pagare."
+    },
+    "ciudadela-gs-01": {
+      "name": "Guardiola",
+      "desc": "Accanto al ponte levatoio, all'ingresso del Borgo di Hyrule, c'è la guardiola, un edificio pieno di vasi con una Skulltula d'Oro nascosta dentro una cassa di legno.\n\nVai verso la parete di fondo e **rotola contro la cassa più a destra**, quella alla destra del soldato guardandolo di fronte."
+    },
+    "castillo-gs-01": {
+      "name": "Albero nel giardino di siepi",
+      "desc": "Puoi esplorare il parco del Castello di Hyrule solo da bambino. Risali il sentiero verso il castello e, su un lato, entra nel giardino di siepi e fiori davanti a te. Attraversalo verso ovest fino all'angolo più lontano, accanto alle mura del castello, dove si trova un albero solitario.\n\n**Rotola contro il tronco** per far cadere la Skulltula d'Oro; sconfiggila e raccogli il simbolo."
+    },
+    "castillo-gs-02": {
+      "name": "Grotta del Canto della Tempesta",
+      "desc": "Per evitare la guardia al cancello del Castello di Hyrule, arrampicati sulle liane e tuffati nel fossato vicino al ponte d'ingresso. Nuota a est sotto il ponte ed esci salendo i gradini di pietra: proprio lì, vicino alle mura esterne, c'è un albero con un cerchio di terra alla base.\n\n**Suona il Canto della Tempesta su quel cerchio** per aprire una buca. La grotta ha pareti crepate che puoi far saltare con le Bombe: dietro una di esse si trova la Skulltula d'Oro. Il Boomerang la elimina e ti porta il simbolo."
+    },
+    "castillo-fairy-01": {
+      "name": "Fata Radiosa: Attacco Rotante",
+      "desc": "All'estremità orientale del parco del Castello di Hyrule, costeggiando il muro di destra, c'è un vicolo cieco chiuso da un masso. Per non farti fermare dalla guardia, arrampicati sulle liane lungo il muro.\n\nIn fondo al sentiero, **fai saltare il masso con una Bomba e striscia nel varco** fino alla Fontana della Fata Radiosa. Suona la Ninna Nanna di Zelda sul simbolo della Triforza e accetta l'offerta di 50 Rupie: la Fata Radiosa potenzierà il tuo Attacco Rotante con un'onda d'urto magica.",
+      "hint": "Chiede un'offerta di 50 Rupie e potenzia l'Attacco Rotante con un'onda d'urto."
+    },
+    "kakariko-heart-01": {
+      "name": "Piccolo tetto dietro la Casa di Impa",
+      "desc": "Il frammento è ben visibile su un piccolo tetto di tegole rosse dietro la Casa di Impa, addossato alla montagna. Dal tetto blu della casa, **lasciati cadere sul piccolo tetto sottostante** e raccoglilo. Da lì puoi scendere nella stalla della mucca.\n\nDa bambino, parla con Kaepora Gaebora sulla vetta del Monte Morte e il gufo ti depositerà sul tetto di Impa. Da adulto ti serve il Rampino.",
+      "hint": "Da adulto, usa il Rampino dal tetto della Casa delle Skulltula."
+    },
+    "kakariko-heart-02": {
+      "name": "Mulino a Vento",
+      "desc": "Dentro il Mulino a Vento, in fondo al villaggio, il frammento attende in alto, su un mobile lungo la passerella superiore.\n\nDa adulto ci arrivi passando per la Tomba di Igor, nel Cimitero. Finita la gara, le scale d'uscita sono rotte: **spara il Rampino al bersaglio sopra la porta** e segui il corridoio. Sbuchi in cima al Mulino a Vento, accanto alla piattaforma rotante; sali sul mobile contro la parete e prendi il frammento.",
+      "hint": "Da adulto si entra attraverso la Tomba di Igor."
+    },
+    "kakariko-heart-03": {
+      "name": "L'uomo sul tetto",
+      "desc": "L'uomo sul tetto è seduto in cima al **Negozio di Pozioni, accanto alla torre di guardia e di fronte al Mulino a Vento**, e ti basta raggiungerlo e parlargli per ricevere il Frammento di Cuore.\n\nDa adulto è sufficiente il Rampino: posizionati sulla ringhiera di fronte al Mulino a Vento e agganciati al tetto.",
+      "hint": "Da adulto ti serve il Rampino."
+    },
+    "kakariko-gs-01": {
+      "name": "Casa in costruzione",
+      "desc": "Mentre i carpentieri stanno costruendo la casa in cantiere, da bambino e di notte, la Skulltula d'Oro è appesa al muro di mattoni del cantiere, sopra il terreno. **Sali lungo la rampa di assi fino alla passerella dell'impalcatura** e te la troverai proprio davanti, sul muro.\n\nLa spada è sufficiente per eliminarla, quindi non ti serve altro per prendere il simbolo."
+    },
+    "kakariko-gs-02": {
+      "name": "Albero all'ingresso",
+      "desc": "Il grande pino vicino all'ingresso dalla Piana di Hyrule, nella parte bassa del villaggio, nasconde di notte una Skulltula d'Oro che cade a terra da bambino se **rotoli contro il tronco del pino**. Una volta caduta, finiscila e raccogli il simbolo."
+    },
+    "kakariko-gs-03": {
+      "name": "Torre di guardia",
+      "desc": "A metà della scala a pioli della torre di guardia, al centro del villaggio, di notte è appesa una Skulltula d'Oro che puoi attaccare dal basso: **colpiscila con la Fionda delle Fate o manda un Bombchu su per la scala**.\n\nQuando muore, sali la scala: il simbolo resta lì, a metà altezza, e puoi raccoglierlo senza arrivare fino in cima.",
+      "hint": "Eliminala prima di salire sulla torre verso l'uomo sul tetto."
+    },
+    "kakariko-gs-04": {
+      "name": "Casa accanto al cancello della montagna",
+      "desc": "Salendo verso il cancello del Monte Morte, nella parte alta del villaggio, vedrai una casa proprio lì accanto, superata la torre di guardia. Da bambino e di notte, **aggirala lungo il sentiero erboso sul retro** e controlla le sue pareti finché non trovi la Skulltula d'Oro. È a livello del terreno, quindi puoi abbatterla con la spada e raccogliere il simbolo senza usare oggetti."
+    },
+    "kakariko-gs-05": {
+      "name": "Casa delle Skulltula",
+      "desc": "La Casa delle Skulltula, dimora della famiglia maledetta, è la prima sulla destra entrando dalla Piana di Hyrule e ha delle ragnatele sopra la porta. Da bambino e di notte, la Skulltula d'Oro compare sulla **facciata della casa, a sinistra dei gradini d'ingresso**, a livello del terreno; di giorno puoi già vederne la ragnatela.\n\nSe è giorno, suona il Canto del Sole per far scendere la notte. La spada la elimina in un attimo, e poi non ti resta che raccogliere il simbolo."
+    },
+    "kakariko-gs-06": {
+      "name": "Sopra la Casa di Impa",
+      "desc": "Devi tornare da adulto e di notte per questa Skulltula d'Oro, che si trova sulla parete rocciosa proprio accanto al tetto blu della Casa di Impa, la grande casa sul margine meridionale del villaggio. Ti serve il Rampino.\n\nAggira la casa di lato fino alla parete rocciosa sul retro, coperta di liane, e **arrampicati fino al tetto blu**. Da lassù vedrai la Skulltula sulla roccia, accanto al tetto: abbattila con il Rampino, che ti porterà anche il simbolo."
+    },
+    "cementerio-heart-01": {
+      "name": "Giro di scavi con Igor",
+      "desc": "Da bambino e di notte, Igor, il custode del cimitero, propone il suo «Giro di Scavi da Batticuore» nel Cimitero. Se arrivi di giorno, suona lì il Canto del Sole: calerà la notte e Igor uscirà subito. Accetta e resta nella piazzetta centrale, perché se ti allontani il giro termina.\n\nFermati accanto a uno dei mucchi di terra e **chiedigli di scavare: ogni tentativo costa 10 Rupie**. A volte colpisce qualcosa di duro e chiede altre 5 Rupie per continuare, e può uscire a caso un sasso oppure il frammento. Insisti finché non compare. La posizione è del tutto casuale.",
+      "hint": "10 Rupie a mucchio; a volte ne chiede altre 5 per continuare a scavare."
+    },
+    "cementerio-heart-02": {
+      "name": "Gara contro Igor",
+      "desc": "La Tomba di Igor è la lapide con i fiori da cui esce del fumo, nell'area recintata a sinistra, saliti alcuni gradini. Da adulto e di notte, **tirala indietro per aprire la buca e scendi nelle catacombe**. Laggiù, segui il suo fantasma fino in fondo senza perderlo di vista; la prima gara ti fa ottenere il Rampino.\n\nIl Frammento di Cuore arriva con la seconda. Esci con il Rampino attraverso il bersaglio sopra le scale rotte (sbucherai nel Mulino a Vento di Calbarico), torna al Cimitero, scendi di nuovo nella buca, che resta aperta, e raggiungi il traguardo in un minuto o meno.",
+      "hint": "La prima gara dà il Rampino; il frammento arriva con la seconda."
+    },
+    "cementerio-heart-03": {
+      "name": "Tomba vicino alla Tomba della Famiglia Reale",
+      "desc": "Vicino alla Tomba della Famiglia Reale, nella parte alta del Cimitero: mettiti con le spalle alla tomba, rivolto verso l'uscita, e tra le lapidi alla tua sinistra è **la prima partendo da sinistra**. Da adulto si apre sempre; da bambino solo di notte (di giorno il ragazzo che sorveglia le tombe ti ferma; il Canto del Sole ti risparmia l'attesa).\n\nTira la lapide e scendi nella buca: il forziere con il Frammento di Cuore è in fondo alla cripta, senza nemici a sorvegliarlo.",
+      "hint": "Da bambino la tomba si apre solo di notte."
+    },
+    "cementerio-heart-04": {
+      "name": "Sporgenza sulla parete",
+      "desc": "In alto sulla parete sinistra del Cimitero, sopra la Tomba di Igor e il terreno soffice, c'è una sporgenza con il Frammento di Cuore ben visibile su un pilastro di pietra, irraggiungibile dal basso senza aiuto.\n\nSe pianti un Fagiolo Magico in quel terreno soffice da bambino, quando torni da adulto **sali sulla foglia e lasciati portare fino alla sporgenza**. Una volta lassù, prendi il frammento dal pilastro.",
+      "hint": "Il frammento è ben visibile su un pilastro lungo la parete."
+    },
+    "cementerio-gs-01": {
+      "name": "Muro del Cimitero",
+      "desc": "Di notte, nello stretto vicolo tra la Capanna di Igor e il muro di pietra con la cancellata in ferro, vicino all'ingresso del Cimitero, compare in alto una Skulltula d'Oro. Di giorno vedrai una ragnatela dorata in quel punto che indica dove apparirà.\n\n**Sconfiggila con il Rampino o il Boomerang e recupera il simbolo con esso.**"
+    },
+    "cementerio-gs-02": {
+      "name": "Insetti nel terreno soffice",
+      "desc": "Con un'ampolla di Insetti e da bambino, a qualsiasi ora del giorno, vai al terreno soffice nell'angolo sinistro del Cimitero, sul fondo, vicino al muro e alla Tomba di Igor, e **liberali sopra per far uscire una Skulltula d'Oro**. Eliminala appena spunta e raccogli il simbolo.",
+      "hint": "È lo stesso terreno in cui si pianta il Fagiolo Magico."
+    },
+    "cementerio-bean-01": {
+      "name": "Terreno soffice del Cimitero",
+      "desc": "Sotto l'alta sporgenza sulla parete sinistra del Cimitero, accanto alla Tomba di Igor, si trova il terreno soffice dove ti consigliamo di **piantare un Fagiolo Magico da bambino**. Quando torni da adulto, la foglia ti solleva fino alla sporgenza che custodisce il Frammento di Cuore.",
+      "hint": "Piantalo da bambino e usalo da adulto."
+    },
+    "sendero-heart-01": {
+      "name": "Sporgenza sopra la Caverna dei Dodongo",
+      "desc": "Sopra l'ingresso della Caverna dei Dodongo si trova la sporgenza con questo Frammento di Cuore, ben visibile in una nicchia nella roccia. Devi piantare un Fagiolo Magico nel terreno soffice da bambino.\n\nDa adulto, sali sulla pianta di fagiolo e salta giù quando passa accanto alla sporgenza per prendere il Frammento di Cuore."
+    },
+    "sendero-gs-01": {
+      "name": "Insetti nel terreno soffice vicino alla caverna",
+      "desc": "Il terreno soffice per questa Skulltula d'Oro si trova davanti alla Caverna dei Dodongo.\n\nCon l'ingresso liberato, **versa gli insetti dall'ampolla sul terreno soffice** e, appena la Skulltula d'Oro sbuca fuori, sconfiggila con la spada e raccogli il simbolo.",
+      "hint": "Puoi piantare un Fagiolo Magico nello stesso terreno."
+    },
+    "sendero-gs-02": {
+      "name": "Parete crepata vicino a Calbarico",
+      "desc": "Uscendo dal Villaggio Calbarico verso la montagna, prima di raggiungere la Caverna dei Dodongo, c'è una parete di rocce crepate sul lato destro del sentiero che stona con il resto: puoi sentire la Skulltula dietro di essa.\n\n**Apri la parete con una Bomba o, da adulto, con il Martello Megaton**, entra nella nicchia e sconfiggi la Skulltula d'Oro, che si trova sulla parete di fondo ad altezza di spada."
+    },
+    "sendero-gs-03": {
+      "name": "Sopra la Caverna dei Dodongo",
+      "desc": "La sporgenza con ringhiera da cui, da bambino, lasci cadere il Fiore Bomba sulla Caverna dei Dodongo, accanto al bivio per la Città dei Goron, ha alcune rocce addossate alla parete. Questa Skulltula d'Oro compare sotto di esse quando torni da adulto, di notte.\n\n**Distruggi le rocce con il Martello Megaton o una Bomba**, gli unici strumenti in grado di romperle, poi sconfiggi la Skulltula e raccogli il suo simbolo."
+    },
+    "sendero-gs-04": {
+      "name": "Sentiero delle rocce cadenti",
+      "desc": "Superata la Caverna dei Dodongo, il sentiero sale verso il tratto in cui piovono rocce vulcaniche e termina alla parete di reti che conduce alla vetta. Questa Skulltula d'Oro appare ai piedi di quella parete, da adulto e di notte.\n\nGuardando la parete, sulla destra mentre sali, accanto all'arco di roccia, c'è un cumulo di rocce che le Bombe non riescono a rompere: **colpiscilo con il Martello Megaton** e, frantumate le rocce, finisci la Skulltula e raccogli il simbolo."
+    },
+    "sendero-bean-01": {
+      "name": "Terreno soffice alla Caverna dei Dodongo",
+      "desc": "Prima di piantare un Fagiolo Magico qui, da bambino devi rimuovere il masso che blocca la Caverna dei Dodongo, usando il Fiore Bomba in alto e il Bracciale Goron. Poi piantalo nel terreno soffice davanti all'ingresso.\n\nDa adulto, la pianta passa sopra la sporgenza del Frammento di Cuore e ti porta fino al tratto delle rocce cadenti: **una scorciatoia che aggira il masso che blocca il sentiero**.",
+      "hint": "Piantalo da bambino e usalo da adulto."
+    },
+    "sendero-fairy-01": {
+      "name": "Fata Radiosa: magia",
+      "desc": "In cima, sulla vetta del Monte Morte, Kaepora Gaebora attende appollaiato vicino all'ingresso del Cratere. **La parete di rocce crepate alla sua sinistra può essere abbattuta con una Bomba** o, da adulto, con il Martello Megaton, e dietro di essa si trova la fontana.\n\nAll'interno, suona la Ninna Nanna di Zelda sul simbolo della Triforza. La Fata Radiosa ti chiederà un'offerta di 25 Rupie: accetta e ti donerà la Barra della Magia e il Fuoco di Din. Se sali da bambino, porta lo Scudo Hylia per il tratto delle rocce cadenti.",
+      "hint": "Chiede un'offerta di 25 Rupie. Ricompensa: Barra della Magia e Fuoco di Din."
+    },
+    "goron-heart-01": {
+      "name": "Vaso rotante",
+      "desc": "Il grande vaso con i volti al centro del piano inferiore della Città dei Goron inizia a girare solo quando, da bambino, **accendi le torce attorno a esso**. Funziona il Fuoco di Din oppure un Bastone Deku acceso, ad esempio nella stanza di Darunia, che si apre suonando la Ninna Nanna di Zelda davanti alla sua porta. Restano accese anche se torni più tardi.\n\nPoi sali al piano superiore, cammina sulla passerella di legno che sporge sopra il vaso e lascia cadere una Bomba al suo interno, oppure lanciagli un Fiore Bomba con il Bracciale Goron. Lascerà cadere il frammento sul pavimento insieme a 10 Rupie.",
+      "hint": "Se si ferma su un altro volto, dà altri premi: riprova finché non lo ottieni."
+    },
+    "goron-gs-01": {
+      "name": "Labirinto di massi",
+      "desc": "La sala del labirinto di massi si trova al piano superiore della Città dei Goron, quello con l'ingresso dal Sentiero del Monte Morte, e da bambino la attraversi aprendoti un varco tra i blocchi con le Bombe.\n\nAll'estremità opposta, accanto a due forzieri, c'è una cassa di legno con dentro la Skulltula d'Oro: **rotola contro la cassa per romperla**, sconfiggi la Skulltula con la spada e raccogli il simbolo."
+    },
+    "goron-gs-02": {
+      "name": "Sporgenza rocciosa sul soffitto",
+      "desc": "Da adulto, nella Città dei Goron, un piano sopra il livello più basso, percorri la piattaforma in senso antiorario. Prima di entrare nel tunnel, guarda in alto: la Skulltula d'Oro si trova sulla parte inferiore della sporgenza rocciosa sul soffitto.\n\n**Abbattila con il Rampino**, che ti porterà anche il simbolo."
+    },
+    "crater-heart-01": {
+      "name": "Nicchia nella parete del Cratere",
+      "desc": "Entrando nel Cratere dalla vetta del Monte Morte, la sporgenza d'ingresso si affaccia su una grande parete che scende verso la piattaforma del Bolero del Fuoco. Alcune reti da arrampicata pendono dal bordo di quella sporgenza: **scendile** e, poco più in basso, troverai il frammento in una nicchia nella parete, tra due reti.\n\nDa bambino, il calore ti consumerà in fretta. Da adulto, con la Tunica Goron non c'è fretta.",
+      "hint": "Da bambino c'è un conto alla rovescia per il calore: fai in fretta."
+    },
+    "crater-heart-02": {
+      "name": "Roccia a cupola nel Cratere",
+      "desc": "Da bambino, **suona il Bolero del Fuoco con l'ocarina** e, una volta nel Cratere, pianta un fagiolo nel terreno soffice accanto alla piattaforma.\n\nTorna da adulto indossando la Tunica Goron, **sali sulla foglia e salta giù quando passa sopra una delle rocce alte**: il frammento ti aspetta in cima.",
+      "hint": "Devi aver imparato il Bolero del Fuoco."
+    },
+    "crater-gs-01": {
+      "name": "Cassa all'ingresso della vetta",
+      "desc": "Se entri nel Cratere da bambino dalla vetta del Monte Morte, anziché dalla Città dei Goron, a pochi passi dall'ingresso, sulla sinistra, vedrai due casse di legno contro la parete rocciosa, accanto a un vaso. La Skulltula d'Oro è dentro quella vicino al vaso.\n\n**Rompi le casse rotolandoci contro**, sconfiggi la Skulltula e raccogli il simbolo.",
+      "hint": "Usa l'Amore di Nayru se non reggi il calore."
+    },
+    "crater-gs-02": {
+      "name": "Insetti nel terreno soffice presso la piattaforma del Bolero",
+      "desc": "Questa Skulltula d'Oro ti costringe a viaggiare nel tempo, perché compare solo da bambino mentre il Bolero del Fuoco si impara da adulto. Da bambino, suonare quella melodia è l'unico modo per raggiungere il suo terreno soffice, a pochi passi dalla piattaforma del Bolero.\n\nAppari sulla piattaforma: **libera gli insetti nel terreno soffice lì accanto**, sconfiggi la Skulltula e raccogli il simbolo senza indugiare, perché il calore continua a consumare i tuoi cuori.",
+      "hint": "Da bambino il calore consuma i tuoi cuori poco a poco: non indugiare."
+    },
+    "crater-bean-01": {
+      "name": "Terreno soffice nel Cratere",
+      "desc": "Accanto alla piattaforma del Bolero del Fuoco, nell'area centrale del Cratere, c'è un terreno soffice che da bambino puoi raggiungere solo suonando quella melodia. **Pianta il Fagiolo Magico e vattene subito**, ad esempio con un'altra melodia di teletrasporto, perché il calore ti impone un limite di tempo.\n\nQuando torni da adulto, la pianta passa sopra la roccia a cupola di un Frammento di Cuore e poi accanto alla parete scalabile dell'altro. Ti porta inoltre fino all'area d'ingresso della vetta.",
+      "hint": "Piantalo da bambino e usalo da adulto."
+    },
+    "crater-fairy-01": {
+      "name": "Fata Radiosa: doppia magia",
+      "desc": "Dalla stanza di Darunia nella Città dei Goron, da adulto scendi nella parte inferiore del Cratere. Se hai appena sconfitto Volvagia, il teletrasporto blu ti lascia sulla piattaforma centrale: attraversa il ponte a catene verso ovest e prosegui lungo quella sponda. Due cumuli di rocce bloccano un passaggio nella parete: **abbattili con il Martello Megaton**.\n\nNella fontana, sali sul simbolo e suona la Ninna Nanna di Zelda. La Fata Radiosa della Saggezza ti chiederà un'offerta di 200 Rupie per la fontana: accetta e raddoppierà la tua Barra della Magia.",
+      "hint": "Chiede un'offerta di 200 Rupie. Ricompensa: raddoppia la Barra della Magia."
+    },
+    "rio-heart-01": {
+      "name": "Pilastro in mezzo al fiume",
+      "desc": "Il frammento si trova su un'alta piattaforma circondata dall'acqua, in mezzo al Fiume Zora, e da bambino la raggiungi planando con un Coccò dalla zona boscosa lì accanto. Sali in quella zona arrampicandoti sulle liane, senza un Coccò in braccio, ma in cima, tra le felci a sinistra, una buca conduce a una grotta con un forziere e un Coccò. **Esci dalla grotta attraverso il fiore con il Coccò in braccio, corri verso il bordo e salta per planare fino alla piattaforma.**\n\nDa adulto ci arrivi salendo sulla pianta di fagiolo o con i Calzari Alati.",
+      "hint": "Da adulto, con il fagiolo piantato o i Calzari Alati."
+    },
+    "rio-heart-02": {
+      "name": "Sporgenza vicino alla cascata",
+      "desc": "Alla fine del Fiume Zora, accanto alla cascata che nasconde l'ingresso al Villaggio degli Zora, c'è una piattaforma isolata con il frammento.\n\nPrendi il Coccò all'inizio del fiume, accanto al Venditore di Fagioli, e portalo con te risalendo la corrente. Arrivato alla cascata, sali nel punto più alto, **salta con lui e plana fino alla piattaforma**.",
+      "hint": "Da adulto puoi raggiungerla solo con i Calzari Alati."
+    },
+    "rio-heart-03": {
+      "name": "Gioco delle rane",
+      "desc": "Le rane per questo frammento, i Favolosi Cinque Tenori Ranocchi, siedono su dei ceppi nello stagno di una grotta scavata nella roccia, a metà del Fiume Zora. Vai da bambino, parla con loro e ti chiederanno di suonare qualcosa con l'ocarina. Ti daranno Rupie per ogni nuova melodia:\n- Ninna Nanna di Zelda\n- Canto di Epona\n- Canto di Saria\n- Canto del Sole\n- Canto del Tempo\n\nUna volta suonate tutte, ti proporranno il loro gioco: un insetto appare sopra una rana e **tu devi suonare rapidamente la sua nota affinché salti a mangiarlo**. Indovina l'intera sequenza e il frammento è tuo; se sbagli, puoi riprovare.",
+      "hint": "Memorizza quale nota suona ciascuna rana."
+    },
+    "rio-heart-04": {
+      "name": "Le rane sotto la pioggia",
+      "desc": "A metà del Fiume Zora troverai un ceppo con cinque rane in una grotta. Devi suonare il **Canto della Tempesta** con l'ocarina. Dopo averlo suonato, le rane ti ricompenseranno con un Frammento di Cuore."
+    },
+    "rio-gs-01": {
+      "name": "Insetti nel terreno soffice presso il Venditore di Fagioli",
+      "desc": "Accanto al Venditore di Fagioli, all'inizio del Fiume Zora, c'è un terreno soffice che nasconde una Skulltula d'Oro, e ti serve un'ampolla di insetti per farla uscire.\n\n**Svuota l'ampolla di insetti sul terreno soffice**: la Skulltula sbucherà fuori. Sconfiggila con la spada e raccogli il simbolo."
+    },
+    "rio-gs-02": {
+      "name": "Parete vicino alla cascata",
+      "desc": "Alla fine del Fiume Zora, vicino alla cascata, questa Skulltula d'Oro esce solo di notte, da bambino.\n\nDalla sporgenza erbosa accanto alla cascata, scendi lungo la roccia fino alla sponda sottostante, vicino all'acqua.\n\nLa Skulltula si trova sulla parete della bassa roccia su quella sponda. Avvicinati e attaccala con la spada."
+    },
+    "rio-gs-03": {
+      "name": "Sopra le grotte rialzate",
+      "desc": "In alto sulla parete rocciosa sopra l'altopiano con le grotte, a metà del Fiume Zora, di notte compare una Skulltula d'Oro, e il Rampino la raggiunge solo se sali sull'altopiano stesso.\n\nDa adulto, arrampicati sulla parete di liane tra le rocce, vicino all'acqua. In cima, cammina fino al bordo e **spara il Rampino verso la parte alta della parete** per sconfiggerla e recuperare il simbolo.",
+      "hint": "Dal sentiero sottostante ti servirebbe il Super Rampino."
+    },
+    "rio-gs-04": {
+      "name": "Sopra il ponte",
+      "desc": "Sopra l'ultimo ponte del Fiume Zora, nella caverna che conduce alla cascata del Villaggio degli Zora, si trova una parete rocciosa altissima su cui di notte si posa una Skulltula d'Oro.\n\n**Colpiscila con il Rampino direttamente dal ponte** e raccogli il simbolo."
+    },
+    "rio-bean-01": {
+      "name": "Terreno soffice presso il Venditore di Fagioli",
+      "desc": "Appena entri nel Fiume Zora, due massi crepati bloccano la strada; falli saltare con una Bomba.\n\nSubito dietro di essi, seduto accanto a una staccionata, c'è il Venditore di Fagioli, e da bambino conviene comprargliene alcuni: il primo costa 10 Rupie e ognuno dei successivi aumenta di 10. **Piantane uno nel terreno soffice accanto a lui**, usandolo dal tuo inventario.",
+      "hint": "Piantalo da bambino e usalo da adulto."
+    },
+    "dominio-gs-01": {
+      "name": "Cascata ghiacciata",
+      "desc": "Da adulto, con il Villaggio degli Zora ghiacciato, la Skulltula d'Oro appare di notte in cima alla cascata gelata, dove da bambino si svolgeva il gioco dei tuffi. Ci arrivi attraverso il corridoio sul piano di Re Zora, che si apre su una galleria alta.\n\nAffacciati dal bordo e guarda a sinistra: è su una colonna coperta di piante ghiacciate, addossata alla parete. **Raggiungila con il Rampino o abbattila con una freccia** per ottenere il simbolo."
+    },
+    "fuente-heart-01": {
+      "name": "Lastrone di ghiaccio più lontano",
+      "desc": "Il frammento giace in cima al lastrone di ghiaccio più lontano nella Fonte degli Zora ghiacciata, lontano dal sentiero verso la Caverna di Ghiaccio. Da adulto entri nella fonte attraverso il passaggio dietro il trono ghiacciato di Re Zora.\n\n**Salta da un blocco all'altro fino all'ultimo**: sono blocchi di ghiaccio scivolosi, quindi calcola bene ogni salto. Se cadi in acqua, nuota fino all'inizio e risali."
+    },
+    "fuente-heart-02": {
+      "name": "Fondale della fonte",
+      "desc": "Questo Frammento di Cuore attende sul fondo della Fonte degli Zora, tra un mucchio di Rupie verdi. Da adulto ti servono due cose: la Tunica Zora, che Re Zora ti dona quando lo liberi, per respirare sott'acqua, e gli Stivali di Ferro, per affondare.\n\nCon la Tunica Zora indosso, entra in acqua, **indossa gli Stivali di Ferro e scendi sul fondo**, prendi il frammento e togli gli stivali per risalire a galla."
+    },
+    "fuente-gs-01": {
+      "name": "Parete sopra l'arco sommerso",
+      "desc": "Appena entri nella Fonte degli Zora dal Villaggio degli Zora, segui la riva fino a un arco di pietra in rovina, semisommerso nell'acqua e addossato alla parete rocciosa con le liane. Sali in cima all'arco: di notte su quella parete compare una Skulltula d'Oro, e da bambino puoi raggiungerla con il Boomerang.",
+      "hint": "Il Boomerang si ottiene Dentro la pancia di Jabu-Jabu."
+    },
+    "fuente-gs-02": {
+      "name": "Pino nell'angolo sud-est",
+      "desc": "Nell'angolo sud-est della Fonte degli Zora, quello con i pini ai piedi della parete rocciosa, accanto al muro che nasconde la Fontana della Fata Radiosa, c'è un albero che cela una Skulltula d'Oro da bambino, a qualsiasi ora del giorno.\n\nNon serve nuotare: dalla ciotola delle offerte davanti al Signore Jabu-Jabu, scendi a destra e segui il sentiero sterrato lungo la riva. **Rotola contro il pino** per far cadere la Skulltula, sconfiggila con la spada e raccogli il simbolo."
+    },
+    "fuente-gs-03": {
+      "name": "Grotta dietro i blocchi con simboli Zora",
+      "desc": "Da adulto, raggiungi l'estremità sud-est della Fonte degli Zora, dove due blocchi di pietra nera con simboli Zora coprono l'ingresso di una grotta. **Sollevali con i Guanti d'Argento** ed entra.\n\nAll'interno, alcune Skulltula invisibili pendono dal soffitto; schivale oppure osservale con la Lente della Verità. Sul fondo, arrampicati sulle liane ed esci su una sporgenza all'aperto.\n\nLa Skulltula d'Oro **esce solo di notte**. Appare sopra la bocca di una grotta sulla sporgenza, e puoi abbatterla con il Rampino e raccogliere il simbolo.",
+      "hint": "All'interno, quattro Skulltula invisibili pendono dal soffitto."
+    },
+    "fuente-fairy-01": {
+      "name": "Fata Radiosa: Vento di Farore",
+      "desc": "Dalla ciotola delle offerte davanti al Signore Jabu-Jabu, segui a piedi la riva in rovina sulla destra fino all'angolo sud-est, quello con gli alberi ai piedi della rupe. Lì la Fontana della Fata Radiosa si nasconde dietro una sezione crepata della parete rocciosa.\n\n**Piazza una Bomba o un Bombchu accanto alla parete crepata** per aprire il passaggio. All'interno, suona la Ninna Nanna di Zelda in piedi sul simbolo della Triforza sul pavimento. Prima di donarti il Vento di Farore, la Fata Radiosa chiede un'offerta di 100 Rupie da gettare nella fontana, quindi portale con te.",
+      "hint": "Chiede un'offerta di 100 Rupie: portale con te."
+    },
+    "lago-heart-01": {
+      "name": "Immersione nel laboratorio",
+      "desc": "Dentro il Laboratorio del Lago, l'edificio sulla riva, c'è una vasca profonda, e il Frammento di Cuore è la ricompensa per esserti immerso fino a toccarne il fondo, cosa possibile solo con la Scaglia d'Oro, il premio del Laghetto di Pesca.\n\nNon importa se vai da bambino o da adulto: tuffati in acqua, **immergiti fino a toccare il fondo della vasca** e, quando risali, lo scienziato ti consegnerà il frammento.",
+      "hint": "La Scaglia d'Oro è il premio della pesca da adulto."
+    },
+    "lago-heart-02": {
+      "name": "Tetto del laboratorio",
+      "desc": "Da bambino, pianta un Fagiolo Magico nel terreno soffice accanto al Laboratorio del Lago al Lago Hylia, e torna da adulto. Sali sulla foglia: compie un giro sopra il lago e ti deposita sul balcone di legno della torre del laboratorio.\n\n**Sali la scala a pioli fino al punto d'osservazione in cima**, dove si trova il Frammento di Cuore.",
+      "hint": "Fai attenzione ai corvi sul tetto: possono farti cadere."
+    },
+    "lago-heart-03": {
+      "name": "Pesca da bambino",
+      "desc": "Il Laghetto di Pesca si trova su una piccola isola del Lago Hylia, e il suo gestore ti presta la canna per 10 Rupie. Quando catturi un pesce, tienilo, e quando hai finito parla con il gestore e digli che smetti: misurerà la tua cattura migliore e, **se supera i 50 cm, da bambino ti consegnerà il Frammento di Cuore**.\n\nI **pesci più grandi** si trovano di solito **al centro dello stagno**.",
+      "hint": "Ogni tentativo costa 10 Rupie; il premio è per un pesce oltre i 50 cm."
+    },
+    "lago-gs-01": {
+      "name": "Insetti nel terreno soffice presso il laboratorio",
+      "desc": "Addossato al muro del Laboratorio del Lago, accanto ad alcuni barili e sacchi, c'è un terreno soffice. Da bambino, a qualsiasi ora del giorno, la Skulltula d'Oro esce appena **apri un'ampolla di Insetti sopra il terreno soffice**: gli insetti si infilano nel buco e lei sbuca da sottoterra. La spada basta per sconfiggerla e prendere il simbolo."
+    },
+    "lago-gs-02": {
+      "name": "Parete del laboratorio",
+      "desc": "Un ponte parte dal retro del Laboratorio del Lago. Da bambino, di notte, appena ci metti piede, guarda a destra: sulla torre rotonda dell'edificio, accanto a un tubo, c'è questa Skulltula d'Oro, troppo in alto per la spada.\n\n**Lanciale il Boomerang direttamente dal ponte**: la abbatte e ti porta il simbolo."
+    },
+    "lago-gs-03": {
+      "name": "Grotta sulla riva ovest",
+      "desc": "Da bambino, segui la riva occidentale del Lago Hylia verso sud fino in fondo, dove una nicchia nella roccia ospita alcuni vasi, un barile e un Pensiero di Fata sulla parete. Da lì entra in acqua e nuota verso la riva accanto: nella parete rocciosa vedrai un basso varco con un architrave di pietra.\n\n**Striscia attraverso quel varco** e arriverai in una piccola grotta buia. La Skulltula d'Oro è sulla parete di fronte; sconfiggila con la spada e raccogli il simbolo.",
+      "hint": "Striscia nel buco per trovare la Skulltula d'Oro."
+    },
+    "lago-gs-04": {
+      "name": "Cassa sul fondo della vasca del laboratorio",
+      "desc": "La vasca nel Laboratorio del Lago nasconde sul fondo una cassa di legno con dentro una Skulltula d'Oro. Per raggiungerla da adulto, indossa gli Stivali di Ferro e tuffati in acqua.\n\nUna volta laggiù, **rotola contro la cassa per romperla**, finisci la Skulltula e raccogli il simbolo con il Rampino."
+    },
+    "lago-gs-05": {
+      "name": "Albero sull'isola grande",
+      "desc": "Sull'isola più grande del lago, quella con la piattaforma della Serenata dell'Acqua, si erge un enorme albero dalla chioma cava. Da adulto, **mira con il Super Rampino alla cima dell'albero per issarti** fino alla chioma; il Rampino normale non ci arriva.\n\nLa Skulltula d'Oro esce solo di notte, dentro la chioma: se è giorno, suona lì il Canto del Sole e apparirà. Sconfiggila con la spada e raccogli il simbolo."
+    },
+    "lago-bean-01": {
+      "name": "Terreno soffice presso il laboratorio",
+      "desc": "Da bambino, pianta un Fagiolo Magico nel terreno soffice addossato al muro del Laboratorio del Lago, lo stesso della Skulltula degli Insetti. Quando torni da adulto, sarà spuntata una pianta a forma di cerchio di foglie colorate.\n\n**Sali sulle foglie e ti faranno volare** attorno al lago fino al tetto del laboratorio.",
+      "hint": "Piantalo da bambino e usalo da adulto."
+    },
+    "valle-heart-01": {
+      "name": "Dietro la cascata",
+      "desc": "Dietro la grande cascata nella Valle Gerudo, sulla sponda del fiume sul fondo del canyon, c'è una piccola camera scavata nella roccia, sopra l'acqua. Per arrivarci, scendi nell'angolo della mucca ai piedi della cascata, planando con il Coccò o tuffandoti nel fiume e uscendo a nuoto.\n\nDa lì, segui la riva verso la cascata, supera la Pietra del Pettegolezzo e salta sulle rocce bagnate dietro l'acqua che cade. Poi **sali i gradini scavati nella roccia** fino alla camera, dove ti aspetta il Frammento di Cuore.",
+      "hint": "Se la corrente ti trascina via, finisci nel Lago Hylia."
+    },
+    "valle-heart-02": {
+      "name": "Forziere sulla sporgenza del canyon",
+      "desc": "Nella Valle Gerudo, superato il ponte, dal lato della tenda dei carpentieri, vai al bordo del canyon vicino ai cumuli di rocce scure presso l'arco di roccia. Più in basso, a metà strada verso il fiume, c'è una stretta sporgenza con un forziere.\n\nSe sei bambino, **usa il Coccò per planare** giù fino al forziere.\n\nSe sei adulto, **lasciati cadere dal bordo sulla sporgenza** e apri il forziere.\n\nPer tornare indietro, segui la sporgenza e tuffati nel fiume: la corrente ti porterà al Lago Hylia.",
+      "hint": "Il forziere si trova sulla parete della rupe."
+    },
+    "valle-gs-01": {
+      "name": "Getto d'acqua vicino alla passerella",
+      "desc": "Quando entri nella Valle Gerudo dalla Piana di Hyrule, la prima cosa che incontri è una piccola passerella di legno sopra una pozza. Di notte, la Skulltula d'Oro è sotto le assi, sul muro di mattoni accanto al getto d'acqua che cade nella pozza.\n\nTuffati in acqua da un lato della passerella, risali sulla sponda di pietra sottostante e **lanciale il Boomerang** per abbatterla e riportare indietro il simbolo. Poi risali sulla passerella."
+    },
+    "valle-gs-02": {
+      "name": "Insetti nel terreno soffice vicino alla mucca",
+      "desc": "Ai piedi della grande cascata, sul tratto superiore del fiume, c'è un angolo con una mucca, una Gerudo e un terreno soffice. Da bambino ci arrivi planando con il Coccò dal bordo del dirupo, a sinistra del grande ponte (puoi fermarti su una sporgenza e saltare di nuovo), oppure tuffandoti nel fiume e nuotando fino a riva.\n\nUna volta lì, **libera gli Insetti dall'ampolla sul terreno soffice** e sconfiggi la Skulltula d'Oro che esce per raccogliere il simbolo."
+    },
+    "valle-gs-03": {
+      "name": "Dietro la tenda",
+      "desc": "Superato il ponte, sul lato della valle rivolto verso la Fortezza Gerudo, si trova la tenda dei carpentieri. Per attraversare da adulto basta saltare il ponte rotto con Epona; funzionano anche il Super Rampino o il ponte riparato, se hai salvato i carpentieri.\n\nDi notte, aggira la tenda fino alle rovine sul retro. La Skulltula d'Oro si arrampica sulla parete di pietra scolpita, a metà altezza: **abbattila con il Rampino, che ti porterà anche il simbolo**."
+    },
+    "valle-gs-04": {
+      "name": "Arco di roccia di fronte alla tenda",
+      "desc": "Sul sentiero dalla tenda dei carpentieri alla Fortezza Gerudo c'è un grande arco naturale di roccia rossastra, con due cumuli di rocce scure ai suoi piedi. Di notte, una Skulltula d'Oro si arrampica sulla faccia interna dell'arco.\n\nMettiti tra i cumuli di rocce, guarda in alto verso la sommità dell'arco finché non la individui e **sparale il Rampino per abbatterla**: quando la elimini, il Rampino stesso ti porta il simbolo."
+    },
+    "valle-bean-01": {
+      "name": "Terreno soffice nel canyon Gerudo",
+      "desc": "Questo terreno soffice condivide lo spazio con la mucca e la Gerudo, ai piedi della grande cascata, ed è anche il punto della Skulltula d'Oro degli Insetti. Da bambino, plana giù con il Coccò dal grande ponte o nuota fuori dal fiume, e pianta il Fagiolo Magico.\n\nDa adulto, la foglia scende e risale le cascate, passando davanti a due Rupie rosse, e **a metà della grande cascata puoi saltare attraverso l'acqua** nella nicchia del Frammento di Cuore.",
+      "hint": "Piantalo da bambino e usalo da adulto."
+    },
+    "fortaleza-heart-01": {
+      "name": "Tiro con l'arco a cavallo - 1.000 punti",
+      "desc": "La Tessera Gerudo che ottieni salvando i quattro carpentieri apre il campo di tiro con l'arco a cavallo. Vai di giorno, perché di notte la responsabile non ti lascerà giocare, e porta Epona. Ogni partita costa 30 Rupie.\n\nEpona percorre il tracciato da sola e hai 20 frecce per i bersagli e i vasi; ogni vaso o centro vale 100 punti. **Raggiungi 1.000 punti per vincere il Frammento di Cuore**; con 1.400 ti porti a casa anche la Faretra Enorme.",
+      "hint": "Ogni partita costa 30 Rupie; con 1.400 punti ottieni la Faretra Enorme."
+    },
+    "fortaleza-gs-01": {
+      "name": "Bersaglio del campo di tiro",
+      "desc": "Con la Tessera Gerudo puoi accedere al campo di tiro con l'arco a cavallo, e di notte c'è una Skulltula d'Oro sul grande bersaglio rotondo montato su un palo in fondo al percorso. Percorri tutto il tracciato, con Epona o a piedi, fino all'area circolare sul fondo.\n\n**Spara il Rampino appena hai campo libero** per eliminare la Skulltula e riportare indietro il simbolo; se non la vedi davanti, aggira il bersaglio."
+    },
+    "fortaleza-gs-02": {
+      "name": "Tetto superiore",
+      "desc": "Di notte, la Skulltula d'Oro compare sui tetti laterali della Fortezza Gerudo, a pochi passi dal forziere del Frammento di Cuore: è sul muro di mattoni del blocco che si erge accanto alla parete rocciosa.\n\nPer salire lassù, da adulto, entra dalla porta del corridoio della cucina, attraversalo senza farti vedere e usa l'uscita alta sul fondo, che porta sui tetti. Mettiti davanti a quel muro e **spara il Rampino**, oppure saltale incontro con la spada, per raccogliere il simbolo."
+    },
+    "desierto-gs-01": {
+      "name": "Dentro il monumento",
+      "desc": "Per raggiungere il monumento di pietra nel Deserto Fantasma, attraversa il fiume di sabbia da adulto seguendo le bandierine. Arrivato al monumento, entra dal varco tra le colonne e scendi la scala a pioli nella stanza sottostante.\n\nLa Skulltula d'Oro si trova sulla parete di fondo, sopra l'altare: **sali sull'altare e abbattila con la spada**. Se accendi le torce con le Frecce di Fuoco o il Fuoco di Din, apparirà un forziere con un Seme di Cespuglio Mercante."
+    },
+    "coloso-heart-01": {
+      "name": "Arco di pietra presso il tempio",
+      "desc": "Vicino all'ingresso del Tempio dello Spirito c'è un arco di pietra che solo la pianta magica può raggiungere, quindi il lavoro inizia da bambino. Viaggia al Colosso del Deserto con il Requiem dello Spirito e pianta un Fagiolo Magico nel terreno soffice a sinistra dell'ingresso del tempio.\n\nDa adulto, il giro sulla foglia passa sopra due piattaforme di roccia e termina sopra l'arco: **quando ci passi sopra, salta giù e afferra il Frammento di Cuore**."
+    },
+    "coloso-gs-01": {
+      "name": "Insetti nel terreno soffice presso il tempio",
+      "desc": "Da bambino, suona il Requiem dello Spirito per raggiungere il Colosso del Deserto e cammina dalla piattaforma d'arrivo fino ai gradini del Tempio dello Spirito: il terreno soffice è appena a sinistra dell'ingresso, addossato alla parete rocciosa.\n\nIn quel punto, che è anche dove pianti il Fagiolo Magico, **libera gli Insetti da un'ampolla** e la Skulltula d'Oro uscirà subito: sconfiggila con la spada e raccogli il simbolo."
+    },
+    "coloso-gs-02": {
+      "name": "Cima della grande roccia",
+      "desc": "Una grande roccia si erge vicino alla Fontana della Fata Radiosa, e la sua cima, con una conca a forma di cratere, è la seconda piattaforma sorvolata dalla pianta del Fagiolo Magico del terreno soffice del Tempio dello Spirito. Da adulto, sali sulla foglia e, quando raggiunge quella roccia, **salta in cima e calati nella conca**.\n\nLa Skulltula d'Oro vi appare solo di notte: se è giorno, suona il Canto del Sole e comparirà. Uccidila con la spada e raccogli il simbolo."
+    },
+    "coloso-gs-03": {
+      "name": "Parete rocciosa accanto al tempio",
+      "desc": "Di notte, questa Skulltula d'Oro del Colosso del Deserto appare in alto sulla parete rocciosa a destra del Tempio dello Spirito.\n\nIndividua la Skulltula e **colpiscila con il Rampino** per eliminarla e attirare a te il simbolo."
+    },
+    "coloso-bean-01": {
+      "name": "Terreno soffice presso il tempio",
+      "desc": "Devi venire qui da bambino con il Requiem dello Spirito per piantare il Fagiolo Magico: il terreno soffice è a sinistra dell'ingresso del Tempio dello Spirito, e versandoci gli Insetti esce anche una Skulltula d'Oro.\n\nDa adulto, la pianta **ti trasporta sopra due piattaforme di roccia fino all'arco di pietra** con il Frammento di Cuore, e la seconda piattaforma ospita l'altra Skulltula d'Oro, che esce solo di notte.",
+      "hint": "Piantalo da bambino, usalo da adulto."
+    },
+    "coloso-fairy-01": {
+      "name": "Fata Radiosa: Amore di Nayru",
+      "desc": "A nord dell'oasi, oltre lo stagno guardando dal Tempio dello Spirito, una parete rocciosa crepata tra le palme nasconde la Fontana della Fata Radiosa. Puoi aprirla indifferentemente da bambino, arrivando con il Requiem dello Spirito, o da adulto, attraversando il Deserto Fantasma.\n\n**Fai saltare la roccia crepata con una Bomba, un Bombchu o il Martello Megaton**, entra, fermati sul simbolo della Triforza e suona la Ninna Nanna di Zelda. La Fata Radiosa ti chiederà un'offerta di 300 Rupie per la fontana: accetta e ti donerà l'Amore di Nayru.",
+      "hint": "Chiede un'offerta di 300 Rupie."
+    },
+    "deku-gs-01": {
+      "name": "Stanza della Bussola",
+      "desc": "La stanza della Bussola, al piano superiore dell'Albero Deku, nasconde questa Skulltula d'Oro in un angolo appartato. Premi l'interruttore per sollevare le piattaforme e, invece di andare verso la Bussola, salta nella nicchia laterale a sinistra.\n\n**Sulla parete di fondo, dietro il piccolo forziere**, è a portata di mano: uccidila con la spada e raccogli il simbolo della Skulltula d'Oro."
+    },
+    "deku-gs-02": {
+      "name": "Liane nel sotterraneo",
+      "desc": "Quando ti lasci cadere sulla grande ragnatela al centro della sala principale, la sfondi e atterri nell'acqua del sotterraneo. Nella vasca circolare sulla destra, questa Skulltula d'Oro attende sulla parete di liane che risale verso la sala principale.\n\nDevi attaccarla a distanza, quindi **abbattila con la Fionda delle Fate o il Boomerang** dall'acqua, poi arrampicati sulle liane fino al simbolo.",
+      "hint": "Ottieni la Fionda delle Fate proprio in questo dungeon."
+    },
+    "deku-gs-03": {
+      "name": "Cancello del sotterraneo",
+      "desc": "Al primo piano sotterraneo dell'Albero Deku c'è un canale d'acqua che termina con un cancello sbarrato, a cui è aggrappata questa Skulltula d'Oro.\n\nSali sulla piattaforma circolare in acqua, di fronte al cancello, **abbattila con la Fionda delle Fate** e raccogli il simbolo."
+    },
+    "deku-gs-04": {
+      "name": "Stanza sul retro",
+      "desc": "Al primo piano sotterraneo dell'Albero Deku, dopo la stanza delle Larve di Gohma, accendi un Bastone Deku sulla torcia e **brucia la ragnatela sulla parete di fondo**. Dietro c'è un tunnel che termina contro una parete di liane.\n\nFai attenzione alla Grande Skulltula di guardia: aspetta che si giri e colpiscile la schiena. Poi **abbatti la Skulltula d'Oro con la Fionda delle Fate** e arrampicati sulle liane fino al simbolo.",
+      "hint": "Puoi prenderla già alla prima visita."
+    },
+    "deku-heart-01": {
+      "name": "Portacuori - Gohma",
+      "desc": "Dopo aver sconfitto i tre Cespugli Deku nell'ordine 2, 3, 1, puoi entrare nella sala della Regina Gohma al secondo piano sotterraneo, e appena entri guarda verso il soffitto, perché il boss si cala da lì.\n\n**Quando il suo occhio diventa rosso, colpiscilo con la Fionda delle Fate** o lancia una Noce Deku per stordirla, poi colpisci l'occhio con la spada o con un Bastone Deku. Se sale sul soffitto per deporre uova, rompile prima che si schiudano le larve. Quando cade, lascia il Portacuori.",
+      "hint": "Un colpo di Fionda delle Fate nell'occhio la fa cadere anche dal soffitto."
+    },
+    "dodongos-gs-01": {
+      "name": "Dietro il muro dei Baby Dodongo",
+      "desc": "Dopo esserti occupato del Beamos, fai saltare la parete crepata sul lato destro della sala principale con un Fiore Bomba ed entrerai nel corridoio dei Baby Dodongo, con un'altra parete crepata sulla destra appena inizi.\n\nAprila con una Bomba oppure **attira un Baby Dodongo e uccidilo proprio contro il muro**, poiché anche la sua esplosione lo sfonda.\n\nAll'interno ci sono alcuni Pipistrelli e la Skulltula d'Oro.",
+      "hint": "Condivide il corridoio con quella sulla sporgenza dello spaventapasseri."
+    },
+    "dodongos-gs-02": {
+      "name": "Liane sulla grande scalinata",
+      "desc": "La grande scalinata nell'ala sinistra, nella stanza piena di Fiori Bomba, non scende finché non piazzi il Fiore Bomba libero nello spazio vuoto della fila per farli esplodere tutti a catena, quindi inizia da lì.\n\nSali le scale, arrampicati sulla scala a pioli e segui la sporgenza fino alla porta sul fondo. Prima di raggiungerla c'è **una parete scalabile con una Skulltula normale e quella d'oro**: eliminale entrambe con la Fionda delle Fate (da adulto con l'Arco delle Fate o il Rampino) e arrampicati per prendere il simbolo."
+    },
+    "dodongos-gs-03": {
+      "name": "Pilastro circondato dai Dodongo",
+      "desc": "Al primo piano, uscendo dalla stanza del forziere della Borsa delle Bombe, fai saltare la parete crepata con una Bomba e prosegui fino alla sporgenza che si affaccia sulla sala centrale. Lì c'è un'altra parete crepata vicino al teschio gigante: **aprila con una Bomba ed entra nella grotta piena di Dodongo**.\n\nLa Skulltula d'Oro è su un pilastro di roccia al centro della stanza, circondata dai Dodongo. Schivali o eliminali, e abbatti la Skulltula con la spada per raccogliere il simbolo.",
+      "hint": "La spada è sufficiente: puoi prenderla già alla prima visita."
+    },
+    "dodongos-gs-04": {
+      "name": "Stanza dell'Armos oltre la bocca",
+      "desc": "Dal ponte al secondo piano, lascia cadere una Bomba in ciascun occhio del teschio gigante nella sala principale affinché apra la bocca, ed entra da lì. Supera la stanza dei Pipistrelli di Fuoco e sali nel corridoio dei blocchi.\n\nSpingi i blocchi per salire sulle travi di legno e lasciati cadere nell'area recintata sul fondo. Lì, **apri la parete crepata con le Bombe** e segui il tunnel. Ti attende un Armos che si sveglia appena ti avvicini, e la Skulltula d'Oro è sulla parete dietro di lui."
+    },
+    "dodongos-gs-05": {
+      "name": "Sporgenza dello spaventapasseri",
+      "desc": "Da adulto, dopo aver già imparato il Canto dello Spaventapasseri, torna nel corridoio dei Baby Dodongo, lo stesso della Skulltula dietro il muro. Resta vicino all'inizio del corridoio, di fronte a un'alta sporgenza sulla parete.\n\nLì, **suona il Canto dello Spaventapasseri affinché Pierre compaia sulla sporgenza**: agganciati a lui con il Rampino, sali, uccidi la Skulltula d'Oro con la spada e raccogli il simbolo.",
+      "hint": "Con il Super Rampino non ti serve lo spaventapasseri."
+    },
+    "dodongos-heart-01": {
+      "name": "Portacuori - Re Dodongo",
+      "desc": "Non ti serve la Chiave del Boss per entrare nella tana di Re Dodongo: dopo la grotta dell'Armos, torna nella stanza dei blocchi e spingine uno sul grande interruttore a pavimento per aprire la porta sbarrata. Nella stanza successiva, rompi i vasi che contengono Bombe e **fai saltare la zona crepata del pavimento per calarti giù**.\n\nOgni volta che apre la bocca per inspirare, lanciagli dentro una Bomba e, quando è stordito, colpiscilo con la spada. Se si appallottola e rotola, spostati di lato o para con lo scudo, e prendi il Portacuori prima di entrare nel teletrasporto blu.",
+      "hint": "Se finisci le Bombe, vanno benissimo i Fiori Bomba della sala."
+    },
+    "jabu-gs-01": {
+      "name": "Stanza dell'interruttore dell'acqua",
+      "desc": "Calati nella stessa buca di Ruto e segui le stanze del sotterraneo fino a quella con la vasca e l'interruttore dell'acqua. La Skulltula d'Oro è sulla parete, in una nicchia in cima alle liane, sopra una sporgenza con tre vasi.\n\n**Lascia Ruto seduta sull'interruttore affinché l'acqua salga**. Nuota fino alle liane, arrampicati sulla sporgenza e uccidi la Skulltula con la spada per ottenere il simbolo.",
+      "hint": "Ruto deve restare sull'interruttore perché l'acqua salga."
+    },
+    "jabu-gs-02": {
+      "name": "Sotterraneo della grande sala, quella inferiore",
+      "desc": "Con il Boomerang in mano, torna nella grande sala con i buchi dove hai incontrato Ruto. Una volta sconfitto il tentacolo verde, il pilastro che copriva il suo buco, in fondo a destra, si ritira: **calati in quel buco**, gettando prima Ruto di sotto se la stai portando in braccio.\n\nSotto fluttuano delle meduse e ci sono due Skulltula d'Oro su due pareti adiacenti; questa è quella inferiore. Poiché non puoi agganciarle, mira manualmente con il Boomerang: la abbatte e ti riporta il simbolo al ritorno.",
+      "hint": "Si raccoglie insieme alla sua compagna più in alto."
+    },
+    "jabu-gs-03": {
+      "name": "Sotterraneo della grande sala, quella superiore",
+      "desc": "Sotto la grande sala con i buchi, nel sotterraneo in cui ti cali dal buco che era coperto dal tentacolo verde, ci sono due Skulltula d'Oro su pareti adiacenti, a nord e a nord-ovest. Ti consigliamo di prenderle entrambe insieme, poiché tutte e due richiedono il Boomerang.\n\nQuella che cerchi qui è la superiore, quindi **mirala manualmente con il Boomerang**, dato che non puoi agganciare neanche questa, e quando cade lancialo di nuovo per recuperare il simbolo."
+    },
+    "jabu-gs-04": {
+      "name": "Liane prima del boss",
+      "desc": "Raggiungi la stanza prima di Barinade dalla seconda stanza del dungeon, quella con la fossa che ti fa cadere se ci salti dentro, portando una cassa sull'interruttore che apre la porta.\n\nPrima elimina le meduse elettriche con il Boomerang e cerca la **colonna di liane che sale verso l'interruttore di cristallo**: la Skulltula d'Oro è lì sopra. Uccidila con il Boomerang e arrampicati per raccogliere il simbolo."
+    },
+    "jabu-heart-01": {
+      "name": "Portacuori - Barinade",
+      "desc": "La porta di Barinade, in fondo alla stanza delle liane, è bloccata da un interruttore protetto da un cristallo: arrampicati sulla parete, aggancia l'interruttore e **lancia il Boomerang in modo che curvi dietro di esso**.\n\nUna volta dentro, usa il Boomerang per recidere i tre tentacoli che lo legano al soffitto, schivando le scosse elettriche, ed elimina le meduse che libera. Poi stordiscilo con il Boomerang e colpiscilo con la spada, ripeti con la seconda ondata di meduse e non entrare nel teletrasporto blu senza aver prima preso il Portacuori."
+    },
+    "bosque-gs-01": {
+      "name": "Liane all'ingresso",
+      "desc": "La prima stanza del tempio è all'aperto, con due alberi e una coppia di Wolfos che ti attaccano, e la Skulltula d'Oro attende in alto, vicino al forziere della Piccola Chiave.\n\nElimina i Wolfos, **arrampicati sulle liane a destra fino in cima all'albero** e, dal ramo, uccidila con il Rampino (funzionano anche l'Arco delle Fate o una Bomba); il Rampino stesso ti porta il simbolo."
+    },
+    "bosque-gs-02": {
+      "name": "Atrio centrale",
+      "desc": "Dopo il filmato delle Sorelle Spettro raggiungi l'atrio centrale, la grande sala con le quattro torce e l'ascensore. Questa Skulltula d'Oro attende a destra delle scale accanto alla porta di fronte.\n\n**Sali quelle scale e gira a destra** per vederla in alto sulla parete, uccidila con il Rampino e sparalo di nuovo per recuperare il simbolo.",
+      "hint": "Guarda con attenzione dietro le pareti."
+    },
+    "bosque-gs-03": {
+      "name": "Balcone sopra la porta a vetrate",
+      "desc": "Dal pianerottolo presso la porta a vetrate, nell'area in cui sbuca il canale d'acqua nel Tempio della Foresta, devi suonare il Canto dello Spaventapasseri: Pierre appare sul piccolo balcone sopra la porta. **Agganciati a lui con il Rampino**, uccidi la Skulltula d'Oro sul pavimento del balcone e raccogli il simbolo.",
+      "hint": "Pierre compare solo se suoni il Canto dello Spaventapasseri."
+    },
+    "bosque-gs-04": {
+      "name": "Sporgenza del cortile ovest",
+      "desc": "Una volta raddrizzato il corridoio contorto e presa la Chiave del Boss, calati dal buco nel pavimento di quella stanza fino alla sala dell'acqua sottostante, sali le sue scale ed esci sulla passerella di pietra in alto sopra il cortile ovest.\n\nAlla fine della passerella, proprio prima della porta, **lasciati cadere sulla piattaforma di pietra muschiosa a sinistra**. Guarda in alto: la Skulltula d'Oro è sulla parete, pronta per il Rampino, che ti porterà anche il simbolo. Con il Super Rampino puoi raggiungerla dal pavimento del cortile.",
+      "hint": "Guarda verso la sommità della parete di pietra."
+    },
+    "bosque-gs-05": {
+      "name": "Stanza rotante nel sotterraneo",
+      "desc": "Sconfitte le quattro Sorelle Spettro, l'ascensore nell'atrio centrale ti porta nel sotterraneo, una sala di pareti rotanti che conduce alla porta del boss.\n\nNon serve spostare le pareti per questa Skulltula d'Oro: **segui il corridoio circolare appena scendi dall'ascensore ed entra nella nicchia aperta con i vasi**. Una Grande Skulltula scende dal soffitto; eliminala e guarda in alto sulla parete, dove attende quella d'oro. Abbattila con il Rampino, che ti porterà anche il simbolo."
+    },
+    "bosque-heart-01": {
+      "name": "Portacuori - Ganon Spettro",
+      "desc": "La Chiave del Boss apre la porta sul fondo della stanza rotante nel sotterraneo; sali le scale e raggiungerai la sala dei dipinti. Ganon Spettro entra a cavallo in un quadro e ne escono diversi cavalieri: quello vero fa rumore di zoccoli e apre un portale viola quando raggiunge la cornice.\n\nQuando esce quello vero, **colpiscilo con una freccia o con il Rampino**; tre frecce lo faranno cadere da cavallo. Poi respingi le sue sfere di energia con la spada o con un'Ampolla vuota finché una non lo colpisce facendolo cadere; colpiscilo e ripeti finché non è sconfitto."
+    },
+    "fuego-gs-01": {
+      "name": "Stanza del Blocco del Tempo",
+      "desc": "In cima alle scale della sala principale, la porta a destra si apre con una Piccola Chiave e conduce alla grande sala della lava. Sul suo lato sinistro c'è un Blocco del Tempo in cima a una parete: posizionati sulla piattaforma proprio davanti a esso, **sali sulla lastra incisa sul pavimento e suona il Canto del Tempo**. Il blocco scenderà e potrai scalarlo fino alla porta in alto.\n\nAll'interno, parati dalle piastrelle che ti volano addosso ed elimina il Like Like: se ti afferra, ti ruba lo Scudo Hylia (lo recuperi quando lo sconfiggi). Poi abbatti la Skulltula d'Oro dalla parete.",
+      "hint": "Entrando nella grande sala della lava, tieni d'occhio la sinistra."
+    },
+    "fuego-gs-02": {
+      "name": "Parete nel labirinto dei massi",
+      "desc": "Questa Skulltula d'Oro si nasconde dietro un tratto di parete nel labirinto dei massi rotolanti. Ci arrivi arrampicandoti sulla grata metallica; da lì, resta vicino alla parete esterna schivando i massi rotolanti finché non raggiungi un tratto di roccia crepata in fondo a un passaggio, vicinissimo alla cella di un Goron.\n\nQuel tratto è ben visibile, quindi non serve cercare alla cieca: **piazza una Bomba o un Bombchu contro di esso** e, nel tunnel che si apre dietro, abbatti la Skulltula d'Oro. Cogli l'occasione per liberare il Goron nella cella accanto."
+    },
+    "fuego-gs-03": {
+      "name": "Grata dietro lo Spaventapasseri",
+      "desc": "Quando lasci la stanza con il muro di fuoco che ti insegue, la porta in cima ti riporta al labirinto dei massi, questa volta dall'alto. Fermati sulla piattaforma proprio davanti alla porta e **suona il Canto dello Spaventapasseri affinché Pierre compaia sulla piattaforma alta**.\n\nAgganciati a lui con il Rampino e, da lì, colpisci il bersaglio lì accanto, su una piattaforma che sale da sola come un ascensore. Attraversa la porta e arrampicati sulle grate: appena raggiungi la cima, la Skulltula d'Oro ti attende sulla parete e puoi abbatterla con il Rampino.",
+      "hint": "Il Canto dello Spaventapasseri si compone da bambino e da adulto al Lago Hylia."
+    },
+    "fuego-gs-04": {
+      "name": "Stanza ottagonale in cima",
+      "desc": "Arrampicati in cima alla grata raggiunta con lo spaventapasseri, quella con l'altra Skulltula d'Oro di quest'area, e varca la porta in cima. Si apre su una grande stanza ottagonale piena di lava, con una piattaforma di tre forzieri circondata dal fuoco.\n\nTi basta guardare a destra appena entri per trovarla: **è sulla parete, a pochi passi dalla porta**, accanto alla lava. Uccidila con il Rampino e raccogli il simbolo.",
+      "hint": "Accanto a quella sulla grata."
+    },
+    "fuego-gs-05": {
+      "name": "Dietro la statua nell'atrio d'ingresso",
+      "desc": "Tieni questa per ultima, una volta ottenuti il Martello Megaton e l'ultima Piccola Chiave, quella del Goron nella stanza del Blocco del Tempo oltre il martello. Quel Goron ti dice che c'è una porta segreta dietro la statua di pietra a tre blocchi all'ingresso: sul lato destro dell'atrio d'ingresso, **frantuma la statua con il martello** e apri la porta con la chiave.\n\nNella prima stanza elimina le Lumache di Fuoco per aprire la successiva. Nella seconda, parati dalle piastrelle volanti, sconfiggi il Like Like e rompi con il martello il cumulo di rocce che nasconde la Skulltula d'Oro.",
+      "hint": "Frantuma la statua nell'atrio d'ingresso e il cumulo di rocce con il martello."
+    },
+    "fuego-heart-01": {
+      "name": "Portacuori - Volvagia",
+      "desc": "Volvagia sporge la testa dai buchi nella piattaforma: appena lo fa, **colpiscilo con il Martello Megaton e infierisci con la spada o con il martello stesso** mentre è stordito. Quando si alza in volo, schiva le sue fiamme e le rocce cadenti osservandone le ombre.\n\nUna volta sconfitto, il Portacuori compare accanto al teletrasporto blu.",
+      "hint": "Puoi ferirlo solo quando sporge la testa dalla lava."
+    },
+    "agua-gs-01": {
+      "name": "Accanto alla grata del sotterraneo",
+      "desc": "Con l'acqua del tempio al livello più basso, usa una Piccola Chiave per aprire la porta alla base del pilastro centrale. Dentro, suona la Ninna Nanna di Zelda davanti al simbolo della Triforza per alzare l'acqua, indossa gli Stivali di Ferro e scendi attraverso il buco nel pavimento fino alla stanza sotterranea.\n\n**Colpisci l'interruttore di cristallo in alto sulla parete con il Rampino**: compariranno diversi nemici. Uccidili, togli gli stivali per risalire fino alla sporgenza del forziere e tira giù con il Rampino la Skulltula d'Oro sulla parete, accanto alla grata."
+    },
+    "agua-gs-02": {
+      "name": "Fiume con i mulinelli",
+      "desc": "Dopo lo scontro con Link Oscuro, sali le scale dietro il forziere del Super Rampino e, nella stanza successiva, calati nel pozzo con la grata. Segui il tunnel allagato finché non sbuchi in un fiume sotterraneo con dei mulinelli, e stanne alla larga perché ti risucchiano.\n\nNell'area dei mulinelli, **indossa gli Stivali di Ferro e cammina sul fondo**, schivando le correnti. La Skulltula d'Oro si trova sopra l'acqua, in alto sulla parete rocciosa: mira in alto con il Super Rampino, che la uccide e ti porta il simbolo.",
+      "hint": "Tieni d'occhio la Skulltula sopra l'acqua."
+    },
+    "agua-gs-03": {
+      "name": "Dentro il pilastro centrale",
+      "desc": "Con la Ninna Nanna di Zelda, porta l'acqua del tempio al livello più basso o intermedio ed entra dalla porta alla base del pilastro centrale. All'interno, al piano terra, usa il Super Rampino sul bersaglio sulla parete per raggiungere una sporgenza a metà altezza.\n\nDa lì, **guarda in alto sulla parete**: è lì che si trova la Skulltula d'Oro, e lo stesso Super Rampino la elimina e ti porta il simbolo. Non serve alzare prima l'acqua del pilastro, ma puoi salire secondo necessità."
+    },
+    "agua-gs-04": {
+      "name": "Cascata dei massi rotolanti",
+      "desc": "Nel sotterraneo nord, raggiungibile con il Super Rampino, attraversa la stanza dei Tektite e quella dell'enigma dei blocchi, e nella successiva premi l'interruttore e salta sui geyser fino all'altra porta. Dietro di essa c'è un canale dove dei massi rotolano giù da una cascata, proprio accanto alla stanza della Chiave del Boss.\n\nRiparati dai massi nel corridoio laterale, dove attende uno Shell Blade, e da lì **guarda verso la cascata, a ovest**: la Skulltula d'Oro è su quella parete. Il Super Rampino la raggiunge senza avvicinarti e ti porta il simbolo."
+    },
+    "agua-gs-05": {
+      "name": "Dietro la parete crepata sott'acqua",
+      "desc": "Questa Skulltula d'Oro si trova in una stanza sul lato est del primo piano. Con l'acqua al livello intermedio, dopo aver suonato la Ninna Nanna di Zelda davanti alla Triforza nel pilastro centrale, indossa gli Stivali di Ferro e percorri il corridoio allagato a est fino a una parete crepata sott'acqua: **sfondala con le Bombe o con il Martello Megaton**.\n\nDietro c'è una stanza con nemici. La Skulltula è su un mosaico sulla parete, accanto alle scale e ad altezza di spada: abbattila con un fendente e raccogli il simbolo.",
+      "hint": "Servono le Bombe e l'acqua al livello intermedio."
+    },
+    "agua-heart-01": {
+      "name": "Portacuori - Morpha",
+      "desc": "Con la Chiave del Boss e l'acqua al livello massimo, sali al terzo piano (3F) e usa il Super Rampino sul bersaglio della colonna dorata sul lato nord. Sali le scale e risali la rampa piena d'acqua, schivando le trappole a spuntoni che scivolano giù.\n\nMetti piede sulle piattaforme al centro per far comparire Morpha e **torna subito verso il bordo esterno della sala, lontano dall'acqua**, perché i suoi tentacoli ti afferrano. Estrai il suo nucleo con il Super Rampino, colpiscilo con la spada e, dopo lo scontro, raccogli il Portacuori prima di entrare nel teletrasporto blu."
+    },
+    "sombra-gs-01": {
+      "name": "Stanza delle falci invisibili",
+      "desc": "Nella grande sala del baratro, dopo aver attraversato con i Calzari Alati fino alla piattaforma dello Stalfos e averlo sconfitto, gira a sinistra e attiva la Lente della Verità: apparirà un sentiero di piattaforme invisibili verso una porta.\n\nDall'altro lato si trova la sala rotonda dei vasi, con falci visibili solo con la Lente. Schivale, abbatti i Pipistrelli di Fuoco con l'arco ed elimina il Like Like con la spada: **ripulire la stanza apre la porta verso una stanzetta con la Skulltula d'Oro sulla parete**, a portata di spada.",
+      "hint": "La nicchia che si apre contiene anche due forzieri, uno dei quali invisibile."
+    },
+    "sombra-gs-02": {
+      "name": "Parete del corridoio delle celle",
+      "desc": "Nella stanza con gli spuntoni che scendono dal soffitto, la Lente della Verità rivela un blocco nascosto nella parete: trascinalo sotto gli spuntoni come riparo e salici sopra per raggiungere la parte superiore. **La Skulltula d'Oro è in alto sulla parete del corridoio delle celle**, e dalla passerella il Rampino la raggiunge.",
+      "hint": "Sali sul blocco per raggiungerla dalla passerella."
+    },
+    "sombra-gs-03": {
+      "name": "Fossa nel corridoio dei ventilatori",
+      "desc": "Superata la sala del grande vaso a teschio, dove una bomba gettata nel teschio fa cadere una Piccola Chiave, prosegui nella stanza successiva: usa la Lente della Verità per individuare il bersaglio sul soffitto, sali al livello superiore con il Rampino e apri la porta chiusa a chiave.\n\nDietro si trova il corridoio dei ventilatori. Indossa gli Stivali di Ferro per non farti spazzare via dal vento e raggiungi la fossa con le grate: **la Skulltula d'Oro è sulla parete della fossa**. Sporgiti dal bordo e colpiscila con il Rampino, che ti porterà il simbolo.",
+      "hint": "Con gli Stivali di Ferro il vento non può spingerti via."
+    },
+    "sombra-gs-04": {
+      "name": "Sporgenza alta nella sala della barca",
+      "desc": "Appena entri nella sala della barca, tira il blocco a sinistra e spingilo lungo la scanalatura sul pavimento fino alla passerella di legno, poi salici sopra. La Skulltula d'Oro è sulla parete di una sporgenza con grate lì accanto.\n\nDevi **suonare il Canto dello Spaventapasseri sulla passerella e agganciarti a Pierre con il Super Rampino**: ti depositerà sulla sporgenza, accanto alla Skulltula, e potrai abbatterla con la spada.",
+      "hint": "Ti servirà conoscere il Canto dello Spaventapasseri per salire lassù."
+    },
+    "sombra-gs-05": {
+      "name": "Dentro i teschi giganti",
+      "desc": "Quando la barca affonda, brucia la ragnatela sulla porta con una Freccia di Fuoco e attraversa la stanza del Floormaster con la Lente della Verità fino alla porta con l'occhio Sheikah.\n\nAll'interno ci sono i teschi giganti. Sali la scala a pioli fino al balcone e **lancia delle bombe dentro i teschi**: quando il secondo esplode, ne uscirà il simbolo della Skulltula d'Oro.",
+      "hint": "La porta sulla riva è coperta da una ragnatela: bruciala con una Freccia di Fuoco."
+    },
+    "sombra-heart-01": {
+      "name": "Portacuori - Bongo Bongo",
+      "desc": "Nello scontro, indossa i Calzari Alati per non rimbalzare sul tamburo e **stordisci le mani di Bongo Bongo con frecce o con il Rampino**. Poi, con la Lente attiva, colpisci il suo occhio e attaccalo con la spada.\n\nAl termine ti lascerà il Portacuori."
+    },
+    "espiritu-gs-01": {
+      "name": "Recinzione metallica nella stanza dei Pipistrelli",
+      "desc": "Da bambino entri parlando con Nabooru e infilandoti nel piccolo passaggio nell'atrio d'ingresso.\n\nPiù avanti raggiungi la stanza con i Pipistrelli e il Wallmaster. Raccogli le Rupie d'Argento affinché la recinzione si abbassi diventando un ponte: dall'altro lato, **la Skulltula d'Oro si trova sulla rete metallica della parete destra**. Il Boomerang la uccide e ti porta il simbolo.",
+      "hint": "Con le cinque Rupie d'Argento, la recinzione si abbassa e diventa un ponte."
+    },
+    "espiritu-gs-02": {
+      "name": "Pavimento della sala della grande statua",
+      "desc": "Una volta raggiunta la sala della grande statua, scendi le scale laterali al piano inferiore e gira dietro la statua.\n\nNello stretto passaggio tra il suo fianco e il muro, sul lato est, **la Skulltula d'Oro è sulla parete, a livello del pavimento**. Basta un fendente di spada per sconfiggerla e raccogliere il simbolo."
+    },
+    "espiritu-gs-03": {
+      "name": "Sopra la porta della scalinata",
+      "desc": "Nella parte da bambino del tempio, la stanza dei blocchi si risolve spostando il blocco con il volto del sole nel fascio di luce: appare un forziere con una Piccola Chiave, quella per la porta incatenata in cima alla scalinata successiva. Varcando la porta verso quella scalinata puoi già sentire la Skulltula.\n\nNon salire senza voltarti: girati indietro e la vedrai **sopra la porta da cui sei appena passato**. Da bambino il Boomerang la elimina e ti porta il simbolo, e da adulto il Rampino fa lo stesso.",
+      "hint": "Prima dello scontro con il Cavaliere di Ferro."
+    },
+    "espiritu-gs-04": {
+      "name": "Dietro il Blocco del Tempo nella stanza dei massi rotolanti",
+      "desc": "La parte da adulto del tempio inizia spostando il grande blocco nell'atrio d'ingresso con i Guanti d'Argento. Nella stanza circolare successiva elimina il Beamos (basta un Bombchu) e colpisci l'interruttore di cristallo sul soffitto con il Rampino per aprire le porte.\n\nLa porta a destra conduce alla stanza dei massi rotolanti. Schivali fino a raggiungere i due Blocchi del Tempo nelle nicchie nella parete: il primo non nasconde nulla, ma **suona il Canto del Tempo accanto al secondo** e, spostandosi, rivelerà la Skulltula d'Oro sul fondo della sua nicchia. Uccidila con la spada e raccogli il simbolo.",
+      "hint": "Il blocco si sposta di uno spazio soltanto, non scompare."
+    },
+    "espiritu-gs-05": {
+      "name": "Sporgenza nord-ovest della sala della statua",
+      "desc": "La Skulltula d'Oro si trova sull'alta sporgenza nord-ovest della sala della grande statua della dea, nell'angolo in cui compare uno spaventapasseri.\n\nDa adulto, usa il Super Rampino sul bersaglio sul polso della statua per salire sul suo palmo. Da lì, **suona il Canto dello Spaventapasseri**: lo spaventapasseri apparirà in cima alla sporgenza e potrai agganciarti a lui con il Super Rampino. Lassù la Skulltula è sul pavimento accanto a lui; uccidila con la spada e raccogli il simbolo.",
+      "hint": "Suona il Canto dello Spaventapasseri dal palmo della statua."
+    },
+    "espiritu-heart-01": {
+      "name": "Portacuori - Twinrova",
+      "desc": "Contro Twinrova, prima rifletti il fuoco di Koume contro Kotake e il ghiaccio di Kotake contro Koume.\n\nQuando si fondono, **assorbi tre colpi dello stesso elemento di fila e scagliali contro Twinrova**; quando cade, colpiscila con la spada. Il Portacuori appare al centro della piattaforma.",
+      "hint": "La Chiave del Boss richiede la Ninna Nanna di Zelda, l'arco e il Rampino."
+    },
+    "pozo-gs-01": {
+      "name": "Stanza a sinistra dell'area centrale",
+      "desc": "Ti servono la Lente della Verità, che trovi nel sotterraneo, e una Piccola Chiave. Con la Lente attiva compaiono forzieri nascosti nelle nicchie delle pareti del pozzo, e uno di essi contiene una chiave.\n\nEntri nell'area centrale attraverso la parete finta di fronte all'ingresso, e devi aggirare la X sul pavimento, che è una buca. **Apri la porta chiusa a chiave a sinistra**, elimina la Baba Deku al centro della stanza e cerca la Skulltula d'Oro in alto sulla parete, sopra una nicchia con delle candele: il Boomerang la abbatte e torna con il simbolo.",
+      "hint": "Ci sono altre due chiavi in nicchie nascoste nel corridoio d'ingresso."
+    },
+    "pozo-gs-02": {
+      "name": "Angolo alto della stanza della fossa",
+      "desc": "La porta chiusa a chiave a destra dell'area centrale, in cui entri dalla parete finta di fronte all'ingresso, conduce a una stanza con Pipistrelli e una grande fossa. Ti servono una Piccola Chiave, come quella nella bara nella stanza del Gibdo, e la Lente della Verità.\n\nElimina i Pipistrelli e **attiva la Lente per vedere la Skulltula d'Oro in un angolo alto, accanto a una torcia**. Usa il Boomerang per prenderla.",
+      "hint": "Ti servono una chiave e la Lente della Verità."
+    },
+    "pozo-gs-03": {
+      "name": "Stanza del Like Like",
+      "desc": "Segui il corridoio esterno che circonda il centro del pozzo fino all'angolo nord-est, dove c'è una porta con un cartello che avvisa: «Guarda dove metti i piedi!» Dagli retta, perché proprio sotto c'è una trappola che ti fa precipitare sul fondo se non la eviti.\n\nLa stanza successiva ha buchi nascosti nel pavimento, quindi **attiva la Lente della Verità e attraversa guardando dove cammini**.\n\nElimina i Pipistrelli di Fuoco con il Boomerang e fai saltare il Beamos con una bomba. La porta dall'altro lato conduce alla stanza del Like Like: una volta sconfitto, la Skulltula d'Oro è sulla parete di fondo, tra due torce, a portata di Boomerang, che ti riporterà anche il simbolo.",
+      "hint": "Guarda dove metti i piedi!"
+    },
+    "hielo-gs-01": {
+      "name": "Stanza della lama rotante",
+      "desc": "Elimina i Ghiaccioli nella prima stanza per aprire la grata e passa nella grande sala rotonda con la lama di ghiaccio rotante.\n\n**Trova l'angolo con le stalagmiti di ghiaccio, quello con la Rupia d'Argento nascosta**: la Skulltula d'Oro è in alto sulla parete, tra le lastre di ghiaccio e sopra una stalagmite. Uccidila con il Rampino.",
+      "hint": "Le Rupie d'Argento aprono la stanza del Fuoco Blu."
+    },
+    "hielo-gs-02": {
+      "name": "Stanza della Bussola",
+      "desc": "Raccogli le Rupie d'Argento nella stanza della lama rotante per aprire la strada verso la stanza della mappa e riempi lì un'ampolla di Fuoco Blu. Torna nella stanza della lama e sciogli con esso una delle due pareti di ghiaccio rosso, quella che porta a un corridoio con trappole a spuntoni.\n\nIn fondo c'è la stanza della Bussola, piena di stalagmiti. Elimina i Pipistrelli di Ghiaccio e **guarda in alto sulla parete di fondo, accanto a un blocco di ghiaccio rosso**: è lì che si trova la Skulltula d'Oro. Usa il Rampino per prenderla."
+    },
+    "hielo-gs-03": {
+      "name": "Stanza del blocco di ghiaccio",
+      "desc": "Nella stanza in cui devi spingere un blocco di ghiaccio, elimina i Pipistrelli di Ghiaccio e voltati verso l'ingresso: **la Skulltula d'Oro è in alto sulla parete, a sinistra della porta entrando**. È più facile vederla dai pilastri di pietra; abbattila con il Rampino dal pavimento e raccogli il simbolo."
+    },
+    "castillo-fairy-02": {
+      "name": "Fata Radiosa: Doppia Difesa",
+      "desc": "Raggiungi l'esterno del Castello di Ganon dal Borgo di Hyrule in rovina, e il suo vicolo cieco a destra termina dove da bambino si trovava la fontana dell'Attacco Rotante. Ora un pilastro di pietra nera con incisioni dorate blocca l'ingresso: **sollevalo con i Guanti d'Oro**, che ottieni nella Prova dell'Ombra del castello.\n\nAll'interno, suona la Ninna Nanna di Zelda dal simbolo della Triforza e getta nella fontana le 500 Rupie richieste come offerta. La Fata Radiosa del Coraggio raddoppia la tua difesa: i tuoi cuori ottengono un bordo dorato e subisci metà dei danni.",
+      "hint": "Chiede un'offerta di 500 Rupie; il pilastro all'ingresso si rimuove con i Guanti d'Oro."
+    },
+    "kakariko-bottle-01": {
+      "name": "I sette Coccò smarriti",
+      "desc": "Alla Signora dei Coccò, accanto al recinto, ne sono scappati sette; se glieli riporti da bambino, ti regala un'Ampolla vuota: **prendi in braccio ogni Coccò e gettalo nel recinto**. Se le parli, ti dice quanti ne mancano e ti dà suggerimenti; quelli già nel recinto restano lì anche se entri nelle case.\n\nUno è proprio accanto a lei, un altro vicino all'ingresso, un altro presso il cancello del Monte Morte e un altro dietro la staccionata della Casa delle Skulltula. Il quinto è dentro una cassa da rompere rotolandoci contro; gli ultimi due si trovano nell'area recintata dietro il Negozio di Pozioni, raggiungibile planando."
+    },
+    "lonlon-bottle-01": {
+      "name": "I Super Coccò di Talon",
+      "desc": "Prima di tutto devi svegliare Talon, che dorme al Castello di Hyrule, con il Coccò che si schiude dall'Uovo Strano, affinché torni alla Fattoria Lon Lon. Alla fattoria entra in casa sua di giorno: di notte Talon dorme.\n\nPer 10 Rupie ti sfida a **trovare i suoi tre Super Coccò tra tutti i Coccò nella stanza** in 30 secondi: raccogli i Coccò e ti dirà quando ne indovini uno. Se ci riesci, la prima volta ti regala un'ampolla di Latte Lon Lon.",
+      "hint": "Una partita costa 10 Rupie."
+    },
+    "lago-bottle-01": {
+      "name": "La lettera di Ruto",
+      "desc": "Sul fondo del Lago Hylia, vicino all'uscita del tunnel sottomarino che proviene dal Villaggio degli Zora, giace un'ampolla con una lettera della Principessa Ruto. Da bambino puoi scendere così in profondità solo con la Scaglia d'Argento, il premio del gioco dei tuffi nel Villaggio degli Zora.\n\nAccanto ai pilastri di pietra che spuntano dall'acqua, **immergiti fino al fondo e prendi l'ampolla**.",
+      "hint": "Puoi raggiungere il lago anche tuffandoti dal Villaggio degli Zora."
+    },
+    "ciudadela-bottle-01": {
+      "name": "Il Mercante di Spettri",
+      "desc": "Da adulto, la vecchia guardiola all'ingresso del Borgo di Hyrule diventa la bottega del Mercante di Spettri. Per ogni Grande Spettro ti paga 30 Rupie e aggiunge 100 punti, e quando raggiungi 500 punti, con il quinto, ti dona un'Ampolla vuota. Se prosegui fino a 1000, ti regala una Rupia Enorme, quella d'oro, dal valore di 200 Rupie.\n\nI Grandi Spettri compaiono nella Piana di Hyrule quando cavalchi Epona e salti una delle staccionate infestate: **abbattili con le frecce da cavallo e cattura ogni anima in un'Ampolla vuota**.",
+      "hint": "Paga 30 Rupie per ogni Grande Spettro; l'ampolla arriva a 500 punti."
+    },
+    "ciudadela-bottle-02": {
+      "name": "L'insetto del negoziante di pozioni",
+      "desc": "Nel Borgo di Hyrule, entra nel Negozio di Pozioni, nell'edificio accanto al sentiero che sale verso il Tempio del Tempo. Al negoziante è scappato un insetto: digli che lo aiuterai e ti darà un'Ampolla vuota per catturarlo.\n\nEquipaggia l'ampolla e **cattura l'insetto mentre corre sul pavimento del negozio**. Per ringraziarti, la riempirà con una Pozione Rossa e potrai tenere l'ampolla."
+    },
+    "dominio-heart-01": {
+      "name": "Forziere delle torce",
+      "desc": "Dietro la cascata al piano inferiore del Villaggio degli Zora, un forziere con il frammento appare quando, da bambino, accendi contemporaneamente tutte le sue torce: accendi un Bastone Deku da una delle torce nella sala di Re Zora.\n\nScendi e **accendi per prima quella ai piedi delle scale**, che non si spegne, poi le quattro a tempo, usando ciascuna torcia per riaccendere il bastone. Sono quella davanti al Negozio Zora, quella presso lo stagno con il cerchio di rocce e le due dietro la cascata, che raggiungi costeggiando la parete.",
+      "hint": "Il Fuoco di Din aiuta con quelle dietro la cascata."
+    },
+    "fortaleza-heart-02": {
+      "name": "Forziere sul tetto",
+      "desc": "Il forziere si trova sul tetto più alto della Fortezza Gerudo, addossato alla parete rocciosa, oltre un baratro. Dai corridoi interni, una scala a pioli **accanto alla tua cella** ti porta su una sporgenza rocciosa sopra i tetti; seguila fino al bordo da cui riesci a vedere il forziere.\n\nDa lì, **mira al forziere con il Super Rampino** per raggiungere il bottino.",
+      "hint": "Usa il Super Rampino per raggiungere il forziere."
+    },
+    "kakariko-heart-04": {
+      "name": "Ricompensa per 50 Skulltula",
+      "desc": "Con 50 simboli di Skulltula d'Oro, torna alla Casa delle Skulltula e **parla con il ricco signore maledetto** per ricevere il Frammento di Cuore.",
+      "hint": "Ti servono 50 simboli di Skulltula d'Oro."
+    },
+    "castillo-gs-03": {
+      "name": "Arco in rovina",
+      "desc": "Da adulto, il sentiero sulla destra all'esterno del Castello di Ganon, quello che conduce alla Fontana della Fata Radiosa, passa sotto un arco di pietra in rovina che un tempo era l'ingresso del Castello di Hyrule.\n\n**Attraversa l'arco e voltati**: la Skulltula d'Oro è in alto sulla sua faccia posteriore, fuori dalla portata della spada. Abbattila con il Rampino."
+    },
+    "cementerio-thought-01": {
+      "name": "Piedistallo rotto nella Tomba della Famiglia Reale",
+      "desc": "Nel Cimitero, entra nella Tomba della Famiglia Reale suonando la Ninna Nanna di Zelda sulla Triforza e prosegui fino all'ultima stanza, quella con il monumento di pietra che insegna il Canto del Sole.\n\nLì, sopra il liquido verde, c'è un piedistallo rotto con il pensiero di una fata che non riesce a ricordare la melodia incisa sul monumento e vorrebbe risentirla per non dimenticarla. **Suona il Canto del Sole accanto al segno.**",
+      "hint": "Suona il Canto del Sole accanto al segno."
+    },
+    "coloso-thought-01": {
+      "name": "Scalinata del Tempio dello Spirito",
+      "desc": "Nel Colosso del Deserto, sulla sporgenza dove ottieni i Guanti d'Argento, tra i due bracieri, il pensiero si trova sul muretto lungo il bordo. La fata dice che la vista è mozzafiato, ma non sopporta un'aria così secca e desidererebbe un bel temporale. Suonare qui il Canto della Tempesta ripristina magia e salute.",
+      "hint": "Suona il Canto della Tempesta davanti al segno."
+    },
+    "hielo-thought-01": {
+      "name": "Tunnel di ghiaccio accanto alla stanza della Bussola",
+      "desc": "Nella Caverna di Ghiaccio, una volta presa la Bussola, riempi un'ampolla con il Fuoco Blu in quella zona e sciogli il blocco di ghiaccio rosso lì accanto. Segui il tunnel ghiacciato dietro di esso, quello che porta al corridoio delle trappole a spuntoni e alla stanza del blocco di ghiaccio: vedrai questo Pensiero di Fata sulla sua parete. Le ali della fata sono gelate e darebbe qualsiasi cosa per stare un po' al sole. **Suona il Canto del Sole accanto al segno.**",
+      "hint": "Suona il Canto del Sole accanto al segno."
+    },
+    "lago-thought-01": {
+      "name": "Nicchia dei vasi sulla riva ovest",
+      "desc": "Al Lago Hylia, segui la riva occidentale verso sud quasi fino in fondo: questo pensiero si trova in una nicchia nella parete rocciosa, con vasi, sacchi e barili. La fata dice che il suo segreto per giocare a nascondino è un posto che le altre fate non possono lanciare né rompere. **Rompi i vasi nella nicchia**: da uno esce una fata, e ci sono anche alcune Rupie.",
+      "hint": "Rompi i vasi nella nicchia: in uno si nasconde una fata."
+    },
+    "llanura-thought-01": {
+      "name": "Rovine vicino al ponte levatoio",
+      "desc": "Esci dal Borgo di Hyrule attraversando il ponte levatoio e vai a est fino alla collinetta che domina il fiume: tra le rovine di un muro di pietra coperto di muschio si trova il primo Pensiero di Fata, e Navi coglie l'occasione per spiegare cosa sono. La fata dice che quando qualcosa cade in testa a qualcuno da un albero, non è un caso: è lei che nasconde oggetti tra i rami. **Rotola contro i tronchi degli alberi** per far cadere ciò che custodiscono; dal pino lì accanto cade una Rupia blu.",
+      "hint": "Rotola contro gli alberi: a volte cade qualcosa dai rami."
+    },
+    "llanura-thought-02": {
+      "name": "Grotta del forziere vicino alla Valle Gerudo",
+      "desc": "A ovest della Piana di Hyrule, nel tratto arido che porta alla Valle Gerudo, c'è una grotta poco profonda nella parete rocciosa settentrionale con un forziere all'interno. La fata che vi ha lasciato il suo pensiero dice al ragazzo dal cappello a punta che il tesoro è per lui e che non l'ha chiuso a chiave. Da adulto sei arrivato troppo tardi: il forziere è aperto e vuoto. **Torna da bambino e apri il forziere**, che allora contiene davvero un Frammento di Cuore.",
+      "hint": "Torna da bambino e apri il forziere nella grotta."
+    },
+    "llanura-thought-03": {
+      "name": "Grotta della Pietra del Pettegolezzo a sud della fattoria",
+      "desc": "A sud-est della Fattoria Lon Lon, vicino a un piccolo stagno, un cerchio di cespugli nasconde una grotta che si apre con un colpo di Martello Megaton al centro. All'interno ci sono una Skulltula appesa alla parete sopra una cassa di legno e una Pietra del Pettegolezzo, e il pensiero si trova sulla parete rocciosa. La fata aveva trovato qui un insetto dorato lucente, ma quel parassita sulla parete le si è avventato addosso prima che potesse catturarlo. **Elimina la Skulltula sulla parete da bambino e, da adulto, rotola contro la cassa di legno sotto di essa per romperla**: dentro c'è l'insetto dorato, una Skulltula d'Oro.",
+      "hint": "Rompi la cassa di legno sotto la Grande Skulltula."
+    },
+    "llanura-thought-04": {
+      "name": "Albero presso la buca del Cespuglio Mercante",
+      "desc": "Esci dal Borgo di Hyrule attraversando il ponte levatoio e procedi a est lungo la striscia d'erba tra le mura e il fiume: questo pensiero è su un albero proprio a ridosso del muro e, a pochi passi, c'è una buca con un Cespuglio Mercante che vende solo a chi conosce la parola d'ordine. La fata dice di averla finalmente capita, e che non era «Niente male...» né «Procedo allo sborso». Da adulto non ha più nulla, quindi **vai da bambino e digli «Vendimi qualcosa, dai!»**: ti venderà un Frammento di Cuore per 100 Rupie.",
+      "hint": "Di' «Vendimi qualcosa, dai!» al Cespuglio Mercante nella buca accanto."
+    },
+    "llanura-thought-05": {
+      "name": "Rovine presso la staccionata della fattoria",
+      "desc": "Nella Piana di Hyrule, aggira l'esterno della Fattoria Lon Lon fino al suo angolo sud-ovest: proprio contro la staccionata di legno ci sono le rovine di un muro di mattoni coperto d'edera, e il pensiero è in basso, sulla faccia del muro. La fata dice che adora la vista della piana da lì, di notte e di giorno, e che vorrebbe passare dall'una all'altro senza dover aspettare. **Suona il Canto del Sole** e lei ripristinerà la tua salute e la tua magia.",
+      "hint": "Suona il Canto del Sole per passare dal giorno alla notte."
+    },
+    "llanura-thought-06": {
+      "name": "Nicchia rocciosa a nord-ovest della Piana di Hyrule",
+      "desc": "All'estremo nord-ovest della Piana di Hyrule, vicino al fiume, c'è una nicchia nella roccia con barili, sacchi e un tavolo, e questo pensiero si trova sulla parete all'ingresso. La fata dice che i Peahat la spaventano perché sono enormi, mettono radici e si comportano come i padroni della piana, ma che, come ogni pianta, non sopportano il fuoco. **Brucia i Peahat con il Fuoco di Din**."
+    },
+    "lonlon-thought-01": {
+      "name": "Muro del giardino della fattoria",
+      "desc": "Alla Fattoria Lon Lon, passa dietro la casa e la stalla fino al giardino: il pensiero è sul muro di mattoni coperto d'edera, tra alcune casse, barili e un carretto di legno. La fata dice che la melodia suonata da quel ragazzo è davvero graziosa e fa impazzire le mucche. È il Canto di Epona, ma suonarlo accanto al segno non produce effetti: **suonalo a una mucca** e ti regalerà del Latte Lon Lon.",
+      "hint": "Suona il Canto di Epona a una mucca."
+    },
+    "pozo-thought-01": {
+      "name": "Bara nella stanza del Gibdo",
+      "desc": "Nel Fondo del Pozzo, scendi al piano B1 ed entra nella stanza del Gibdo, quella con le bare avvolte nelle ragnatele, che liberi bruciandole con un Bastone Deku acceso alle torce. Questo Pensiero di Fata si trova sul lato di una delle bare in piedi: alla fata manca la canzone di quell'uomo sul «girare e girare» e vorrebbe che qualcuno lì intorno la conoscesse. **Suona il Canto della Tempesta accanto alla bara** per ripristinare magia e salute.",
+      "hint": "Suona il Canto della Tempesta accanto alla bara."
+    },
+    "sendero-thought-01": {
+      "name": "Cerchio di foglie vicino alla Città dei Goron",
+      "desc": "Salendo lungo il Sentiero del Monte Morte, a pochi passi dall'ingresso della Città dei Goron, c'è una sporgenza rocciosa sulla destra con una buca nel terreno che ospita una pianta, e sulla parete accanto questo pensiero. La fata dice che nei giorni calmi le foglie a terra danzano lentamente in cerchio, ma nei giorni di tempesta girano a tutta velocità come se stessero per volare via. **Suona il Canto della Tempesta sul cerchio** per entrare nella buca.",
+      "hint": "Suona il Canto della Tempesta sul cerchio di foglie."
+    },
+    "sombra-thought-01": {
+      "name": "Parete della stanza degli spuntoni sul soffitto",
+      "desc": "Al piano B3 del Tempio dell'Ombra si trova la stanza in cui il blocco nascosto ti ripara dagli spuntoni che scendono dal soffitto. Superata la cella con il forziere della Rupia rossa, accanto a un foro nella parete, vedrai questo Pensiero di Fata. La fata dice che adora i posti dove il vento soffia forte e **che a questo luogo farebbe davvero comodo una bella folata di vento**."
+    },
+    "crater-heart-03": {
+      "name": "Cespuglio Mercante nel Cratere",
+      "desc": "Nel Cratere, da bambino, vai a ovest dall'ingresso della vetta del Monte Morte, verso il punto in cui la mappa segna la Fontana della Fata Radiosa. Accanto a una rete da arrampicata sulla parete, un Cespuglio Mercante sbuca dal terreno e proverà ad attaccarti.\n\nAvvicinati schivando i suoi colpi e colpiscilo. Quando si arrende, parlagli: **ti vende il Frammento di Cuore per 100 Rupie**.",
+      "hint": "Da bambino te lo vende per 100 Rupie dopo che lo hai colpito."
+    },
+    "cementerio-thought-02": {
+      "name": "Rovine all'ingresso della Tomba della Famiglia Reale",
+      "desc": "Nel Cimitero, avvicinati alla lastra con la Triforza che apre la Tomba della Famiglia Reale: questo pensiero si trova tra le pietre spezzate dell'ingresso.\n\nLa fata racconta di essere finita in fondo a una tomba, di come un mostro orribile le si sia avventato contro e di come abbia smesso di inseguirla quando ha cantato una melodia che lo ha abbagliato, ma non ricorda come si chiamasse. **È il Canto del Sole: suonalo per paralizzare i ReDead.**",
+      "hint": "Il Canto del Sole paralizza i ReDead."
+    },
+    "llanura-thought-07": {
+      "name": "Rovine presso l'uscita per il Lago Hylia",
+      "desc": "All'estremità meridionale della Piana di Hyrule, vicino al sentiero che scende verso il Lago Hylia, ci sono alcune rovine di pietra tra gli alberi: il pensiero è sulla faccia di uno dei pilastri.\n\nLa fata supplica che nessuno agiti mai un bastone contro una farfalla, e ancor meno restando fermo. **Colpisci una farfalla con un Bastone Deku senza muoverti dal posto: si trasforma in una Fata.**",
+      "hint": "Colpisci una farfalla con un Bastone Deku: si trasforma in una Fata."
+    },
+    "llanura-thought-08": {
+      "name": "Nicchia rocciosa presso l'ingresso del Fiume Zora",
+      "desc": "Sul margine orientale della Piana di Hyrule, poco a sud dell'ingresso del Fiume Zora, c'è una nicchia nella roccia con barili, un tavolo, una panca e i resti di un falò: il pensiero si trova sulla parete rocciosa.\n\nLa fata adora disporre le Rupie in graziose figure. Le nasconde in fosse e buche, e anche sott'acqua, e non le dispiace se qualcuno le raccoglie. **Cerca le Rupie disposte in figure nelle fosse, nelle buche e sott'acqua.**",
+      "hint": "Cerca le Rupie disposte in figure nelle fosse, nelle buche e sott'acqua."
+    },
+    "llanura-thought-09": {
+      "name": "Rocce presso il fossato a ovest del ponte levatoio",
+      "desc": "Esci dal Borgo di Hyrule attraversando il ponte levatoio e procedi a ovest lungo la sponda del fossato: di fronte al muro da cui sgorga l'acqua ci sono alcune grandi rocce, e questo pensiero è accanto a esse.\n\nLa fata dice che nessuno sospetterà mai che abbia nascosto tutta la sua fortuna dentro una cassa di legno.",
+      "hint": "La fata dice di aver nascosto tutta la sua fortuna dentro una cassa di legno."
+    },
+    "llanura-thought-10": {
+      "name": "Carretto presso l'orto vicino a Calbarico",
+      "desc": "A nord-est della Piana di Hyrule, non lontano dalla salita verso il Villaggio Calbarico, c'è un carretto di legno addossato a un muretto di pietra: il pensiero è sulle sue assi.\n\nLa fata dice che il posto sembra desolato, come se non ci fossero che erbacce, ma che guardando bene si vedono dei piccolini sgattaiolare di nascosto. **Scendi nell'orto: ci sono degli Insetti che corrono tra le piante.**",
+      "hint": "Ci sono degli Insetti che corrono tra le piante nell'orto accanto."
+    }
+  }
+}

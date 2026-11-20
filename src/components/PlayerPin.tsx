@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useId, useState } from 'react'
+import { useI18n } from '../lib/i18n'
 import type { Fraction } from '../lib/types'
 import { useLichiiPosition } from '../lib/useLichiiTracker'
 
@@ -15,12 +16,13 @@ export type PlayerPinProps = {
 export const PlayerPin = memo(function PlayerPin({
   at,
   yaw,
-  label = 'Link',
+  label,
   sublabel,
   position3d,
   live = true,
   onClick,
 }: PlayerPinProps) {
+  const { t } = useI18n()
   const coneGradId = useId()
   // Backend reports compass yaw: 0° = North (-Z, up on map), 90° = East (+X, right), 180° = South (+Z, down), 270° = West (-X, left).
   const targetRot = typeof yaw === 'number' && Number.isFinite(yaw) ? yaw : null
@@ -38,9 +40,16 @@ export const PlayerPin = memo(function PlayerPin({
     })
   }, [targetRot])
 
-  const baseTitle = `${label}${sublabel ? ` (${sublabel})` : ''}${live ? '' : ' (Saved)'}`
+  const resolvedLabel = label ?? t('common.link')
+  const savedBadge = `(${t('common.saved')})`
+  const baseTitle = `${resolvedLabel}${sublabel ? ` (${sublabel})` : ''}${live ? '' : ` ${savedBadge}`}`
   const ariaLabel = position3d
-    ? `${baseTitle} at X ${position3d.x.toFixed(1)}, Y ${position3d.y.toFixed(1)}, Z ${position3d.z.toFixed(1)}`
+    ? t('player.ariaAtCoords', {
+        label: baseTitle,
+        x: position3d.x.toFixed(1),
+        y: position3d.y.toFixed(1),
+        z: position3d.z.toFixed(1),
+      })
     : baseTitle
 
   return (
@@ -132,9 +141,9 @@ export const PlayerPin = memo(function PlayerPin({
             }`}
           >
             <span className={`size-1.5 rounded-full ${live ? 'bg-moss' : 'bg-ember/80'}`} />
-            {label}
+            {resolvedLabel}
             {sublabel && <span className="font-normal text-parchment-400">· {sublabel}</span>}
-            {!live && <span className="font-normal text-ember">(Saved)</span>}
+            {!live && <span className="font-normal text-ember">{savedBadge}</span>}
           </span>
           {position3d && (
             <span className="mt-0.5 hidden rounded border border-ink-600 bg-ink-950/95 px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap text-parchment-200 shadow group-hover:block">
@@ -164,7 +173,7 @@ export type LivePlayerPinProps = {
 export const LivePlayerPin = memo(function LivePlayerPin({
   mode,
   fallbackAt = null,
-  label = 'Link',
+  label,
   sublabel,
   live = true,
   onClick,

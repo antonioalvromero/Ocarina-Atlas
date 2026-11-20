@@ -60,4 +60,36 @@ describe('dataset pin placements', () => {
     expect(skulltula?.at).toEqual({ map: 'principal', x: 0.6442, y: 0.7654 })
     expect(skulltula?.at).not.toEqual(thought?.at)
   })
+
+  it('marks "Wall of the ranch garden" Fairy Thought as child-only (Issue #50)', () => {
+    const thought = dataset.items.find((item) => item.name === 'Wall of the ranch garden')
+
+    expect(thought).toBeDefined()
+    expect(thought?.id).toBe('lonlon-thought-01')
+    expect(thought?.place).toBe('lonlon')
+    expect(thought?.age).toBe('child')
+  })
+
+  it('places llanura-heart-01 (Business Scrub by the moat) at its calibrated Hyrule Field coordinates as child-only', () => {
+    const heart = dataset.items.find((item) => item.id === 'llanura-heart-01')
+
+    expect(heart).toBeDefined()
+    expect(heart?.place).toBe('llanura')
+    expect(heart?.at).toEqual({ map: 'principal', x: 0.647, y: 0.1344 })
+    expect(heart?.age).toBe('child')
+  })
+
+  it('places llanura-heart-02 and llanura-thought-02 at the calibrated chest cave hollow in Hyrule Field', () => {
+    const heart = dataset.items.find((item) => item.id === 'llanura-heart-02')
+    const thought = dataset.items.find((item) => item.id === 'llanura-thought-02')
+
+    expect(heart).toBeDefined()
+    expect(thought).toBeDefined()
+    expect(heart?.place).toBe('llanura')
+    expect(heart?.at).toEqual({ map: 'principal', x: 0.2545, y: 0.3576 })
+    expect(heart?.age).toBe('child')
+    expect(thought?.place).toBe('llanura')
+    expect(thought?.at).toEqual({ map: 'principal', x: 0.2445, y: 0.3576 })
+    expect(thought?.age).toBe('adult')
+  })
 })

@@ -1,17 +1,25 @@
-import raw from '../data/oot.json'
+import { OOT_REMAKE_ADAPTER } from './game-adapter'
 import type { AgeFilter, Dataset, Item, ItemRequirement, Place, PlaceMap } from './types'
 
-export const dataset = raw as unknown as Dataset
+export const dataset: Dataset = OOT_REMAKE_ADAPTER.dataset
 
 const requirementNames = new Map(dataset.requirements.map((r) => [r.key, r.name]))
 const categoryNames = new Map(dataset.categories.map((c) => [c.key, c.name]))
 
+export function placeById(id: string): Place | undefined {
+  return OOT_REMAKE_ADAPTER.getPlaceById(id)
+}
+
+export function placeBySlug(slug: string): Place | undefined {
+  return OOT_REMAKE_ADAPTER.getPlaceBySlug(slug)
+}
+
 export function findPlace(slug: string): Place | undefined {
-  return dataset.places.find((place) => place.slug === slug)
+  return OOT_REMAKE_ADAPTER.getPlaceBySlug(slug)
 }
 
 export function itemsOfPlace(placeId: string): Item[] {
-  return dataset.items.filter((item) => item.place === placeId)
+  return OOT_REMAKE_ADAPTER.itemsOfPlace(placeId)
 }
 
 export function startMapOf(place: Place): PlaceMap | undefined {

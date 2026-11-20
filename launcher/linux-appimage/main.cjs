@@ -2,6 +2,7 @@
 
 const { app, BrowserWindow, clipboard, dialog, ipcMain, shell } = require('electron')
 const { spawn } = require('node:child_process')
+const crypto = require('node:crypto')
 const fs = require('node:fs')
 const http = require('node:http')
 const https = require('node:https')
@@ -19,6 +20,15 @@ const MAX_LOG_LINES = 500
 const OFFICIAL_REPO_URL = 'https://github.com/antonioalvromero/Ocarina-Atlas'
 const OFFICIAL_RELEASES_API_URL =
   'https://api.github.com/repos/antonioalvromero/Ocarina-Atlas/releases/latest'
+const LINUX_APPIMAGE_ASSET_NAME = 'OcarinaAtlas-Linux-x64.AppImage'
+const LINUX_APPIMAGE_SHA256_ASSET_NAME = 'OcarinaAtlas-Linux-x64.AppImage.sha256'
+const ALLOWED_GITHUB_HOSTS = new Set([
+  'github.com',
+  'api.github.com',
+  'objects.githubusercontent.com',
+  'release-assets.githubusercontent.com',
+  'github-releases.githubusercontent.com',
+])
 
 const RECOMP_PROCESS_NAMES = new Set([
   'hookshot',
@@ -858,10 +868,21 @@ function postJsonHttp(url, body, timeoutMs = 1500) {
   })
 }
 
-function fetchHttpsJson(url, headers = {}, timeoutMs = 6000) {
+const MAX_REDIRECTS = 5
+
+function isAllowedGitHubUrl(rawUrl) {
+  if (typeof rawUrl !== 'string' || !rawUrl.trim()) return false
+  try {
+    const parsed = new URL(rawUrl.trim())
+    return parsed.protocol === 'https:' && ALLOWED_GITHUB_HOSTS.has(parsed.hostname.toLowerCase())
+  } catch {
+    return false
+  }
+}
+
+function fetchHttpsJson(url, headers = {}, timeoutMs = 6000, redirectsLeft = MAX_REDIRECTS) {
   return new Promise((resolve, reject) => {
-    const parsed = new URL(url)
-    if (parsed.protocol !== 'https:' || (parsed.hostname !== 'api.github.com' && parsed.hostname !== 'github.com')) {
+    if (!isAllowedGitHubUrl(url)) {
       reject(new Error('Blocked untrusted update host'))
       return
     }
@@ -878,7 +899,22 @@ function fetchHttpsJson(url, headers = {}, timeoutMs = 6000) {
       (res) => {
         if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
           res.resume()
-          fetchHttpsJson(res.headers.location, headers, timeoutMs).then(resolve, reject)
+          if (redirectsLeft <= 0) {
+            reject(new Error('Too many redirects'))
+            return
+          }
+          let nextUrl
+          try {
+            nextUrl = new URL(res.headers.location, url).toString()
+          } catch {
+            reject(new Error('Invalid redirect URL'))
+            return
+          }
+          if (!isAllowedGitHubUrl(nextUrl)) {
+            reject(new Error('Blocked untrusted redirect host'))
+            return
+          }
+          fetchHttpsJson(nextUrl, headers, timeoutMs, redirectsLeft - 1).then(resolve, reject)
           return
         }
         const chunks = []
@@ -902,6 +938,207 @@ function fetchHttpsJson(url, headers = {}, timeoutMs = 6000) {
       reject(new Error('Request timed out'))
     })
     req.on('error', reject)
+  })
+}
+
+function fetchHttpsText(url, timeoutMs = 15000, redirectsLeft = MAX_REDIRECTS) {
+  return new Promise((resolve, reject) => {
+    if (!isAllowedGitHubUrl(url)) {
+      reject(new Error('Blocked untrusted update host'))
+      return
+    }
+    const req = https.get(
+      url,
+      {
+        timeout: timeoutMs,
+        headers: {
+          'User-Agent': 'Ocarina-Atlas-Linux-Launcher',
+          Accept: 'text/plain, application/octet-stream, */*',
+        },
+      },
+      (res) => {
+        if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          res.resume()
+          if (redirectsLeft <= 0) {
+            reject(new Error('Too many redirects'))
+            return
+          }
+          let nextUrl
+          try {
+            nextUrl = new URL(res.headers.location, url).toString()
+          } catch {
+            reject(new Error('Invalid redirect URL'))
+            return
+          }
+          if (!isAllowedGitHubUrl(nextUrl)) {
+            reject(new Error('Blocked untrusted redirect host'))
+            return
+          }
+          fetchHttpsText(nextUrl, timeoutMs, redirectsLeft - 1).then(resolve, reject)
+          return
+        }
+        const chunks = []
+        let totalLen = 0
+        res.on('data', (c) => {
+          totalLen += c.length
+          if (totalLen <= 65536) {
+            chunks.push(c)
+          }
+        })
+        res.on('end', () => {
+          if (res.statusCode !== 200) {
+            reject(new Error(`GitHub download HTTP ${res.statusCode}`))
+            return
+          }
+          resolve(Buffer.concat(chunks).toString('utf8'))
+        })
+      },
+    )
+    req.on('timeout', () => {
+      req.destroy()
+      reject(new Error('Checksum download timed out'))
+    })
+    req.on('error', reject)
+  })
+}
+
+function parseSha256Digest(rawText) {
+  const text = String(rawText ?? '').trim()
+  const match = /\b([0-9a-fA-F]{64})\b/.exec(text)
+  if (!match) {
+    throw new Error('Invalid or missing 64-character hex SHA-256 digest in .sha256 sidecar')
+  }
+  return match[1].toLowerCase()
+}
+
+function downloadHttpsToFileWithSha256(
+  url,
+  destPath,
+  onProgress,
+  timeoutMs = 120000,
+  redirectsLeft = MAX_REDIRECTS,
+) {
+  return new Promise((resolve, reject) => {
+    if (!isAllowedGitHubUrl(url)) {
+      reject(new Error('Blocked untrusted update host'))
+      return
+    }
+    const req = https.get(
+      url,
+      {
+        timeout: timeoutMs,
+        headers: {
+          'User-Agent': 'Ocarina-Atlas-Linux-Launcher',
+          Accept: 'application/octet-stream, */*',
+        },
+      },
+      (res) => {
+        if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          res.resume()
+          if (redirectsLeft <= 0) {
+            reject(new Error('Too many redirects'))
+            return
+          }
+          let nextUrl
+          try {
+            nextUrl = new URL(res.headers.location, url).toString()
+          } catch {
+            reject(new Error('Invalid redirect URL'))
+            return
+          }
+          if (!isAllowedGitHubUrl(nextUrl)) {
+            reject(new Error('Blocked untrusted redirect host'))
+            return
+          }
+          downloadHttpsToFileWithSha256(nextUrl, destPath, onProgress, timeoutMs, redirectsLeft - 1).then(
+            resolve,
+            reject,
+          )
+          return
+        }
+        if (res.statusCode !== 200) {
+          res.resume()
+          reject(new Error(`AppImage download HTTP ${res.statusCode}`))
+          return
+        }
+
+        const totalBytes = Number.parseInt(String(res.headers['content-length'] || '0'), 10) || 0
+        let downloadedBytes = 0
+        let lastProgressAt = 0
+        const hash = crypto.createHash('sha256')
+        const outStream = fs.createWriteStream(destPath, { mode: 0o600 })
+        let settled = false
+
+        const fail = (err) => {
+          if (settled) return
+          settled = true
+          res.destroy()
+          outStream.destroy()
+          try {
+            if (fs.existsSync(destPath)) fs.unlinkSync(destPath)
+          } catch {
+            // Ignore cleanup error
+          }
+          reject(err)
+        }
+
+        res.on('data', (chunk) => {
+          downloadedBytes += chunk.length
+          hash.update(chunk)
+          const now = Date.now()
+          if (typeof onProgress === 'function' && (now - lastProgressAt >= 80 || downloadedBytes === totalBytes)) {
+            lastProgressAt = now
+            const percent =
+              totalBytes > 0 ? Math.min(100, Math.round((downloadedBytes / totalBytes) * 100)) : null
+            onProgress({
+              stage: 'downloading',
+              downloadedBytes,
+              totalBytes,
+              percent,
+            })
+          }
+        })
+
+        res.on('error', fail)
+        outStream.on('error', fail)
+
+        outStream.on('finish', () => {
+          outStream.close((closeErr) => {
+            if (closeErr) {
+              fail(closeErr)
+              return
+            }
+            if (settled) return
+            settled = true
+            resolve({
+              actualSha256: hash.digest('hex').toLowerCase(),
+              downloadedBytes,
+              totalBytes,
+            })
+          })
+        })
+
+        res.pipe(outStream)
+      },
+    )
+
+    req.on('timeout', () => {
+      req.destroy()
+      try {
+        if (fs.existsSync(destPath)) fs.unlinkSync(destPath)
+      } catch {
+        // Ignore
+      }
+      reject(new Error('AppImage download timed out'))
+    })
+    req.on('error', (err) => {
+      try {
+        if (fs.existsSync(destPath)) fs.unlinkSync(destPath)
+      } catch {
+        // Ignore
+      }
+      reject(err)
+    })
   })
 }
 
@@ -929,7 +1166,7 @@ function isNewerSemver(candidateRaw, currentRaw) {
   return false
 }
 
-async function checkOfficialUpdates(currentVersion) {
+async function checkForUpdates(currentVersion) {
   try {
     const release = await fetchHttpsJson(OFFICIAL_RELEASES_API_URL)
     if (!release || release.draft || release.prerelease) {
@@ -938,27 +1175,141 @@ async function checkOfficialUpdates(currentVersion) {
         currentVersion,
         latestVersion: currentVersion,
         releaseUrl: OFFICIAL_REPO_URL + '/releases/latest',
+        appImageDownloadUrl: '',
+        sha256DownloadUrl: '',
+        canSelfUpdate: false,
       }
     }
     const htmlUrl = String(release.html_url || '')
-    if (!htmlUrl.startsWith(OFFICIAL_REPO_URL + '/')) {
-      return { status: 'error', currentVersion, error: 'Untrusted release URL' }
+    if (!htmlUrl.startsWith(OFFICIAL_REPO_URL + '/') || !isAllowedGitHubUrl(htmlUrl)) {
+      return { status: 'error', currentVersion, error: 'Untrusted release URL', canSelfUpdate: false }
     }
+
+    let appImageDownloadUrl = ''
+    let sha256DownloadUrl = ''
+    const assets = Array.isArray(release.assets) ? release.assets : []
+    for (const asset of assets) {
+      if (!asset || typeof asset !== 'object') continue
+      const assetName = String(asset.name || '').trim()
+      const downloadUrl = String(asset.browser_download_url || '').trim()
+      if (!isAllowedGitHubUrl(downloadUrl)) continue
+      if (assetName === LINUX_APPIMAGE_ASSET_NAME) {
+        appImageDownloadUrl = downloadUrl
+      } else if (assetName === LINUX_APPIMAGE_SHA256_ASSET_NAME) {
+        sha256DownloadUrl = downloadUrl
+      }
+    }
+
     const latestTag = String(release.tag_name || '').trim()
     const hasUpdate = isNewerSemver(latestTag, currentVersion)
+    const canSelfUpdate = Boolean(process.env.APPIMAGE && appImageDownloadUrl && sha256DownloadUrl)
     return {
       status: hasUpdate ? 'update-available' : 'up-to-date',
       currentVersion,
       latestVersion: latestTag.replace(/^v/i, '') || currentVersion,
       releaseUrl: htmlUrl,
       publishedAt: release.published_at || '',
+      appImageDownloadUrl,
+      sha256DownloadUrl,
+      canSelfUpdate,
     }
   } catch (err) {
     return {
       status: 'error',
       currentVersion,
       error: err instanceof Error ? err.message : String(err),
+      canSelfUpdate: false,
     }
+  }
+}
+
+const checkOfficialUpdates = checkForUpdates
+
+async function applyAppImageUpdate(updateInfo, onProgress = () => {}) {
+  const appImagePath = typeof process.env.APPIMAGE === 'string' ? process.env.APPIMAGE.trim() : ''
+  if (!appImagePath) {
+    throw new Error('In-place update requires running from a packaged Linux AppImage (APPIMAGE is unset).')
+  }
+  if (!fs.existsSync(appImagePath) || !fs.statSync(appImagePath).isFile()) {
+    throw new Error(`Current AppImage file was not found on disk: ${appImagePath}`)
+  }
+  try {
+    fs.accessSync(appImagePath, fs.constants.W_OK)
+    fs.accessSync(path.dirname(appImagePath), fs.constants.W_OK)
+  } catch {
+    throw new Error(`Current AppImage location is not writable: ${appImagePath}`)
+  }
+
+  const appImageDownloadUrl = String(updateInfo?.appImageDownloadUrl || '').trim()
+  const sha256DownloadUrl = String(updateInfo?.sha256DownloadUrl || '').trim()
+  if (!isAllowedGitHubUrl(appImageDownloadUrl) || !isAllowedGitHubUrl(sha256DownloadUrl)) {
+    throw new Error('Missing or untrusted official GitHub asset URLs for AppImage update.')
+  }
+
+  const tmpPath = `${appImagePath}.update.tmp`
+  try {
+    if (fs.existsSync(tmpPath)) {
+      fs.unlinkSync(tmpPath)
+    }
+  } catch {
+    // Ignore stale temporary file cleanup errors
+  }
+
+  onProgress({ stage: 'fetching-checksum', percent: 0 })
+  const sha256Raw = await fetchHttpsText(sha256DownloadUrl, 15000, MAX_REDIRECTS)
+  const expectedSha256 = parseSha256Digest(sha256Raw)
+
+  onProgress({ stage: 'downloading', downloadedBytes: 0, totalBytes: 0, percent: 0 })
+  const { actualSha256, downloadedBytes } = await downloadHttpsToFileWithSha256(
+    appImageDownloadUrl,
+    tmpPath,
+    onProgress,
+    120000,
+    MAX_REDIRECTS,
+  )
+
+  onProgress({ stage: 'verifying', percent: 100 })
+  if (actualSha256.toLowerCase() !== expectedSha256.toLowerCase()) {
+    try {
+      if (fs.existsSync(tmpPath)) {
+        fs.unlinkSync(tmpPath)
+      }
+    } catch {
+      // Ignore cleanup error
+    }
+    throw new Error(
+      `SHA-256 verification failed: expected ${expectedSha256}, computed ${actualSha256}. Temporary update deleted.`,
+    )
+  }
+
+  try {
+    fs.chmodSync(tmpPath, 0o755)
+    fs.renameSync(tmpPath, appImagePath)
+  } catch (err) {
+    try {
+      if (fs.existsSync(tmpPath)) {
+        fs.unlinkSync(tmpPath)
+      }
+    } catch {
+      // Ignore cleanup error
+    }
+    throw err
+  }
+
+  onProgress({
+    stage: 'complete',
+    percent: 100,
+    sha256: actualSha256,
+    downloadedBytes,
+    appImagePath,
+  })
+
+  return {
+    ok: true,
+    appImagePath,
+    sha256: actualSha256,
+    downloadedBytes,
+    version: updateInfo?.latestVersion || '',
   }
 }
 
@@ -1401,6 +1752,7 @@ async function main() {
         preload: path.join(__dirname, 'preload.cjs'),
         contextIsolation: true,
         nodeIntegration: false,
+        sandbox: true,
       },
     })
 
@@ -1601,11 +1953,88 @@ async function main() {
   })
 
   ipcMain.handle('launcher:check-updates', async () => {
-    const info = await checkOfficialUpdates(state.version)
+    const info = await checkForUpdates(state.version)
     state.updateInfo = info
     pushState()
     return info
   })
+
+  let updateInFlight = false
+  function emitUpdateProgress(progress) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('launcher:update-progress', progress)
+    }
+  }
+
+  async function handleApplyUpdate(_ev, opts = {}) {
+    if (updateInFlight) {
+      return { ok: false, error: 'An update is already in progress.' }
+    }
+    updateInFlight = true
+    try {
+      if (!state.updateInfo || !state.updateInfo.appImageDownloadUrl || !state.updateInfo.sha256DownloadUrl) {
+        state.updateInfo = await checkForUpdates(state.version)
+        pushState()
+      }
+      emitLog(
+        'info',
+        `[update] Downloading v${state.updateInfo?.latestVersion || 'latest'} AppImage and .sha256 checksum...`,
+      )
+      const res = await applyAppImageUpdate(state.updateInfo, emitUpdateProgress)
+      emitLog(
+        'info',
+        `[update] SHA-256 verified (${res.sha256.slice(0, 12)}...). Replaced ${res.appImagePath} in-place.`,
+      )
+      if (opts?.relaunch !== false) {
+        setTimeout(() => {
+          void (async () => {
+            try {
+              await Promise.all([
+                terminateChild(serverChild, 2000),
+                terminateChild(bridgeChild, 1000),
+              ])
+              serverChild = null
+              bridgeChild = null
+            } catch {
+              // Ignore child shutdown errors before relaunch
+            }
+            try {
+              const cleanEnv = { ...process.env }
+              delete cleanEnv.APPDIR
+              delete cleanEnv.APPIMAGE
+              delete cleanEnv.ARGV0
+              delete cleanEnv.OWD
+              delete cleanEnv.APPIMAGE_UUID
+              const child = spawn(res.appImagePath, getCliArgs(), {
+                detached: true,
+                stdio: 'ignore',
+                env: cleanEnv,
+              })
+              child.unref()
+            } catch {
+              try {
+                app.relaunch({ execPath: res.appImagePath, args: getCliArgs() })
+              } catch {
+                // Ignore relaunch error in test environments
+              }
+            }
+            void shutdown('self-update-relaunch', 0)
+          })()
+        }, 450)
+      }
+      return res
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      emitLog('error', `[update] ${errorMsg}`)
+      emitUpdateProgress({ stage: 'error', error: errorMsg })
+      return { ok: false, error: errorMsg }
+    } finally {
+      updateInFlight = false
+    }
+  }
+
+  ipcMain.handle('apply-update', handleApplyUpdate)
+  ipcMain.handle('launcher:apply-update', handleApplyUpdate)
 
   ipcMain.handle('launcher:clear-logs', () => {
     state.logs = []

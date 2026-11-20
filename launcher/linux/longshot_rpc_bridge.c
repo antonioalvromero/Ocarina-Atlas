@@ -42,6 +42,8 @@
 #define SEARCH_CHUNK_SIZE 1048576
 #define DEFAULT_MAX_HITS 64
 #define MAX_ALLOWED_HITS 1024
+#define MAX_JSON_DEPTH 32
+#define MAX_RPC_CLIENTS 16
 #define DEFAULT_BRIDGE_PORT 6545
 #define OOT_PROGRAM_ID "0400486024DEC000"
 
@@ -90,6 +92,7 @@ static bool g_once_mode = false;
 
 static pthread_mutex_t g_clients_mutex = PTHREAD_MUTEX_INITIALIZER;
 static client_node_t *g_clients_head = NULL;
+static size_t g_active_clients = 0;
 
 static void on_signal(int sig) {
     (void)sig;
@@ -1143,9 +1146,12 @@ static bool parse_json_string_alloc(const char **pp, char **out_str) {
     return true;
 }
 
-static bool skip_json_value(const char **pp);
+static bool skip_json_value(const char **pp, int depth);
 
-static bool skip_json_container(const char **pp, char open_ch, char close_ch) {
+static bool skip_json_container(const char **pp, char open_ch, char close_ch, int depth) {
+    if (depth >= MAX_JSON_DEPTH) {
+        return false;
+    }
     const char *p = *pp;
     if (*p != open_ch) {
         return false;
@@ -1166,7 +1172,7 @@ static bool skip_json_container(const char **pp, char open_ch, char close_ch) {
             }
             p = skip_ws(p + 1);
         }
-        if (!skip_json_value(&p)) {
+        if (!skip_json_value(&p, depth + 1)) {
             return false;
         }
         p = skip_ws(p);
@@ -1182,7 +1188,10 @@ static bool skip_json_container(const char **pp, char open_ch, char close_ch) {
     }
 }
 
-static bool skip_json_value(const char **pp) {
+static bool skip_json_value(const char **pp, int depth) {
+    if (depth > MAX_JSON_DEPTH) {
+        return false;
+    }
     const char *p = skip_ws(*pp);
     if (*p == '"') {
         *pp = p;
@@ -1190,11 +1199,11 @@ static bool skip_json_value(const char **pp) {
     }
     if (*p == '{') {
         *pp = p;
-        return skip_json_container(pp, '{', '}');
+        return skip_json_container(pp, '{', '}', depth);
     }
     if (*p == '[') {
         *pp = p;
-        return skip_json_container(pp, '[', ']');
+        return skip_json_container(pp, '[', ']', depth);
     }
     if (strncmp(p, "true", 4) == 0) {
         *pp = p + 4;
@@ -1409,7 +1418,7 @@ static bool parse_params_object(const char **pp, rpc_request_t *req) {
             req->has_budget_ms = true;
             req->budget_ms = iv;
         } else {
-            if (!skip_json_value(&p)) {
+            if (!skip_json_value(&p, 0)) {
                 free(key);
                 return false;
             }
@@ -1458,7 +1467,7 @@ static bool parse_rpc_request(const char *line, rpc_request_t *req) {
 
         if (strcmp(key, "id") == 0) {
             const char *val_start = p;
-            if (!skip_json_value(&p)) {
+            if (!skip_json_value(&p, 0)) {
                 free(key);
                 rpc_request_free(req);
                 return false;
@@ -1486,7 +1495,7 @@ static bool parse_rpc_request(const char *line, rpc_request_t *req) {
                 return false;
             }
         } else {
-            if (!skip_json_value(&p)) {
+            if (!skip_json_value(&p, 0)) {
                 free(key);
                 rpc_request_free(req);
                 return false;
@@ -1788,7 +1797,7 @@ static void *client_thread_main(void *arg) {
     size_t len = 0;
     char *buf = (char *)malloc(cap);
     if (!buf) {
-        return NULL;
+        goto cleanup;
     }
 
     while (!g_stop) {
@@ -1866,9 +1875,13 @@ static void *client_thread_main(void *arg) {
     }
 
     free(buf);
+cleanup:
     shutdown(fd, SHUT_RDWR);
     pthread_mutex_lock(&g_clients_mutex);
     node->finished = true;
+    if (g_active_clients > 0) {
+        g_active_clients--;
+    }
     pthread_mutex_unlock(&g_clients_mutex);
     return NULL;
 }
@@ -2152,17 +2165,38 @@ int main(int argc, char **argv) {
             break;
         }
 
+        reap_finished_clients();
+
+        pthread_mutex_lock(&g_clients_mutex);
+        if (g_active_clients >= MAX_RPC_CLIENTS) {
+            pthread_mutex_unlock(&g_clients_mutex);
+            close(client_fd);
+            continue;
+        }
+        g_active_clients++;
+        pthread_mutex_unlock(&g_clients_mutex);
+
         int nodelay = 1;
         (void)setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
 
         client_node_t *node = (client_node_t *)calloc(1, sizeof(client_node_t));
         if (!node) {
+            pthread_mutex_lock(&g_clients_mutex);
+            if (g_active_clients > 0) {
+                g_active_clients--;
+            }
+            pthread_mutex_unlock(&g_clients_mutex);
             close(client_fd);
             continue;
         }
         node->fd = client_fd;
 
         if (pthread_create(&node->thread, NULL, client_thread_main, node) != 0) {
+            pthread_mutex_lock(&g_clients_mutex);
+            if (g_active_clients > 0) {
+                g_active_clients--;
+            }
+            pthread_mutex_unlock(&g_clients_mutex);
             close(client_fd);
             free(node);
             continue;

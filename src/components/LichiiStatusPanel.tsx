@@ -1,21 +1,57 @@
-import { CheckCircle2, Compass, Crosshair, Eye, EyeOff, Radio, RefreshCw, Skull, SlidersHorizontal, Sparkles, X } from 'lucide-react'
+import {
+  ArrowUp,
+  CheckCircle2,
+  Compass,
+  Crosshair,
+  Eye,
+  EyeOff,
+  Navigation,
+  Radio,
+  RefreshCw,
+  Shield,
+  Skull,
+  SlidersHorizontal,
+  Sparkles,
+  X,
+} from 'lucide-react'
 import {
   useCallback,
   useEffect,
   useId,
+  useMemo,
   useReducer,
   useRef,
   useState,
   type FocusEvent as ReactFocusEvent,
   type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from 'react'
 import { dataset, formatFloorLabel } from '../lib/data'
 import { DEFAULT_LOCALE, translate, translatePlace, useI18n, type Locale } from '../lib/i18n'
-import { hideDoneSlot, officialVisibleSlot, prereqFilterEnabledSlot, useStored, write } from '../lib/storage'
+import {
+  computeRelativeBearing,
+  findNearestReachableCollectible,
+  stepContinuousAngle,
+  type NearestCollectibleMatch,
+} from '../lib/nearest-collectible'
+import { expandOwnedRequirements } from '../lib/prerequisites'
+import {
+  hideDoneSlot,
+  nearestFinderSlot,
+  officialDoneSlot,
+  officialVisibleSlot,
+  ownedPrereqsSlot,
+  prereqAutoSyncSlot,
+  prereqFilterEnabledSlot,
+  spoilerFreeSlot,
+  useStored,
+  write,
+} from '../lib/storage'
 
 const itemsById = new Map(dataset.items.map((item) => [item.id, item]))
 import type { LichiiTelemetryState } from '../lib/lichii-types'
-import { isLiveMemoryState, type SkulltulaToast } from '../lib/useLichiiTracker'
+import { isLiveMemoryState, useLichiiPosition, type SkulltulaToast } from '../lib/useLichiiTracker'
+import { categoryStyle } from './categories'
 
 const HOVER_CLOSE_DELAY_MS = 180
 const TOUCH_HOVER_GUARD_MS = 500
@@ -50,7 +86,7 @@ export type ConnectionView = {
   note: string | null
 }
 
-function getEmulatorDisplayName(emulator?: LichiiTelemetryState['emulator']): string {
+function getEmulatorDisplayName(emulator?: LichiiTelemetryState['emulator'] | string): string {
   if (emulator === 'fritchii') return 'Fritchii'
   if (emulator === 'eden') return 'Eden'
   if (emulator === 'cheezyemu') return 'CheezyEmu'
@@ -59,6 +95,7 @@ function getEmulatorDisplayName(emulator?: LichiiTelemetryState['emulator']): st
   if (emulator === 'triforce') return 'Triforce'
   if (emulator === 'nx2saria') return 'NX2Saria'
   if (emulator === 'ootpc') return 'OOT-PC'
+  if (emulator === 'heylisten') return 'HeyListen'
   return 'Lichii'
 }
 
@@ -285,6 +322,179 @@ export async function switchSaveSlot(slot: string | null): Promise<boolean> {
   }
 }
 
+export function NearestItemIslandPill({
+  state,
+  doneIds,
+  ownedExpanded,
+  onSelectItem,
+}: {
+  state: LichiiTelemetryState
+  doneIds: ReadonlySet<string>
+  ownedExpanded: ReadonlySet<string>
+  onSelectItem?: (itemId: string) => void
+}) {
+  const { t, tItemName } = useI18n()
+  const position = useLichiiPosition()
+  const prereqAutoSync = useStored(prereqAutoSyncSlot)
+  const mapFraction = position.mapFraction ?? state.mapFraction
+
+  const beanEvalOptions = useMemo(
+    () =>
+      prereqAutoSync && state.authoritativeBeans && state.collectedBeanIds
+        ? { beanAutoSynced: true, collectedBeanIds: new Set(state.collectedBeanIds) }
+        : undefined,
+    [prereqAutoSync, state.authoritativeBeans, state.collectedBeanIds],
+  )
+
+  const nearestMatch = useMemo(
+    () =>
+      findNearestReachableCollectible({
+        placeId: state.placeId,
+        mapId: state.mapId,
+        mapFraction,
+        age: state.age,
+        doneIds,
+        ownedExpanded,
+        beanEvalOptions,
+      }),
+    [state.placeId, state.mapId, mapFraction, state.age, doneIds, ownedExpanded, beanEvalOptions],
+  )
+
+  const lastMatchRef = useRef<NearestCollectibleMatch | null>(null)
+  if (nearestMatch) {
+    lastMatchRef.current = nearestMatch
+  }
+  const activeMatch = nearestMatch ?? lastMatchRef.current
+  const [hasEntered, setHasEntered] = useState(() => typeof window === 'undefined')
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    let raf2 = 0
+    const raf1 = window.requestAnimationFrame(() => {
+      raf2 = window.requestAnimationFrame(() => {
+        setHasEntered(true)
+      })
+    })
+    return () => {
+      window.cancelAnimationFrame(raf1)
+      if (raf2) window.cancelAnimationFrame(raf2)
+    }
+  }, [])
+
+  const isVisible = nearestMatch !== null && hasEntered
+
+  const playerYaw = position.position?.yaw ?? state.position?.yaw
+  const targetArrowDeg = nearestMatch
+    ? computeRelativeBearing(nearestMatch.bearingDeg, playerYaw)
+    : null
+  const [arrowRotationDeg, setArrowRotationDeg] = useState<number | null>(targetArrowDeg)
+
+  useEffect(() => {
+    if (targetArrowDeg === null) {
+      setArrowRotationDeg(null)
+      return
+    }
+    setArrowRotationDeg((prev) => stepContinuousAngle(prev, targetArrowDeg))
+  }, [targetArrowDeg])
+
+  let pillBody: ReactNode = null
+  if (activeMatch) {
+    const { icon: CategoryIcon, color: categoryColor } = categoryStyle(activeMatch.item.cat)
+    const displayName = tItemName(activeMatch.item.id, activeMatch.item.name)
+    const distanceLabel = t('tracker.nearestDistance', { distance: activeMatch.distanceMeters })
+    const pillContent = (
+      <>
+        <span
+          aria-hidden="true"
+          className="grid size-7 shrink-0 place-items-center rounded-full border border-ink-600/80 bg-ink-800/90"
+          style={{ color: categoryColor }}
+        >
+          <CategoryIcon size={14} strokeWidth={2.1} />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col text-left">
+          <span className="truncate text-xs leading-tight font-medium text-parchment-50">
+            {displayName}
+          </span>
+          <span className="mt-0.5 flex items-center gap-1 text-[11px] leading-none text-parchment-300 tabular-nums">
+            <ArrowUp
+              size={11}
+              aria-hidden="true"
+              className="shrink-0 text-[#e6b450] transition-transform duration-150 ease-linear motion-reduce:transition-none"
+              style={{
+                transform: `rotate(${Math.round(arrowRotationDeg ?? activeMatch.bearingDeg)}deg)`,
+              }}
+            />
+            <span>{distanceLabel}</span>
+          </span>
+        </span>
+      </>
+    )
+
+    const liquidGlassStyle = {
+      boxShadow:
+        'inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.06), 0 12px 30px rgba(0,0,0,0.48)',
+    }
+
+    if (onSelectItem) {
+      pillBody = (
+        <button
+          type="button"
+          tabIndex={isVisible ? undefined : -1}
+          onClick={() => onSelectItem(activeMatch.item.id)}
+          title={`${displayName} (${distanceLabel})`}
+          aria-label={`${displayName} (${distanceLabel})`}
+          style={liquidGlassStyle}
+          className="relative flex w-max max-w-[240px] cursor-pointer items-center gap-2 overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-ink-800/75 via-ink-900/65 to-ink-950/75 px-2.5 py-1.5 text-left backdrop-blur-xl transition-colors duration-200 hover:border-[#e6b450]/55 hover:from-ink-800/85 hover:to-ink-900/85 focus-visible:ring-2 focus-visible:ring-[#e6b450]/60 focus-visible:outline-none"
+        >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent"
+          />
+          {pillContent}
+        </button>
+      )
+    } else {
+      pillBody = (
+        <div
+          title={`${displayName} (${distanceLabel})`}
+          style={liquidGlassStyle}
+          className="relative flex w-max max-w-[240px] items-center gap-2 overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-ink-800/75 via-ink-900/65 to-ink-950/75 px-2.5 py-1.5 backdrop-blur-xl"
+        >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent"
+          />
+          {pillContent}
+        </div>
+      )
+    }
+  }
+
+  return (
+    <div
+      data-nearest-pill={isVisible ? 'visible' : 'collapsed'}
+      aria-hidden={!isVisible}
+      inert={!isVisible}
+      style={{
+        maxWidth: isVisible ? '248px' : '0px',
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible
+          ? 'translate3d(0px, 0px, 0px) scale(1)'
+          : 'translate3d(-24px, 0px, 0px) scale(0.72)',
+        filter: isVisible ? 'blur(0px)' : 'blur(6px)',
+        transition: isVisible
+          ? 'max-width 520ms cubic-bezier(0.34, 1.38, 0.64, 1), transform 520ms cubic-bezier(0.34, 1.38, 0.64, 1), opacity 300ms ease-out, filter 340ms ease-out'
+          : 'max-width 340ms cubic-bezier(0.4, 0, 0.2, 1), transform 340ms cubic-bezier(0.4, 0, 0.2, 1), opacity 220ms ease-in, filter 260ms ease-in',
+      }}
+      className={`origin-left overflow-hidden will-change-[transform,opacity,max-width,filter] ${
+        isVisible ? 'pointer-events-auto' : 'pointer-events-none'
+      }`}
+    >
+      {pillBody}
+    </div>
+  )
+}
+
 export function LichiiStatusPanel({
   state,
   followPlayer,
@@ -302,6 +512,7 @@ export function LichiiStatusPanel({
 }: LichiiStatusPanelProps) {
   const panelId = useId()
   const containerRef = useRef<HTMLDivElement>(null)
+  const orbRegionRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const orbRef = useRef<HTMLButtonElement>(null)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -315,6 +526,12 @@ export function LichiiStatusPanel({
   const showOfficialPins = useStored(officialVisibleSlot)
   const prereqFilterEnabled = useStored(prereqFilterEnabledSlot)
   const hideDone = useStored(hideDoneSlot)
+  const spoilerFree = useStored(spoilerFreeSlot)
+  const nearestEnabled = useStored(nearestFinderSlot)
+  const doneIds = useStored(officialDoneSlot)
+  const doneIdSet = useMemo(() => new Set(doneIds), [doneIds])
+  const ownedPrereqs = useStored(ownedPrereqsSlot)
+  const ownedExpanded = useMemo(() => expandOwnedRequirements(ownedPrereqs), [ownedPrereqs])
   const [panelState, dispatch] = useReducer(reducePanelInteraction, INITIAL_PANEL_INTERACTION)
   const [selectedSlot, setSelectedSlot] = useState<string | undefined>(undefined)
   const [isSwitchingSlot, setIsSwitchingSlot] = useState(false)
@@ -389,6 +606,7 @@ export function LichiiStatusPanel({
 
     const onDocumentKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
+        event.preventDefault()
         collapsePanel(true)
       }
     }
@@ -401,13 +619,13 @@ export function LichiiStatusPanel({
     }
   }, [isOpen, collapsePanel])
 
-  function handleWrapperPointerEnter(event: ReactPointerEvent<HTMLDivElement>) {
+  function handleRegionPointerEnter(event: ReactPointerEvent<HTMLDivElement>) {
     if (shouldIgnoreHoverPointer(event.pointerType, lastTouchAtRef.current)) return
     clearCloseTimer()
     dispatch({ type: 'hoverEnter' })
   }
 
-  function handleWrapperPointerLeave(event: ReactPointerEvent<HTMLDivElement>) {
+  function handleRegionPointerLeave(event: ReactPointerEvent<HTMLDivElement>) {
     if (shouldIgnoreHoverPointer(event.pointerType, lastTouchAtRef.current)) return
     clearCloseTimer()
     closeTimerRef.current = setTimeout(() => {
@@ -425,21 +643,21 @@ export function LichiiStatusPanel({
     }
   }
 
-  function handleWrapperPointerDownCapture(event: ReactPointerEvent<HTMLDivElement>) {
+  function handleRegionPointerDownCapture(event: ReactPointerEvent<HTMLDivElement>) {
     recordPointerActivity(event.pointerType, true)
   }
 
-  function handleWrapperPointerEndCapture(event: ReactPointerEvent<HTMLDivElement>) {
+  function handleRegionPointerEndCapture(event: ReactPointerEvent<HTMLDivElement>) {
     recordPointerActivity(event.pointerType, false)
   }
 
-  function handleWrapperKeyDownCapture() {
+  function handleRegionKeyDownCapture() {
     pointerActiveRef.current = false
     lastPointerAtRef.current = 0
     lastTouchAtRef.current = 0
   }
 
-  function handleWrapperFocus() {
+  function handleRegionFocusCapture() {
     if (suppressFocusReopenRef.current) {
       suppressFocusReopenRef.current = false
       return
@@ -458,9 +676,12 @@ export function LichiiStatusPanel({
     dispatch({ type: 'focusIn' })
   }
 
-  function handleWrapperBlur(event: ReactFocusEvent<HTMLDivElement>) {
+  function handleRegionBlurCapture(event: ReactFocusEvent<HTMLDivElement>) {
     const nextTarget = event.relatedTarget
-    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) {
+    if (
+      nextTarget instanceof Node &&
+      (orbRegionRef.current?.contains(nextTarget) || panelRef.current?.contains(nextTarget))
+    ) {
       return
     }
     dispatch({ type: 'focusOut' })
@@ -492,14 +713,6 @@ export function LichiiStatusPanel({
       {/* Bottom-left Gold Skulltula medallion trigger + docked telemetry card (flex-col-reverse keeps orb first in Tab order) */}
       <div
         ref={containerRef}
-        onPointerEnter={handleWrapperPointerEnter}
-        onPointerLeave={handleWrapperPointerLeave}
-        onPointerDownCapture={handleWrapperPointerDownCapture}
-        onPointerUpCapture={handleWrapperPointerEndCapture}
-        onPointerCancelCapture={handleWrapperPointerEndCapture}
-        onKeyDownCapture={handleWrapperKeyDownCapture}
-        onFocus={handleWrapperFocus}
-        onBlur={handleWrapperBlur}
         style={
           isFullscreen
             ? {
@@ -510,55 +723,78 @@ export function LichiiStatusPanel({
         }
         className="pointer-events-none absolute bottom-3 left-3 z-30 flex max-w-[calc(100%-1.5rem)] flex-col-reverse items-start"
       >
-        {/* Compact circular Gold Skulltula medallion trigger */}
-        <button
-          ref={orbRef}
-          type="button"
-          aria-expanded={isOpen}
-          aria-controls={panelId}
-          aria-label={orbAriaLabel}
-          onPointerDown={handleOrbPointerDown}
-          onClick={handleOrbClick}
-          className={`group pointer-events-auto relative flex size-14 shrink-0 cursor-pointer flex-col items-center justify-center rounded-full border bg-ink-900/95 backdrop-blur-sm transition-[transform,border-color,box-shadow,background-color] duration-200 ease-out hover:scale-105 hover:bg-ink-800/95 active:scale-95 motion-reduce:transition-none ${connection.ringClass} ${
-            isOpen ? 'ring-2 ring-[#e6b450]/35' : ''
-          }`}
-        >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-1 rounded-full border border-[#e6b450]/20 transition-colors group-hover:border-[#e6b450]/40 motion-reduce:transition-none"
-          />
-
-          <Skull
-            size={17}
-            strokeWidth={2.1}
-            aria-hidden
-            className={`drop-shadow-[0_1px_2px_rgb(0_0_0/0.85)] transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none ${
-              connection.tone === 'disconnected' && state.skulltulaCount === null
-                ? 'text-[#e6b450]/75'
-                : 'text-[#e6b450]'
-            }`}
-          />
-          <span
-            aria-hidden
-            className={`mt-0.5 text-[11px] leading-none font-bold tracking-tight tabular-nums ${
-              state.skulltulaCount !== null ? 'text-parchment-50' : 'text-parchment-400'
+        {/* Compact circular Gold Skulltula medallion trigger + emerging nearest-item capsule */}
+        <div className="flex items-center gap-2">
+          <div
+            ref={orbRegionRef}
+            onPointerEnter={handleRegionPointerEnter}
+            onPointerLeave={handleRegionPointerLeave}
+            onPointerDownCapture={handleRegionPointerDownCapture}
+            onPointerUpCapture={handleRegionPointerEndCapture}
+            onPointerCancelCapture={handleRegionPointerEndCapture}
+            onKeyDownCapture={handleRegionKeyDownCapture}
+            onFocusCapture={handleRegionFocusCapture}
+            onBlurCapture={handleRegionBlurCapture}
+          >
+            <button
+              ref={orbRef}
+            type="button"
+            aria-expanded={isOpen}
+            aria-controls={panelId}
+            aria-label={orbAriaLabel}
+            onPointerDown={handleOrbPointerDown}
+            onClick={handleOrbClick}
+            className={`group pointer-events-auto relative flex size-14 shrink-0 cursor-pointer flex-col items-center justify-center rounded-full border bg-ink-900/95 backdrop-blur-sm transition-[transform,border-color,box-shadow,background-color] duration-200 ease-out hover:scale-105 hover:bg-ink-800/95 active:scale-95 motion-reduce:transition-none ${connection.ringClass} ${
+              isOpen ? 'ring-2 ring-[#e6b450]/35' : ''
             }`}
           >
-            {countDisplay}
-          </span>
-
-          <span
-            aria-hidden
-            className="pointer-events-none absolute top-0.5 right-0.5 flex size-3.5 items-center justify-center"
-          >
-            {connection.pulse && (
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-moss opacity-75 motion-reduce:animate-none" />
-            )}
             <span
-              className={`relative inline-flex size-2.5 rounded-full ring-2 ring-ink-950 ${connection.dotClass}`}
+              aria-hidden
+              className="pointer-events-none absolute inset-1 rounded-full border border-[#e6b450]/20 transition-colors group-hover:border-[#e6b450]/40 motion-reduce:transition-none"
             />
-          </span>
-        </button>
+
+            <Skull
+              size={17}
+              strokeWidth={2.1}
+              aria-hidden
+              className={`drop-shadow-[0_1px_2px_rgb(0_0_0/0.85)] transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none ${
+                connection.tone === 'disconnected' && state.skulltulaCount === null
+                  ? 'text-[#e6b450]/75'
+                  : 'text-[#e6b450]'
+              }`}
+            />
+            <span
+              aria-hidden
+              className={`mt-0.5 text-[11px] leading-none font-bold tracking-tight tabular-nums ${
+                state.skulltulaCount !== null ? 'text-parchment-50' : 'text-parchment-400'
+              }`}
+            >
+              {countDisplay}
+            </span>
+
+            <span
+              aria-hidden
+              className="pointer-events-none absolute top-0.5 right-0.5 flex size-3.5 items-center justify-center"
+            >
+              {connection.pulse && (
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-moss opacity-75 motion-reduce:animate-none" />
+              )}
+              <span
+                className={`relative inline-flex size-2.5 rounded-full ring-2 ring-ink-950 ${connection.dotClass}`}
+              />
+            </span>
+          </button>
+          </div>
+
+          {nearestEnabled && (
+            <NearestItemIslandPill
+              state={state}
+              doneIds={doneIdSet}
+              ownedExpanded={ownedExpanded}
+              onSelectItem={onSelectItem}
+            />
+          )}
+        </div>
 
         {/* Continuous pb-2 bridge eliminates any dead hover gap between card and orb */}
         <div
@@ -568,6 +804,15 @@ export function LichiiStatusPanel({
           aria-label={t('tracker.emulatorTracker', { emulator: getEmulatorDisplayName(state.emulator) })}
           aria-hidden={!isOpen}
           inert={!isOpen}
+          data-overlay-open={isOpen ? 'true' : undefined}
+          onPointerEnter={handleRegionPointerEnter}
+          onPointerLeave={handleRegionPointerLeave}
+          onPointerDownCapture={handleRegionPointerDownCapture}
+          onPointerUpCapture={handleRegionPointerEndCapture}
+          onPointerCancelCapture={handleRegionPointerEndCapture}
+          onKeyDownCapture={handleRegionKeyDownCapture}
+          onFocusCapture={handleRegionFocusCapture}
+          onBlurCapture={handleRegionBlurCapture}
           className={`max-w-full origin-bottom-left pb-2 transition-[opacity,transform,visibility] duration-200 ease-out motion-reduce:transition-none ${
             isOpen
               ? 'pointer-events-auto visible translate-y-0 scale-100 opacity-100'
@@ -633,9 +878,9 @@ export function LichiiStatusPanel({
                 type="button"
                 aria-label={t('tracker.collapsePanel')}
                 onClick={(event) => collapsePanel(event.detail === 0)}
-                className="-mt-1 -mr-1.5 inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-parchment-400 transition-colors hover:bg-ink-700 hover:text-parchment-50 motion-reduce:transition-none"
+                className="-mt-2.5 -mr-2.5 -mb-1.5 inline-flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-parchment-400 transition-colors hover:bg-ink-700 hover:text-parchment-50 motion-reduce:transition-none"
               >
-                <X size={14} />
+                <X size={16} />
               </button>
             </div>
 
@@ -709,11 +954,11 @@ export function LichiiStatusPanel({
                   title={activeSaveDir ?? undefined}
                 >
                   <label htmlFor={`${panelId}-save-slot`} className="font-medium text-parchment-400">
-                    Save Slot
+                    {t('tracker.saveSlot')}
                   </label>
                   <select
                     id={`${panelId}-save-slot`}
-                    aria-label="Save Slot"
+                    aria-label={t('tracker.saveSlot')}
                     disabled={isSwitchingSlot}
                     value={selectedSlot ?? activeSaveSlot ?? ''}
                     onChange={(event) => {
@@ -726,7 +971,7 @@ export function LichiiStatusPanel({
                     }}
                     className="cursor-pointer rounded border border-ink-600 bg-ink-900 px-1.5 py-0.5 text-[11px] font-semibold text-parchment-50 focus:border-[#e6b450] focus:outline-none disabled:opacity-60"
                   >
-                    <option value="">Auto</option>
+                    <option value="">{t('tracker.saveSlotAuto')}</option>
                     {slotOptions.map((slot) => (
                       <option key={slot} value={slot}>
                         {slot}
@@ -797,6 +1042,44 @@ export function LichiiStatusPanel({
                   aria-hidden
                 />
                 <span>{t('filter.hideCompleted')}</span>
+              </button>
+
+              <button
+                type="button"
+                aria-pressed={spoilerFree}
+                onClick={() => write(spoilerFreeSlot, !spoilerFree)}
+                title={t('filter.spoilerFree')}
+                className={`inline-flex cursor-pointer items-center gap-1 rounded border px-2 py-1 text-[11px] font-medium transition-colors motion-reduce:transition-none ${
+                  spoilerFree
+                    ? 'border-[#e6b450]/70 bg-[#e6b450]/20 text-parchment-50'
+                    : 'border-ink-600 bg-ink-800 text-parchment-400 hover:text-parchment-50'
+                }`}
+              >
+                <Shield
+                  size={11}
+                  className={`shrink-0 ${spoilerFree ? 'text-[#e6b450]' : ''}`}
+                  aria-hidden
+                />
+                <span>{t('filter.spoilerFreeShort')}</span>
+              </button>
+
+              <button
+                type="button"
+                aria-pressed={nearestEnabled}
+                onClick={() => write(nearestFinderSlot, !nearestEnabled)}
+                title={t('tracker.nearestPinTitle')}
+                className={`inline-flex cursor-pointer items-center gap-1 rounded border px-2 py-1 text-[11px] font-medium transition-colors motion-reduce:transition-none ${
+                  nearestEnabled
+                    ? 'border-[#e6b450]/70 bg-[#e6b450]/20 text-parchment-50'
+                    : 'border-ink-600 bg-ink-800 text-parchment-400 hover:text-parchment-50'
+                }`}
+              >
+                <Navigation
+                  size={11}
+                  className={`shrink-0 ${nearestEnabled ? 'text-[#e6b450]' : ''}`}
+                  aria-hidden
+                />
+                <span>{t('tracker.nearestPin')}</span>
               </button>
             </div>
           </section>

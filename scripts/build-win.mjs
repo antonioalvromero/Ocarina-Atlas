@@ -16,9 +16,72 @@ const ZIP_PATH = path.join(RELEASE_DIR, ZIP_NAME)
 const DIST_DIR = path.join(ROOT_DIR, 'dist')
 const STANDALONE_ENTRY = path.join(ROOT_DIR, 'scripts', 'server-entry.ts')
 const STANDALONE_OUT = path.join(DIST_DIR, 'standalone-server.mjs')
+const PACKAGE_JSON = path.join(ROOT_DIR, 'package.json')
 const LAUNCHER_CS = path.join(ROOT_DIR, 'launcher', 'OcarinaAtlas.cs')
+const LAUNCHER_WIN_DIR = path.join(ROOT_DIR, 'launcher', 'win')
 const LAUNCHER_ICO = path.join(ROOT_DIR, 'launcher', 'OcarinaAtlas.ico')
 const LAUNCHER_EXE = path.join(BUNDLE_DIR, 'OcarinaAtlas.exe')
+
+function toAssemblyFourPartVersion(semver) {
+  const clean = String(semver || '0.0.0').trim().split('-')[0].split('+')[0]
+  const parts = clean
+    .split('.')
+    .map((p) => {
+      const n = Number.parseInt(p, 10)
+      return Number.isFinite(n) && n >= 0 ? n : 0
+    })
+  while (parts.length < 4) {
+    parts.push(0)
+  }
+  return parts.slice(0, 4).join('.')
+}
+
+function syncLauncherVersionFromPackageJson() {
+  assertExists(PACKAGE_JSON, 'package.json')
+  assertExists(LAUNCHER_CS, 'WinForms launcher entry source')
+  const pkg = JSON.parse(fs.readFileSync(PACKAGE_JSON, 'utf8'))
+  const appVersion = String(pkg.version || '0.0.0').trim()
+  const assemblyVersion = toAssemblyFourPartVersion(appVersion)
+
+  const original = fs.readFileSync(LAUNCHER_CS, 'utf8')
+  const updated = original
+    .replace(
+      /\[assembly:\s*AssemblyVersion\("[^"]*"\)\]/,
+      `[assembly: AssemblyVersion("${assemblyVersion}")]`,
+    )
+    .replace(
+      /\[assembly:\s*AssemblyFileVersion\("[^"]*"\)\]/,
+      `[assembly: AssemblyFileVersion("${assemblyVersion}")]`,
+    )
+    .replace(
+      /public\s+const\s+string\s+AppVersion\s*=\s*"[^"]*";/,
+      `public const string AppVersion = "${appVersion}";`,
+    )
+
+  if (updated !== original) {
+    fs.writeFileSync(LAUNCHER_CS, updated, 'utf8')
+    console.log(
+      `Synchronized launcher/OcarinaAtlas.cs version to v${appVersion} (${assemblyVersion})`,
+    )
+  }
+}
+
+function collectLauncherCsSources() {
+  assertExists(LAUNCHER_CS, 'WinForms launcher entry source')
+  assertExists(LAUNCHER_WIN_DIR, 'WinForms launcher module directory (launcher/win)')
+  const winModules = fs
+    .readdirSync(LAUNCHER_WIN_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.cs'))
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b))
+    .map((name) => path.join(LAUNCHER_WIN_DIR, name))
+
+  if (winModules.length === 0) {
+    throw new Error(`No C# modules found under ${LAUNCHER_WIN_DIR}`)
+  }
+
+  return [LAUNCHER_CS, ...winModules]
+}
 
 function runStep(label, command, args, options = {}) {
   console.log(`\n==> ${label}`)
@@ -132,9 +195,11 @@ function main() {
   fs.copyFileSync(process.execPath, bundledNodePath)
   console.log(`Copied Node.js runtime (${process.version}): ${bundledNodePath}`)
 
-  // 5. Compile native Windows launcher GUI (OcarinaAtlas.exe)
+  // 5. Synchronize version metadata from package.json & compile native Windows launcher GUI (OcarinaAtlas.exe)
+  syncLauncherVersionFromPackageJson()
+  const launcherSources = collectLauncherCsSources()
   const cscExe = findCscExe()
-  runStep(`Compiling WinForms launcher with ${cscExe}`, cscExe, [
+  runStep(`Compiling WinForms launcher (${launcherSources.length} C# files) with ${cscExe}`, cscExe, [
     '/nologo',
     '/target:winexe',
     '/optimize+',
@@ -144,7 +209,7 @@ function main() {
     '/r:System.IO.Compression.FileSystem.dll',
     `/win32icon:${LAUNCHER_ICO}`,
     `/out:${LAUNCHER_EXE}`,
-    LAUNCHER_CS,
+    ...launcherSources,
   ])
   assertExists(LAUNCHER_EXE, 'compiled OcarinaAtlas.exe')
 

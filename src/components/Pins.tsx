@@ -2,12 +2,14 @@ import { Check, MapPin } from 'lucide-react'
 import { memo, type CSSProperties } from 'react'
 import { pinPosition } from '../lib/coords'
 import { categoryName } from '../lib/data'
-import { useI18n } from '../lib/i18n'
+import { useI18n, type TranslationKey } from '../lib/i18n'
 import type { Merge } from '../lib/merge'
-import { OTHER_PIN, pinTypeLabel } from '../lib/pinTypes'
+import { OTHER_PIN, PIN_TYPES, pinTypeLabel } from '../lib/pinTypes'
 import type { CustomPin } from '../lib/storage'
 import type { Fraction, Item } from '../lib/types'
 import { categoryStyle } from './categories'
+
+const PIN_TYPE_KEYS = new Set<string>(PIN_TYPES.map((p) => p.key))
 
 /*
  * Each marker hangs from a zero-size anchor placed at its fraction of the
@@ -48,8 +50,12 @@ export function CustomMarker({
   onSelect: () => void
 }) {
   const { t } = useI18n()
-  // A typed pin with its default name says the same as its icon.
-  const labelled = selected || pin.type === OTHER_PIN || pin.name !== pinTypeLabel(pin.type)
+  // A typed pin with its default name (English or localized) says the same as its icon.
+  const localizedDefaultLabel = PIN_TYPE_KEYS.has(pin.type)
+    ? t(`pin.type.${pin.type}` as TranslationKey)
+    : pinTypeLabel(pin.type)
+  const isDefaultName = pin.name === pinTypeLabel(pin.type) || pin.name === localizedDefaultLabel
+  const labelled = selected || pin.type === OTHER_PIN || !isDefaultName
   return (
     <div data-pin className={`absolute size-0 hover:z-30 ${selected ? 'z-30' : 'z-20'}`} style={pinPosition(pin)}>
       <button
@@ -133,13 +139,17 @@ export const OfficialMarker = memo(function OfficialMarker({
         aria-label={`${itemName}, ${tCategory(item.cat, categoryName(item.cat))}${done ? `, ${t('panel.completed')}` : ''}`}
         aria-pressed={selected}
         onClick={onSelect}
-        style={{ borderColor: color, color }}
-        className={`absolute -top-3.5 -left-3.5 grid size-7 cursor-pointer place-items-center rounded-full border-2 bg-ink-950 shadow-md shadow-black/50 transition-[transform,opacity] hover:scale-115 ${
-          selected ? 'scale-125 ring-2 ring-parchment-50' : ''
-        } ${done && !selected ? 'opacity-50 hover:opacity-100' : 'opacity-100'} ${target?.appeared ? 'merge-pop' : ''}`}
+        className="group absolute -top-[22px] -left-[22px] grid size-11 cursor-pointer place-items-center rounded-full"
       >
-        <Icon size={15} strokeWidth={2.25} />
-        {done && <DoneBadge />}
+        <span
+          style={{ borderColor: color, color }}
+          className={`relative grid size-7 place-items-center rounded-full border-2 bg-ink-950 shadow-md shadow-black/50 transition-[transform,opacity] group-hover:scale-115 ${
+            selected ? 'scale-125 ring-2 ring-parchment-50' : ''
+          } ${done && !selected ? 'opacity-50 group-hover:opacity-100' : 'opacity-100'} ${target?.appeared ? 'merge-pop' : ''}`}
+        >
+          <Icon size={15} strokeWidth={2.25} />
+          {done && <DoneBadge />}
+        </span>
       </button>
     </div>
   )

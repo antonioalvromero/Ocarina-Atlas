@@ -1,6 +1,14 @@
 import { Link } from '@tanstack/react-router'
-import { Check, ChevronRight, Eye, EyeOff, Info, Wrench, X } from 'lucide-react'
-import { memo, useEffect, useMemo, useState } from 'react'
+import { Check, ChevronRight, Download, Eye, EyeOff, Info, Shield, Upload, Wrench, X } from 'lucide-react'
+import {
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react'
 import { dataset, formatFloorLabel } from '../lib/data'
 import { useI18n, type TranslationKey } from '../lib/i18n'
 import {
@@ -11,15 +19,20 @@ import {
 } from '../lib/prerequisites'
 import type { GlobalProgressSummary } from '../lib/progress-stats'
 import {
+  activeProfileSlot,
+  exportProgressBackup,
   hideDoneSlot,
+  importProgressBackup,
   officialVisibleSlot,
   ownedPrereqsSlot,
   prereqFilterEnabledSlot,
+  spoilerFreeSlot,
   useStored,
   write,
 } from '../lib/storage'
 import type { Dataset, Item } from '../lib/types'
 import { useLichiiTracker } from '../lib/useLichiiTracker'
+import { useModalFocusTrap } from '../lib/useModalFocusTrap'
 import { categoryStyle } from './categories'
 import { CreditsModal } from './CreditsModal'
 import { GearChecklistModal } from './GearChecklistModal'
@@ -129,17 +142,59 @@ function GlobalStatsDrawerContent({
   doneIds = [],
 }: Omit<GlobalStatsDrawerProps, 'open'>) {
   const { t, tCategory, tPlace, tRegion, tItemName } = useI18n()
+  const dialogRef = useRef<HTMLElement>(null)
+  const importInputRef = useRef<HTMLInputElement>(null)
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
   const [filter, setFilter] = useState<LocationFilter>('all')
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<string | null>(null)
   const [categoryItemFilter, setCategoryItemFilter] = useState<CategoryItemFilter>('remaining')
   const [gearOpen, setGearOpen] = useState(false)
   const [creditsOpen, setCreditsOpen] = useState(false)
+  const [backupStatus, setBackupStatus] = useState<{ kind: 'ok' | 'error'; message: string } | null>(null)
 
   const showOfficial = useStored(officialVisibleSlot)
   const hideDone = useStored(hideDoneSlot)
+  const spoilerFree = useStored(spoilerFreeSlot)
   const prereqFilterEnabled = useStored(prereqFilterEnabledSlot)
   const ownedPrereqs = useStored(ownedPrereqsSlot)
+  const activeProfile = useStored(activeProfileSlot)
   const tracker = useLichiiTracker({ trackPosition: false })
+
+  useEffect(() => {
+    if (!backupStatus) return
+    const timer = window.setTimeout(() => setBackupStatus(null), 3500)
+    return () => window.clearTimeout(timer)
+  }, [backupStatus])
+
+  function handleExportBackup() {
+    const backup = exportProgressBackup()
+    const date = new Date().toISOString().slice(0, 10)
+    const safeProfile = (backup.activeProfile || activeProfile || 'default').replace(/[^a-zA-Z0-9._-]+/g, '-')
+    const filename = `ocarina-atlas-backup-${safeProfile}-${date}.json`
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+    setBackupStatus({ kind: 'ok', message: t('backup.exported') })
+  }
+
+  async function handleImportBackupFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    try {
+      const text = await file.text()
+      importProgressBackup(text)
+      setBackupStatus({ kind: 'ok', message: t('backup.imported') })
+    } catch {
+      setBackupStatus({ kind: 'error', message: t('backup.invalid') })
+    }
+  }
 
   const ownedCount = useMemo(() => {
     const ownedSet = new Set(ownedPrereqs)
@@ -154,13 +209,26 @@ function GlobalStatsDrawerContent({
     [tracker.prereqAutoSync, tracker.state.authoritativeBeans, tracker.state.collectedBeanIds],
   )
 
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape' && !gearOpen && !creditsOpen) onClose()
+  useModalFocusTrap(true, dialogRef, onClose)
+
+  function handleTabKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, currentIndex: number) {
+    let nextIndex: number | null = null
+    if (event.key === 'ArrowRight') {
+      nextIndex = (currentIndex + 1) % FILTER_TABS.length
+    } else if (event.key === 'ArrowLeft') {
+      nextIndex = (currentIndex - 1 + FILTER_TABS.length) % FILTER_TABS.length
+    } else if (event.key === 'Home') {
+      nextIndex = 0
+    } else if (event.key === 'End') {
+      nextIndex = FILTER_TABS.length - 1
     }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose, gearOpen, creditsOpen])
+    if (nextIndex === null) return
+    event.preventDefault()
+    const nextTab = FILTER_TABS[nextIndex]
+    if (!nextTab) return
+    setFilter(nextTab.key)
+    tabRefs.current[nextIndex]?.focus()
+  }
 
   const filteredPlaces = useMemo(
     () => filterPlacesForDrawer(summary.places, filter, hideDone),
@@ -196,9 +264,12 @@ function GlobalStatsDrawerContent({
       role="presentation"
     >
       <aside
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="global-stats-title"
+        data-overlay-open="true"
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
         className="flex h-full w-full max-w-md flex-col border-r border-ink-600 bg-ink-900 text-parchment-200 shadow-2xl"
       >
@@ -246,6 +317,32 @@ function GlobalStatsDrawerContent({
                 <span
                   className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-parchment-50 transition-transform ${
                     showOfficial ? 'translate-x-3.5' : ''
+                  }`}
+                />
+              </span>
+            </button>
+            <button
+              type="button"
+              aria-pressed={spoilerFree}
+              onClick={() => write(spoilerFreeSlot, !spoilerFree)}
+              className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border border-ink-700 bg-ink-800/60 px-2.5 py-1.5 text-xs text-parchment-200 transition-colors hover:border-ink-600 hover:text-parchment-50"
+            >
+              <span className="flex items-center gap-2">
+                <Shield
+                  size={13}
+                  className={spoilerFree ? 'text-[#e8c04a]' : 'text-parchment-400'}
+                  aria-hidden
+                />
+                <span>{t('filter.spoilerFree')}</span>
+              </span>
+              <span
+                className={`relative h-4.5 w-8 shrink-0 rounded-full transition-colors ${
+                  spoilerFree ? 'bg-moss' : 'bg-ink-600'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-parchment-50 transition-transform ${
+                    spoilerFree ? 'translate-x-3.5' : ''
                   }`}
                 />
               </span>
@@ -550,15 +647,22 @@ function GlobalStatsDrawerContent({
               aria-label={t('stats.filterLocations')}
               className="mb-2.5 grid grid-cols-4 gap-1 rounded-md border border-ink-700 bg-ink-950/70 p-1"
             >
-              {FILTER_TABS.map((tab) => {
+              {FILTER_TABS.map((tab, index) => {
                 const active = filter === tab.key
                 return (
                   <button
                     key={tab.key}
+                    ref={(el) => {
+                      tabRefs.current[index] = el
+                    }}
+                    id={`global-stats-tab-${tab.key}`}
                     type="button"
                     role="tab"
                     aria-selected={active}
+                    aria-controls="global-stats-locations-panel"
+                    tabIndex={active ? 0 : -1}
                     onClick={() => setFilter(tab.key)}
+                    onKeyDown={(event) => handleTabKeyDown(event, index)}
                     className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition-colors ${
                       active
                         ? 'bg-parchment-200 text-ink-950'
@@ -572,7 +676,13 @@ function GlobalStatsDrawerContent({
             </div>
 
             {/* Location list */}
-            {filteredPlaces.length === 0 ? (
+            <div
+              id="global-stats-locations-panel"
+              role="tabpanel"
+              aria-labelledby={`global-stats-tab-${filter}`}
+              tabIndex={0}
+            >
+              {filteredPlaces.length === 0 ? (
               <p className="rounded-md border border-ink-700/70 bg-ink-950/40 px-3 py-6 text-center text-xs text-parchment-400">
                 {filter === 'incomplete' ||
                 (hideDone &&
@@ -647,8 +757,58 @@ function GlobalStatsDrawerContent({
                 })}
               </ul>
             )}
+            </div>
           </section>
         </div>
+
+        {/* Backup & Profiles toolbar */}
+        <section
+          aria-label={t('backup.title')}
+          className="border-t border-ink-700 bg-ink-900/70 px-5 py-2.5"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-[11px] font-medium text-parchment-200">{t('backup.title')}</span>
+            <span className="inline-flex items-center rounded-full border border-ink-600 bg-ink-950/80 px-2 py-0.5 text-[10px] font-medium text-parchment-300">
+              {t('backup.activeProfile', { profile: activeProfile })}
+            </span>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportBackup}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-ink-600 bg-ink-800/90 px-2.5 py-1 text-[11px] font-medium text-parchment-200 transition-colors hover:border-[#e8c04a]/70 hover:text-parchment-50"
+            >
+              <Download size={12} className="text-[#e8c04a]" aria-hidden />
+              <span>{t('backup.export')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded border border-ink-600 bg-ink-800/90 px-2.5 py-1 text-[11px] font-medium text-parchment-200 transition-colors hover:border-[#e8c04a]/70 hover:text-parchment-50"
+            >
+              <Upload size={12} className="text-[#e8c04a]" aria-hidden />
+              <span>{t('backup.import')}</span>
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleImportBackupFile}
+              aria-label={t('backup.import')}
+              className="hidden"
+            />
+            {backupStatus && (
+              <span
+                role="status"
+                className={`text-[11px] font-medium ${
+                  backupStatus.kind === 'error' ? 'text-ember' : 'text-moss'
+                }`}
+              >
+                {backupStatus.message}
+              </span>
+            )}
+          </div>
+        </section>
 
         {/* Credits footer */}
         <footer className="flex items-center justify-between gap-2 border-t border-ink-700 bg-ink-950/60 px-5 py-2.5 text-[11px] text-parchment-400">

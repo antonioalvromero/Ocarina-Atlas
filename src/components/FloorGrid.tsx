@@ -1,11 +1,12 @@
-import { type MouseEvent, type ReactNode, type Ref } from 'react'
-import { boxToFraction, isInsideImage, pinPosition } from '../lib/coords'
+import { memo, useCallback, useRef, type MouseEvent, type ReactNode, type Ref } from 'react'
+import { boxToFraction, isInsideImage } from '../lib/coords'
 import { formatFloorLabel } from '../lib/data'
 import { floorToGrid, type FloorCell, type FloorGrid as Grid } from '../lib/floorGrid'
 import { useI18n, type TranslationKey } from '../lib/i18n'
 import type { Merge } from '../lib/merge'
 import { pinsSlot, useStored } from '../lib/storage'
 import type { Fraction, Item, Place } from '../lib/types'
+import { useLichiiPosition } from '../lib/useLichiiTracker'
 import { MapViewport, type MapViewportHandle, type Projection } from './MapViewport'
 import { NewPinPopover } from './NewPinPopover'
 import { CustomMarker, DraftMarker, MergeTrail, OfficialMarker } from './Pins'
@@ -15,11 +16,8 @@ export type FloorDraft = { mapId: string; at: Fraction }
 
 export type FloorPlayer = {
   mapId: string
-  at: Fraction
-  yaw?: number | null
-  position3d?: { x: number; y: number; z: number } | null
   live?: boolean
-  onClick?: () => void
+  onClick?: (gridAt: Fraction) => void
 }
 
 type Shared = {
@@ -42,6 +40,40 @@ function translateFloorLabel(labelOrId: string, t: (key: TranslationKey) => stri
   return formatted
 }
 
+const LiveFloorPlayerPin = memo(function LiveFloorPlayerPin({
+  cell,
+  floorLabel,
+  live,
+  onClick,
+}: {
+  cell: FloorCell
+  floorLabel: string
+  live?: boolean
+  onClick?: (gridAt: Fraction) => void
+}) {
+  const { t } = useI18n()
+  const { position, mapFraction } = useLichiiPosition()
+  const handleClick = useCallback(() => {
+    if (mapFraction && onClick) {
+      onClick(floorToGrid(cell, mapFraction))
+    }
+  }, [cell, mapFraction, onClick])
+
+  if (!mapFraction) return null
+
+  return (
+    <PlayerPin
+      at={mapFraction}
+      yaw={position?.yaw}
+      live={live}
+      label={t('common.link')}
+      sublabel={floorLabel}
+      position3d={position}
+      onClick={onClick ? handleClick : undefined}
+    />
+  )
+})
+
 function Floor({
   cell,
   draft,
@@ -59,6 +91,32 @@ function Floor({
   const { t } = useI18n()
   const pins = useStored(pinsSlot(placeId, cell.map.id))
   const floorLabel = translateFloorLabel(cell.map.label, t)
+
+  const onSelectItemRef = useRef(onSelectItem)
+  onSelectItemRef.current = onSelectItem
+  const itemSelectCallbacksRef = useRef(new Map<string, () => void>())
+  const getItemSelectCallback = useCallback((id: string) => {
+    let cb = itemSelectCallbacksRef.current.get(id)
+    if (!cb) {
+      cb = () => onSelectItemRef.current(id)
+      itemSelectCallbacksRef.current.set(id, cb)
+    }
+    return cb
+  }, [])
+
+  const onSelectCustomRef = useRef(onSelectCustom)
+  onSelectCustomRef.current = onSelectCustom
+  const mapIdRef = useRef(cell.map.id)
+  mapIdRef.current = cell.map.id
+  const customSelectCallbacksRef = useRef(new Map<string, () => void>())
+  const getCustomSelectCallback = useCallback((id: string) => {
+    let cb = customSelectCallbacksRef.current.get(id)
+    if (!cb) {
+      cb = () => onSelectCustomRef.current(id, mapIdRef.current)
+      customSelectCallbacksRef.current.set(id, cb)
+    }
+    return cb
+  }, [])
 
   function onClick(event: MouseEvent<HTMLDivElement>) {
     if ((event.target as Element).closest('[data-pin]')) return
@@ -93,7 +151,7 @@ function Floor({
               done={done.has(item.id)}
               selected={item.id === selectedItem}
               merge={merge}
-              onSelect={() => onSelectItem(item.id)}
+              onSelect={getItemSelectCallback(item.id)}
             />
           ),
       )}
@@ -102,19 +160,16 @@ function Floor({
           key={pin.id}
           pin={pin}
           selected={pin.id === selectedCustom}
-          onSelect={() => onSelectCustom(pin.id, cell.map.id)}
+          onSelect={getCustomSelectCallback(pin.id)}
         />
       ))}
       {draft && <DraftMarker at={draft} />}
       {merge?.mapId === cell.map.id && <MergeTrail key={merge.id} merge={merge} />}
       {player && player.mapId === cell.map.id && (
-        <PlayerPin
-          at={player.at}
-          yaw={player.yaw}
+        <LiveFloorPlayerPin
+          cell={cell}
+          floorLabel={floorLabel}
           live={player.live}
-          label={t('common.link')}
-          sublabel={floorLabel}
-          position3d={player.position3d}
           onClick={player.onClick}
         />
       )}

@@ -60,6 +60,9 @@ jobs:
       - name: Run TypeScript typecheck
         run: npm run typecheck
 
+      - name: Run linter
+        run: npm run lint
+
       - name: Run unit tests
         run: npm test
 

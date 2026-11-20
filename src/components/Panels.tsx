@@ -1,4 +1,4 @@
-import { Check, ChevronDown, EyeOff, Trash2, Wrench } from 'lucide-react'
+import { Check, ChevronDown, Eye, EyeOff, Moon, Trash2, Wrench } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import {
   ageFilterSlot,
@@ -10,18 +10,20 @@ import {
   prereqFilterEnabledSlot,
   removePin,
   setInList,
+  spoilerFreeSlot,
   toggleInList,
   updatePin,
   useStored,
   write,
   type CustomPin,
 } from '../lib/storage'
-import { dataset } from '../lib/data'
+import { categoryName, dataset } from '../lib/data'
 import { useI18n, type TranslationKey } from '../lib/i18n'
 import { PIN_TYPES, pinTypeLabel } from '../lib/pinTypes'
 import {
   ALL_PREREQUISITE_KEYS,
   expandOwnedRequirements,
+  isRequirementClauseMet,
   meetsItemRequirements,
   type RequirementEvalOptions,
 } from '../lib/prerequisites'
@@ -29,6 +31,7 @@ import type { AgeFilter, Item } from '../lib/types'
 import { categoryStyle } from './categories'
 import { GearChecklistModal } from './GearChecklistModal'
 import { ItemDetail } from './ItemDetail'
+import { RichText } from './RichText'
 
 export function Section({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) {
   return (
@@ -221,6 +224,100 @@ export function CustomPinList({
   )
 }
 
+const ageLabelKeys: Record<string, TranslationKey> = {
+  child: 'panel.ageChild',
+  adult: 'panel.ageAdult',
+  both: 'panel.ageChildOrAdult',
+}
+
+type ChipTone = 'neutral' | 'met' | 'missing'
+
+const CHIP_TONE_CLASS: Record<ChipTone, string> = {
+  neutral: 'border-ink-600 bg-ink-800 text-parchment-200',
+  met: 'border-moss/55 bg-moss/15 text-moss',
+  missing: 'border-ember/60 bg-ember/10 text-ember',
+}
+
+function DetailChip({ children, tone = 'neutral', title }: { children: ReactNode; tone?: ChipTone; title?: string }) {
+  return (
+    <span
+      title={title}
+      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] ${CHIP_TONE_CLASS[tone]}`}
+    >
+      {children}
+    </span>
+  )
+}
+
+export function SpoilerShieldBadgesAndHint({
+  item,
+  ownedExpanded,
+  evalOptions,
+  onRevealSolution,
+}: {
+  item: Item
+  ownedExpanded?: ReadonlySet<string>
+  evalOptions?: Pick<RequirementEvalOptions, 'collectedBeanIds' | 'beanAutoSynced'>
+  onRevealSolution: () => void
+}) {
+  const { t, tCategory, tRequirement, tItemHint } = useI18n()
+  const ageKey = item.age ? ageLabelKeys[item.age] : undefined
+  const requirementOptions = evalOptions ? { ...evalOptions, item } : { item }
+  return (
+    <div className="space-y-3 px-2 pt-1 pb-3 text-sm leading-relaxed text-parchment-200">
+      <div className="flex flex-wrap gap-1">
+        <DetailChip>{tCategory(item.cat, categoryName(item.cat))}</DetailChip>
+        {item.age && <DetailChip>{ageKey ? t(ageKey) : item.age}</DetailChip>}
+        {item.night && (
+          <DetailChip>
+            <Moon size={11} /> {t('item.nightOnly')}
+          </DetailChip>
+        )}
+      </div>
+      {item.hint && (
+        <div className="rounded-md border-l-2 border-parchment-400 bg-ink-800 px-3 py-2">
+          <p className="text-[11px] font-medium tracking-wide text-parchment-400 uppercase">{t('item.hint')}</p>
+          <RichText text={tItemHint(item.id, item.hint)} />
+        </div>
+      )}
+      {item.requires.length > 0 && (
+        <div>
+          <p className="mb-1 text-[11px] font-medium tracking-wide text-parchment-400 uppercase">{t('item.requires')}</p>
+          <ul className="flex flex-wrap gap-1">
+            {item.requires.map((requirement, index) => {
+              const met = ownedExpanded
+                ? isRequirementClauseMet(requirement, ownedExpanded, requirementOptions)
+                : null
+              return (
+                <li key={index}>
+                  <DetailChip
+                    tone={met === true ? 'met' : met === false ? 'missing' : 'neutral'}
+                    title={met === false ? t('filter.missingReqs') : undefined}
+                  >
+                    {met === true && <Check size={10} strokeWidth={3} aria-hidden />}
+                    {tRequirement(requirement)}
+                  </DetailChip>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )}
+      <div className="rounded-md border border-[#e8c04a]/40 bg-ink-950/75 px-3 py-2.5 text-xs text-parchment-200">
+        <p className="text-parchment-400">{t('spoiler.hiddenNotice')}</p>
+        <button
+          type="button"
+          onClick={onRevealSolution}
+          className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded border border-[#e8c04a]/60 bg-[#e8c04a]/15 px-2.5 py-1 text-xs font-medium text-[#f3d473] transition-colors hover:border-[#e8c04a] hover:bg-[#e8c04a]/25 hover:text-parchment-50"
+        >
+          <Eye size={12} aria-hidden />
+          <span>{t('spoiler.revealSolution')}</span>
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function ItemRow({
   item,
   done,
@@ -240,6 +337,11 @@ function ItemRow({
   const ref = useRevealWhen(selected)
   const { icon: Icon, color } = categoryStyle(item.cat)
   const revealed = useStored(officialRevealedSlot).includes(item.id)
+  const spoilerFree = useStored(spoilerFreeSlot)
+  const [solutionRevealed, setSolutionRevealed] = useState(false)
+  useEffect(() => {
+    setSolutionRevealed(false)
+  }, [item.id])
   const itemName = tItemName(item.id, item.name)
   return (
     <li ref={ref} className={`rounded-md ${selected ? 'bg-ink-900 ring-1 ring-ink-600' : ''}`}>
@@ -258,7 +360,31 @@ function ItemRow({
           <ChevronDown size={14} className={`shrink-0 text-parchment-600 ${selected ? 'rotate-180' : ''}`} />
         </button>
       </div>
-      {selected && <ItemDetail item={item} ownedExpanded={ownedExpanded} evalOptions={evalOptions} />}
+      {selected &&
+        (spoilerFree && !done && !solutionRevealed ? (
+          <SpoilerShieldBadgesAndHint
+            item={item}
+            ownedExpanded={ownedExpanded}
+            evalOptions={evalOptions}
+            onRevealSolution={() => setSolutionRevealed(true)}
+          />
+        ) : (
+          <>
+            <ItemDetail item={item} ownedExpanded={ownedExpanded} evalOptions={evalOptions} />
+            {spoilerFree && !done && solutionRevealed && (
+              <div className="px-2 pb-2">
+                <button
+                  type="button"
+                  onClick={() => setSolutionRevealed(false)}
+                  className="inline-flex cursor-pointer items-center gap-1 rounded border border-ink-600 bg-ink-800 px-2 py-1 text-xs text-parchment-200 transition-colors hover:border-parchment-400 hover:text-parchment-50"
+                >
+                  <EyeOff size={12} aria-hidden />
+                  <span>{t('spoiler.hideSolution')}</span>
+                </button>
+              </div>
+            )}
+          </>
+        ))}
       {selected && revealed && (
         <div className="flex justify-end px-2 pb-2">
           <button
@@ -351,7 +477,7 @@ function CategoryFilter({ items, hidden }: { items: Item[]; hidden: string[] }) 
             title={label}
             onClick={() => toggleInList(hiddenCategoriesSlot, category.key)}
             className={`flex cursor-pointer items-center gap-1 rounded border px-1.5 py-1 text-[11px] tabular-nums ${
-              on ? 'border-ink-600 bg-ink-800 text-parchment-200' : 'border-ink-700 text-parchment-600 opacity-60'
+              on ? 'border-ink-600 bg-ink-800 text-parchment-200' : 'border-ink-700 bg-ink-950/40 text-parchment-600'
             }`}
           >
             <Icon size={12} style={{ color: on ? color : undefined }} aria-hidden />
@@ -377,6 +503,24 @@ export function OfficialToggle({ on }: { on: boolean }) {
       {t('panel.showOfficialPins')}
       <span className={`relative h-5 w-9 rounded-full transition-colors ${on ? 'bg-moss' : 'bg-ink-600'}`}>
         <span className={`absolute top-0.5 left-0.5 size-4 rounded-full bg-parchment-50 transition-transform ${on ? 'translate-x-4' : ''}`} />
+      </span>
+    </button>
+  )
+}
+
+export function SpoilerFreeToggle({ on }: { on: boolean }) {
+  const { t } = useI18n()
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      onClick={() => write(spoilerFreeSlot, !on)}
+      className="mb-2.5 flex cursor-pointer items-center gap-2 text-xs text-parchment-200"
+    >
+      <span>{t('filter.spoilerFree')}</span>
+      <span className={`relative h-4.5 w-8 rounded-full transition-colors ${on ? 'bg-moss' : 'bg-ink-600'}`}>
+        <span className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-parchment-50 transition-transform ${on ? 'translate-x-3.5' : ''}`} />
       </span>
     </button>
   )

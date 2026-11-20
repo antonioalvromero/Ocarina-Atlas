@@ -1,6 +1,7 @@
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
+import { dataset } from '../lib/data'
 import type { LichiiTelemetryState } from '../lib/lichii-types'
 import type { SkulltulaToast } from '../lib/useLichiiTracker'
 import {
@@ -10,6 +11,7 @@ import {
   INITIAL_PANEL_INTERACTION,
   isPanelOpen,
   LichiiStatusPanel,
+  NearestItemIslandPill,
   reducePanelInteraction,
   shouldIgnoreHoverPointer,
   shouldIgnorePointerFocus,
@@ -97,6 +99,20 @@ describe('getConnectionView', () => {
       makeState({ connected: true, emulatorRunning: true, emulator: 'ootpc', source: 'memory' }),
     )
     expect(view.label).toBe('OOT-PC · Live')
+  })
+
+  it('returns HeyListen display name for heylisten emulator', () => {
+    const heylisten = 'heylisten' as unknown as LichiiTelemetryState['emulator']
+    const liveView = getConnectionView(
+      makeState({ connected: true, emulatorRunning: true, emulator: heylisten, source: 'memory' }),
+    )
+    expect(liveView.label).toBe('HeyListen · Live')
+
+    const saveView = getConnectionView(
+      makeState({ connected: false, emulatorRunning: false, emulator: heylisten, source: 'save' }),
+    )
+    expect(saveView.label).toBe('HeyListen · Save only')
+    expect(saveView.note).toBe('Offline (HeyListen RPC :6545 closed)')
   })
 
   it('returns muted disconnected view when offline with no save', () => {
@@ -312,6 +328,8 @@ describe('LichiiStatusPanel SSR rendering', () => {
     expect(html).toContain('Only reachable')
     expect(html).not.toContain('(12.3, 45.7, -78.9)')
     expect(html).toContain('Collapse tracker panel')
+    expect(html).toContain('min-h-11 min-w-11')
+    expect(html).not.toContain('data-overlay-open="true"')
   })
 
   it('renders error retry and independent Skulltula pickup toasts', () => {
@@ -377,11 +395,94 @@ describe('LichiiStatusPanel SSR rendering', () => {
     expect(disconnectedNoSlots).not.toContain('aria-label="Save Slot"')
   })
 
-  it('renders Hide completed quick-toggle pill in the Dynamic Island', () => {
+  it('renders Hide completed, No spoilers, and Nearest item quick-toggle pills in the Dynamic Island', () => {
     const html = renderPanelText(makeProps())
     expect(html).toContain('Official pins')
     expect(html).toContain('Only reachable')
     expect(html).toContain('Hide completed')
+    expect(html).toContain('No spoilers')
+    expect(html).toContain('Nearest item')
+    expect(html).not.toContain('data-nearest-pill="visible"')
+  })
+
+  it('renders NearestItemIslandPill with category icon and distance when nearby and collapses when absent', () => {
+    const sampleItem = dataset.items.find(
+      (item) => item.at && (!item.requires || item.requires.length === 0),
+    )
+    expect(sampleItem).toBeDefined()
+    if (!sampleItem || !sampleItem.at) return
+
+    const nearbyState = makeState({
+      connected: true,
+      emulatorRunning: true,
+      source: 'memory',
+      placeId: sampleItem.place,
+      mapId: sampleItem.at.map,
+      age: sampleItem.age === 'adult' ? 'adult' : 'child',
+      mapFraction: {
+        x: Math.max(0, Math.min(1, sampleItem.at.x + 0.04)),
+        y: sampleItem.at.y,
+      },
+    })
+
+    const visibleHtml = renderToString(
+      createElement(NearestItemIslandPill, {
+        state: nearbyState,
+        doneIds: new Set<string>(),
+        ownedExpanded: new Set<string>(),
+        onSelectItem: vi.fn(),
+      }),
+    ).replace(/<!-- -->/g, '')
+
+    expect(visibleHtml).toContain('data-nearest-pill="visible"')
+    expect(visibleHtml).toContain('max-width:248px')
+    expect(visibleHtml).toContain('opacity:1')
+    expect(visibleHtml).toContain('translate3d(0px, 0px, 0px) scale(1)')
+    expect(visibleHtml).toContain('blur(0px)')
+    expect(visibleHtml).toContain('<button type="button"')
+    expect(visibleHtml).toContain(sampleItem.name)
+    expect(visibleHtml).toContain('10m')
+    expect(visibleHtml).toContain('<svg')
+
+    const collapsedDoneHtml = renderToString(
+      createElement(NearestItemIslandPill, {
+        state: nearbyState,
+        doneIds: new Set<string>([sampleItem.id]),
+        ownedExpanded: new Set<string>(),
+        onSelectItem: vi.fn(),
+      }),
+    ).replace(/<!-- -->/g, '')
+
+    // If no other reachable uncollected item is within range at that exact point, or when mapFraction is null:
+    const collapsedNoPosHtml = renderToString(
+      createElement(NearestItemIslandPill, {
+        state: makeState({ placeId: sampleItem.place, mapId: sampleItem.at.map, mapFraction: null }),
+        doneIds: new Set<string>(),
+        ownedExpanded: new Set<string>(),
+        onSelectItem: vi.fn(),
+      }),
+    ).replace(/<!-- -->/g, '')
+
+    expect(collapsedNoPosHtml).toContain('data-nearest-pill="collapsed"')
+    expect(collapsedNoPosHtml).toContain('max-width:0px')
+    expect(collapsedNoPosHtml).toContain('opacity:0')
+    expect(collapsedNoPosHtml).toContain('translate3d(-24px, 0px, 0px) scale(0.72)')
+    expect(collapsedNoPosHtml).toContain('blur(6px)')
+    expect(collapsedNoPosHtml).toContain('pointer-events-none')
+    expect(collapsedNoPosHtml).toContain('inert=""')
+    expect(collapsedNoPosHtml).toContain('aria-hidden="true"')
+    expect(collapsedDoneHtml).not.toContain(sampleItem.name)
+  })
+
+  it('keeps orb inside its own hover/focus wrapper within flex items-center gap-2 before the panel region', () => {
+    const html = renderPanelText(makeProps())
+    const rowIdx = html.indexOf('flex items-center gap-2')
+    const orbIdx = html.indexOf('aria-expanded="false"')
+    const panelIdx = html.indexOf('role="region"')
+
+    expect(rowIdx).toBeGreaterThan(-1)
+    expect(orbIdx).toBeGreaterThan(rowIdx)
+    expect(panelIdx).toBeGreaterThan(orbIdx)
   })
 })
 

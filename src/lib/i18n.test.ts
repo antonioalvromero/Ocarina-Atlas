@@ -11,7 +11,10 @@ import {
   PLACE_LABELS,
   REGION_LABELS,
   REQUIREMENT_LABELS,
+  SUPPORTED_LOCALES,
   getLocale,
+  isLocaleLoaded,
+  preloadLocale,
   resolveLocaleFromTag,
   setLocale,
   translate,
@@ -24,6 +27,7 @@ import {
   translateRegion,
   translateRequirement,
   useI18n,
+  type I18nKey,
   type Locale,
   type TranslationKey,
 } from './i18n'
@@ -78,8 +82,21 @@ describe('i18n', () => {
     expect(getLocale()).toBe('en')
   })
 
-  it('exposes all 15 supported locales in LOCALE_OPTIONS', () => {
+  it('exposes all 15 supported locales in LOCALE_OPTIONS and SUPPORTED_LOCALES', () => {
     expect(LOCALE_OPTIONS.map((o) => o.code)).toEqual(ALL_LOCALES)
+    expect(SUPPORTED_LOCALES).toEqual(ALL_LOCALES)
+  })
+
+  it('loads only English synchronously and falls back to English until a locale is preloaded', async () => {
+    expect(isLocaleLoaded('en')).toBe(true)
+    expect(isLocaleLoaded('es')).toBe(false)
+    expect(translate('es', 'world.mapAlt')).toBe('Map of Hyrule')
+    expect(translatePlace('es', 'espiritu')).toBe('Spirit Temple')
+
+    await preloadLocale('es')
+    expect(isLocaleLoaded('es')).toBe(true)
+    expect(translate('es', 'world.mapAlt')).toBe('Mapa de Hyrule')
+    expect(translatePlace('es', 'espiritu')).toBe('Templo del Espíritu')
   })
 
   it('resolves BCP-47 language tags to supported locales', () => {
@@ -165,7 +182,9 @@ describe('i18n', () => {
     expect(html).toContain('en|Map of Hyrule|Gold Skulltulas|Kokiri Forest|Forest|Bombs or Megaton Hammer')
   })
 
-  it('interpolates parameters in translated strings', () => {
+  it('interpolates parameters in translated strings', async () => {
+    await Promise.all([preloadLocale('es'), preloadLocale('fr'), preloadLocale('pt')])
+
     expect(translate('en', 'world.itemsCompleted', { done: 3, total: 10 })).toBe('3 / 10 items completed')
     expect(translate('es', 'world.itemsCompleted', { done: 3, total: 10 })).toBe('3 / 10 objetos completados')
     expect(translate('fr', 'world.itemsCompleted', { done: 3, total: 10 })).toBe('3 / 10 objets complétés')
@@ -177,7 +196,9 @@ describe('i18n', () => {
     expect(translate('pt', 'filter.reachableCount', { count: 12 })).toBe('12 alcançáveis')
   })
 
-  it('translates categories, places, regions, and requirements across all locales', () => {
+  it('translates categories, places, regions, and requirements across all locales', async () => {
+    await Promise.all([preloadLocale('es'), preloadLocale('fr'), preloadLocale('pt')])
+
     expect(translateCategory('es', 'gs')).toBe('Skulltulas Doradas')
     expect(translateCategory('fr', 'heart')).toBe('Quarts de Cœur')
     expect(translateCategory('pt', 'fairy')).toBe('Grandes Fadas')
@@ -198,13 +219,38 @@ describe('i18n', () => {
     expect(translateRequirement('pt', ['bombs', 'hover-boots'])).toBe('Bombas ou Botas Flutuantes')
   })
 
-  it('has complete, non-empty UI message translations with matching placeholders for all 15 locales', () => {
+  it('has complete, non-empty UI message translations with matching placeholders for all 15 locales', async () => {
+    await Promise.all(ALL_LOCALES.map((locale) => preloadLocale(locale)))
+
     const enKeys = Object.keys(MESSAGES.en) as TranslationKey[]
+    const searchKeys: I18nKey[] = [
+      'search.open',
+      'search.title',
+      'search.placeholder',
+      'search.empty',
+      'search.places',
+      'search.collectibles',
+      'search.copyLink',
+      'search.linkCopied',
+      'backup.title',
+      'backup.export',
+      'backup.import',
+      'backup.exported',
+      'backup.imported',
+      'backup.invalid',
+      'backup.activeProfile',
+    ]
+    for (const key of searchKeys) {
+      expect(enKeys).toContain(key)
+    }
+
     const extractPlaceholders = (text: string) =>
       Array.from(text.matchAll(/\{(\w+)\}/g), (m) => m[1]).sort()
 
     for (const locale of ALL_LOCALES) {
       const dict = MESSAGES[locale]
+      expect(dict, `Locale "${locale}" should be loaded`).toBeDefined()
+      if (!dict) continue
       expect(Object.keys(dict).sort()).toEqual([...enKeys].sort())
       for (const key of enKeys) {
         expect(dict[key], `Missing or empty key "${key}" in locale "${locale}"`).toBeTruthy()
@@ -216,42 +262,44 @@ describe('i18n', () => {
     }
   })
 
-  it('covers every category, place, region, and requirement in oot.json for all 15 locales', () => {
+  it('covers every category, place, region, and requirement in oot.json for all 15 locales', async () => {
+    await Promise.all(ALL_LOCALES.map((locale) => preloadLocale(locale)))
     const uniqueRegions = Array.from(new Set(dataset.places.map((p) => p.region)))
 
     for (const locale of ALL_LOCALES) {
       for (const category of dataset.categories) {
         expect(
-          CATEGORY_LABELS[locale][category.key],
+          CATEGORY_LABELS[locale]?.[category.key],
           `Missing category "${category.key}" for "${locale}"`,
         ).toBeTruthy()
       }
 
       for (const place of dataset.places) {
         expect(
-          PLACE_LABELS[locale][place.id],
+          PLACE_LABELS[locale]?.[place.id],
           `Missing place "${place.id}" for "${locale}"`,
         ).toBeTruthy()
       }
 
       for (const region of uniqueRegions) {
         expect(
-          REGION_LABELS[locale][region],
+          REGION_LABELS[locale]?.[region],
           `Missing region "${region}" for "${locale}"`,
         ).toBeTruthy()
       }
 
       for (const req of dataset.requirements) {
         expect(
-          REQUIREMENT_LABELS[locale][req.key],
+          REQUIREMENT_LABELS[locale]?.[req.key],
           `Missing requirement "${req.key}" for "${locale}"`,
         ).toBeTruthy()
       }
     }
   })
 
-  it('covers every place intro and every item name, desc, and non-null hint in es, fr, and pt', () => {
+  it('covers every place intro and every item name, desc, and non-null hint in es, fr, and pt', async () => {
     const locales: Locale[] = ['es', 'fr', 'pt']
+    await Promise.all(locales.map((locale) => preloadLocale(locale)))
 
     expect(dataset.places).toHaveLength(32)
     expect(dataset.items).toHaveLength(184)

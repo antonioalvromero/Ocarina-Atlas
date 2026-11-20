@@ -1,15 +1,19 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { NotFound } from '../components/NotFound'
 import { PlaceView } from '../components/PlaceView'
 import { findPlace } from '../lib/data'
+import { translatePlace, useI18n } from '../lib/i18n'
 
 type ZoneSearch = {
+  pin?: string
   item?: string
   map?: string
 }
 
 export const Route = createFileRoute('/$zone')({
   validateSearch: (search: Record<string, unknown>): ZoneSearch => ({
+    pin: typeof search.pin === 'string' && search.pin.length > 0 ? search.pin : undefined,
     item: typeof search.item === 'string' && search.item.length > 0 ? search.item : undefined,
     map: typeof search.map === 'string' && search.map.length > 0 ? search.map : undefined,
   }),
@@ -27,6 +31,14 @@ export const Route = createFileRoute('/$zone')({
 
 function ZonePage() {
   const { place } = Route.useLoaderData()
-  const { item, map } = Route.useSearch()
-  return <PlaceView key={place.id} place={place} initialItemId={item} initialMapId={map} />
+  const { pin, item, map } = Route.useSearch()
+  const { locale, t } = useI18n()
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const localizedName = translatePlace(locale, place.id, place.name)
+    document.title = `${localizedName} | ${t('app.title')}`
+  }, [locale, place.id, place.name, t])
+
+  return <PlaceView key={place.id} place={place} initialItemId={pin ?? item} initialMapId={map} />
 }

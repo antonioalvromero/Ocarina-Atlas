@@ -4,6 +4,7 @@ import {
   exitFullscreen,
   getFullscreenElement,
   getFullscreenSnapshotForTests,
+  hasOpenOverlay,
   resetFullscreenForTests,
   resolveFullscreenTarget,
   subscribeFullscreenStoreForTests,
@@ -52,6 +53,7 @@ function createFakeDom() {
     webkitFullscreenElement?: unknown
     documentElement: typeof documentElement | null
     exitFullscreen: ReturnType<typeof vi.fn>
+    querySelector: ReturnType<typeof vi.fn>
     addEventListener: (type: string, fn: (event?: unknown) => void) => void
     removeEventListener: (type: string, fn: (event?: unknown) => void) => void
     dispatch: (type: string, event?: unknown) => void
@@ -62,6 +64,7 @@ function createFakeDom() {
       fakeDoc.fullscreenElement = null
       dispatch(docListeners, 'fullscreenchange')
     }),
+    querySelector: vi.fn(() => null),
     addEventListener: (type, fn) => add(docListeners, type, fn),
     removeEventListener: (type, fn) => remove(docListeners, type, fn),
     dispatch: (type, event) => dispatch(docListeners, type, event),
@@ -164,6 +167,20 @@ describe('useFullscreenMap helpers', () => {
       tryUnlockOrientation({
         unlock: () => {
           throw new Error('unsupported')
+        },
+      }),
+    ).toBe(false)
+  })
+
+  it('hasOpenOverlay detects open dialogs/overlays safely', () => {
+    expect(hasOpenOverlay(null)).toBe(false)
+    expect(hasOpenOverlay({})).toBe(false)
+    expect(hasOpenOverlay({ querySelector: () => null })).toBe(false)
+    expect(hasOpenOverlay({ querySelector: () => ({ id: 'dialog' }) })).toBe(true)
+    expect(
+      hasOpenOverlay({
+        querySelector: () => {
+          throw new Error('bad selector')
         },
       }),
     ).toBe(false)
@@ -284,6 +301,43 @@ describe('useFullscreenMap shared store & route persistence', () => {
     expect(getFullscreenSnapshotForTests().isFullscreen).toBe(true)
     doc.fullscreenElement = null
     doc.dispatch('fullscreenchange')
+
+    expect(getFullscreenSnapshotForTests()).toEqual({
+      isMapOnly: false,
+      isNativeFullscreen: false,
+      isFullscreen: false,
+    })
+
+    unsub()
+  })
+
+  it('does not exit map-only fullscreen on Escape while an overlay/dialog is open', async () => {
+    const doc = document as unknown as ReturnType<typeof createFakeDom>['fakeDoc']
+    const win = window as unknown as ReturnType<typeof createFakeDom>['fakeWindow']
+    doc.documentElement!.requestFullscreen = vi.fn().mockRejectedValue(new Error('not supported'))
+
+    const unsub = subscribeFullscreenStoreForTests(() => {})
+    await enterFullscreen()
+    expect(getFullscreenSnapshotForTests().isFullscreen).toBe(true)
+
+    // Simulate an open modal/drawer or expanded LichiiStatusPanel in the DOM
+    doc.querySelector.mockReturnValue({ dataset: { overlayOpen: 'true' } })
+    win.dispatch('keydown', { key: 'Escape', defaultPrevented: false })
+    await Promise.resolve()
+
+    expect(getFullscreenSnapshotForTests().isFullscreen).toBe(true)
+    expect(getFullscreenSnapshotForTests().isMapOnly).toBe(true)
+
+    // Also respect defaultPrevented even if the overlay already unmounted
+    doc.querySelector.mockReturnValue(null)
+    win.dispatch('keydown', { key: 'Escape', defaultPrevented: true })
+    await Promise.resolve()
+
+    expect(getFullscreenSnapshotForTests().isFullscreen).toBe(true)
+
+    // Once no overlay is open and event is not prevented, Escape exits map-only fullscreen
+    win.dispatch('keydown', { key: 'Escape', defaultPrevented: false })
+    await Promise.resolve()
 
     expect(getFullscreenSnapshotForTests()).toEqual({
       isMapOnly: false,

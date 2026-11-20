@@ -220,7 +220,7 @@ async function main() {
   const githubToken = (process.env.GITHUB_TOKEN ?? '').trim()
   const zipPath = process.env.ZIP_PATH || 'release/OcarinaAtlas-Windows-x64.zip'
   const explicitLinuxTarPath = (process.env.LINUX_TAR_PATH ?? '').trim()
-  const defaultLinuxTarPath = 'release/OcarinaAtlas-Linux-x64.tar.gz'
+  const defaultLinuxTarPath = 'release/OcarinaAtlas-Linux-x64.AppImage'
   const linuxTarPath = explicitLinuxTarPath || (fs.existsSync(defaultLinuxTarPath) ? defaultLinuxTarPath : '')
   const zipAssetName = path.basename(zipPath)
   const linuxAssetName = linuxTarPath ? path.basename(linuxTarPath) : null

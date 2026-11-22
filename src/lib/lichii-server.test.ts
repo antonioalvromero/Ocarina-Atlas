@@ -125,6 +125,7 @@ describe('Lichii environment config helpers', () => {
     const appData = path.join(os.tmpdir(), 'fake-appdata')
     const xdgDataHome = path.join(os.tmpdir(), 'fake-xdg-data')
     const fallbackXdgDataHome = path.join(os.homedir(), '.local', 'share')
+    const fallbackLocalAppData = path.join(os.homedir(), 'AppData', 'Local')
     const explicit = path.join(os.tmpdir(), 'custom-lichii-saves')
     const explicitFritchii = path.join(os.tmpdir(), 'custom-fritchii-saves')
     const explicitCheezy = path.join(os.tmpdir(), 'custom-cheezy-saves')
@@ -133,18 +134,40 @@ describe('Lichii environment config helpers', () => {
     const explicitTriforce = path.join(os.tmpdir(), 'custom-triforce-saves')
     const explicitNx2Saria = path.join(os.tmpdir(), 'custom-nx2saria-profile')
     const emulators = ['fritchii', 'lichii', 'eden', 'cheezyemu'] as const
-    const appDataDefaults = emulators.map((emu) =>
-      path.resolve(appData, emu, 'nand', 'user', 'save', '0000000000000000'),
+    const saveSubs = ['0000000000000000', 'account'] as const
+    const appDataDefaults = emulators.flatMap((emu) =>
+      saveSubs.map((sub) => path.resolve(appData, emu, 'nand', 'user', 'save', sub)),
     )
-    const fallbackXdgDefaults = emulators.map((emu) =>
-      path.resolve(fallbackXdgDataHome, emu, 'nand', 'user', 'save', '0000000000000000'),
+    const fallbackXdgDefaults = emulators.flatMap((emu) =>
+      saveSubs.map((sub) => path.resolve(fallbackXdgDataHome, emu, 'nand', 'user', 'save', sub)),
     )
-    const customXdgDefaults = emulators.map((emu) =>
-      path.resolve(xdgDataHome, emu, 'nand', 'user', 'save', '0000000000000000'),
+    const customXdgDefaults = emulators.flatMap((emu) =>
+      saveSubs.map((sub) => path.resolve(xdgDataHome, emu, 'nand', 'user', 'save', sub)),
     )
+    const winSharedLongshotDefaults = [
+      path.resolve(appData, 'Longshot'),
+      path.resolve(appData, 'Longshot', 'user'),
+      path.resolve(
+        fallbackLocalAppData,
+        'Programs',
+        'LongshotLauncher',
+        'LongshotLauncher-data',
+        'user',
+      ),
+    ]
+    const fallbackXdgLongshotDefaults = [
+      path.resolve(fallbackXdgDataHome, 'longshot'),
+      path.resolve(fallbackXdgDataHome, 'longshot', 'user'),
+    ]
+    const customXdgLongshotDefaults = [
+      path.resolve(xdgDataHome, 'longshot'),
+      path.resolve(xdgDataHome, 'longshot', 'user'),
+    ]
     const recompDefaults = [
       path.resolve('E:\\Longshot\\Game\\user'),
+      path.resolve(path.join(os.homedir(), 'Games', 'Longshot')),
       path.resolve(path.join(os.homedir(), 'Games', 'Longshot', 'user')),
+      path.resolve(path.join(os.homedir(), 'Games', 'Longshot', 'LongshotLauncher-data', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'Hookshot', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'HeyListen', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'ProjectReLink', 'user')),
@@ -153,8 +176,20 @@ describe('Lichii environment config helpers', () => {
       path.resolve(path.join(os.homedir(), 'Games', 'ReLink', 'game', 'user')),
       path.resolve(path.join(os.homedir(), 'Games', 'Triforce', 'user')),
     ]
-    const defaultDirs = [...appDataDefaults, ...fallbackXdgDefaults, ...recompDefaults]
-    const customXdgDirs = [...appDataDefaults, ...customXdgDefaults, ...recompDefaults]
+    const defaultDirs = [
+      ...appDataDefaults,
+      ...fallbackXdgDefaults,
+      ...winSharedLongshotDefaults,
+      ...fallbackXdgLongshotDefaults,
+      ...recompDefaults,
+    ]
+    const customXdgDirs = [
+      ...appDataDefaults,
+      ...customXdgDefaults,
+      ...winSharedLongshotDefaults,
+      ...customXdgLongshotDefaults,
+      ...recompDefaults,
+    ]
 
     expect(getCandidateSaveDirs({ APPDATA: appData })).toEqual(defaultDirs)
     expect(getCandidateSaveDirs({ APPDATA: appData, XDG_DATA_HOME: '   ', LICHII_SAVE_DIR: '   ' })).toEqual(
@@ -164,6 +199,7 @@ describe('Lichii environment config helpers', () => {
     // Deduplicates when APPDATA and XDG_DATA_HOME resolve to the same directory
     expect(getCandidateSaveDirs({ APPDATA: appData, XDG_DATA_HOME: `${appData}${path.sep}` })).toEqual([
       ...appDataDefaults,
+      ...winSharedLongshotDefaults,
       ...recompDefaults,
     ])
     expect(
@@ -396,6 +432,126 @@ describe('Lichii environment config helpers', () => {
       expect(
         detectEmulatorFromPath(path.join(tmpRoot, 'Games', 'Triforce', 'user', 'save', uid, 'slot_00')),
       ).toBe('triforce')
+    } finally {
+      homeSpy.mockRestore()
+      fs.rmSync(tmpRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('discovers Longshot v3.0.0-rc.5+/v3.1.0 shared --user saves (%APPDATA%\\Longshot, $XDG_DATA_HOME/longshot), <track>/<version> instances, and Fritchii nand/user/save/account/<uid>/0400486024DEC000/0/slot_00', () => {
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'issue53-save-layouts-'))
+    const homeSpy = vi.spyOn(os, 'homedir').mockReturnValue(tmpRoot)
+    const writeSlotCap = (slotDir: string, mtimeMs: number) => {
+      fs.mkdirSync(slotDir, { recursive: true })
+      const capPath = path.join(slotDir, 'caption.sav')
+      fs.writeFileSync(capPath, Buffer.alloc(0x30))
+      fs.utimesSync(capPath, new Date(mtimeMs), new Date(mtimeMs))
+    }
+
+    try {
+      const uid = '5a3c9e1f0b7d24680000000000000001'
+      const appDataDir = path.join(tmpRoot, 'appdata')
+      const localAppDataDir = path.join(tmpRoot, 'localappdata')
+      const xdgDataDir = path.join(tmpRoot, 'xdg-data')
+      const env: NodeJS.ProcessEnv = {
+        APPDATA: appDataDir,
+        LOCALAPPDATA: localAppDataDir,
+        XDG_DATA_HOME: xdgDataDir,
+      }
+
+      // 1. Windows %APPDATA%\Longshot\save\<uid>\slot_00 (direct save/ without user/ subfolder)
+      const winAppDataLongshotSlot = path.join(appDataDir, 'Longshot', 'save', uid, 'slot_00')
+      writeSlotCap(winAppDataLongshotSlot, 5000)
+
+      const foundWinAppData = findLatestSaveSlotDir(getCandidateSaveDirs(env))
+      expect(foundWinAppData?.dir).toBe(winAppDataLongshotSlot)
+      expect(detectEmulatorFromPath(foundWinAppData!.dir)).toBe('longshot')
+
+      // 2. Linux $XDG_DATA_HOME/longshot/save/<uid>/slot_00
+      const linuxXdgLongshotSlot = path.join(xdgDataDir, 'longshot', 'save', uid, 'slot_00')
+      writeSlotCap(linuxXdgLongshotSlot, 10000)
+
+      const foundLinuxXdg = findLatestSaveSlotDir(getCandidateSaveDirs(env))
+      expect(foundLinuxXdg?.dir).toBe(linuxXdgLongshotSlot)
+      expect(detectEmulatorFromPath(foundLinuxXdg!.dir)).toBe('longshot')
+
+      // 3. LongshotLauncher <track>/<version> layout ~/Games/Longshot/stable/v3.0.0-rc.5/user/save/<uid>/slot_00
+      const trackVersionSlot = path.join(
+        tmpRoot,
+        'Games',
+        'Longshot',
+        'stable',
+        'v3.0.0-rc.5',
+        'user',
+        'save',
+        uid,
+        'slot_00',
+      )
+      writeSlotCap(trackVersionSlot, 15000)
+
+      const foundTrackVersion = findLatestSaveSlotDir(getCandidateSaveDirs(env))
+      expect(foundTrackVersion?.dir).toBe(trackVersionSlot)
+      expect(detectEmulatorFromPath(foundTrackVersion!.dir)).toBe('longshot')
+
+      // 4. Fritchii nand/user/save/account/<uid>/0400486024DEC000/0/slot_00
+      const fritchiiAccountSlot = path.join(
+        appDataDir,
+        'fritchii',
+        'nand',
+        'user',
+        'save',
+        'account',
+        uid,
+        '0400486024DEC000',
+        '0',
+        'slot_00',
+      )
+      writeSlotCap(fritchiiAccountSlot, 20000)
+
+      const foundFritchiiAccount = findLatestSaveSlotDir(getCandidateSaveDirs(env))
+      expect(foundFritchiiAccount?.dir).toBe(fritchiiAccountSlot)
+      expect(detectEmulatorFromPath(foundFritchiiAccount!.dir)).toBe('fritchii')
+
+      // 5. Portable Fritchii <root>/user/nand/user/save/account/<uid>/0400486024DEC000/0/slot_00 via FRITCHII_SAVE_DIR
+      const portableFritchiiRoot = path.join(tmpRoot, 'portable-fritchii-v6')
+      const portableFritchiiSlot = path.join(
+        portableFritchiiRoot,
+        'user',
+        'nand',
+        'user',
+        'save',
+        'account',
+        uid,
+        '0400486024DEC000',
+        '0',
+        'slot_00',
+      )
+      writeSlotCap(portableFritchiiSlot, 1000)
+
+      const foundPortableFritchii = findLatestSaveSlotDir(
+        getCandidateSaveDirs({ ...env, FRITCHII_SAVE_DIR: portableFritchiiRoot }),
+      )
+      expect(foundPortableFritchii?.dir).toBe(portableFritchiiSlot)
+
+      // 6. Wine/Proton drive_c/users/<user>/AppData/Roaming/Longshot/save/<uid>/slot_00
+      const wineLongshotSlot = path.join(
+        tmpRoot,
+        '.wine',
+        'drive_c',
+        'users',
+        'player',
+        'AppData',
+        'Roaming',
+        'Longshot',
+        'save',
+        uid,
+        'slot_00',
+      )
+      writeSlotCap(wineLongshotSlot, 25000)
+
+      const foundWineLongshot = findLatestSaveSlotDir(getCandidateSaveDirs(env))
+      expect(foundWineLongshot?.dir).toBe(wineLongshotSlot)
+      expect(detectEmulatorFromPath(foundWineLongshot!.dir)).toBe('longshot')
     } finally {
       homeSpy.mockRestore()
       fs.rmSync(tmpRoot, { recursive: true, force: true })

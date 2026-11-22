@@ -393,7 +393,7 @@ namespace OcarinaAtlasLauncher
 
     internal static class LichiiConfigManager
     {
-        private static readonly string[] ProfileDirNames = new[] { "fritchii", "lichii", "cheezyemu" };
+        private static readonly string[] ProfileDirNames = new[] { "fritchii", "lichii", "eden", "cheezyemu" };
 
         private static readonly Regex ActiveSwitchRegex = new Regex(
             @"^\s*EDEN_NX2_DEBUG_SERVER\s*=\s*(.+?)\s*$",
@@ -405,24 +405,96 @@ namespace OcarinaAtlasLauncher
             return paths.Count > 0 ? paths[0] : string.Empty;
         }
 
+        private static void AddUniqueConfigPath(List<string> targets, HashSet<string> seen, string configPath)
+        {
+            if (string.IsNullOrEmpty(configPath)) return;
+            string normalized = configPath;
+            try
+            {
+                normalized = Path.GetFullPath(configPath);
+            }
+            catch
+            {
+                normalized = configPath;
+            }
+            if (seen.Add(normalized))
+            {
+                targets.Add(configPath);
+            }
+        }
+
         public static List<string> GetTargetConfigPaths()
         {
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            List<string> existing = new List<string>();
-            List<string> all = new List<string>();
+            List<string> targets = new List<string>();
+            HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             for (int i = 0; i < ProfileDirNames.Length; i++)
             {
-                string dir = Path.Combine(appData, ProfileDirNames[i]);
+                string profileName = ProfileDirNames[i];
+                string dir = Path.Combine(appData, profileName);
                 string cfg = Path.Combine(dir, "nx2_switches.txt");
-                all.Add(cfg);
-                if (Directory.Exists(dir))
+                bool alwaysInclude = string.Equals(profileName, "fritchii", StringComparison.OrdinalIgnoreCase) ||
+                                     string.Equals(profileName, "lichii", StringComparison.OrdinalIgnoreCase);
+                if (alwaysInclude || Directory.Exists(dir) || File.Exists(cfg))
                 {
-                    existing.Add(cfg);
+                    AddUniqueConfigPath(targets, seen, cfg);
                 }
             }
 
-            return existing.Count > 0 ? existing : all;
+            for (int i = 0; i < ProfileDirNames.Length; i++)
+            {
+                Process[] procs = null;
+                try
+                {
+                    procs = Process.GetProcessesByName(ProfileDirNames[i]);
+                }
+                catch
+                {
+                    procs = null;
+                }
+
+                if (procs == null || procs.Length == 0) continue;
+
+                for (int j = 0; j < procs.Length; j++)
+                {
+                    Process proc = procs[j];
+                    if (proc == null) continue;
+                    try
+                    {
+                        ProcessModule mod = proc.MainModule;
+                        string exePath = mod != null ? mod.FileName : null;
+                        if (!string.IsNullOrEmpty(exePath))
+                        {
+                            string exeDir = Path.GetDirectoryName(exePath);
+                            if (!string.IsNullOrEmpty(exeDir))
+                            {
+                                string exeCfg = Path.Combine(exeDir, "nx2_switches.txt");
+                                string userDir = Path.Combine(exeDir, "user");
+                                bool userDirExists = Directory.Exists(userDir);
+                                if (File.Exists(exeCfg) || userDirExists)
+                                {
+                                    AddUniqueConfigPath(targets, seen, exeCfg);
+                                }
+                                if (userDirExists)
+                                {
+                                    AddUniqueConfigPath(targets, seen, Path.Combine(userDir, "nx2_switches.txt"));
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore inaccessible or exiting emulator process.
+                    }
+                    finally
+                    {
+                        try { proc.Dispose(); } catch { }
+                    }
+                }
+            }
+
+            return targets;
         }
 
         private static bool TryReadSwitchTarget(string configPath, out bool fileExists, out string target)

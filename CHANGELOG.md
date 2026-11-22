@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2.6.1] - 2026-11-21
+
+### Fixed
+- **Longshot `v3.0+` & `LongshotLauncher` Compatibility ([#53](https://github.com/antonioalvromero/Ocarina-Atlas/issues/53)):** Added automatic save discovery for shared `--user` save directories (`%APPDATA%\Longshot\save` on Windows, `$XDG_DATA_HOME/longshot/save` on Linux, portable `LongshotLauncher-data\user`, and Wine/Proton prefixes) as well as `<track>\<version>` instance layouts (`stable\v3.0.0-rc.5+`), dynamically pushed detected save directories to the server when Longshot launches after `Start Map`, and reset the heap scan timer budget before Longshot's `0x1000000000..0x2000000000` heap fallback across Windows and Linux bridges.
+- **Fritchii & Portable `1-Click Setup Sync` ([#53](https://github.com/antonioalvromero/Ocarina-Atlas/issues/53)):** Fixed `1-Click Setup Sync` skipping `%APPDATA%\fritchii\nx2_switches.txt` when `%APPDATA%\lichii` already existed on disk, added `%APPDATA%\eden\nx2_switches.txt` (`~/.config/eden/nx2_switches.txt` on Linux), and added automatic configuration for portable `nx2_switches.txt` next to running `fritchii.exe` / `lichii.exe` / `eden.exe` / `cheezyemu.exe` instances and `nand/user/save/account` save profiles.
+- **Bridge Diagnostics & Linux `ptrace_scope` Guard ([#53](https://github.com/antonioalvromero/Ocarina-Atlas/issues/53)):** Added clear **Logs** diagnostics when a recomp process cannot be opened due to Administrator elevation mismatch or when port `6545` is busy, scanned all `/proc/<pid>/cmdline` arguments for Wine/Proton on Linux, and verified `/proc/<pid>/mem` readability before spawning `longshot-rpc-bridge --once` to avoid respawn loops when `kernel.yama.ptrace_scope >= 1`.
+
 ## [2.6.0] - 2026-11-20
 
 ### Added

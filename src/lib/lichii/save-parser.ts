@@ -16,9 +16,12 @@ import {
 
 export const OOT_REMAKE_TITLE_ID = '0400486024DEC000'
 export const DEFAULT_EMULATOR_SAVE_ROOTS = ['fritchii', 'lichii', 'eden', 'cheezyemu'] as const
+export const DEFAULT_EMULATOR_NAND_SAVE_SUBDIRS = ['0000000000000000', 'account'] as const
 
 const RECOMP_USER_SUBDIRS = [
+  ['Longshot'],
   ['Longshot', 'user'],
+  ['Longshot', 'LongshotLauncher-data', 'user'],
   ['Hookshot', 'user'],
   ['HeyListen', 'user'],
   ['ProjectReLink', 'user'],
@@ -36,6 +39,22 @@ function getDefaultRecompSaveDirs(): string[] {
   ]
 }
 
+const IGNORED_INSTANCE_TRAVERSAL_DIRS = new Set([
+  'node_modules',
+  '.git',
+  'bin',
+  'assets',
+  'romfs',
+  'exefs',
+  'shaders',
+  'cache',
+  'logs',
+  'nand',
+  'save',
+  'user',
+  'profile',
+])
+
 function listSubdirsSafe(dirPath: string): string[] {
   try {
     return fs
@@ -45,6 +64,66 @@ function listSubdirsSafe(dirPath: string): string[] {
   } catch {
     return []
   }
+}
+
+function listVisibleInstanceSubdirsBounded(dirPath: string, maxEntries = 32): string[] {
+  try {
+    if (!fs.existsSync(dirPath)) return []
+    const result: string[] = []
+    for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue
+      const name = entry.name
+      if (
+        name.startsWith('.') ||
+        name.startsWith('slot_') ||
+        IGNORED_INSTANCE_TRAVERSAL_DIRS.has(name.toLowerCase())
+      ) {
+        continue
+      }
+      result.push(name)
+      if (result.length >= maxEntries) break
+    }
+    return result
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Scans LongshotLauncher `<track>/<version>/user/save` and `builds/<track>/<version>/user/save`
+ * instance layouts under a candidate root directory with bounded depth.
+ */
+function collectLongshotInstanceSaveRoots(rootDir: string): string[] {
+  const found: string[] = []
+  const seen = new Set<string>()
+  const pushSaveRoot = (candidateSaveDir: string) => {
+    const resolved = path.resolve(candidateSaveDir)
+    const key = process.platform === 'win32' ? resolved.toLowerCase() : resolved
+    if (!seen.has(key) && fs.existsSync(resolved)) {
+      seen.add(key)
+      found.push(resolved)
+    }
+  }
+
+  const buildsBases = [
+    rootDir,
+    path.join(rootDir, 'builds'),
+    path.join(rootDir, 'LongshotLauncher-data', 'builds'),
+  ]
+  for (const buildsBase of buildsBases) {
+    for (const trackOrVersion of listVisibleInstanceSubdirsBounded(buildsBase)) {
+      const trackDir = path.join(buildsBase, trackOrVersion)
+      pushSaveRoot(path.join(trackDir, 'user', 'save'))
+      pushSaveRoot(path.join(trackDir, 'save'))
+      for (const versionDirName of listVisibleInstanceSubdirsBounded(trackDir)) {
+        const versionDir = path.join(trackDir, versionDirName)
+        pushSaveRoot(path.join(versionDir, 'user', 'save'))
+        pushSaveRoot(path.join(versionDir, 'save'))
+      }
+    }
+  }
+
+  return found
 }
 
 function parseSteamLibraryFoldersVdf(vdfPath: string): string[] {
@@ -64,6 +143,19 @@ function parseSteamLibraryFoldersVdf(vdfPath: string): string[] {
   }
 }
 
+function collectLinuxLauncherLongshotDirs(userDir: string, pushUnique: (dir: string) => void): void {
+  const candidates = [
+    path.join(userDir, 'AppData', 'Roaming', 'Longshot'),
+    path.join(userDir, 'AppData', 'Roaming', 'Longshot', 'user'),
+    path.join(userDir, 'AppData', 'Local', 'Programs', 'LongshotLauncher', 'LongshotLauncher-data', 'user'),
+  ]
+  for (const dir of candidates) {
+    if (fs.existsSync(dir)) {
+      pushUnique(dir)
+    }
+  }
+}
+
 function collectWinePrefixSaveDirs(prefixDir: string, pushUnique: (dir: string) => void): void {
   const driveC = path.join(prefixDir, 'drive_c')
   if (!fs.existsSync(driveC)) return
@@ -74,11 +166,14 @@ function collectWinePrefixSaveDirs(prefixDir: string, pushUnique: (dir: string) 
     if (skipUsers.has(userName.toLowerCase())) continue
     const userDir = path.join(usersDir, userName)
     for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
-      const emuSave = path.join(userDir, 'AppData', 'Roaming', emu, 'nand', 'user', 'save', '0000000000000000')
-      if (fs.existsSync(emuSave)) {
-        pushUnique(emuSave)
+      for (const saveSub of DEFAULT_EMULATOR_NAND_SAVE_SUBDIRS) {
+        const emuSave = path.join(userDir, 'AppData', 'Roaming', emu, 'nand', 'user', 'save', saveSub)
+        if (fs.existsSync(emuSave)) {
+          pushUnique(emuSave)
+        }
       }
     }
+    collectLinuxLauncherLongshotDirs(userDir, pushUnique)
     for (const parts of RECOMP_USER_SUBDIRS) {
       const userGamesSave = path.join(userDir, 'Games', ...parts)
       if (fs.existsSync(userGamesSave)) {
@@ -144,9 +239,11 @@ function collectLinuxContainerSaveDirs(
   for (const appId of listSubdirsSafe(flatpakDir)) {
     for (const sub of ['data', 'config'] as const) {
       for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
-        const emuSave = path.join(flatpakDir, appId, sub, emu, 'nand', 'user', 'save', '0000000000000000')
-        if (fs.existsSync(emuSave)) {
-          pushUnique(emuSave)
+        for (const saveSub of DEFAULT_EMULATOR_NAND_SAVE_SUBDIRS) {
+          const emuSave = path.join(flatpakDir, appId, sub, emu, 'nand', 'user', 'save', saveSub)
+          if (fs.existsSync(emuSave)) {
+            pushUnique(emuSave)
+          }
         }
       }
     }
@@ -183,7 +280,7 @@ function collectLinuxContainerSaveDirs(
   const gamesRoot = path.join(home, 'Games')
   for (const gameDirName of listSubdirsSafe(gamesRoot)) {
     const gameDir = path.join(gamesRoot, gameDirName)
-    for (const rel of [['user'], ['game', 'user']] as const) {
+    for (const rel of [['user'], ['game', 'user'], ['LongshotLauncher-data', 'user']] as const) {
       const candidateUserDir = path.join(gameDir, ...rel)
       if (fs.existsSync(candidateUserDir)) {
         pushUnique(candidateUserDir)
@@ -196,6 +293,9 @@ function collectLinuxContainerSaveDirs(
 let runtimeCustomSaveDir: string | null = null
 // undefined = defer to process.env.CUSTOM_SAVE_SLOT; null = explicitly auto-latest; string = explicit slot
 let runtimeSelectedSaveSlot: string | null | undefined = undefined
+
+const knownExplicitCandidateDirs = new Set<string>()
+const knownDefaultCandidateDirs = new Set<string>()
 
 const saveSelectionResetListeners = new Set<() => void>()
 
@@ -220,8 +320,10 @@ function getEffectiveSelectedSaveSlot(env: NodeJS.ProcessEnv = process.env): str
  * runtime custom save override / CUSTOM_SAVE_DIR first,
  * then explicit LICHII_SAVE_DIR / FRITCHII_SAVE_DIR / CHEEZYEMU_SAVE_DIR / LONGSHOT_SAVE_DIR / RELINK_SAVE_DIR / TRIFORCE_SAVE_DIR /
  * NX2SARIA_SAVE_DIR overrides,
- * then default %APPDATA%\{fritchii,lichii,eden,cheezyemu}\nand\user\save\0000000000000000,
- * Linux $XDG_DATA_HOME/{fritchii,lichii,eden,cheezyemu}/nand/user/save/0000000000000000 (or ~/.local/share),
+ * then default %APPDATA%\{fritchii,lichii,eden,cheezyemu}\nand\user\save\{0000000000000000,account},
+ * Linux $XDG_DATA_HOME/{fritchii,lichii,eden,cheezyemu}/nand/user/save/{0000000000000000,account} (or ~/.local/share),
+ * shared Longshot / LongshotLauncher user save directories (%APPDATA%\Longshot, %LOCALAPPDATA%\Programs\LongshotLauncher\LongshotLauncher-data\user,
+ * $XDG_DATA_HOME/longshot),
  * Longshot/Hookshot/HeyListen/ProjectReLink/Triforce user paths,
  * and existing Linux Wine, Steam/Proton, Flatpak, Bottles, Heroic, and Lutris ~/Games/* paths.
  */
@@ -231,17 +333,27 @@ export function getCandidateSaveDirs(
 ): string[] {
   const dirs: string[] = []
   const seen = new Set<string>()
-  const pushUnique = (candidatePath: string) => {
+  const pushUniqueWithClass = (candidatePath: string, isExplicit: boolean) => {
     const resolved = path.resolve(candidatePath)
     const dedupeKey = process.platform === 'win32' ? resolved.toLowerCase() : resolved
+    const classifyKey = resolved.toLowerCase()
     if (!seen.has(dedupeKey)) {
       seen.add(dedupeKey)
       dirs.push(resolved)
+      if (isExplicit) {
+        knownExplicitCandidateDirs.add(classifyKey)
+        knownDefaultCandidateDirs.delete(classifyKey)
+      } else {
+        knownDefaultCandidateDirs.add(classifyKey)
+        knownExplicitCandidateDirs.delete(classifyKey)
+      }
     }
   }
+  const pushExplicit = (candidatePath: string) => pushUniqueWithClass(candidatePath, true)
+  const pushDefault = (candidatePath: string) => pushUniqueWithClass(candidatePath, false)
 
   if (includeRuntimeOverride && runtimeCustomSaveDir) {
-    pushUnique(runtimeCustomSaveDir)
+    pushExplicit(runtimeCustomSaveDir)
   }
 
   for (const explicitRaw of [
@@ -256,23 +368,37 @@ export function getCandidateSaveDirs(
   ]) {
     const explicit = explicitRaw?.trim()
     if (explicit) {
-      pushUnique(explicit)
+      pushExplicit(explicit)
     }
   }
 
-  const appData = env.APPDATA?.trim() || path.join(os.homedir(), 'AppData', 'Roaming')
-  const xdgDataHome = env.XDG_DATA_HOME?.trim() || path.join(os.homedir(), '.local', 'share')
+  const home = os.homedir()
+  const appData = env.APPDATA?.trim() || path.join(home, 'AppData', 'Roaming')
+  const localAppData = env.LOCALAPPDATA?.trim() || path.join(home, 'AppData', 'Local')
+  const xdgDataHome = env.XDG_DATA_HOME?.trim() || path.join(home, '.local', 'share')
   for (const dataRoot of [appData, xdgDataHome]) {
     for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
-      pushUnique(path.join(dataRoot, emu, 'nand', 'user', 'save', '0000000000000000'))
+      for (const saveSub of DEFAULT_EMULATOR_NAND_SAVE_SUBDIRS) {
+        pushDefault(path.join(dataRoot, emu, 'nand', 'user', 'save', saveSub))
+      }
     }
+  }
+
+  pushDefault(path.join(appData, 'Longshot'))
+  pushDefault(path.join(appData, 'Longshot', 'user'))
+  pushDefault(
+    path.join(localAppData, 'Programs', 'LongshotLauncher', 'LongshotLauncher-data', 'user'),
+  )
+  if (path.resolve(xdgDataHome).toLowerCase() !== path.resolve(appData).toLowerCase()) {
+    pushDefault(path.join(xdgDataHome, 'longshot'))
+    pushDefault(path.join(xdgDataHome, 'longshot', 'user'))
   }
 
   for (const recompUserDir of getDefaultRecompSaveDirs()) {
-    pushUnique(recompUserDir)
+    pushDefault(recompUserDir)
   }
 
-  collectLinuxContainerSaveDirs(env, xdgDataHome, pushUnique)
+  collectLinuxContainerSaveDirs(env, xdgDataHome, pushDefault)
 
   return dirs
 }
@@ -328,10 +454,26 @@ function collectSlotsFromTitleDir(titleDir: string, slots: Set<string>): void {
   }
 }
 
+/**
+ * Collects slots from a Switch title save directory (`0400486024DEC000`), supporting both
+ * direct `0400486024DEC000/slot_*` and `account/<uid>/0400486024DEC000/0/slot_*` layouts.
+ */
+function collectSlotsFromSwitchTitleDir(titleDir: string, slots: Set<string>): void {
+  if (!fs.existsSync(titleDir)) return
+  for (const name of listSubdirsSafe(titleDir)) {
+    const childPath = path.join(titleDir, name)
+    if (name.startsWith('slot_')) {
+      addSlotIfValid(childPath, slots)
+    } else {
+      collectSlotsFromTitleDir(childPath, slots)
+    }
+  }
+}
+
 function collectSlotsFromAccountDir(accountDir: string, slots: Set<string>): void {
   if (!fs.existsSync(accountDir)) return
   for (const userName of listSubdirsSafe(accountDir)) {
-    collectSlotsFromTitleDir(path.join(accountDir, userName, OOT_REMAKE_TITLE_ID), slots)
+    collectSlotsFromSwitchTitleDir(path.join(accountDir, userName, OOT_REMAKE_TITLE_ID), slots)
     collectSlotsFromTitleDir(path.join(accountDir, userName), slots)
   }
 }
@@ -352,20 +494,27 @@ function collectSlotsInCandidateRoot(rootDir: string): string[] {
   // Level 4: Direct slot_* folder (or folder directly holding caption.sav / progress.sav)
   addSlotIfValid(rootDir, slots)
   // Level 3: Title ID folder (0400486024DEC000) or Longshot/ReLink/HeyListen UID profile folder containing slot_*
-  collectSlotsFromTitleDir(rootDir, slots)
-  // Level 3 (Switch profile): Profile folder (<userId>) containing 0400486024DEC000/slot_*
-  collectSlotsFromTitleDir(path.join(rootDir, OOT_REMAKE_TITLE_ID), slots)
-  // Level 2: Account folder (0000000000000000) or user/save / profile/save containing <userId>/slot_*
+  if (path.basename(rootDir).toUpperCase() === OOT_REMAKE_TITLE_ID) {
+    collectSlotsFromSwitchTitleDir(rootDir, slots)
+  } else {
+    collectSlotsFromTitleDir(rootDir, slots)
+  }
+  // Level 3 (Switch profile): Profile folder (<userId>) containing 0400486024DEC000/[0/]slot_*
+  collectSlotsFromSwitchTitleDir(path.join(rootDir, OOT_REMAKE_TITLE_ID), slots)
+  // Level 2: Account folder (0000000000000000 / account) or user/save / profile/save containing <userId>/slot_*
   collectSlotsFromAccountDir(rootDir, slots)
 
   // Level 1 & 2: Full game install root / LongshotLauncher-data / user / profile / nand layouts
   const saveRoots = [
     path.join(rootDir, 'nand', 'user', 'save'),
+    path.join(rootDir, 'user', 'nand', 'user', 'save'),
     path.join(rootDir, 'user', 'save'),
     path.join(rootDir, 'LongshotLauncher-data', 'user', 'save'),
+    path.join(rootDir, 'LongshotLauncher-data', 'save'),
     path.join(rootDir, 'profile', 'save'),
     path.join(rootDir, 'user'),
     path.join(rootDir, 'save'),
+    ...collectLongshotInstanceSaveRoots(rootDir),
   ]
   if (path.basename(rootDir).toLowerCase() === 'save') {
     saveRoots.push(rootDir)
@@ -392,7 +541,7 @@ export function detectEmulatorFromPath(
     const nx2sariaRoot = path.resolve(nx2sariaRaw).toLowerCase()
     if (resolved === nx2sariaRoot || resolved.startsWith(nx2sariaRoot + path.sep)) return 'nx2saria'
   }
-  const segments = resolved.split(path.sep)
+  const segments = resolved.split(/[\\/]/)
   for (const emu of DEFAULT_EMULATOR_SAVE_ROOTS) {
     if (segments.includes(emu)) return emu
   }
@@ -402,7 +551,13 @@ export function detectEmulatorFromPath(
   if (segments.includes('triforce')) {
     return 'triforce'
   }
-  if (segments.includes('longshot') || segments.includes('hookshot') || segments.includes('heylisten')) {
+  if (
+    segments.includes('longshot') ||
+    segments.includes('longshotlauncher') ||
+    segments.includes('longshotlauncher-data') ||
+    segments.includes('hookshot') ||
+    segments.includes('heylisten')
+  ) {
     return 'longshot'
   }
   return undefined
@@ -410,9 +565,17 @@ export function detectEmulatorFromPath(
 
 function isDefaultEmulatorSaveDir(dir: string): boolean {
   const normalized = path.resolve(dir).toLowerCase()
+  if (knownExplicitCandidateDirs.has(normalized)) {
+    return false
+  }
+  if (knownDefaultCandidateDirs.has(normalized)) {
+    return true
+  }
   if (
     DEFAULT_EMULATOR_SAVE_ROOTS.some((emu) =>
-      normalized.endsWith(`${path.sep}${path.join(emu, 'nand', 'user', 'save', '0000000000000000')}`.toLowerCase()),
+      DEFAULT_EMULATOR_NAND_SAVE_SUBDIRS.some((saveSub) =>
+        normalized.endsWith(`${path.sep}${path.join(emu, 'nand', 'user', 'save', saveSub)}`.toLowerCase()),
+      ),
     )
   ) {
     return true

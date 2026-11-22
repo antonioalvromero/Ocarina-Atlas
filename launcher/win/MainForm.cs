@@ -181,6 +181,8 @@ namespace OcarinaAtlasLauncher
         private JobObject _jobObject;
         private Process _serverProcess;
         private LongshotRpcBridge _longshotBridge;
+        private string _lastBridgeDiagnosticLog = string.Empty;
+        private string _lastSyncedBridgeSaveDir = string.Empty;
         private volatile bool _isShuttingDown = false;
         private ServerLifecycle _lifecycle = ServerLifecycle.Stopped;
         private bool _hasStartupError = false;
@@ -2663,6 +2665,7 @@ namespace OcarinaAtlasLauncher
             _activeBindHost = bindHost;
             _activeLichiiHost = lichiiHost;
             _activeLichiiPort = lichiiPort;
+            _lastSyncedBridgeSaveDir = string.Empty;
             _browserOpenedForRun = false;
             _hasStartupError = false;
             _lifecycle = ServerLifecycle.Starting;
@@ -3239,6 +3242,7 @@ namespace OcarinaAtlasLauncher
 
             bool isLoopback = IsBridgeLoopbackHost(lichiiHost);
             string logMsg = null;
+            string bridgeSaveDirToSync = null;
 
             lock (_bridgeLock)
             {
@@ -3254,6 +3258,7 @@ namespace OcarinaAtlasLauncher
                         int oldPort = _longshotBridge.Port;
                         _longshotBridge.Dispose();
                         _longshotBridge = null;
+                        _lastSyncedBridgeSaveDir = string.Empty;
 
                         if (portOrHostMismatch)
                         {
@@ -3277,12 +3282,14 @@ namespace OcarinaAtlasLauncher
                 {
                     if (!ProbeTcpPort("127.0.0.1", lichiiPort, 120))
                     {
-                        LongshotRpcBridge candidate = LongshotRpcBridge.TryFindLongshotProcess();
+                        string diagnosticHint;
+                        LongshotRpcBridge candidate = LongshotRpcBridge.TryFindLongshotProcess(out diagnosticHint);
                         if (candidate != null)
                         {
                             if (candidate.Start(lichiiPort))
                             {
                                 _longshotBridge = candidate;
+                                _lastBridgeDiagnosticLog = string.Empty;
                                 string saveNote = string.IsNullOrEmpty(candidate.DetectedUserSaveDir)
                                     ? "no user save dir"
                                     : candidate.DetectedUserSaveDir;
@@ -3296,11 +3303,52 @@ namespace OcarinaAtlasLauncher
                             }
                             else
                             {
+                                string bindErr = string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "Warning: detected {0} (PID {1}), but Longshot RPC bridge failed to bind 127.0.0.1:{2}.",
+                                    FormatEmulatorDisplayName(candidate.EmulatorKind),
+                                    candidate.ProcessId,
+                                    lichiiPort);
+                                if (!string.Equals(_lastBridgeDiagnosticLog, bindErr, StringComparison.Ordinal))
+                                {
+                                    _lastBridgeDiagnosticLog = bindErr;
+                                    logMsg = logMsg != null ? (logMsg + " " + bindErr) : bindErr;
+                                }
                                 candidate.Dispose();
                             }
                         }
+                        else if (!string.IsNullOrEmpty(diagnosticHint))
+                        {
+                            if (!string.Equals(_lastBridgeDiagnosticLog, diagnosticHint, StringComparison.Ordinal))
+                            {
+                                _lastBridgeDiagnosticLog = diagnosticHint;
+                                logMsg = logMsg != null ? (logMsg + " " + diagnosticHint) : diagnosticHint;
+                            }
+                        }
+                        else
+                        {
+                            _lastBridgeDiagnosticLog = string.Empty;
+                        }
                     }
                 }
+
+                if (_longshotBridge != null && !string.IsNullOrEmpty(_longshotBridge.DetectedUserSaveDir))
+                {
+                    string customSaveDir = (_launcherSettings.CustomSaveDir ?? string.Empty).Trim();
+                    if (string.IsNullOrEmpty(customSaveDir) && _lifecycle == ServerLifecycle.Running)
+                    {
+                        if (!string.Equals(_lastSyncedBridgeSaveDir, _longshotBridge.DetectedUserSaveDir, StringComparison.OrdinalIgnoreCase))
+                        {
+                            _lastSyncedBridgeSaveDir = _longshotBridge.DetectedUserSaveDir;
+                            bridgeSaveDirToSync = _longshotBridge.DetectedUserSaveDir;
+                        }
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(bridgeSaveDirToSync))
+            {
+                ApplyBridgeSaveDirToServerAsync(bridgeSaveDirToSync);
             }
 
             if (!string.IsNullOrEmpty(logMsg))
@@ -3308,6 +3356,65 @@ namespace OcarinaAtlasLauncher
                 string msgToLog = logMsg;
                 BeginInvokeSafe(delegate { AppendLog(msgToLog); });
             }
+        }
+
+        private void ApplyBridgeSaveDirToServerAsync(string detectedSaveDir)
+        {
+            if (string.IsNullOrEmpty(detectedSaveDir) || _lifecycle != ServerLifecycle.Running)
+            {
+                return;
+            }
+
+            int port = _activePort;
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                string url = string.Format(CultureInfo.InvariantCulture, "http://127.0.0.1:{0}/api/saves/slot", port);
+                string payload = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "{{\"saveDir\":\"{0}\"}}",
+                    SimpleJsonParser.EscapeString(detectedSaveDir));
+
+                try
+                {
+                    HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+                    req.Method = "POST";
+                    req.ContentType = "application/json";
+                    req.Timeout = 2000;
+                    req.ReadWriteTimeout = 2000;
+                    req.Proxy = null;
+                    req.KeepAlive = false;
+
+                    byte[] bodyBytes = Encoding.UTF8.GetBytes(payload);
+                    req.ContentLength = bodyBytes.Length;
+                    using (Stream reqStream = req.GetRequestStream())
+                    {
+                        reqStream.Write(bodyBytes, 0, bodyBytes.Length);
+                    }
+
+                    using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
+                    using (Stream respStream = resp.GetResponseStream())
+                    using (StreamReader reader = new StreamReader(respStream, Encoding.UTF8))
+                    {
+                        string respBody = reader.ReadToEnd();
+                        Dictionary<string, object> obj = SimpleJsonParser.ParseObject(respBody);
+                        string[] slots = ExtractStringArray(obj, "availableSaveSlots");
+                        if (slots != null && !IsDisposed && IsHandleCreated)
+                        {
+                            BeginInvoke(new Action(delegate
+                            {
+                                if (!IsDisposed)
+                                {
+                                    RefreshSaveSlotOptions(slots);
+                                }
+                            }));
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore transient failure; next poll or user selection can retry.
+                }
+            });
         }
 
         private void TriggerPollNow()

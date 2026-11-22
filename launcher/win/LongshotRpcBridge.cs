@@ -161,8 +161,31 @@ namespace OcarinaAtlasLauncher
             }
         }
 
+        private static string _lastDiagnosticHint = string.Empty;
+
+        public string EmulatorKind
+        {
+            get { return _emulatorKind; }
+        }
+
+        public static string GetDiagnosticHintForRunningRecomp()
+        {
+            return _lastDiagnosticHint ?? string.Empty;
+        }
+
         public static LongshotRpcBridge TryFindLongshotProcess()
         {
+            string diagnosticHint;
+            return TryFindLongshotProcess(out diagnosticHint);
+        }
+
+        public static LongshotRpcBridge TryFindLongshotProcess(out string diagnosticHint)
+        {
+            diagnosticHint = string.Empty;
+            string accessDeniedHint = null;
+            string openFailedHint = null;
+            string unmappedHint = null;
+
             for (int n = 0; n < ProcessNames.Length; n++)
             {
                 Process[] procs = null;
@@ -194,13 +217,35 @@ namespace OcarinaAtlasLauncher
                             continue;
                         }
 
-                        handle = OpenProcess(ProcessReadAccess, false, proc.Id);
+                        string procKey = ProcessNames[n];
+                        int procId = proc.Id;
+                        handle = OpenProcess(ProcessReadAccess, false, procId);
                         if (handle == IntPtr.Zero)
                         {
+                            int win32Err = Marshal.GetLastWin32Error();
+                            if (win32Err == 5)
+                            {
+                                if (accessDeniedHint == null)
+                                {
+                                    accessDeniedHint = string.Format(
+                                        CultureInfo.InvariantCulture,
+                                        "Detected {0} (PID {1}), but OpenProcess failed with ERROR_ACCESS_DENIED (Win32 error 5). If the game is running as Administrator, run Ocarina Atlas with the same elevation.",
+                                        procKey,
+                                        procId);
+                                }
+                            }
+                            else if (openFailedHint == null)
+                            {
+                                openFailedHint = string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "Detected {0} (PID {1}), but OpenProcess(0x0410) failed (Win32 error {2}).",
+                                    procKey,
+                                    procId,
+                                    win32Err);
+                            }
                             continue;
                         }
 
-                        string procKey = ProcessNames[n];
                         string emulatorKind = procKey.StartsWith("relink", StringComparison.OrdinalIgnoreCase)
                             ? "relink"
                             : string.Equals(procKey, "Triforce", StringComparison.OrdinalIgnoreCase)
@@ -215,6 +260,14 @@ namespace OcarinaAtlasLauncher
 
                         if (!VerifyGuestCodeMapped(handle, isDirectHostVa))
                         {
+                            if (unmappedHint == null)
+                            {
+                                unmappedHint = string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "Detected {0} (PID {1}), waiting for guest code memory to be mapped (launcher or startup process before game load).",
+                                    procKey,
+                                    procId);
+                            }
                             continue;
                         }
 
@@ -227,7 +280,8 @@ namespace OcarinaAtlasLauncher
                                 try { procs[k].Dispose(); } catch { }
                             }
                         }
-                        return new LongshotRpcBridge(proc, proc.Id, handle, userSaveDir, emulatorKind);
+                        _lastDiagnosticHint = string.Empty;
+                        return new LongshotRpcBridge(proc, procId, handle, userSaveDir, emulatorKind);
                     }
                     catch
                     {
@@ -247,17 +301,51 @@ namespace OcarinaAtlasLauncher
                 }
             }
 
+            diagnosticHint = accessDeniedHint ?? openFailedHint ?? unmappedHint ?? string.Empty;
+            _lastDiagnosticHint = diagnosticHint;
+            return null;
+        }
+
+        private static string ResolveAppDataLongshotSaveDir()
+        {
+            try
+            {
+                string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                if (!string.IsNullOrEmpty(appData))
+                {
+                    string longshotAppData = Path.Combine(appData, "Longshot");
+                    if (Directory.Exists(Path.Combine(longshotAppData, "save")))
+                    {
+                        return longshotAppData;
+                    }
+                    string longshotAppDataUser = Path.Combine(longshotAppData, "user");
+                    if (Directory.Exists(Path.Combine(longshotAppDataUser, "save")))
+                    {
+                        return longshotAppDataUser;
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore environment path resolution failures.
+            }
             return null;
         }
 
         public static string DetectRunningUserSaveDir()
         {
+            bool sawLongshotProcess = false;
+
             for (int n = 0; n < ProcessNames.Length; n++)
             {
+                string procKey = ProcessNames[n];
+                bool isLongshotKey = string.Equals(procKey, "Longshot", StringComparison.OrdinalIgnoreCase) ||
+                                     string.Equals(procKey, "hookshot", StringComparison.OrdinalIgnoreCase);
+
                 Process[] procs = null;
                 try
                 {
-                    procs = Process.GetProcessesByName(ProcessNames[n]);
+                    procs = Process.GetProcessesByName(procKey);
                 }
                 catch
                 {
@@ -265,6 +353,10 @@ namespace OcarinaAtlasLauncher
                 }
 
                 if (procs == null) continue;
+                if (procs.Length > 0 && isLongshotKey)
+                {
+                    sawLongshotProcess = true;
+                }
 
                 string found = null;
                 for (int i = 0; i < procs.Length; i++)
@@ -298,6 +390,15 @@ namespace OcarinaAtlasLauncher
                 }
             }
 
+            if (sawLongshotProcess)
+            {
+                string appDataLongshot = ResolveAppDataLongshotSaveDir();
+                if (!string.IsNullOrEmpty(appDataLongshot) && Directory.Exists(appDataLongshot))
+                {
+                    return appDataLongshot;
+                }
+            }
+
             return null;
         }
 
@@ -308,23 +409,84 @@ namespace OcarinaAtlasLauncher
             {
                 ProcessModule mod = proc.MainModule;
                 string exePath = mod != null ? mod.FileName : null;
-                if (string.IsNullOrEmpty(exePath)) return null;
+                if (string.IsNullOrEmpty(exePath))
+                {
+                    return ResolveAppDataLongshotSaveDir();
+                }
 
                 string exeDir = Path.GetDirectoryName(exePath);
-                if (string.IsNullOrEmpty(exeDir)) return null;
+                if (string.IsNullOrEmpty(exeDir))
+                {
+                    return ResolveAppDataLongshotSaveDir();
+                }
                 exeDir = exeDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
                 string leaf = Path.GetFileName(exeDir);
                 string gameRoot = string.Equals(leaf, "bin", StringComparison.OrdinalIgnoreCase)
                     ? Path.GetDirectoryName(exeDir)
                     : exeDir;
-                if (string.IsNullOrEmpty(gameRoot)) return null;
+                if (string.IsNullOrEmpty(gameRoot))
+                {
+                    return ResolveAppDataLongshotSaveDir();
+                }
 
-                return Path.Combine(gameRoot, "user");
+                // 1. Direct <gameRoot>\user\save check (note: LongshotLauncher removes <gameRoot>\user\save after migrating to %APPDATA%\Longshot\save)
+                string gameUserDir = Path.Combine(gameRoot, "user");
+                if (Directory.Exists(Path.Combine(gameUserDir, "save")))
+                {
+                    return gameUserDir;
+                }
+
+                // 2. Portable LongshotLauncher-data\user (when <gameRoot> is inside <launcherRoot>\LongshotLauncher-data\builds\<track>\<version>)
+                string currentParent = gameRoot;
+                for (int depth = 0; depth < 3; depth++)
+                {
+                    currentParent = Path.GetDirectoryName(currentParent);
+                    if (string.IsNullOrEmpty(currentParent))
+                    {
+                        break;
+                    }
+
+                    string parentUser = Path.Combine(currentParent, "user");
+                    if (Directory.Exists(Path.Combine(parentUser, "save")))
+                    {
+                        return parentUser;
+                    }
+                    if (Directory.Exists(Path.Combine(currentParent, "save")))
+                    {
+                        return currentParent;
+                    }
+
+                    string launcherDataDir = Path.Combine(currentParent, "LongshotLauncher-data");
+                    string launcherDataUser = Path.Combine(launcherDataDir, "user");
+                    if (Directory.Exists(Path.Combine(launcherDataUser, "save")))
+                    {
+                        return launcherDataUser;
+                    }
+                    if (Directory.Exists(Path.Combine(launcherDataDir, "save")))
+                    {
+                        return launcherDataDir;
+                    }
+                }
+
+                // 3. %APPDATA%\Longshot\save or %APPDATA%\Longshot\user\save
+                string appDataSaveDir = ResolveAppDataLongshotSaveDir();
+                if (!string.IsNullOrEmpty(appDataSaveDir))
+                {
+                    return appDataSaveDir;
+                }
+
+                // 4. Fallback to <gameRoot>\user if it exists
+                if (Directory.Exists(gameUserDir))
+                {
+                    return gameUserDir;
+                }
+
+                return null;
             }
             catch
             {
-                return null;
+                return ResolveAppDataLongshotSaveDir();
             }
         }
 
@@ -917,6 +1079,7 @@ namespace OcarinaAtlasLauncher
                     bool alreadyCovered = guestStart <= LongshotHeapBase && guestEnd >= LongshotHeapEnd;
                     if (!alreadyCovered)
                     {
+                        sw.Restart();
                         SearchHostRange(
                             hostOffset + LongshotHeapBase,
                             hostOffset + LongshotHeapEnd,

@@ -18,6 +18,7 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <time.h>
@@ -459,12 +460,45 @@ static bool verify_guest_code_mapped(pid_t pid, bool is_direct_host_va, int *out
     return true;
 }
 
-static bool format_user_dir_from_exe_path(const char *raw_exe_path, char *out_buf, size_t out_cap) {
+static bool dir_exists(const char *path) {
+    if (!path || !*path) {
+        return false;
+    }
+    struct stat st;
+    return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+static void normalize_possible_wine_path(const char *raw_path, char *out_buf, size_t out_cap) {
+    if (!out_buf || out_cap == 0) {
+        return;
+    }
+    out_buf[0] = '\0';
+    if (!raw_path || !*raw_path) {
+        return;
+    }
+    const char *src = raw_path;
+    if ((src[0] == 'Z' || src[0] == 'z') && src[1] == ':' && (src[2] == '\\' || src[2] == '/')) {
+        src += 2;
+    }
+    size_t j = 0;
+    for (size_t i = 0; src[i] != '\0' && j + 1 < out_cap; i++) {
+        out_buf[j++] = (src[i] == '\\') ? '/' : src[i];
+    }
+    out_buf[j] = '\0';
+    while (j > 1 && out_buf[j - 1] == '/') {
+        out_buf[--j] = '\0';
+    }
+}
+
+static bool extract_game_root_from_exe_path(const char *raw_exe_path, char *out_buf, size_t out_cap) {
     if (!raw_exe_path || !*raw_exe_path || !out_buf || out_cap == 0) {
         return false;
     }
     char exe_path[PATH_MAX];
-    snprintf(exe_path, sizeof(exe_path), "%s", raw_exe_path);
+    normalize_possible_wine_path(raw_exe_path, exe_path, sizeof(exe_path));
+    if (!exe_path[0]) {
+        return false;
+    }
 
     char *last_slash = strrchr(exe_path, '/');
     if (!last_slash || last_slash == exe_path) {
@@ -483,8 +517,58 @@ static bool format_user_dir_from_exe_path(const char *raw_exe_path, char *out_bu
         *leaf = '\0';
     }
 
-    int written = snprintf(out_buf, out_cap, "%s/user", exe_path);
+    int written = snprintf(out_buf, out_cap, "%s", exe_path);
     return written > 0 && (size_t)written < out_cap;
+}
+
+static bool try_resolve_game_root_save_dir(const char *raw_exe_path, char *out_buf, size_t out_cap) {
+    char game_root[PATH_MAX];
+    if (!extract_game_root_from_exe_path(raw_exe_path, game_root, sizeof(game_root))) {
+        return false;
+    }
+
+    /* Longshot on Linux migrates saves out of <game_root>/user/save to $XDG_DATA_HOME/longshot/save
+     * and leaves saves-moved.txt inside <game_root>/user, so require <game_root>/user/save to exist. */
+    char candidate_user[PATH_MAX];
+    char candidate_save[PATH_MAX];
+    int uw = snprintf(candidate_user, sizeof(candidate_user), "%s/user", game_root);
+    int sw = snprintf(candidate_save, sizeof(candidate_save), "%s/user/save", game_root);
+    if (uw > 0 && (size_t)uw < sizeof(candidate_user) &&
+        sw > 0 && (size_t)sw < sizeof(candidate_save) &&
+        dir_exists(candidate_save)) {
+        int w = snprintf(out_buf, out_cap, "%s", candidate_user);
+        return w > 0 && (size_t)w < out_cap;
+    }
+
+    /* Check portable LongshotLauncher-data/user (walking up 1-3 parent directories from <game_root>
+     * when the game binary is inside builds/<track>/<version>). */
+    char parent_dir[PATH_MAX];
+    snprintf(parent_dir, sizeof(parent_dir), "%s", game_root);
+    for (int depth = 0; depth < 3; depth++) {
+        char *slash = strrchr(parent_dir, '/');
+        if (!slash || slash == parent_dir) {
+            break;
+        }
+        *slash = '\0';
+
+        int pw = snprintf(candidate_user, sizeof(candidate_user), "%s/LongshotLauncher-data/user", parent_dir);
+        if (pw > 0 && (size_t)pw < sizeof(candidate_user) && dir_exists(candidate_user)) {
+            int w = snprintf(out_buf, out_cap, "%s", candidate_user);
+            return w > 0 && (size_t)w < out_cap;
+        }
+
+        const char *parent_leaf = strrchr(parent_dir, '/');
+        parent_leaf = parent_leaf ? (parent_leaf + 1) : parent_dir;
+        if (strcasecmp(parent_leaf, "LongshotLauncher-data") == 0) {
+            int lw = snprintf(candidate_user, sizeof(candidate_user), "%s/user", parent_dir);
+            if (lw > 0 && (size_t)lw < sizeof(candidate_user) && dir_exists(candidate_user)) {
+                int w = snprintf(out_buf, out_cap, "%s", candidate_user);
+                return w > 0 && (size_t)w < out_cap;
+            }
+        }
+    }
+
+    return false;
 }
 
 static bool resolve_user_save_dir(pid_t pid, char *out_buf, size_t out_cap) {
@@ -493,42 +577,152 @@ static bool resolve_user_save_dir(pid_t pid, char *out_buf, size_t out_cap) {
     }
     out_buf[0] = '\0';
 
-    /* For Wine/Proton processes, argv[0] may be a Z:\... path pointing to the Linux filesystem. */
+    char wine_exe_path[PATH_MAX];
+    wine_exe_path[0] = '\0';
+
     char cmd_path[64];
     snprintf(cmd_path, sizeof(cmd_path), "/proc/%ld/cmdline", (long)pid);
     int fd = open(cmd_path, O_RDONLY | O_CLOEXEC);
     if (fd >= 0) {
-        char cmd[PATH_MAX];
+        char cmd[PATH_MAX * 2];
         ssize_t cn = read(fd, cmd, sizeof(cmd) - 1);
         close(fd);
         if (cn > 0) {
             cmd[cn] = '\0';
-            if ((cmd[0] == 'Z' || cmd[0] == 'z') && cmd[1] == ':' && (cmd[2] == '\\' || cmd[2] == '/')) {
-                char unix_path[PATH_MAX];
-                size_t j = 0;
-                for (size_t i = 2; cmd[i] != '\0' && j + 1 < sizeof(unix_path); i++) {
-                    unix_path[j++] = (cmd[i] == '\\') ? '/' : cmd[i];
+            size_t offset = 0;
+            while (offset < (size_t)cn) {
+                const char *tok = cmd + offset;
+                size_t tlen = strlen(tok);
+                offset += tlen + 1;
+                if (tlen == 0) {
+                    continue;
                 }
-                unix_path[j] = '\0';
-                if (format_user_dir_from_exe_path(unix_path, out_buf, out_cap) && access(out_buf, F_OK) == 0) {
-                    return true;
+
+                if (strcmp(tok, "--user") == 0) {
+                    while (offset < (size_t)cn && cmd[offset] == '\0') {
+                        offset++;
+                    }
+                    if (offset < (size_t)cn) {
+                        const char *val = cmd + offset;
+                        offset += strlen(val) + 1;
+                        char user_dir[PATH_MAX];
+                        normalize_possible_wine_path(val, user_dir, sizeof(user_dir));
+                        if (dir_exists(user_dir)) {
+                            int w = snprintf(out_buf, out_cap, "%s", user_dir);
+                            if (w > 0 && (size_t)w < out_cap) {
+                                return true;
+                            }
+                            out_buf[0] = '\0';
+                        }
+                    }
+                    continue;
                 }
-                out_buf[0] = '\0';
+
+                if (strncmp(tok, "--user=", 7) == 0 && tok[7] != '\0') {
+                    char user_dir[PATH_MAX];
+                    normalize_possible_wine_path(tok + 7, user_dir, sizeof(user_dir));
+                    if (dir_exists(user_dir)) {
+                        int w = snprintf(out_buf, out_cap, "%s", user_dir);
+                        if (w > 0 && (size_t)w < out_cap) {
+                            return true;
+                        }
+                        out_buf[0] = '\0';
+                    }
+                    continue;
+                }
+
+                if ((tok[0] == 'Z' || tok[0] == 'z') && tok[1] == ':' && (tok[2] == '\\' || tok[2] == '/')) {
+                    if (!wine_exe_path[0] || match_normalized_target(tok, false) != NULL) {
+                        snprintf(wine_exe_path, sizeof(wine_exe_path), "%s", tok);
+                    }
+                }
             }
         }
     }
 
+    if (wine_exe_path[0] && try_resolve_game_root_save_dir(wine_exe_path, out_buf, out_cap)) {
+        return true;
+    }
+
     char exe_link[64];
     snprintf(exe_link, sizeof(exe_link), "/proc/%ld/exe", (long)pid);
-
     char exe_path[PATH_MAX];
     ssize_t n = readlink(exe_link, exe_path, sizeof(exe_path) - 1);
+    if (n > 0) {
+        exe_path[n] = '\0';
+        if (try_resolve_game_root_save_dir(exe_path, out_buf, out_cap)) {
+            return true;
+        }
+    }
+
+    char xdg_base[PATH_MAX];
+    xdg_base[0] = '\0';
+    const char *xdg = getenv("XDG_DATA_HOME");
+    if (xdg && *xdg) {
+        snprintf(xdg_base, sizeof(xdg_base), "%s", xdg);
+    } else {
+        const char *home = getenv("HOME");
+        if (home && *home) {
+            snprintf(xdg_base, sizeof(xdg_base), "%s/.local/share", home);
+        }
+    }
+    size_t xlen = strlen(xdg_base);
+    while (xlen > 1 && xdg_base[xlen - 1] == '/') {
+        xdg_base[--xlen] = '\0';
+    }
+    if (xdg_base[0]) {
+        char candidate_save[PATH_MAX];
+        int sw1 = snprintf(candidate_save, sizeof(candidate_save), "%s/longshot/user/save", xdg_base);
+        if (sw1 > 0 && (size_t)sw1 < sizeof(candidate_save) && dir_exists(candidate_save)) {
+            int w = snprintf(out_buf, out_cap, "%s/longshot/user", xdg_base);
+            if (w > 0 && (size_t)w < out_cap) {
+                return true;
+            }
+            out_buf[0] = '\0';
+        }
+        int sw2 = snprintf(candidate_save, sizeof(candidate_save), "%s/longshot/save", xdg_base);
+        if (sw2 > 0 && (size_t)sw2 < sizeof(candidate_save) && dir_exists(candidate_save)) {
+            int w = snprintf(out_buf, out_cap, "%s/longshot", xdg_base);
+            if (w > 0 && (size_t)w < out_cap) {
+                return true;
+            }
+            out_buf[0] = '\0';
+        }
+    }
+
+    out_buf[0] = '\0';
+    return false;
+}
+
+static bool match_cmdline_process(pid_t pid, const char **out_emulator) {
+    char cmd_path[64];
+    snprintf(cmd_path, sizeof(cmd_path), "/proc/%ld/cmdline", (long)pid);
+    int fd = open(cmd_path, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) {
+        return false;
+    }
+    char cmd[PATH_MAX * 2];
+    ssize_t n = read(fd, cmd, sizeof(cmd) - 1);
+    close(fd);
     if (n <= 0) {
         return false;
     }
-    exe_path[n] = '\0';
-
-    return format_user_dir_from_exe_path(exe_path, out_buf, out_cap);
+    cmd[n] = '\0';
+    size_t offset = 0;
+    while (offset < (size_t)n) {
+        const char *tok = cmd + offset;
+        size_t tlen = strlen(tok);
+        offset += tlen + 1;
+        if (tlen == 0 || tok[0] == '-') {
+            continue;
+        }
+        const char *emu = match_normalized_target(tok, false);
+        if (emu) {
+            *out_emulator = emu;
+            return true;
+        }
+    }
+    return false;
 }
 
 static bool match_proc_name(pid_t pid, const char **out_emulator) {
@@ -552,21 +746,8 @@ static bool match_proc_name(pid_t pid, const char **out_emulator) {
         fclose(fp);
     }
 
-    char cmd_path[64];
-    snprintf(cmd_path, sizeof(cmd_path), "/proc/%ld/cmdline", (long)pid);
-    int fd = open(cmd_path, O_RDONLY | O_CLOEXEC);
-    if (fd >= 0) {
-        char cmd[PATH_MAX];
-        ssize_t n = read(fd, cmd, sizeof(cmd) - 1);
-        close(fd);
-        if (n > 0) {
-            cmd[n] = '\0';
-            const char *emu = match_normalized_target(cmd, false);
-            if (emu) {
-                *out_emulator = emu;
-                return true;
-            }
-        }
+    if (match_cmdline_process(pid, out_emulator)) {
+        return true;
     }
 
     char exe_link[64];
@@ -1739,6 +1920,7 @@ static void handle_rpc_line(int fd, const char *line) {
             if (!is_direct_host_va && hits.count == 0 && (is_heap || guest_start >= STANDARD_HEAP_THRESHOLD)) {
                 bool already_covered = guest_start <= LONGSHOT_HEAP_BASE && guest_end >= LONGSHOT_HEAP_END;
                 if (!already_covered) {
+                    t0 = monotonic_ms();
                     search_host_range(
                         pid,
                         GUEST_WINDOW_BASE + LONGSHOT_HEAP_BASE,

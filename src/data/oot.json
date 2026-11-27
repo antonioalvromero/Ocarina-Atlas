@@ -596,8 +596,15 @@
         "x": 0.1554,
         "y": 0.3466
       },
-      "maps": [],
-      "startMap": null
+      "maps": [
+        {
+          "id": "principal",
+          "label": "Main",
+          "image": "/content/maps/2ff6301e7f292004.svg",
+          "aspect": 1.2837
+        }
+      ],
+      "startMap": "principal"
     },
     {
       "id": "coloso",
@@ -3179,7 +3186,11 @@
       "n": 96,
       "cat": "gs",
       "place": "desierto",
-      "at": null,
+      "at": {
+        "map": "principal",
+        "x": 0.5289,
+        "y": 0.1747
+      },
       "name": "Inside the monument",
       "desc": "To reach the stone monument in the Haunted Wasteland, cross the river of sand as an adult, following the flags. At the monument, go in through the gap between the columns and climb down the ladder to the room below.\n\nThe Gold Skulltula is on the back wall, above the altar: **climb onto the altar and knock it down with your sword**. If you light the torches with Fire Arrows or Din's Fire, a chest with a Business Scrub Seed appears.",
       "hint": null,

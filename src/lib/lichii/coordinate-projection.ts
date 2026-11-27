@@ -428,12 +428,12 @@ export const SCENE_TO_PLACE: Record<
   HountedWasteland: {
     placeId: 'desierto',
     defaultAge: 'adult',
-    capture: { camX: 6.0, camY: 100.0, camZ: -52.0, height: 645.0 },
+    capture: { camX: 6.0, camY: 100.0, camZ: -52.0, height: 645.0, scaleX: 2.2, cx: 307, scaleZ: 2.2, cz: 307 },
   },
   HauntedWasteland: {
     placeId: 'desierto',
     defaultAge: 'adult',
-    capture: { camX: 6.0, camY: 100.0, camZ: -52.0, height: 645.0 },
+    capture: { camX: 6.0, camY: 100.0, camZ: -52.0, height: 645.0, scaleX: 2.2, cx: 307, scaleZ: 2.2, cz: 307 },
   },
   DesertColossus: {
     placeId: 'coloso',

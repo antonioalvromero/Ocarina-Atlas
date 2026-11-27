@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.8.2] - 2026-11-27
+
+### Added
+- **Haunted Wasteland Floor Map & Coordinate Calibration ([#66](https://github.com/antonioalvromero/Ocarina-Atlas/pull/66)):** Added the Haunted Wasteland floor SVG (`public/content/maps/2ff6301e7f292004.svg`), mapped the `desierto-gs-01` Gold Skulltula pin in `src/data/oot.json`, and calibrated `HauntedWasteland` / `HountedWasteland` coordinate projection bounds in `src/lib/lichii/coordinate-projection.ts`, courtesy of `@alexesba`.
+
 ## [2.8.1] - 2026-11-25
 
 ### Fixed
